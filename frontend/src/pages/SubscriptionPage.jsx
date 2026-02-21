@@ -10,7 +10,7 @@ import axios from 'axios';
 const SubscriptionPage = () => {
   const navigate = useNavigate();
   const [billingCycle, setBillingCycle] = useState(1);
-  const [loading, setLoading] = useState(false);
+  const [loadingPlan, setLoadingPlan] = useState(null); // UPDATED: Tracks specific plan loading
   const [userStatus, setUserStatus] = useState(null); 
   const [userProfile, setUserProfile] = useState(null);
   
@@ -64,27 +64,27 @@ const SubscriptionPage = () => {
 
   /**
    * RECURRING AUTOPAY LOGIC
-   * Updated: Now handles Starter pack as a paid recurring subscription
+   * Automatically triggers Tier upgrade on backend upon success
    */
   const handleSubscribe = async (planId) => {
-    setLoading(true);
+    setLoadingPlan(planId); // SET WHICH PLAN IS LOADING
     const token = localStorage.getItem('token');
 
     try {
-      // 1. Create Recurring Subscription ID for ALL plans
+      // 1. Create Recurring Subscription ID
       const subRes = await axios.post('http://localhost:5001/api/payment/create-subscription', 
         { planId, billingCycle }, 
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
       const options = {
-        key: "rzp_test_SHrX3upgmJ6sGL", // Your verified Test Key
+        key: "rzp_test_SHrX3upgmJ6sGL", 
         subscription_id: subRes.data.id,
         name: "DropPay Mission",
         description: `Recurring ${planId} Plan Deployment`,
         handler: async (response) => {
           try {
-            // 2. Verify Recurring Subscription
+            // 2. Verify Subscription & Backend Tier Update
             const verifyRes = await axios.post('http://localhost:5001/api/payment/verify-subscription', {
               plan: planId,
               razorpay_payment_id: response.razorpay_payment_id,
@@ -93,25 +93,33 @@ const SubscriptionPage = () => {
             }, { headers: { Authorization: `Bearer ${token}` } });
 
             if (verifyRes.data.status === 'success') {
+              // 3. SUCCESS REDIRECT
               window.location.href = '/dashboard';
             }
           } catch (err) {
-            alert("Autopay Verification Failed");
+            console.error("Verification Error:", err);
+            alert("Autopay Verification Failed. If payment was cut, contact support.");
+            setLoadingPlan(null); // Reset on error
           }
         },
         prefill: {
           name: userProfile?.username || "",
           email: userProfile?.email || ""
         },
-        theme: { color: "#4F46E5" }
+        theme: { color: "#4F46E5" },
+        modal: {
+          ondismiss: function() {
+            setLoadingPlan(null); // RESET LOADING IF USER CLOSES POPUP
+          }
+        }
       };
 
       const rzp = new window.Razorpay(options);
       rzp.open();
     } catch (err) {
-      alert("Autopay Setup Failed. Verify Plan IDs in .env and restart server.");
-    } finally {
-      setLoading(false);
+      console.error("Setup Error:", err);
+      alert("Autopay Setup Failed. Ensure Plan IDs are correct in server .env");
+      setLoadingPlan(null); // Reset on error
     }
   };
 
@@ -169,6 +177,11 @@ const SubscriptionPage = () => {
           ].map((plan) => {
             const isTrialUsed = plan.id === 'starter' && userStatus === 'expired';
             const { original, discounted, savings } = getPriceData(plan.price);
+            
+            // Check if THIS specific button is loading
+            const isThisLoading = loadingPlan === plan.id;
+            // Check if ANY button is loading
+            const isAnyLoading = loadingPlan !== null;
 
             return (
               <motion.div key={plan.id} whileHover={{ y: -8 }} className={`relative bg-[#0a0a0a] border ${plan.popular ? 'border-indigo-500 shadow-[0_0_60px_rgba(99,102,241,0.15)]' : 'border-white/5'} rounded-[2.5rem] sm:rounded-[3rem] p-8 sm:p-10 flex flex-col ${isTrialUsed ? 'opacity-40 grayscale' : ''}`}>
@@ -202,14 +215,22 @@ const SubscriptionPage = () => {
 
                 <button 
                   onClick={() => handleSubscribe(plan.id)}
-                  disabled={loading || isTrialUsed}
-                  className={`w-full py-4 sm:py-5 rounded-2xl font-black uppercase italic text-[11px] transition-all active:scale-95 shadow-xl ${
+                  disabled={isAnyLoading || isTrialUsed}
+                  className={`w-full py-4 sm:py-5 rounded-2xl font-black uppercase italic text-[11px] transition-all active:scale-95 shadow-xl flex justify-center items-center gap-2 ${
                     isTrialUsed 
                     ? 'bg-red-500/10 text-red-500 cursor-not-allowed border border-red-500/20' 
+                    : isAnyLoading && !isThisLoading // Grey out other buttons
+                    ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
                     : plan.id === 'starter' ? 'bg-white text-black hover:bg-slate-200' : 'bg-indigo-600 text-white hover:bg-indigo-500'
                   }`}
                 >
-                  {loading ? <Loader2 className="animate-spin mx-auto w-5 h-5" /> : isTrialUsed ? 'Mission Locked' : 'Deploy Plan'}
+                  {isThisLoading ? (
+                    <><Loader2 className="animate-spin w-4 h-4" /> Deploying...</>
+                  ) : isTrialUsed ? (
+                    'Mission Locked'
+                  ) : (
+                    'Deploy Plan'
+                  )}
                 </button>
               </motion.div>
             );

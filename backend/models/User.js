@@ -19,8 +19,19 @@ const UserSchema = new mongoose.Schema({
     unique: true, 
     lowercase: true, 
     trim: true 
+  },
+  bio: {
+    type: String,
+    default: "Support the stream, trigger custom on-screen alerts, and join the Hall of Fame.",
+    maxLength: 150
   }, 
   
+  tier: { 
+    type: String, 
+    enum: ['none', 'starter', 'pro', 'legend'], 
+    default: 'none' 
+  },
+
   obsKey: { 
     type: String, 
     unique: true, 
@@ -37,17 +48,16 @@ const UserSchema = new mongoose.Schema({
   subscription: {
     plan: { 
       type: String, 
-      enum: ['none', 'starter', 'pro', 'legend'], 
+      enum: ['none','starter', 'pro', 'legend'], 
       default: 'none' 
     },
     status: { type: String, enum: ['active', 'inactive'], default: 'inactive' },
     expiryDate: { type: Date }
   },
 
-  // --- NEW: FINANCIALS & SETTLEMENT HUB ---
-  walletBalance: { type: Number, default: 0 }, // Tracks total verified earnings
+  walletBalance: { type: Number, default: 0 }, 
   
-  razorpayAccountId: { type: String, default: null }, // Unique ID from Razorpay Route
+  razorpayAccountId: { type: String, default: null }, 
   
   payoutSettings: {
     onboardingStatus: { 
@@ -63,9 +73,17 @@ const UserSchema = new mongoose.Schema({
     volume: { type: Number, default: 50 },
     activeStickerSet: { type: String, default: 'classic' },
     isPanicMode: { type: Boolean, default: false },
-    // NEW: Alert Customization placeholders for Feature #2
     customGifUrl: { type: String, default: null },
-    customSoundUrl: { type: String, default: null }
+    customSoundUrl: { type: String, default: null },
+    
+    primaryColor: { type: String, default: '#6366f1' },
+    fontFamily: { type: String, default: 'Orbitron' },
+    animationType: { type: String, default: 'slide-left' },
+    alertDuration: { type: Number, default: 7 },
+    
+    ttsEnabled: { type: Boolean, default: false },
+    ttsMinAmount: { type: Number, default: 500 },
+    ttsVoice: { type: String, default: 'female' }
   },
 
   goalSettings: {
@@ -74,6 +92,19 @@ const UserSchema = new mongoose.Schema({
     currentProgress: { type: Number, default: 0 },
     isActive: { type: Boolean, default: true }
   },
+
+  // --- NEW: PARTNER STICKER PROTOCOL ---
+  // Only accessible for PRO and LEGEND tiers
+  partnerPack: [
+    {
+      stickerId: { type: String, default: () => `stk_${Date.now()}` },
+      name: { type: String, trim: true },
+      lottieUrl: { type: String, required: true },
+      minAmount: { type: Number, default: 100 },
+      isActive: { type: Boolean, default: true }
+    }
+  ],
+  // -------------------------------------
 
   googleId: { type: String, unique: true, sparse: true }
 

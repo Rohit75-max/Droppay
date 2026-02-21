@@ -12,13 +12,12 @@ const razorpay = new Razorpay({
 /**
  * 1. CREATE RECURRING SUBSCRIPTION
  * Logic: Creates a Razorpay Subscription ID for Autopay.
- * Now includes 'starter' plan mapping for paid autopay.
  */
 exports.createSubscription = async (req, res) => {
     try {
         const { planId, billingCycle } = req.body;
         const planMap = {
-            'starter': process.env.RAZORPAY_PLAN_STARTER_ID, // Added for paid Starter autopay
+            'starter': process.env.RAZORPAY_PLAN_STARTER_ID, 
             'pro': process.env.RAZORPAY_PLAN_PRO_ID, 
             'legend': process.env.RAZORPAY_PLAN_LEGEND_ID
         };
@@ -39,7 +38,7 @@ exports.createSubscription = async (req, res) => {
 
 /**
  * 2. VERIFY RECURRING SUBSCRIPTION
- * Logic: Verifies initial payment for Autopay.
+ * Logic: Verifies initial payment and AUTOMATICALLY activates the Tier.
  */
 exports.verifySubscription = async (req, res) => {
     try {
@@ -55,23 +54,30 @@ exports.verifySubscription = async (req, res) => {
         }
 
         const user = await User.findById(req.user.id);
+        if (!user) return res.status(404).json({ msg: "User not found" });
+
+        // Update Subscription Details
         user.subscription.plan = plan;
         user.subscription.status = 'active';
         user.subscription.razorpaySubscriptionId = razorpay_subscription_id;
+        
+        // --- AUTOMATIC TIER ACTIVATION ---
+        user.tier = plan; 
         
         // Expiry = 7 Days Trial + 1 month cycle
         user.subscription.expiryDate = moment().add(7, 'days').add(1, 'month').toDate();
         
         await user.save();
-        res.json({ status: "success", msg: "Autopay mission active" });
+        res.json({ status: "success", msg: "Autopay mission active", tier: user.tier });
     } catch (error) {
+        console.error("Verify Subscription Error:", error);
         res.status(500).json({ msg: "Activation failed" });
     }
 };
 
 /**
  * 3. RAZORPAY WEBHOOK LISTENER
- * Automatically extends missions upon successful recurring charges.
+ * Automatically manages Tiers based on recurring charge success/failure.
  */
 exports.handleWebhook = async (req, res) => {
     try {
@@ -89,19 +95,23 @@ exports.handleWebhook = async (req, res) => {
         const event = req.body.event;
         const subscription = req.body.payload.subscription.entity;
 
+        // When a recurring payment is successful
         if (event === 'subscription.charged') {
             const user = await User.findOne({ "subscription.razorpaySubscriptionId": subscription.id });
             if (user) {
                 user.subscription.status = 'active';
+                user.tier = user.subscription.plan; // Ensure Tier is active
                 user.subscription.expiryDate = moment(user.subscription.expiryDate).add(1, 'month').toDate();
                 await user.save();
             }
         }
 
+        // When a subscription is cancelled or payment fails multiple times
         if (event === 'subscription.halted' || event === 'subscription.cancelled') {
             const user = await User.findOne({ "subscription.razorpaySubscriptionId": subscription.id });
             if (user) {
                 user.subscription.status = 'expired';
+                user.tier = 'none'; // Lock the Dashboard
                 await user.save();
             }
         }
@@ -113,8 +123,7 @@ exports.handleWebhook = async (req, res) => {
 };
 
 /**
- * 4. SUBSCRIBE TO MISSION (LEGACY/TEST)
- * Preserved for non-recurring or manual starter activations.
+ * 4. SUBSCRIBE TO MISSION (LEGACY/MANUAL)
  */
 exports.subscribe = async (req, res) => {
     try {
@@ -127,6 +136,7 @@ exports.subscribe = async (req, res) => {
                 return res.status(403).json({ status: "failed", msg: "Trial already used." });
             }
             user.subscription.plan = 'starter';
+            user.tier = 'starter'; // Set Tier
             user.subscription.status = 'active';
             user.subscription.expiryDate = moment().add(7, 'days').toDate();
             await user.save();
@@ -134,12 +144,13 @@ exports.subscribe = async (req, res) => {
         }
 
         user.subscription.plan = plan;
+        user.tier = plan; // Set Tier for Pro/Legend
         user.subscription.status = 'active';
         let expiry = moment().add(months, 'months');
         if (!user.subscription.expiryDate) expiry.add(7, 'days');
         user.subscription.expiryDate = expiry.toDate();
         await user.save();
-        res.status(200).json({ status: "success" });
+        res.status(200).json({ status: "success", tier: user.tier });
     } catch (error) {
         res.status(500).json({ msg: "Mission deployment failed" });
     }
@@ -147,22 +158,24 @@ exports.subscribe = async (req, res) => {
 
 /**
  * 5. DAILY EXPIRY CHECKER
+ * Updated to lock the Tier when the time runs out.
  */
 exports.checkExpirations = async () => {
     try {
         const now = new Date();
         const result = await User.updateMany(
             { "subscription.status": "active", "subscription.expiryDate": { $lt: now } },
-            { $set: { "subscription.status": "expired" } }
+            { $set: { "subscription.status": "expired", "tier": "none" } }
         );
         if (result.modifiedCount > 0) {
-            console.log(`[System]: ${result.modifiedCount} missions locked.`);
+            console.log(`[System]: ${result.modifiedCount} missions locked. Tiers reset to none.`);
         }
     } catch (err) { console.error("Expiry check error:", err); }
 };
 
 /**
  * 6. VERIFY DONATION & DYNAMIC REVENUE SPLIT
+ * Logic: Uses the subscription plan to determine the creator's cut.
  */
 exports.verifyPayment = async (req, res) => {
     try {
@@ -181,6 +194,7 @@ exports.verifyPayment = async (req, res) => {
             const streamer = await User.findOne({ streamerId });
             if (!streamer) return res.status(404).json({ msg: "Streamer not found" });
 
+            // Percentage based on active subscription
             let creatorPercent = 0.85; 
             if (streamer.subscription.plan === 'pro') creatorPercent = 0.90; 
             if (streamer.subscription.plan === 'legend') creatorPercent = 0.95; 
@@ -295,11 +309,28 @@ exports.getRecentDrops = async (req, res) => {
     } catch (err) { res.status(500).send(); }
 };
 
+/**
+ * UPDATED GET GOAL: Ensures Tier data explicitly hits the frontend.
+ */
 exports.getGoal = async (req, res) => {
     try {
-        const user = await User.findOne({ streamerId: req.params.streamerId });
-        res.status(200).json(user ? user.goalSettings : { msg: "Not found" });
-    } catch (error) { res.status(500).send(); }
+        const user = await User.findOne({ streamerId: req.params.streamerId })
+            .select('goalSettings tier username bio streamerId'); 
+
+        if (!user) return res.status(404).json({ msg: "Not found" });
+        
+        // Structure the response exactly as DonationPage expects
+        res.status(200).json({
+            ...user.goalSettings.toObject(), // Keeps goal bar working
+            tier: user.tier || 'none',
+            username: user.username,
+            bio: user.bio,
+            streamerId: user.streamerId
+        });
+    } catch (error) { 
+        console.error("Get Goal Error:", error);
+        res.status(500).send(); 
+    }
 };
 
 exports.testDrop = async (req, res) => {

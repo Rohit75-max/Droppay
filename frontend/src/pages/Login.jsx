@@ -1,19 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
-import { Mail, Lock, LogIn, Loader2, ArrowRight } from 'lucide-react';
+import { Mail, Lock, LogIn, Loader2, ArrowRight, ArrowLeft } from 'lucide-react'; // Added ArrowLeft
 import { useNavigate, Link } from 'react-router-dom';
 
 const Login = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false); // State for persistence
+  const [rememberMe, setRememberMe] = useState(false); 
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
 
-  // Load remembered email on component mount
   useEffect(() => {
     const savedEmail = localStorage.getItem('rememberedEmail');
     if (savedEmail) {
@@ -32,7 +31,6 @@ const Login = () => {
     try {
       const response = await axios.post('http://localhost:5001/api/auth/login', formData);
       
-      // Handle "Remember Me" logic
       if (rememberMe) {
         localStorage.setItem('rememberedEmail', formData.email);
       } else {
@@ -50,14 +48,28 @@ const Login = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen p-4 bg-[#050505]">
+    <div className="flex items-center justify-center min-h-screen p-4 bg-[#050505] relative">
+      
+      {/* --- BACK TO HOME BUTTON --- */}
+      <button 
+        onClick={() => navigate('/')} 
+        className="fixed top-8 left-8 flex items-center gap-2 text-slate-500 hover:text-white transition-colors group z-50"
+      >
+        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+        <span className="text-[10px] font-black uppercase tracking-[0.2em]">Back to Protocol</span>
+      </button>
+
       <motion.div 
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-md p-8 rounded-[2.5rem] bg-[#111] border border-white/5 shadow-2xl"
+        className="w-full max-w-md p-8 rounded-[2.5rem] bg-[#111] border border-white/5 shadow-2xl relative z-10"
       >
         <div className="mb-10 text-center">
-            <div className="w-16 h-16 bg-indigo-600/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-indigo-500/20">
+            {/* Clickable Icon to go Home */}
+            <div 
+              onClick={() => navigate('/')}
+              className="w-16 h-16 bg-indigo-600/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-indigo-500/20 cursor-pointer hover:bg-indigo-600/20 transition-all"
+            >
                 <LogIn className="w-8 h-8 text-indigo-500" />
             </div>
             <h1 className="text-4xl font-black text-white mb-2 tracking-tight">Welcome Back</h1>
@@ -90,7 +102,6 @@ const Login = () => {
             />
           </div>
 
-          {/* New: Remember Me & Forgot Password Section */}
           <div className="flex items-center justify-between px-2 text-sm">
             <label className="flex items-center gap-2 text-slate-400 cursor-pointer hover:text-slate-200 transition-colors">
               <input 
@@ -101,7 +112,7 @@ const Login = () => {
               />
               Remember Me
             </label>
-            <Link to="/forgot-password" name="Lock" className="text-indigo-500 hover:text-indigo-400 font-bold transition-colors">
+            <Link to="/forgot-password" value="Lock" className="text-indigo-500 hover:text-indigo-400 font-bold transition-colors">
               Forgot Password?
             </Link>
           </div>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Player } from '@lottiefiles/react-lottie-player'; // Surgical Import for 3D Previews
 import { 
   LayoutDashboard, Wallet, Copy, 
   CheckCircle, ShieldAlert, LogOut, Settings, 
@@ -8,8 +9,9 @@ import {
   MessageSquare, BarChart3, Save, Edit3, User, Hash, Phone, Mail as MailIcon,
   CreditCard, Plus, BadgeCheck, BellRing, X, Landmark, ShieldCheck, Search,
   Star, Monitor, Send, UploadCloud, Users, Gift, Award, Globe, Settings2,
-  Sun, Moon, Wand2, Volume2, Type, Image as ImageIcon, Sparkles, Layers, Sliders
-} from 'lucide-react';
+  Sun, Moon, Wand2, Volume2, Type, Image as ImageIcon, Sparkles, Layers, Sliders, Crown,
+  Trash2, Info, Lock, Car, Rocket, Flame // Surgical Import for Runner Protocol
+} from 'lucide-react'; 
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -39,6 +41,10 @@ const Dashboard = () => {
 
   const toggleTheme = () => setTheme(theme === 'dark' ? 'light' : 'dark');
 
+  // --- NEW: Partner Pack Protocol State ---
+  const [partnerStickers, setPartnerStickers] = useState([]);
+  const [isSavingStickers, setIsSavingStickers] = useState(false);
+
   // --- Alert Studio State ---
   const [activeAlertTier, setActiveAlertTier] = useState('standard');
   const [alertConfig, setAlertConfig] = useState({
@@ -48,8 +54,12 @@ const Dashboard = () => {
     layout: 'icon-left',
     font: 'font-sans',
     animation: 'slide-left',
-    duration: 5
+    duration: 5,
+    media: '💎' // Default media
   });
+  
+  const [previewKey, setPreviewKey] = useState(0); // Forces animation replay
+  const [isSavingAlerts, setIsSavingAlerts] = useState(false);
 
   // --- Live Notification State ---
   const [notification, setNotification] = useState(null);
@@ -60,7 +70,7 @@ const Dashboard = () => {
 
   // --- Account Edit State ---
   const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState({ username: "", phone: "", streamerId: "" });
+  const [editForm, setEditForm] = useState({ username: "", phone: "", streamerId: "", bio: "" });
   const [profilePreview, setProfilePreview] = useState(null);
 
   // --- Bank & Settlement State ---
@@ -69,7 +79,14 @@ const Dashboard = () => {
 
   const [isUpdatingGoal, setIsUpdatingGoal] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
-  const [goalForm, setGoalForm] = useState({ title: "", targetAmount: 0 });
+  
+  // --- SURGICALLY UPDATED GOAL FORM STATE ---
+  const [goalForm, setGoalForm] = useState({ 
+    title: "", 
+    targetAmount: 0,
+    runnerType: "star",
+    customRunnerUrl: ""
+  });
 
   // --- Feedback Logic States ---
   const [feedbackType, setFeedbackType] = useState('feature'); 
@@ -80,6 +97,10 @@ const Dashboard = () => {
   const stickerMap = { zap: '⚡', fire: '🔥', heart: '💖', crown: '👑', rocket: '🚀' };
 
   useEffect(() => {
+    if (user) console.log("🔍 DEBUG - User Tier is:", user.tier);
+  }, [user]);
+  
+  useEffect(() => {
     const fetchProfile = async () => {
       try {
         const token = localStorage.getItem('token');
@@ -88,15 +109,39 @@ const Dashboard = () => {
           headers: { Authorization: `Bearer ${token}` }
         });
         setUser(res.data);
+        
+        // Load Partner Pack data surgically
+        setPartnerStickers(res.data.partnerPack || []);
+
         setEditForm({ 
           username: res.data.username, 
           phone: res.data.phone || "", 
-          streamerId: res.data.streamerId 
+          streamerId: res.data.streamerId,
+          bio: res.data.bio || "" 
         });
+
+        // Load Goal Settings Surgically (including Runner Protocol)
         setGoalForm({
           title: res.data.goalSettings?.title || "New Stream Equipment",
-          targetAmount: res.data.goalSettings?.targetAmount || 5000
+          targetAmount: res.data.goalSettings?.targetAmount || 5000,
+          runnerType: res.data.goalSettings?.runnerType || "star",
+          customRunnerUrl: res.data.goalSettings?.customRunnerUrl || ""
         });
+
+        // Load saved Alert Studio settings
+        if (res.data.overlaySettings) {
+          setAlertConfig(prev => ({
+            ...prev,
+            ttsEnabled: res.data.overlaySettings.ttsEnabled ?? prev.ttsEnabled,
+            ttsMinAmount: res.data.overlaySettings.ttsMinAmount ?? prev.ttsMinAmount,
+            ttsVoice: res.data.overlaySettings.ttsVoice || prev.ttsVoice,
+            layout: res.data.overlaySettings.layout || prev.layout,
+            font: res.data.overlaySettings.fontFamily || prev.font,
+            animation: res.data.overlaySettings.animationType || prev.animation,
+            duration: res.data.overlaySettings.alertDuration || prev.duration
+          }));
+        }
+
         fetchAnalytics(res.data.streamerId);
         fetchChartData(res.data.streamerId, timeRange);
       } catch (err) { setError(true); }
@@ -104,7 +149,62 @@ const Dashboard = () => {
     fetchProfile();
   }, [timeRange]);
 
-  // --- Logic to check for new drops and show notification ---
+  // --- NEW: PARTNER STICKER PROTOCOL LOGIC ---
+  const addStickerSlot = () => {
+    if (partnerStickers.length >= 10) return alert("Protocol Restricted: Max 10 custom stickers allowed.");
+    setPartnerStickers([...partnerStickers, { name: '', lottieUrl: '', minAmount: 100, isActive: true }]);
+  };
+
+  const updateStickerSlot = (index, field, value) => {
+    const updated = [...partnerStickers];
+    updated[index][field] = value;
+    setPartnerStickers(updated);
+  };
+
+  const removeStickerSlot = (index) => {
+    setPartnerStickers(partnerStickers.filter((_, i) => i !== index));
+  };
+
+  const savePartnerPack = async () => {
+    setIsSavingStickers(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.put('http://localhost:5001/api/user/update-stickers', partnerStickers, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setUser({ ...user, partnerPack: res.data });
+      alert("Partner Protocol Updated: Custom Stickers are now live on your node!");
+    } catch (err) {
+      alert(err.response?.data?.msg || "Update failed.");
+    } finally { setIsSavingStickers(false); }
+  };
+
+  const saveAlertSettings = async () => {
+    setIsSavingAlerts(true);
+    try {
+      const token = localStorage.getItem('token');
+      const payload = {
+        ttsEnabled: alertConfig.ttsEnabled,
+        ttsMinAmount: alertConfig.ttsMinAmount,
+        ttsVoice: alertConfig.ttsVoice,
+        layout: alertConfig.layout,
+        fontFamily: alertConfig.font,
+        animationType: alertConfig.animation,
+        alertDuration: alertConfig.duration,
+      };
+
+      await axios.put('http://localhost:5001/api/user/update-overlay', payload, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      alert("Alert Studio configuration saved successfully! OBS will now use these settings.");
+    } catch (err) {
+      console.error("Failed to save alert settings", err);
+      alert("Failed to save configuration. Please try again.");
+    } finally {
+      setIsSavingAlerts(false);
+    }
+  };
+
   useEffect(() => {
     if (recentDrops.length > 0 && user) {
       const latestDrop = recentDrops[0];
@@ -149,7 +249,14 @@ const Dashboard = () => {
     setIsUpdatingGoal(true);
     try {
       const token = localStorage.getItem('token');
-      await axios.put('http://localhost:5001/api/user/update-goal', goalForm, {
+      // Updated payload to include runner protocols
+      const payload = {
+        title: goalForm.title,
+        targetAmount: Number(goalForm.targetAmount),
+        runnerType: goalForm.runnerType,
+        customRunnerUrl: goalForm.customRunnerUrl
+      };
+      await axios.put('http://localhost:5001/api/user/update-goal', payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
       alert("Goal settings updated!");
@@ -185,7 +292,6 @@ const Dashboard = () => {
     finally { setIsTesting(false); }
   };
 
-  // --- Start Razorpay Route Onboarding ---
   const handleBankLink = async () => {
     setIsLinkingBank(true);
     try {
@@ -238,10 +344,17 @@ const Dashboard = () => {
 
   const saveProfileUpdates = async () => {
     try {
+      const token = localStorage.getItem('token');
+      await axios.put('http://localhost:5001/api/user/update-profile', editForm, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       setIsEditing(false);
-      alert("Profile successfully updated!");
-    } catch (err) { alert("Failed to save profile."); }
+      alert("Identity Hub successfully updated!");
+    } catch (err) { alert("Failed to update profile."); }
   };
+
+  // Eligibility Check Surgical Injection
+  const isTierEligible = user?.tier === 'pro' || user?.tier === 'legend';
 
   if (error) return (
     <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center text-white p-6 text-center font-sans">
@@ -251,6 +364,7 @@ const Dashboard = () => {
   );
 
   if (!user) return <div className="min-h-screen bg-[#050505] flex items-center justify-center text-slate-500 font-black animate-pulse font-sans uppercase tracking-widest">Syncing Hub...</div>;
+
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -336,7 +450,23 @@ const Dashboard = () => {
           <div className="flex justify-between items-center w-full sm:w-auto">
             <div>
               <h1 className={`text-2xl font-black tracking-tight mb-0.5 uppercase italic ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{activeSection}</h1>
-              <p className="text-slate-500 text-[11px] font-medium italic">Active Streamer: <span className="text-indigo-400 font-mono font-bold tracking-wider">@{user.streamerId}</span></p>
+              <div className="flex items-center gap-3">
+                <p className="text-slate-500 text-[11px] font-medium italic">Active Streamer: <span className="text-indigo-400 font-mono font-bold tracking-wider">@{user.streamerId}</span></p>
+                
+                {/* GLOBAL TIER BADGE IN HEADER */}
+                {user?.tier && user.tier !== 'none' && (
+                  <span className={`px-2 py-0.5 rounded flex items-center gap-1 text-[8px] font-black uppercase tracking-widest ${
+                    user.tier === 'legend' ? 'bg-amber-500/20 text-amber-500' :
+                    user.tier === 'pro' ? 'bg-indigo-500/20 text-indigo-400' :
+                    'bg-slate-500/20 text-slate-400'
+                  }`}>
+                    {user.tier === 'legend' && <Crown className="w-2.5 h-2.5" />}
+                    {user.tier === 'pro' && <Zap className="w-2.5 h-2.5" />}
+                    {user.tier === 'starter' && <ShieldCheck className="w-2.5 h-2.5" />}
+                    {user.tier}
+                  </span>
+                )}
+              </div>
             </div>
             
             {/* MOBILE ONLY THEME/LOGOUT BUTTONS */}
@@ -477,7 +607,7 @@ const Dashboard = () => {
                           {recentDrops.length > 0 ? recentDrops.map((drop, i) => (
                               <div key={i} className={`flex items-center justify-between p-3 rounded-xl border transition-colors ${theme === 'dark' ? 'bg-white/5 border-white/5' : 'bg-slate-50 border-slate-200'}`}>
                                   <div className="flex items-center gap-3"><div className="text-lg">{stickerMap[drop.sticker] || '💎'}</div>
-                                      <div className="min-w-0"><p className={`font-black italic text-[10px] truncate ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{drop.donorName}</p><p className="text-[8px] text-slate-500 truncate italic truncate font-sans">"{drop.message}"</p></div>
+                                      <div className="min-w-0"><p className={`font-black italic text-[10px] truncate ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{drop.donorName}</p><p className="text-[8px] text-slate-500 truncate italic font-sans">"{drop.message}"</p></div>
                                   </div><p className="font-black text-indigo-400 italic text-[10px]">₹{drop.amount}</p>
                               </div>
                           )) : <div className="text-center py-10 opacity-20 font-black text-[9px] uppercase italic font-sans">No Drops...</div>}
@@ -491,10 +621,9 @@ const Dashboard = () => {
             {activeSection === 'settings' && (
               <div className="max-w-6xl mx-auto space-y-10 font-sans pb-20 w-full">
                 
-                {/* --- MISSION HUB & STREAM PROTOCOLS (ALIGNED GRID) --- */}
+                {/* --- MISSION HUB & STREAM PROTOCOLS --- */}
+
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch w-full">
-                  
-                  {/* MISSION HUB TERMINAL */}
                   <div className={`w-full h-full lg:col-span-7 border rounded-[3rem] p-8 lg:p-10 shadow-2xl relative overflow-hidden group transition-colors flex flex-col ${theme === 'dark' ? 'bg-[#111] border-white/5' : 'bg-white border-slate-200'}`}>
                     <div className={`absolute top-0 right-0 w-64 h-64 rounded-full blur-[80px] -mr-32 -mt-32 ${theme === 'dark' ? 'bg-indigo-600/5' : 'bg-indigo-600/10'}`} />
                     <div className="flex justify-between items-center mb-10 relative z-10">
@@ -509,8 +638,8 @@ const Dashboard = () => {
                       </button>
                     </div>
 
-                    <form onSubmit={updateGoalSettings} className="space-y-8 relative z-10 flex-1 flex flex-col justify-between">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
+                    <form onSubmit={updateGoalSettings} className="space-y-8 relative z-10 flex-1 flex flex-col">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full mb-6">
                         <div className="space-y-3 w-full">
                           <label className="flex items-center gap-2 text-[9px] font-black uppercase text-slate-500 tracking-widest ml-1">Mission Title</label>
                           <input type="text" value={goalForm.title} onChange={(e) => setGoalForm({...goalForm, title: e.target.value})} className={`w-full border-2 rounded-2xl p-5 text-sm font-bold focus:border-indigo-500 outline-none transition-all shadow-inner ${theme === 'dark' ? 'bg-black border-white/5 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'}`} placeholder="e.g. New GPU Build" />
@@ -520,13 +649,60 @@ const Dashboard = () => {
                           <input type="number" value={goalForm.targetAmount} onChange={(e) => setGoalForm({...goalForm, targetAmount: e.target.value})} className={`w-full border-2 rounded-2xl p-5 text-sm font-bold focus:border-indigo-500 outline-none transition-all shadow-inner ${theme === 'dark' ? 'bg-black border-white/5 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'}`} />
                         </div>
                       </div>
-                      <button type="submit" disabled={isUpdatingGoal} className="w-full bg-indigo-600 py-5 rounded-2xl font-black uppercase italic text-xs text-white shadow-xl shadow-indigo-600/20 hover:bg-indigo-500 active:scale-[0.98] transition-all flex items-center justify-center gap-3 mt-8">
+
+                      {/* SURGICAL INJECTION: RUNNER PROTOCOL SELECTOR */}
+                      <div className="space-y-4 mb-6">
+                        <label className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-500 tracking-widest ml-1">
+                          Visual Protocol: Progress Runner
+                        </label>
+                        <div className="grid grid-cols-4 gap-3">
+                          {[
+                            { id: 'star', label: 'Classic Star', icon: Star, tier: 'starter' },
+                            { id: 'car', label: 'Drift Car', icon: Car, tier: 'pro' },
+                            { id: 'rocket', label: 'X-Rocket', icon: Rocket, tier: 'pro' },
+                            { id: 'fire', label: 'Inferno', icon: Flame, tier: 'pro' }
+                          ].map((runner) => {
+                            const isLocked = (runner.tier === 'pro' && user?.tier === 'starter') || (runner.tier === 'pro' && user?.tier === 'none');
+                            return (
+                              <button
+                                key={runner.id}
+                                type="button"
+                                disabled={isLocked}
+                                onClick={() => setGoalForm({...goalForm, runnerType: runner.id})}
+                                className={`relative p-4 rounded-2xl border-2 flex flex-col items-center gap-2 transition-all ${
+                                  goalForm.runnerType === runner.id 
+                                  ? 'bg-indigo-500/10 border-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.2)]' 
+                                  : 'bg-black/20 border-white/5 hover:border-white/20'
+                                } ${isLocked ? 'opacity-30 cursor-not-allowed grayscale' : ''}`}
+                              >
+                                <runner.icon className={`w-5 h-5 ${goalForm.runnerType === runner.id ? 'text-indigo-400' : 'text-slate-500'}`} />
+                                <span className="text-[8px] font-black uppercase tracking-tighter">{runner.label}</span>
+                                {isLocked && <Lock className="absolute top-1.5 right-1.5 w-2.5 h-2.5 text-slate-600" />}
+                              </button>
+                            );
+                          })}
+                        </div>
+                        {user?.tier === 'legend' && (
+                          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="pt-2">
+                             <div className="relative">
+                               <UploadCloud className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-500" />
+                               <input 
+                                 placeholder="Legendary Protocol: Custom Lottie URL..." 
+                                 value={goalForm.customRunnerUrl}
+                                 onChange={(e) => setGoalForm({...goalForm, customRunnerUrl: e.target.value, runnerType: 'custom'})}
+                                 className="w-full bg-black/40 border border-amber-500/20 rounded-2xl py-4 pl-12 pr-4 text-[10px] font-mono text-amber-400 focus:border-amber-500/50 outline-none placeholder:text-amber-900"
+                               />
+                             </div>
+                          </motion.div>
+                        )}
+                      </div>
+
+                      <button type="submit" disabled={isUpdatingGoal} className="w-full bg-indigo-600 py-5 rounded-2xl font-black uppercase italic text-xs text-white shadow-xl shadow-indigo-600/20 hover:bg-indigo-500 active:scale-[0.98] transition-all flex items-center justify-center gap-3">
                         {isUpdatingGoal ? <Loader2 className="animate-spin w-5 h-5" /> : <><Settings2 className="w-5 h-5" /> Deploy Mission Setup</>}
                       </button>
                     </form>
                   </div>
 
-                  {/* STREAM PROTOCOL URLS */}
                   <div className={`w-full h-full lg:col-span-5 border rounded-[3rem] p-8 lg:p-10 shadow-2xl relative overflow-hidden group transition-colors flex flex-col ${theme === 'dark' ? 'bg-[#111] border-white/5' : 'bg-white border-slate-200'}`}>
                     <div className="flex items-center gap-4 mb-10">
                       <div className="p-3.5 bg-indigo-500/10 rounded-2xl text-indigo-500 border border-indigo-500/20 shadow-lg">
@@ -554,7 +730,85 @@ const Dashboard = () => {
                   </div>
                 </div>
 
-                {/* --- ALERT STUDIO INJECTION --- */}
+                {/* --- PARTNER PACK STUDIO --- */}
+                <div className={`mt-10 border rounded-[3rem] p-8 lg:p-12 shadow-2xl relative overflow-hidden transition-colors ${theme === 'dark' ? 'bg-[#111] border-white/5' : 'bg-white border-slate-200'}`}>
+                  <div className={`absolute top-0 right-0 w-96 h-96 rounded-full blur-[100px] -mr-32 -mt-32 pointer-events-none ${theme === 'dark' ? 'bg-amber-600/5' : 'bg-amber-600/10'}`} />
+                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 relative z-10 gap-4">
+                    <div className="space-y-1">
+                      <h2 className={`text-3xl font-black uppercase italic tracking-tighter flex items-center gap-3 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+                        <Crown className="w-8 h-8 text-amber-500" /> Partner Pack Studio
+                      </h2>
+                      <p className="text-slate-500 text-[10px] font-bold uppercase tracking-[0.3em]">Deploy Community Specific 3D Assets</p>
+                    </div>
+                    {isTierEligible && (
+                      <button 
+                        onClick={savePartnerPack} 
+                        disabled={isSavingStickers}
+                        className="bg-amber-500 text-black px-6 py-3 rounded-xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-amber-500/20 hover:scale-105 transition-all flex items-center gap-2"
+                      >
+                        {isSavingStickers ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />} 
+                        {isSavingStickers ? "Deploying..." : "Save Sticker Protocol"}
+                      </button>
+                    )}
+                  </div>
+
+                  {!isTierEligible ? (
+                    <div className="bg-black/20 border-2 border-dashed border-white/5 rounded-[3rem] p-16 text-center flex flex-col items-center">
+                      <ShieldAlert className="w-12 h-12 text-amber-500/20 mb-4" />
+                      <h4 className="text-white font-black uppercase tracking-widest text-sm italic mb-2">Protocol Restricted</h4>
+                      <p className="text-slate-500 text-[10px] uppercase font-bold max-w-sm leading-relaxed">Partner Packs are exclusive to <span className="text-indigo-400">PRO</span> and <span className="text-amber-500">LEGEND</span> tiers. Upgrade to unlock 3D custom sticker uploads.</p>
+                      <button onClick={() => setActiveSection('accounts')} className="mt-8 bg-white/5 hover:bg-white/10 text-white px-8 py-3 rounded-xl border border-white/10 text-[10px] font-black uppercase transition-all">Go to Tier Management</button>
+                    </div>
+                  ) : (
+                    <div className="space-y-8 relative z-10 w-full">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+                        {partnerStickers.map((stk, index) => (
+                          <div key={index} className="bg-[#0a0a0a] border border-white/5 rounded-[2.5rem] p-6 flex gap-6 group relative shadow-inner">
+                            <div className="w-24 h-24 bg-black rounded-[1.5rem] flex items-center justify-center overflow-hidden border border-white/5 shrink-0">
+                              {stk.lottieUrl ? (
+                                <Player autoplay loop src={stk.lottieUrl} style={{ height: '70px', width: '70px' }} />
+                              ) : (
+                                <Sparkles className="w-6 h-6 text-slate-800" />
+                              )}
+                            </div>
+                            <div className="flex-1 space-y-3 min-w-0">
+                              <input placeholder="Sticker Name" value={stk.name} onChange={(e) => updateStickerSlot(index, 'name', e.target.value)} className="w-full bg-black/50 border border-white/5 rounded-xl px-4 py-2 text-xs font-bold text-white outline-none focus:border-indigo-500" />
+                              <input placeholder="Lottie JSON URL" value={stk.lottieUrl} onChange={(e) => updateStickerSlot(index, 'lottieUrl', e.target.value)} className="w-full bg-black/50 border border-white/5 rounded-xl px-4 py-2 text-[9px] font-mono text-indigo-400 outline-none focus:border-indigo-500" />
+                              <div className="flex items-center gap-3">
+                                <span className="text-[9px] font-black text-slate-500 uppercase">Min Price: ₹</span>
+                                <input type="number" value={stk.minAmount} onChange={(e) => updateStickerSlot(index, 'minAmount', e.target.value)} className="w-24 bg-black/50 border border-white/5 rounded-xl px-3 py-1.5 text-xs font-black text-white outline-none focus:border-indigo-500" />
+                              </div>
+                            </div>
+                            <button onClick={() => removeStickerSlot(index)} className="absolute top-4 right-4 p-2 text-slate-700 hover:text-red-500 transition-colors">
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ))}
+
+                        {partnerStickers.length < 10 && (
+                          <button onClick={addStickerSlot} className="border-2 border-dashed border-white/5 rounded-[2.5rem] p-12 flex flex-col items-center justify-center gap-3 hover:border-indigo-500/30 hover:bg-white/[0.02] transition-all group">
+                            <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-500 group-hover:bg-indigo-500 group-hover:text-white transition-all shadow-lg">
+                              <Plus className="w-6 h-6" />
+                            </div>
+                            <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest group-hover:text-white transition-colors">Add Sticker Slot</span>
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="bg-indigo-500/5 border border-indigo-500/10 p-6 rounded-[2rem] flex items-start gap-4">
+                        <Info className="w-5 h-5 text-indigo-400 shrink-0 mt-0.5" />
+                        <div>
+                          <p className="text-[10px] text-slate-500 font-medium leading-relaxed italic uppercase tracking-wider">
+                            Streamer Advisory: Paste the "Lottie JSON URL" from LottieFiles.com into the slot. 
+                            Custom stickers will appear in the <span className="text-indigo-400">"Partner Pack"</span> tab on your public donation node instantly.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* --- ALERT STUDIO --- */}
                 <div className={`mt-10 border rounded-[3rem] p-8 lg:p-12 shadow-2xl relative overflow-hidden transition-colors ${theme === 'dark' ? 'bg-[#111] border-white/5' : 'bg-white border-slate-200'}`}>
                     <div className={`absolute top-0 right-0 w-96 h-96 rounded-full blur-[100px] -mr-32 -mt-32 pointer-events-none ${theme === 'dark' ? 'bg-purple-600/5' : 'bg-purple-600/10'}`} />
                     
@@ -565,15 +819,20 @@ const Dashboard = () => {
                             </h2>
                             <p className="text-slate-500 text-[10px] font-bold uppercase tracking-[0.3em]">Advanced Drop Physics & Styling</p>
                         </div>
-                        <button className="bg-purple-600 text-white px-6 py-3 rounded-xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-purple-600/20 hover:scale-105 transition-all flex items-center gap-2">
-                            <Save className="w-3.5 h-3.5" /> Save Configuration
+                        <button 
+                          onClick={saveAlertSettings} 
+                          disabled={isSavingAlerts} 
+                          className="bg-purple-600 text-white px-6 py-3 rounded-xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-purple-600/20 hover:scale-105 transition-all flex items-center gap-2 disabled:opacity-50"
+                        >
+                            {isSavingAlerts ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />} 
+                            {isSavingAlerts ? "Saving..." : "Save Configuration"}
                         </button>
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 relative z-10 w-full">
-                        {/* LEFT: CONTROLS */}
+                      {/* LEFT: CONTROLS */}
                         <div className="lg:col-span-7 space-y-8">
-                            {/* Tiers */}
+
                             <div className="space-y-3">
                                 <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest flex items-center gap-2"><Layers className="w-3 h-3"/> 1. Amount-Based Tiers</label>
                                 <div className={`flex p-1.5 rounded-2xl border ${theme === 'dark' ? 'bg-black/50 border-white/5' : 'bg-slate-100 border-slate-200'}`}>
@@ -619,15 +878,21 @@ const Dashboard = () => {
                                     </select>
                                 </div>
 
-                                {/* Media Injection */}
+                                {/* Media Injection (Now Interactive) */}
                                 <div className={`p-6 rounded-3xl border transition-colors ${theme === 'dark' ? 'bg-black/20 border-white/5' : 'bg-slate-50 border-slate-200'}`}>
                                     <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest flex items-center gap-2 mb-4"><ImageIcon className="w-3 h-3"/> Media Injection</label>
                                     <div className="grid grid-cols-4 gap-2 mb-3">
                                         {['⚡', '🔥', '🚀', '💎'].map(sticker => (
-                                            <button key={sticker} className={`p-2 rounded-xl text-lg border transition-all ${theme === 'dark' ? 'bg-black border-white/5 hover:border-indigo-500' : 'bg-white border-slate-200 hover:border-indigo-500'}`}>{sticker}</button>
+                                            <button 
+                                                key={sticker} 
+                                                onClick={() => setAlertConfig({...alertConfig, media: sticker})}
+                                                className={`p-2 rounded-xl text-lg border transition-all ${alertConfig.media === sticker ? 'border-indigo-500 bg-indigo-500/10 scale-105 shadow-lg shadow-indigo-500/20' : theme === 'dark' ? 'bg-black border-white/5 hover:border-indigo-500/50' : 'bg-white border-slate-200 hover:border-indigo-500/50'}`}
+                                            >
+                                                {sticker}
+                                            </button>
                                         ))}
                                     </div>
-                                    <button className={`w-full text-[9px] font-black uppercase tracking-widest p-3 rounded-xl border border-dashed flex items-center justify-center gap-2 transition-colors ${theme === 'dark' ? 'border-white/20 text-slate-400 hover:text-white hover:border-white/50' : 'border-slate-300 text-slate-500 hover:text-slate-800 hover:border-slate-500'}`}>
+                                    <button onClick={() => alert("Custom Video/GIF uploads unlock at Legend Tier.")} className={`w-full text-[9px] font-black uppercase tracking-widest p-3 rounded-xl border border-dashed flex items-center justify-center gap-2 transition-colors ${theme === 'dark' ? 'border-white/20 text-slate-400 hover:text-white hover:border-white/50' : 'border-slate-300 text-slate-500 hover:text-slate-800 hover:border-slate-500'}`}>
                                         <UploadCloud className="w-3 h-3" /> Custom GIF/WebM
                                     </button>
                                 </div>
@@ -648,7 +913,7 @@ const Dashboard = () => {
                             </div>
                         </div>
 
-                        {/* RIGHT: LIVE PREVIEW */}
+                        {/* RIGHT: LIVE PREVIEW (Fully hooked up) */}
                         <div className="lg:col-span-5 w-full">
                             <div className="bg-[#050505] rounded-[2.5rem] border-[8px] border-[#18181b] overflow-hidden relative shadow-2xl flex flex-col h-full min-h-[400px]">
                                 <div className="p-4 border-b border-white/5 flex items-center justify-between bg-[#0a0a0a]">
@@ -660,41 +925,25 @@ const Dashboard = () => {
                                     <span className="text-[9px] font-mono text-slate-500 uppercase">OBS Studio Preview</span>
                                     <Sparkles className="w-3 h-3 text-slate-600" />
                                 </div>
-                                <div className="flex-1 p-6 relative flex items-center justify-center bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-opacity-20">
+                                <div className="flex-1 p-6 relative flex items-center justify-center bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-opacity-20 overflow-hidden">
                                     <AnimatePresence mode="wait">
                                         <motion.div 
-                                            key={activeAlertTier}
-                                            initial={{ x: -50, opacity: 0, scale: 0.9 }}
+                                            key={`${activeAlertTier}-${previewKey}`}
+                                            initial={{ x: -100, opacity: 0, scale: 0.9 }}
                                             animate={{ x: 0, opacity: 1, scale: 1 }}
-                                            transition={{ type: 'spring', bounce: 0.5 }}
-                                            className={`relative z-10 w-full max-w-sm backdrop-blur-xl border-2 rounded-3xl p-6 flex items-center gap-5 shadow-2xl ${
-                                                activeAlertTier === 'legendary' 
-                                                ? 'bg-amber-500/10 border-amber-500 shadow-amber-500/20' 
-                                                : activeAlertTier === 'epic'
-                                                ? 'bg-purple-600/10 border-purple-500 shadow-purple-500/20'
-                                                : 'bg-[#111]/80 border-white/10 shadow-white/5'
-                                            }`}
+                                            transition={{ type: 'spring', bounce: 0.5, duration: 0.6 }}
+                                            className={`relative z-10 w-full max-w-sm backdrop-blur-xl border-2 rounded-3xl p-6 flex gap-5 shadow-2xl ${activeAlertTier === 'legendary' ? 'bg-amber-500/10 border-amber-500 shadow-amber-500/20' : 'bg-[#111]/80 border-white/10 shadow-white/5'}`}
                                         >
-                                            <div className="text-5xl drop-shadow-2xl">
-                                                {activeAlertTier === 'legendary' ? '👑' : activeAlertTier === 'epic' ? '🔥' : '🚀'}
-                                            </div>
+                                            <div className="text-5xl drop-shadow-2xl">{alertConfig.media}</div>
                                             <div className={`flex-1 ${alertConfig.font}`}>
-                                                <div className="flex items-center gap-3 mb-1">
-                                                    <h4 className={`text-lg font-black uppercase italic tracking-tighter ${activeAlertTier === 'legendary' ? 'text-amber-400 drop-shadow-[0_0_10px_rgba(251,191,36,0.8)]' : 'text-white'}`}>TEST SUPPORTER</h4>
-                                                </div>
-                                                <div className="flex items-center gap-2 mb-2">
-                                                    <span className={`px-2.5 py-1 rounded-lg text-xs font-black italic shadow-lg ${activeAlertTier === 'legendary' ? 'bg-amber-500 text-black' : activeAlertTier === 'epic' ? 'bg-purple-600 text-white' : 'bg-white/10 text-white border border-white/10'}`}>
-                                                        {activeAlertTier === 'legendary' ? '₹2000' : activeAlertTier === 'epic' ? '₹500' : '₹100'}
-                                                    </span>
-                                                </div>
+                                                <h4 className={`text-lg font-black uppercase italic tracking-tighter ${activeAlertTier === 'legendary' ? 'text-amber-400' : 'text-white'}`}>TEST SUPPORTER</h4>
                                                 <p className="text-xs text-slate-300 italic font-medium">"This UI goes incredibly hard. Keep it up! ⚡"</p>
                                             </div>
-                                            {activeAlertTier === 'legendary' && <div className="absolute inset-0 border-2 border-amber-400 rounded-3xl animate-[pulse_2s_infinite] pointer-events-none" />}
                                         </motion.div>
                                     </AnimatePresence>
                                 </div>
                                 <div className="p-4 bg-[#0a0a0a] border-t border-white/5 flex justify-center">
-                                     <button className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-400 hover:text-white transition-colors">
+                                     <button onClick={() => setPreviewKey(prev => prev + 1)} className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-400 hover:text-white transition-all active:scale-95">
                                          <Play className="w-3 h-3 fill-slate-400" /> Replay Animation
                                      </button>
                                 </div>
@@ -709,13 +958,10 @@ const Dashboard = () => {
             {activeSection === 'accounts' && (
               <div className="max-w-6xl mx-auto space-y-8 font-sans pb-20 w-full">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start w-full">
-                  
-                  {/* 1. IDENTITY MAIN CARD */}
                   <div className={`w-full lg:col-span-8 border rounded-[2.5rem] p-8 lg:p-12 shadow-2xl relative overflow-hidden group transition-colors ${theme === 'dark' ? 'bg-[#111] border-white/5' : 'bg-white border-slate-200'}`}>
                     <div className={`absolute top-0 right-0 w-64 h-64 rounded-full blur-[80px] -mr-32 -mt-32 ${theme === 'dark' ? 'bg-indigo-500/5' : 'bg-indigo-500/10'}`} />
                     
                     <div className="relative z-10 flex flex-col md:flex-row justify-between items-start gap-12 mb-12">
-                      {/* Profile Image Section */}
                       <div className="relative group/avatar shrink-0">
                         <div className={`w-36 h-36 rounded-[2.5rem] border-2 border-dashed flex items-center justify-center overflow-hidden transition-all group-hover/avatar:border-indigo-500 shadow-2xl ${theme === 'dark' ? 'bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border-white/10' : 'bg-slate-50 border-slate-200'}`}>
                           {profilePreview ? (
@@ -723,8 +969,6 @@ const Dashboard = () => {
                           ) : (
                             <User className={`w-14 h-14 ${theme === 'dark' ? 'text-white/20' : 'text-slate-300'}`} />
                           )}
-                          
-                          {/* Upload Overlay */}
                           <button 
                             onClick={() => fileInputRef.current.click()}
                             className="absolute inset-0 bg-black/60 opacity-0 group-hover/avatar:opacity-100 flex flex-col items-center justify-center transition-all duration-300 backdrop-blur-sm"
@@ -734,8 +978,6 @@ const Dashboard = () => {
                           </button>
                         </div>
                         <input type="file" ref={fileInputRef} className="hidden" onChange={handleImageChange} accept="image/*" />
-                        
-                        {/* Status Indicator */}
                         <div className={`absolute -bottom-2 -right-2 p-1.5 rounded-2xl border transition-colors ${theme === 'dark' ? 'bg-[#050505] border-white/5' : 'bg-white border-slate-200'}`}>
                           <div className="bg-green-500 w-3 h-3 rounded-full animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.5)]" />
                         </div>
@@ -758,19 +1000,36 @@ const Dashboard = () => {
                             {isEditing ? <><Save className="w-3.5 h-3.5" /> Save Node</> : <><Edit3 className="w-3.5 h-3.5" /> Update Core</>}
                           </button>
                         </div>
-
                         <div className="flex flex-wrap items-center gap-3">
                           <div className="px-4 py-1.5 bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-2">
                             <BadgeCheck className="w-3 h-3" /> Droppay Verified
                           </div>
-                          <div className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border transition-colors ${theme === 'dark' ? 'bg-white/5 border-white/10 text-slate-400' : 'bg-slate-100 border-slate-200 text-slate-600'}`}>
-                            Tier: Legend
-                          </div>
+                          
+                          {/* --- DYNAMIC TIER BADGE REPLACEMENT --- */}
+                          {user?.tier && user.tier !== 'none' ? (
+                            <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all ${
+                              user.tier === 'legend' 
+                                ? 'bg-amber-500/10 border-amber-500/30 text-amber-500 shadow-amber-500/10' 
+                                : user.tier === 'pro'
+                                  ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-400'
+                                  : 'bg-slate-500/10 border-slate-500/30 text-slate-400'
+                            }`}>
+                              {user.tier === 'legend' && <Crown className="w-3.5 h-3.5 fill-amber-500" />}
+                              {user.tier === 'pro' && <Zap className="w-3.5 h-3.5 fill-indigo-400" />}
+                              {user.tier === 'starter' && <ShieldCheck className="w-3.5 h-3.5" />}
+                              <span className="text-[9px] font-black uppercase tracking-[0.2em] italic">
+                                {user.tier} Protocol
+                              </span>
+                            </div>
+                          ) : (
+                            <div className="px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border transition-colors bg-red-500/10 border-red-500/20 text-red-500">
+                              No Active Plan
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
 
-                    {/* Input Matrix */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-10 border-t border-slate-200 dark:border-white/5 relative z-10 w-full">
                       <div className="space-y-2 w-full">
                         <label className="flex items-center gap-2 text-[9px] font-black uppercase text-slate-500 tracking-[0.2em] ml-1">
@@ -788,7 +1047,6 @@ const Dashboard = () => {
                           </div>
                         )}
                       </div>
-
                       <div className="space-y-2 w-full">
                         <label className="flex items-center gap-2 text-[9px] font-black uppercase text-slate-500 tracking-[0.2em] ml-1">
                           <Hash className="w-3 h-3" /> Streamer ID
@@ -805,7 +1063,6 @@ const Dashboard = () => {
                           </div>
                         )}
                       </div>
-
                       <div className="space-y-2 w-full">
                         <label className="flex items-center gap-2 text-[9px] font-black uppercase text-slate-500 tracking-[0.2em] ml-1">
                           <MailIcon className="w-3 h-3" /> Registered Email
@@ -814,7 +1071,6 @@ const Dashboard = () => {
                           <p className="text-sm font-bold text-slate-500 dark:text-slate-400">{user.email}</p>
                         </div>
                       </div>
-
                       <div className="space-y-2 w-full">
                         <label className="flex items-center gap-2 text-[9px] font-black uppercase text-slate-500 tracking-[0.2em] ml-1">
                           <Phone className="w-3 h-3" /> Secure Contact
@@ -831,10 +1087,27 @@ const Dashboard = () => {
                           </div>
                         )}
                       </div>
+                      <div className="space-y-2 w-full md:col-span-2 mt-4">
+                        <label className="flex items-center gap-2 text-[9px] font-black uppercase text-slate-500 tracking-[0.2em] ml-1">
+                          <MessageSquare className="w-3 h-3" /> Streamer Bio / Page Message
+                        </label>
+                        {isEditing ? (
+                          <textarea 
+                            value={editForm.bio} 
+                            onChange={(e) => setEditForm({...editForm, bio: e.target.value})} 
+                            maxLength={150}
+                            className={`w-full border-2 rounded-2xl p-4 text-xs font-bold focus:border-indigo-500 outline-none transition-all shadow-inner resize-none min-h-[80px] ${theme === 'dark' ? 'bg-black border-white/10 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'}`} 
+                          />
+                        ) : (
+                          <div className={`w-full border rounded-2xl p-4 transition-colors ${theme === 'dark' ? 'bg-white/5 border-white/5' : 'bg-slate-50 border-slate-200'}`}>
+                            <p className={`text-sm font-medium italic ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>"{user.bio || editForm.bio || 'Support the stream, trigger custom on-screen alerts, and join the Hall of Fame.'}"</p>
+                          </div>
+                        )}
+                      </div>
+
                     </div>
                   </div>
 
-                  {/* 2. BANKING HUB (Side Panel) */}
                   <div className="w-full lg:col-span-4 space-y-6">
                     <div className={`w-full border rounded-[2.5rem] p-8 shadow-2xl flex flex-col font-sans relative overflow-hidden group min-h-[300px] transition-colors ${theme === 'dark' ? 'bg-[#111] border-white/5' : 'bg-white border-slate-200'}`}>
                       <div className="flex items-center gap-4 mb-8">
@@ -843,7 +1116,6 @@ const Dashboard = () => {
                         </div>
                         <h3 className={`text-sm font-black uppercase italic tracking-widest ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Banking Node</h3>
                       </div>
-                      
                       <div className="space-y-6 flex-1 z-10 w-full">
                         {user.razorpayAccountId ? (
                           <div className="space-y-6 w-full">
@@ -879,7 +1151,6 @@ const Dashboard = () => {
                       </div>
                       <Landmark className="absolute -bottom-10 -right-10 w-40 h-40 text-slate-100 dark:text-white/[0.02] -rotate-12 pointer-events-none" />
                     </div>
-                    
                     <div className="w-full bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/5 rounded-[2rem] p-6 flex items-center justify-between transition-colors">
                        <div className="flex items-center gap-4">
                           <div className="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-500/10 flex items-center justify-center border border-indigo-200 dark:border-indigo-500/20">
@@ -978,6 +1249,7 @@ const Dashboard = () => {
               </div>
             )}
 
+            {/* KNOWLEDGE HUB */}
             {activeSection === 'help' && (
               <div className="max-w-5xl mx-auto space-y-10 font-sans pb-20 w-full">
                 <div className="text-center space-y-4 w-full">
@@ -1048,6 +1320,7 @@ const Dashboard = () => {
               </div>
             )}
 
+            {/* FEEDBACK STATION */}
             {activeSection === 'feedback' && (
               <div className="max-w-3xl mx-auto space-y-12 font-sans pb-20 pt-4 w-full">
                 <div className="text-center space-y-2 w-full">
