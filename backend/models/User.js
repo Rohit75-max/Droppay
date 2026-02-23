@@ -8,7 +8,8 @@ const UserSchema = new mongoose.Schema({
     required: true, 
     unique: true, 
     lowercase: true, 
-    trim: true 
+    trim: true,
+    index: true // ADDED: Fast login lookups
   },
   phone: { type: String, required: true, trim: true },
   password: { type: String },
@@ -18,7 +19,8 @@ const UserSchema = new mongoose.Schema({
     required: true, 
     unique: true, 
     lowercase: true, 
-    trim: true 
+    trim: true,
+    index: true // ADDED: Critical for the /pay/:streamerId page
   },
   bio: {
     type: String,
@@ -29,15 +31,18 @@ const UserSchema = new mongoose.Schema({
   tier: { 
     type: String, 
     enum: ['none', 'starter', 'pro', 'legend'], 
-    default: 'none' 
+    default: 'none',
+    index: true // ADDED: Filtering users by tier for marketing/admin
   },
 
   obsKey: { 
     type: String, 
     unique: true, 
-    default: () => uuidv4() 
+    default: () => uuidv4(),
+    index: true // ADDED: Vital for 50k OBS browser source connections
   },
 
+  // ... (verified/otp/subscription fields remain same) ...
   isEmailVerified: { type: Boolean, default: false },
   isPhoneVerified: { type: Boolean, default: false },
   otp: {
@@ -57,8 +62,9 @@ const UserSchema = new mongoose.Schema({
 
   walletBalance: { type: Number, default: 0 }, 
   
-  razorpayAccountId: { type: String, default: null }, 
+  razorpayAccountId: { type: String, default: null, index: true }, // ADDED: Fast payout lookups
   
+  // ... (payout/overlay/goal settings remain same) ...
   payoutSettings: {
     onboardingStatus: { 
       type: String, 
@@ -93,8 +99,6 @@ const UserSchema = new mongoose.Schema({
     isActive: { type: Boolean, default: true }
   },
 
-  // --- NEW: PARTNER STICKER PROTOCOL ---
-  // Only accessible for PRO and LEGEND tiers
   partnerPack: [
     {
       stickerId: { type: String, default: () => `stk_${Date.now()}` },
@@ -104,10 +108,17 @@ const UserSchema = new mongoose.Schema({
       isActive: { type: Boolean, default: true }
     }
   ],
-  // -------------------------------------
 
   googleId: { type: String, unique: true, sparse: true }
 
 }, { timestamps: true });
+
+// --- ADVANCED COMPOUND INDEXES FOR 50K SCALE ---
+
+// 1. Fast lookup for the Overlay (find user by obsKey + check if panic mode is off)
+UserSchema.index({ obsKey: 1, "overlaySettings.isPanicMode": 1 });
+
+// 2. Fast lookup for Payout Engine (active accounts that need settlement)
+UserSchema.index({ "payoutSettings.onboardingStatus": 1, walletBalance: -1 });
 
 module.exports = mongoose.model('User', UserSchema);

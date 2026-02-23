@@ -1,14 +1,19 @@
 const mongoose = require('mongoose');
 
+/**
+ * DROP SCHEMA: The Financial Ledger for Donations
+ * Improvised for high-concurrency (50k+ users) with Compound Indexing.
+ */
 const DropSchema = new mongoose.Schema({
   streamerId: {
     type: String,
     required: true,
-    index: true // Makes searching for a specific streamer's drops faster
+    index: true // Core lookup for streamer-specific data
   },
   donorName: {
     type: String,
-    default: 'Anonymous'
+    default: 'Anonymous',
+    trim: true
   },
   amount: {
     type: Number,
@@ -16,7 +21,8 @@ const DropSchema = new mongoose.Schema({
   },
   message: {
     type: String,
-    trim: true
+    trim: true,
+    maxLength: 280 // Limit to prevent DB bloat at scale
   },
   sticker: {
     type: String,
@@ -25,12 +31,28 @@ const DropSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: ['pending', 'completed', 'failed'],
-    default: 'pending'
+    default: 'pending',
+    index: true // Essential for filtering valid transactions
   },
-  createdAt: {
-    type: Date,
-    default: Date.now
+  // Technical metadata for Split Payments / Razorpay Route
+  razorpayPaymentId: { 
+    type: String, 
+    sparse: true 
+  },
+  razorpayOrderId: { 
+    type: String, 
+    sparse: true 
   }
+}, { 
+  timestamps: true // Automatically manages createdAt and updatedAt
 });
+
+/**
+ * GIANT-TIER COMPOUND INDEXES
+ * 1. Hall of Fame Index: Speeds up "Top Donors" by pre-sorting streamerId, status, and amount.
+ * 2. History Index: Speeds up "Recent Drops" by pre-sorting streamerId, status, and time.
+ */
+DropSchema.index({ streamerId: 1, status: 1, amount: -1 });
+DropSchema.index({ streamerId: 1, status: 1, createdAt: -1 });
 
 module.exports = mongoose.model('Drop', DropSchema);

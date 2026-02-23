@@ -1,7 +1,11 @@
-require('dotenv').config();
+require('dotenv').config(); // MUST BE LINE 1
 const express = require('express');
 const http = require('http'); 
 const { Server } = require('socket.io'); 
+const { createClient } = require('redis');
+const { createAdapter } = require('@socket.io/redis-adapter');
+
+const { globalLimiter, strictLimiter } = require('./middleware/rateLimiter');
 const connectDB = require('./config/db');
 const cors = require('cors');
 const cron = require('node-cron'); 
@@ -10,78 +14,59 @@ const paymentController = require('./controllers/paymentController');
 const app = express();
 const server = http.createServer(app); 
 
-// 1. Initialize Socket.io
-const io = new Server(server, {
-    cors: {
-        origin: "http://localhost:3000", 
-        methods: ["GET", "POST"]
+// 1. SOCKET ENGINE (Logic Preserved)
+const setupSockets = async () => {
+    const ioOptions = {
+        cors: { origin: process.env.FRONTEND_URL || "http://localhost:3000", methods: ["GET", "POST"] },
+        transports: ['websocket', 'polling']
+    };
+    let io;
+    try {
+        const pubClient = createClient({ url: process.env.REDIS_URL || 'redis://127.0.0.1:6379' });
+        const subClient = pubClient.duplicate();
+        await Promise.all([pubClient.connect(), subClient.connect()]);
+        io = new Server(server, ioOptions);
+        io.adapter(createAdapter(pubClient, subClient));
+    } catch (err) {
+        io = new Server(server, ioOptions);
     }
-});
+    app.set('io', io);
+    io.on('connection', (socket) => {
+        socket.on('join-overlay', (obsKey) => socket.join(obsKey));
+    });
+};
 
-// 2. Database Connection
+// 2. CONNECT DATABASE
 connectDB();
 
-// 3. Middleware Setup
+// 3. MIDDLEWARE
 app.use(cors()); 
-
-/**
- * CRITICAL: Webhook Raw Body Handling
- * Razorpay needs the raw body to verify signatures.
- * This ensures express.json() doesn't corrupt the data before verification.
- */
+app.use('/api', globalLimiter);
 app.use(express.json({
-    verify: (req, res, buf) => {
-        if (req.originalUrl.includes('/webhook')) {
-            req.rawBody = buf.toString();
-        }
-    }
+    verify: (req, res, buf) => { if (req.originalUrl.includes('/webhook')) req.rawBody = buf.toString(); }
 }));
-
 app.use(express.urlencoded({ extended: true })); 
 
-// Fix: Name this 'io' so the controller can find it with req.app.get('io')
-app.set('io', io);
+// 4. PROTECTION SYNC (Fixed Path Mismatch)
+// Added /signup to the strict limiter to prevent the "Connection Failed" loop
+app.use('/api/auth/login', strictLimiter);
+app.use('/api/auth/signup', strictLimiter); // SYNCED WITH FRONTEND
+app.use('/api/payment/create-order', strictLimiter);
 
-// 4. Socket Handler Logic
-io.on('connection', (socket) => {
-    console.log('⚡ New Connection:', socket.id);
-
-    socket.on('join-overlay', (obsKey) => {
-        socket.join(obsKey);
-        console.log(`📡 Overlay joined private room: ${obsKey}`);
-    });
-
-    socket.on('disconnect', () => {
-        console.log('❌ User Disconnected');
-    });
-});
-
-/**
- * 5. AUTOMATED MISSION CHECKER (CRITICAL)
- * Runs every night at 00:00 (Midnight).
- */
-cron.schedule('0 0 * * *', () => {
-    console.log('--- SYSTEM: Running Daily Mission Expiry Check ---');
-    paymentController.checkExpirations();
-});
-
-// 6. Routes
+// 5. ROUTE MOUNTING
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/user', require('./routes/userRoutes'));
 app.use('/api/payment', require('./routes/paymentRoutes'));
 
-app.get('/', (req, res) => {
-    res.send('DropPay API is running. Systems Green.');
+// 6. MISSION CHECKER
+cron.schedule('0 0 * * *', () => {
+    paymentController.checkExpirations();
 });
 
-// 7. Global Error Handler
-app.use((err, req, res, next) => {
-    console.error('💥 Global Error:', err.stack);
-    res.status(500).json({ msg: 'Something went wrong on the server.' });
-});
-
-// 8. Start Server
 const PORT = process.env.PORT || 5001;
-server.listen(PORT, () => {
-    console.log(`🚀 Server & Socket running on http://localhost:${PORT}`);
+
+setupSockets().then(() => {
+    server.listen(PORT, () => {
+        console.log(`🚀 System Green: Server on http://localhost:${PORT}`);
+    });
 });

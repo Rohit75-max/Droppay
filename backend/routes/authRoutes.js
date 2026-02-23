@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const passport = require('passport');
 const jwt = require('jsonwebtoken');
-// Added forgotPassword and resetPassword to the import
+
 const { 
     signup, 
     verifyEmail, 
@@ -11,12 +11,15 @@ const {
     resetPassword 
 } = require('../controllers/authController');
 
-// --- 1. Manual Auth Routes ---
+// --- 1. Manual Auth Routes (SYNCED NAMES) ---
 router.post('/signup', signup); 
-router.post('/verify-otp', verifyEmail); 
+
+// FIXED: Renamed from /verify-otp to /verify-email to match Frontend
+router.post('/verify-email', verifyEmail); 
+
 router.post('/login', login);
 
-// New: Password Recovery Routes
+// Password Recovery Routes
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
 
