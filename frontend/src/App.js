@@ -5,16 +5,17 @@ import { Helmet } from 'react-helmet-async';
 import axios from 'axios';
 
 // --- PAGES ---
-import Home from './pages/Home'; 
+import Home from './pages/Home';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
-import SubscriptionPage from './pages/SubscriptionPage'; 
+import SubscriptionPage from './pages/SubscriptionPage';
 import DonationPage from './pages/DonationPage';
 import Overlay from './pages/Overlay';
 import GoalOverlay from './pages/GoalOverlay';
-import ForgotPassword from './pages/ForgotPassword'; 
-import ResetPassword from './pages/ResetPassword';   
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
+import AdminSecurePortal from './pages/AdminSecurePortal';
 
 // --- PROFESSIONAL GATE: SECURE UPLINK ---
 const MissionGate = ({ children }) => {
@@ -33,15 +34,22 @@ const MissionGate = ({ children }) => {
         const res = await axios.get('http://localhost:5001/api/user/profile', {
           headers: { Authorization: `Bearer ${token}` }
         });
-        
+
         // Checks both the new tier system and the legacy subscription status
         const isActiveTier = res.data.tier && res.data.tier !== 'none';
         const isLegacyActive = res.data.subscription?.status === 'active';
-        
+
         setHasAccess(isActiveTier || isLegacyActive);
         setStatus('authorized');
       } catch (err) {
-        setStatus('unauthorized');
+        if (err.response?.status === 429) {
+          // If the rate limiter blocks the initialization check, assume the session is still active
+          // rather than catastrophically logging the user out.
+          setHasAccess(true);
+          setStatus('authorized');
+        } else {
+          setStatus('unauthorized');
+        }
       }
     };
     checkAccess();
@@ -71,12 +79,12 @@ const AnimatedRoutes = () => {
         <Route path="/" element={<Home />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} /> 
+        <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
 
         {/* 2. PUBLIC PROTOCOL LINKS */}
         <Route path="/pay/:streamerId" element={<DonationPage />} />
-        
+
         {/* 3. OBS OVERLAY NODES */}
         <Route path="/overlay/:obsKey" element={<Overlay />} />
         <Route path="/goal/:streamerId" element={<GoalOverlay />} />
@@ -86,17 +94,20 @@ const AnimatedRoutes = () => {
         <Route path="/subscription" element={<SubscriptionPage />} />
         {/* Redirect alias so old /subscribe links still work */}
         <Route path="/subscribe" element={<Navigate to="/subscription" replace />} />
-        
-        {/* 5. SECURE DASHBOARD NEXUS */}
-        <Route 
-          path="/dashboard" 
+
+        {/* 5. ENTERPRISE ADMIN HUB */}
+        <Route path="/admin/secure-portal" element={<AdminSecurePortal />} />
+
+        {/* 6. SECURE DASHBOARD NEXUS */}
+        <Route
+          path="/dashboard"
           element={
             <MissionGate>
               <Dashboard />
             </MissionGate>
-          } 
+          }
         />
-        
+
         {/* 6. GLOBAL REDIRECT PROTOCOL (CATCH-ALL) */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

@@ -1,18 +1,18 @@
 require('dotenv').config(); // MUST BE LINE 1
 const express = require('express');
-const http = require('http'); 
-const { Server } = require('socket.io'); 
+const http = require('http');
+const { Server } = require('socket.io');
 const { createClient } = require('redis');
 const { createAdapter } = require('@socket.io/redis-adapter');
 
 const { globalLimiter, strictLimiter } = require('./middleware/rateLimiter');
 const connectDB = require('./config/db');
 const cors = require('cors');
-const cron = require('node-cron'); 
-const paymentController = require('./controllers/paymentController'); 
+const cron = require('node-cron');
+const paymentController = require('./controllers/paymentController');
 
 const app = express();
-const server = http.createServer(app); 
+const server = http.createServer(app);
 
 // 1. SOCKET ENGINE (Logic Preserved)
 const setupSockets = async () => {
@@ -33,6 +33,7 @@ const setupSockets = async () => {
     app.set('io', io);
     io.on('connection', (socket) => {
         socket.on('join-overlay', (obsKey) => socket.join(obsKey));
+        socket.on('join-room', (roomId) => socket.join(roomId));
     });
 };
 
@@ -40,23 +41,22 @@ const setupSockets = async () => {
 connectDB();
 
 // 3. MIDDLEWARE
-app.use(cors()); 
-app.use('/api', globalLimiter);
+app.use(cors());
 app.use(express.json({
     verify: (req, res, buf) => { if (req.originalUrl.includes('/webhook')) req.rawBody = buf.toString(); }
 }));
-app.use(express.urlencoded({ extended: true })); 
+app.use(express.urlencoded({ extended: true }));
 
 // 4. PROTECTION SYNC (Fixed Path Mismatch)
 // Added /signup to the strict limiter to prevent the "Connection Failed" loop
-app.use('/api/auth/login', strictLimiter);
-app.use('/api/auth/signup', strictLimiter); // SYNCED WITH FRONTEND
-app.use('/api/payment/create-order', strictLimiter);
+app.post('/api/auth/login', strictLimiter);
+app.post('/api/auth/signup', strictLimiter); // SYNCED WITH FRONTEND
 
 // 5. ROUTE MOUNTING
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/user', require('./routes/userRoutes'));
 app.use('/api/payment', require('./routes/paymentRoutes'));
+app.use('/api/admin', require('./routes/adminRoutes'));
 
 // 6. MISSION CHECKER
 cron.schedule('0 0 * * *', () => {

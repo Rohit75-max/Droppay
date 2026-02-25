@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { io } from 'socket.io-client';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Player } from '@lottiefiles/react-lottie-player'; 
-import { 
-  Send, ShieldCheck, Zap, IndianRupee, MessageSquare, Loader2, Sparkles, 
+import { Player } from '@lottiefiles/react-lottie-player';
+import {
+  Send, ShieldCheck, Zap, IndianRupee, MessageSquare, Loader2, Sparkles,
   CheckCircle, Award, Trophy, User, Crown, Smile, Volume2, Lock, Target, Crosshair, UserCircle, Gift
-} from 'lucide-react'; 
+} from 'lucide-react';
 
 // --- MODULAR IMPORT ---
 import AlertPreview from '../components/AlertPreview';
@@ -16,8 +16,13 @@ const globalStickers = [
   { id: 'hype_zap', url: 'https://fonts.gstatic.com/s/e/notoemoji/latest/26a1/lottie.json', price: 20, color: 'from-yellow-400 to-orange-500', sound: '/sounds/zap.mp3' },
   { id: 'fire_rocket', url: 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f680/lottie.json', price: 50, color: 'from-orange-500 to-red-600', sound: '/sounds/fire.mp3' },
   { id: 'super_heart', url: 'https://fonts.gstatic.com/s/e/notoemoji/latest/2764_fe0f/lottie.json', price: 100, color: 'from-pink-500 to-rose-600', sound: '/sounds/love.mp3' },
+  { id: 'alien_visit', url: 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f47d/lottie.json', price: 150, color: 'from-green-400 to-emerald-500', sound: '/sounds/zap.mp3' },
+  { id: 'driving_car', url: 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f697/lottie.json', price: 200, color: 'from-blue-400 to-indigo-500', sound: '/sounds/rocket.mp3' },
+  { id: 'football_goal', url: 'https://fonts.gstatic.com/s/e/notoemoji/latest/26bd/lottie.json', price: 250, color: 'from-gray-400 to-slate-500', sound: '/sounds/fire.mp3' },
+  { id: 'flying_bird', url: 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f426/lottie.json', price: 300, color: 'from-sky-400 to-blue-500', sound: '/sounds/magic.mp3' },
   { id: 'gold_trophy', url: 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f3c6/lottie.json', price: 500, color: 'from-amber-400 to-yellow-600', sound: '/sounds/king.mp3' },
   { id: 'party_popper', url: 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f389/lottie.json', price: 1000, color: 'from-indigo-500 to-purple-600', sound: '/sounds/rocket.mp3' },
+  { id: 'diamond_gem', url: 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f48e/lottie.json', price: 5000, color: 'from-cyan-400 to-blue-500', sound: '/sounds/magic.mp3' },
 ];
 
 const runnerMap = {
@@ -29,11 +34,12 @@ const runnerMap = {
 
 const DonationPage = () => {
   const { streamerId } = useParams();
+  const navigate = useNavigate();
   const [streamer, setStreamer] = useState(null);
-  const [topDonors, setTopDonors] = useState([]); 
+  const [topDonors, setTopDonors] = useState([]);
   const [amount, setAmount] = useState(20);
-  const [selectedSticker, setSelectedSticker] = useState('hype_zap');
-  const [activeTab, setActiveTab] = useState('global'); 
+  const [selectedSticker, setSelectedSticker] = useState('https://fonts.gstatic.com/s/e/notoemoji/latest/26a1/lottie.json');
+  const [activeTab, setActiveTab] = useState('global');
   const [donorName, setDonorName] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(true);
@@ -55,7 +61,7 @@ const DonationPage = () => {
           axios.get(`http://localhost:5001/api/payment/top/${streamerId}`),
           axios.get(`http://localhost:5001/api/payment/goal/${streamerId}`).catch(() => ({ data: null }))
         ]);
-        setStreamer(s.data); 
+        setStreamer(s.data);
         setTopDonors(t.data.slice(0, 3));
         if (g.data) {
           const settings = g.data.goalSettings || g.data.goal || g.data;
@@ -64,28 +70,51 @@ const DonationPage = () => {
           const rType = settings.runnerType || 'star';
           setRunnerUrl(rType === 'custom' ? settings.customRunnerUrl : (runnerMap[rType] || runnerMap.star));
         }
-      } catch { 
-        setStreamer({ username: streamerId.toUpperCase(), streamerId, tier: 'none' }); 
+      } catch {
+        setStreamer({ username: streamerId.toUpperCase(), streamerId, tier: 'none' });
       } finally { setLoading(false); }
     })();
   }, [streamerId]);
 
   useEffect(() => {
     const socket = io('http://localhost:5001');
-    socket.emit('join-room', streamerId); 
+    socket.emit('join-room', streamerId);
     socket.on('goal-update', (updatedGoal) => {
       setGoal(updatedGoal);
       if (updatedGoal.isActive !== undefined) setIsGoalActive(updatedGoal.isActive);
       if (updatedGoal.runnerType) {
-         setRunnerUrl(updatedGoal.runnerType === 'custom' ? updatedGoal.customRunnerUrl : (runnerMap[updatedGoal.runnerType] || runnerMap.star));
+        setRunnerUrl(updatedGoal.runnerType === 'custom' ? updatedGoal.customRunnerUrl : (runnerMap[updatedGoal.runnerType] || runnerMap.star));
       }
     });
+
+    socket.on('new-drop', (data) => {
+      if (data.isTest) return; // Ignore Test Signals on public tracking
+
+      setTopDonors(prev => {
+        const updated = [...prev];
+        const existingIdx = updated.findIndex(d => d._id?.toLowerCase() === data.donorName?.toLowerCase());
+
+        if (existingIdx >= 0) {
+          const currentTotal = updated[existingIdx].totalAmount || updated[existingIdx].total || 0;
+          updated[existingIdx].totalAmount = currentTotal + Number(data.amount);
+        } else {
+          updated.push({ _id: data.donorName, totalAmount: Number(data.amount) });
+        }
+
+        return updated.sort((a, b) => {
+          const totalA = a.totalAmount || a.total || 0;
+          const totalB = b.totalAmount || b.total || 0;
+          return totalB - totalA;
+        }).slice(0, 10);
+      });
+    });
+
     return () => socket.disconnect();
   }, [streamerId]);
 
   const playSoundPreview = (e, id, path) => {
     e.stopPropagation(); setPlayingSound(id);
-    new Audio(path).play().catch(() => {});
+    new Audio(path).play().catch(() => { });
     setTimeout(() => setPlayingSound(null), 2000);
   };
 
@@ -93,21 +122,32 @@ const DonationPage = () => {
     e.preventDefault(); if (!window.Razorpay) return;
     setIsProcessing(true);
     try {
-      const { data } = await axios.post('http://localhost:5001/api/payment/create-order', { 
-        streamerId, amount: Number(amount), donorName: donorName || 'Anonymous', message, sticker: selectedSticker 
+      const { data } = await axios.post('http://localhost:5001/api/payment/create-order', {
+        streamerId, amount: Number(amount), donorName: donorName || 'Anonymous', message, sticker: selectedSticker
       });
       new window.Razorpay({
-        key: process.env.REACT_APP_RAZORPAY_KEY_ID || "rzp_test_SHrX3upgmJ6sGL", 
+        key: process.env.REACT_APP_RAZORPAY_KEY_ID || "rzp_test_SHrX3upgmJ6sGL",
         amount: data.amount, currency: "INR", name: "DropPay Protocol", order_id: data.id,
         handler: async (res) => {
-          await axios.post('http://localhost:5001/api/payment/verify', { ...res, streamerId, donorName: donorName || 'Anonymous', message, sticker: selectedSticker, amount: Number(amount) });
-          setIsSuccess(true); setIsProcessing(false);
+          try {
+            await axios.post('http://localhost:5001/api/payment/verify', { ...res, streamerId, donorName: donorName || 'Anonymous', message, sticker: selectedSticker, amount: Number(amount) });
+            setIsSuccess(true);
+          } catch (err) {
+            console.error("Webhook Verification Error:", err);
+            alert(err.response?.data?.msg || "Payment was captured but verification failed. Streamer Not Found.");
+          } finally {
+            setIsProcessing(false);
+          }
         }, modal: { ondismiss: () => setIsProcessing(false) }
       }).open();
-    } catch { setIsProcessing(false); }
+    } catch (err) {
+      console.error("Payment Error:", err);
+      alert(err.response?.data?.msg || "Payment encountered an unexpected failure.");
+      setIsProcessing(false);
+    }
   };
 
-  if (loading) return <div className="min-h-screen bg-[#050505] flex items-center justify-center text-indigo-500"><Loader2 className="animate-spin" /></div>;
+  if (loading) return <div className="min-h-screen bg-[#050505] flex items-center justify-center text-[#10B981]"><Loader2 className="animate-spin w-12 h-12" /></div>;
 
   const isLegend = streamer?.tier === 'legend';
   const hasCustomPack = streamer?.tier === 'pro' || streamer?.tier === 'legend'; // VARIABLE NOW USED BELOW
@@ -116,21 +156,23 @@ const DonationPage = () => {
 
   return (
     <div className="min-h-screen lg:h-screen lg:overflow-hidden bg-[#050505] text-slate-100 font-sans relative flex flex-col px-4 md:px-8">
-      <header className="absolute top-0 left-0 w-full p-4 lg:p-6 z-50 flex items-center gap-2">
-        <Zap className="w-5 h-5 text-indigo-500 fill-indigo-500" />
-        <span className="text-lg font-black italic text-white uppercase tracking-tighter">DropPay</span>
+      <header
+        className="absolute top-0 left-0 w-full p-4 lg:p-6 z-50 flex items-center gap-2"
+      >
+        <Zap className="w-5 h-5 text-[#10B981] fill-[#10B981]" />
+        <span className="text-lg font-black italic text-white tracking-tighter">DropPay</span>
       </header>
 
       <main className="max-w-[1400px] mx-auto pt-20 lg:pt-24 pb-4 lg:pb-8 w-full h-full flex flex-col z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full flex-1 min-h-0 items-stretch">
-          
+
           {/* COLUMN 1 */}
           <div className="lg:col-span-3 flex flex-col justify-center h-full">
             <div className={`relative overflow-hidden border ${isLegend ? 'bg-amber-500/10 border-amber-500/30' : 'bg-white/5 border-white/10'} backdrop-blur-2xl rounded-[2.5rem] p-6 text-center flex flex-col items-center shadow-2xl`}>
               <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]" />
-              <div className={`relative w-20 h-20 rounded-full p-1 mb-4 ${isLegend ? 'bg-amber-500' : 'bg-indigo-500'} z-10`}><div className="w-full h-full rounded-full bg-[#050505] flex items-center justify-center border-4 border-[#111]"><User className="w-8 h-8 text-slate-400" /></div></div>
+              <div className={`relative w-20 h-20 rounded-full p-1 mb-4 ${isLegend ? 'bg-amber-500' : 'bg-[#10B981]'} z-10`}><div className="w-full h-full rounded-full bg-[#050505] flex items-center justify-center border-4 border-[#111]"><User className="w-8 h-8 text-slate-400" /></div></div>
               {streamer?.tier && streamer.tier !== 'none' && (
-                <div className={`relative z-10 inline-flex items-center gap-2 px-3 py-1.5 rounded-full border mb-4 text-[9px] font-black uppercase italic ${isLegend ? 'text-amber-500 border-amber-500/30' : 'text-indigo-400 border-indigo-500/30'}`}><Crown className="w-3 h-3" /> {streamer.tier} Verified</div>
+                <div className={`relative z-10 inline-flex items-center gap-2 px-3 py-1.5 rounded-full border mb-4 text-[9px] font-black uppercase italic ${isLegend ? 'text-amber-500 border-amber-500/30' : 'text-[#10B981] border-[#10B981]/30'}`}><Crown className="w-3 h-3" /> {streamer.tier} Verified</div>
               )}
               <p className="relative z-10 text-lg font-mono font-black mb-3">@{streamer?.streamerId}</p>
             </div>
@@ -143,23 +185,23 @@ const DonationPage = () => {
                 <div className="absolute inset-0 bg-[#050505]/80 backdrop-blur-2xl rounded-full border border-white/10 flex items-center px-4 gap-3 overflow-hidden">
                   <div className="flex items-center gap-3 w-auto shrink-0 relative z-10">
                     <div className="relative w-10 h-10 flex items-center justify-center shrink-0">
-                      <div className="absolute inset-0 rounded-full border border-dashed animate-[spin_4s_linear_infinite] border-indigo-500/50" />
-                      <Target className="w-4 h-4 text-indigo-400" />
+                      <div className="absolute inset-0 rounded-full border border-dashed animate-[spin_4s_linear_infinite] border-[#10B981]/50" />
+                      <Target className="w-4 h-4 text-[#10B981]" />
                     </div>
                     <div className="flex flex-col min-w-0 pt-0.5">
-                      <p className="text-[8px] font-black uppercase tracking-[0.2em] text-indigo-400"><Crosshair className="inline w-2 h-2 mr-1" /> Active Mission</p>
+                      <p className="text-[8px] font-black uppercase tracking-[0.2em] text-[#10B981]"><Crosshair className="inline w-2 h-2 mr-1" /> Active Mission</p>
                       <h2 className="text-white text-xs font-black italic uppercase truncate max-w-[120px]">{goal.title}</h2>
                     </div>
                   </div>
-                  <div className="flex-1 relative h-2 bg-[#000000] rounded-full border border-white/5"><motion.div initial={{ width: 0 }} animate={{ width: `${goalPercentage}%` }} className="h-full relative rounded-full bg-indigo-600"><div className="absolute right-[-16px] top-1/2 -translate-y-1/2 w-10 h-10"><Player autoplay loop src={runnerUrl} /></div></motion.div></div>
+                  <div className="flex-1 relative h-2 bg-[#000000] rounded-full border border-white/5"><motion.div initial={{ width: 0 }} animate={{ width: `${goalPercentage}%` }} className="h-full relative rounded-full bg-[#10B981]"><div className="absolute right-[-16px] top-1/2 -translate-y-1/2 w-10 h-10"><Player autoplay loop src={runnerUrl} /></div></motion.div></div>
                 </div>
               </motion.div>
             )}
             <div className="relative overflow-hidden border border-white/5 bg-[#111]/80 backdrop-blur-2xl rounded-[2.5rem] p-6 shadow-xl">
-               <div className="relative z-10 flex items-center gap-3 mb-5"><Trophy className="w-5 h-5 text-indigo-400" /><h3 className="text-xs font-black uppercase tracking-widest text-white italic">Hall of Fame <Award className="inline w-3 h-3 ml-1" /></h3></div>
-               <div className="relative z-10 space-y-3">
+              <div className="relative z-10 flex items-center gap-3 mb-5"><Trophy className="w-5 h-5 text-[#10B981]" /><h3 className="text-xs font-black uppercase tracking-widest text-white italic">Top Supporters <Award className="inline w-3 h-3 ml-1" /></h3></div>
+              <div className="relative z-10 space-y-3">
                 {topDonors.map((d, i) => (
-                  <div key={i} className="flex items-center gap-3 p-3 rounded-2xl border bg-[#0a0a0a] border-white/5"><div className="w-8 h-8 rounded-xl flex items-center justify-center font-black text-[10px] bg-[#1a1a1a] text-white">#{i + 1}</div><p className="font-black text-[10px] uppercase truncate text-white">{d._id}</p><p className="font-black text-xs italic ml-auto text-indigo-400">₹{d.total}</p></div>
+                  <div key={i} className="flex items-center gap-3 p-3 rounded-2xl border bg-[#0a0a0a] border-white/5"><div className="w-8 h-8 rounded-xl flex items-center justify-center font-black text-[10px] bg-[#1a1a1a] text-white">#{i + 1}</div><p className="font-black text-[10px] uppercase truncate text-white">{d._id}</p><p className="font-black text-xs italic ml-auto text-[#10B981]">₹{d.totalAmount || d.total}</p></div>
                 ))}
               </div>
             </div>
@@ -168,19 +210,19 @@ const DonationPage = () => {
           {/* COLUMN 3 */}
           <div className="lg:col-span-4 xl:col-span-5 flex flex-col h-full min-h-0">
             <div className="shrink-0 mb-4 bg-[#050505]/95">
-              <p className="text-[9px] font-black uppercase tracking-widest mb-2 text-center italic text-indigo-400">Alert Preview</p>
+              <p className="text-[9px] font-black uppercase tracking-widest mb-2 text-center italic text-[#10B981]">Alert Preview</p>
               <div className="scale-[0.8] origin-top mt-[-10px] mb-[-40px]">
-                <AlertPreview donorName={donorName || 'Donor'} amount={Number(amount) || 0} message={message || 'Message...'} sticker={selectedSticker} tier={currentTier} />
+                <AlertPreview donorName={donorName || 'Donor'} amount={Number(amount) || 0} message={message || 'Message...'} sticker={selectedSticker} tier={streamer?.tier || 'starter'} stylePreference={streamer?.overlaySettings?.stylePreference || 'modern'} />
               </div>
             </div>
-            
+
             <motion.div layout className="flex-1 bg-[#0a0a0a] border border-white/5 rounded-[2.5rem] p-7 shadow-2xl relative overflow-y-auto scrollbar-hide">
               <AnimatePresence mode="wait">
                 {!isSuccess ? (
                   <form key="form" onSubmit={handlePayment} className="space-y-6">
                     <div className="space-y-4">
                       <div className="flex gap-4 border-b border-white/5">
-                        <button type="button" onClick={() => setActiveTab('global')} className={`pb-1.5 text-[9px] font-black uppercase tracking-widest transition-all ${activeTab === 'global' ? 'border-b-2 border-indigo-500 text-indigo-400' : 'text-slate-500'}`}>Global Pack</button>
+                        <button type="button" onClick={() => setActiveTab('global')} className={`pb-1.5 text-[9px] font-black uppercase tracking-widest transition-all ${activeTab === 'global' ? 'border-b-2 border-[#10B981] text-[#10B981]' : 'text-slate-500'}`}>Global Pack</button>
                         {/* FIXED: hasCustomPack USED TO SHOW LOCK ICON */}
                         <button type="button" onClick={() => setActiveTab('partner')} className={`pb-1.5 text-[9px] font-black uppercase transition-all flex items-center gap-2 ${activeTab === 'partner' ? 'border-b-2 border-amber-500 text-amber-500' : 'text-slate-500'}`}>
                           Partner Pack {!hasCustomPack && <Lock className="w-2.5 h-2.5" />}
@@ -190,8 +232,8 @@ const DonationPage = () => {
                         <div className="grid grid-cols-5 gap-1.5">
                           {activeTab === 'global' ? (
                             globalStickers.map(s => (
-                              <div key={s.id} onClick={() => { setSelectedSticker(s.id); setAmount(s.price); }} className={`relative py-2.5 rounded-xl border-2 cursor-pointer transition-all flex flex-col items-center ${selectedSticker === s.id ? 'bg-indigo-500/10 border-indigo-500' : 'bg-[#111] border-white/5'}`}>
-                                <button type="button" onClick={(e) => playSoundPreview(e, s.id, s.sound)} className={`absolute top-1 right-1 p-0.5 rounded-full ${playingSound === s.id ? 'bg-indigo-500 text-white' : 'text-slate-500'}`}><Volume2 className="w-2 h-2"/></button>
+                              <div key={s.id} onClick={() => { setSelectedSticker(s.url); setAmount(s.price); }} className={`relative py-2.5 rounded-xl border-2 cursor-pointer transition-all flex flex-col items-center ${selectedSticker === s.url ? 'bg-[#10B981]/10 border-[#10B981]' : 'bg-[#111] border-white/5'}`}>
+                                <button type="button" onClick={(e) => playSoundPreview(e, s.id, s.sound)} className={`absolute top-1 right-1 p-0.5 rounded-full ${playingSound === s.id ? 'bg-[#10B981] text-black' : 'text-slate-500'}`}><Volume2 className="w-2 h-2" /></button>
                                 <Player autoplay loop src={s.url} style={{ height: '40px', width: '40px' }} />
                                 <span className="text-[8px] font-black mt-1">₹{s.price}</span>
                               </div>
@@ -219,25 +261,25 @@ const DonationPage = () => {
 
                     <div className="space-y-5">
                       <div className="grid md:grid-cols-2 gap-4">
-                        <div className="relative"><UserCircle className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 w-5 h-5"/><input placeholder="Name" value={donorName} className="w-full bg-[#111] border border-white/5 rounded-xl py-5 px-12 font-bold text-white outline-none" onChange={e => setDonorName(e.target.value)}/></div>
-                        <div className="relative"><IndianRupee className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 w-5 h-5"/><input type="number" value={amount} className="w-full bg-[#111] border border-white/5 rounded-xl py-5 px-12 font-black italic text-white outline-none" onChange={e => setAmount(e.target.value)}/></div>
+                        <div className="relative"><UserCircle className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 w-5 h-5" /><input placeholder="Name" value={donorName} className="w-full bg-[#111] border border-white/5 rounded-xl py-5 px-12 font-bold text-white outline-none" onChange={e => setDonorName(e.target.value)} /></div>
+                        <div className="relative"><IndianRupee className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 w-5 h-5" /><input type="number" value={amount} className="w-full bg-[#111] border border-white/5 rounded-xl py-5 px-12 font-black italic text-white outline-none" onChange={e => setAmount(e.target.value)} /></div>
                       </div>
                       <div className="relative">
-                        <MessageSquare className="absolute left-4 top-6 text-slate-600 w-5 h-5"/>
-                        <textarea placeholder="Message..." maxLength={100} value={message} className="w-full bg-[#111] border border-white/5 rounded-2xl py-6 px-12 text-white min-h-[140px] outline-none resize-none" onChange={e => setMessage(e.target.value)}/>
+                        <MessageSquare className="absolute left-4 top-6 text-slate-600 w-5 h-5" />
+                        <textarea placeholder="Message..." maxLength={100} value={message} className="w-full bg-[#111] border border-white/5 rounded-2xl py-6 px-12 text-white min-h-[140px] outline-none resize-none" onChange={e => setMessage(e.target.value)} />
                         <div className="absolute bottom-5 left-12 right-5 flex items-center gap-1.5 overflow-x-auto scrollbar-hide py-1">
                           <Smile className="w-4 h-4 text-slate-600 mr-2 shrink-0" />
                           {quickEmotes.map(e => (
-                            <button key={e} type="button" onClick={() => setMessage(p => (p + e).slice(0, 100))} className="w-7 h-7 rounded-md bg-[#1a1a1a] text-xs hover:border-indigo-500">{e}</button> 
+                            <button key={e} type="button" onClick={() => setMessage(p => (p + e).slice(0, 100))} className="w-7 h-7 rounded-md bg-[#1a1a1a] text-xs hover:border-indigo-500">{e}</button>
                           ))}
                         </div>
                       </div>
                     </div>
 
-                    <button disabled={isProcessing} className="w-full bg-indigo-600 py-5 rounded-2xl text-lg font-black flex items-center justify-center gap-3 uppercase italic transition hover:bg-indigo-500 shadow-lg shadow-indigo-600/20">
+                    <button disabled={isProcessing} className="w-full bg-[#10B981] py-5 rounded-2xl text-lg text-black font-black flex items-center justify-center gap-3 uppercase italic transition hover:bg-emerald-400 shadow-lg shadow-[#10B981]/20">
                       {isProcessing ? <Loader2 className="animate-spin w-3 h-3" /> : <>Execute Drop <Zap className="w-4 h-4" /> <Send className="w-4 h-4" /></>}
                     </button>
-                    
+
                     <div className="flex items-center justify-center gap-4 text-slate-600 text-[7px] font-black uppercase pt-1">
                       <div className="flex items-center gap-1.5"><ShieldCheck className="w-3 h-3" /> Secure Node</div>
                       <div className="flex items-center gap-1.5"><Sparkles className="w-3 h-3" /> <Gift className="w-3 h-3" /> Razorpay Verified</div>

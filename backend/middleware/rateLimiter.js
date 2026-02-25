@@ -24,4 +24,17 @@ const strictLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-module.exports = { globalLimiter, strictLimiter };
+/**
+ * DONATION LIMITER (HIGH-VOLUME)
+ * Allows massive spikes in transactions during active YouTube/Twitch live streams.
+ * Prevents DDoS while ensuring large watch parties can tip simultaneously.
+ */
+const donationLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5000,
+  message: { msg: "High-volume stream limits reached. Please pause for a moment." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+module.exports = { globalLimiter, strictLimiter, donationLimiter };

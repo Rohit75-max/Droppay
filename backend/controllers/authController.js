@@ -6,16 +6,21 @@ const nodemailer = require('nodemailer');
 // --- VAULT-GRADE SECURITY REGEX (1 Upper, 1 Number, 1 Special, 8+ Total) ---
 const securityRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,}$/;
 
+// --- UTIL: NoSQL REGEX SANITIZER ---
+const escapeRegex = (string) => {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+};
+
 // --- REUSABLE TRANSPORTER SOCKET ---
 const createTransporter = () => {
     return nodemailer.createTransport({
         service: 'gmail',
         host: 'smtp.gmail.com',
         port: 465,
-        secure: true, 
-        auth: { 
-            user: process.env.EMAIL_USER, 
-            pass: process.env.EMAIL_PASS 
+        secure: true,
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS
         },
         tls: { rejectUnauthorized: false }
     });
@@ -41,18 +46,24 @@ const sendOTPEmail = async (email, otpCode) => {
 // 1. SIGNUP: Hardened with Identity Conflict Protocol
 exports.signup = async (req, res) => {
     try {
-        const { username, phone, password, streamerId } = req.body;
+        const { username, phone, password, referralCode } = req.body;
         const email = req.body.email.trim().toLowerCase();
-        const cleanStreamerId = streamerId.trim().toLowerCase();
 
-        // Check for Identity Conflicts
-        const identityConflict = await User.findOne({ 
-            $or: [{ username }, { streamerId: cleanStreamerId }],
-            isEmailVerified: true 
+        // Auto-generate Streamer ID from Username (strip spaces, lowercase)
+        const cleanStreamerId = username.trim().toLowerCase().replace(/\s+/g, '');
+
+        // Check for Identity Conflicts across the dual-namespace
+        const identityConflict = await User.findOne({
+            $or: [
+                { username: { $regex: new RegExp(`^${escapeRegex(username.trim())}$`, 'i') } },
+                { streamerId: cleanStreamerId },
+                { phone: phone.trim() } // ADDED: Fortified Phone Uniqueness Protocol
+            ],
+            isEmailVerified: true
         });
 
         if (identityConflict) {
-            return res.status(400).json({ msg: "Identity Conflict: Name or Link already claimed." });
+            return res.status(400).json({ msg: "Identity Conflict: Username or Phone Number already claimed." });
         }
 
         if (!securityRegex.test(password)) {
@@ -64,20 +75,43 @@ exports.signup = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
+        // ENHANCED FLOW: Resend OTP for existing unverified nodes
         if (user && !user.isEmailVerified) {
             user.username = username;
             user.phone = phone;
             user.streamerId = cleanStreamerId;
             user.password = hashedPassword;
-            user.otp = { code: otpCode, expiresAt: Date.now() + 600000 };
+
+            // Fix Mongoose Nested Object Persistence
+            if (!user.otp) user.otp = {};
+            user.otp.code = otpCode;
+            user.otp.expiresAt = Date.now() + 600000;
+            user.markModified('otp');
+
             await user.save();
+            await sendOTPEmail(email, otpCode);
+            // Return 206 to signal the frontend to jump to the OTP screen
+            return res.status(206).json({ msg: "Identity Node exists but unverified. Re-transmitting OTP." });
         } else if (user && user.isEmailVerified) {
             return res.status(400).json({ msg: "Identity Conflict: Node already active." });
         } else {
+            // Enterprise Feature: Process Referral Networking
+            let referrer = null;
+            if (referralCode) {
+                const cleanRef = referralCode.trim();
+                referrer = await User.findOne({
+                    $or: [
+                        { streamerId: cleanRef.toLowerCase() },
+                        { username: new RegExp(`^${escapeRegex(cleanRef)}$`, 'i') }
+                    ]
+                });
+            }
+
             user = new User({
                 username, email, phone, streamerId: cleanStreamerId,
                 password: hashedPassword, isEmailVerified: false,
-                otp: { code: otpCode, expiresAt: Date.now() + 600000 }
+                otp: { code: otpCode, expiresAt: Date.now() + 600000 },
+                referredBy: referrer ? referrer._id : undefined
             });
             await user.save();
         }
@@ -85,7 +119,8 @@ exports.signup = async (req, res) => {
         await sendOTPEmail(email, otpCode);
         res.status(201).json({ msg: "Identity Node saved. OTP transmitted." });
     } catch (err) {
-        res.status(500).json({ msg: "Signup Transmission Error." });
+        console.error("SIGNUP CRASH LOG:", err);
+        res.status(500).json({ msg: err.message || "Signup Transmission Error." });
     }
 };
 
@@ -93,8 +128,17 @@ exports.signup = async (req, res) => {
 exports.verifyEmail = async (req, res) => {
     try {
         const email = req.body.email.trim().toLowerCase();
-        const { otp } = req.body; 
+        const { otp } = req.body;
         const user = await User.findOne({ email });
+
+        console.log("--- OTP DEBUG LOG ---");
+        console.log("Email Searched:", email);
+        console.log("User Found:", !!user);
+        console.log("Frontend OTP Received:", otp, typeof otp);
+        if (user) {
+            console.log("Backend DB OTP:", user.otp?.code, typeof user.otp?.code);
+            console.log("Backend DB Expiry:", user.otp?.expiresAt, "Current Time:", new Date());
+        }
 
         if (!user || user.otp?.code !== otp || user.otp?.expiresAt < Date.now()) {
             return res.status(400).json({ msg: "Invalid or expired transmission key." });
@@ -104,9 +148,15 @@ exports.verifyEmail = async (req, res) => {
         user.otp = undefined;
         await user.save();
 
+        // Enterprise Feature: Credit the Recruiter upon successful activation!
+        if (user.referredBy) {
+            await User.findByIdAndUpdate(user.referredBy, { $inc: { referralCount: 1 } });
+        }
+
         const token = jwt.sign({ user: { id: user._id } }, process.env.JWT_SECRET, { expiresIn: '24h' });
         res.status(200).json({ token, user: { username: user.username } });
     } catch (err) {
+        console.error("VERIFY OTP ERROR:", err);
         res.status(500).json({ msg: "Activation Handshake Error." });
     }
 };
@@ -119,10 +169,19 @@ exports.login = async (req, res) => {
         const user = await User.findOne({ email });
 
         if (!user || !user.password) return res.status(400).json({ msg: "Authentication Failed." });
-        
+
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(400).json({ msg: "Authentication Failed." });
-        if (!user.isEmailVerified) return res.status(401).json({ msg: "Verify email node." });
+
+        // Changed as requested: Show "Account not exist" instead of verification prompt
+        if (!user.isEmailVerified) return res.status(401).json({ msg: "Account not exist. Signup/Create account" });
+
+        // Enterprise Upgrades: Log Auditable Access Telemetry
+        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        await User.findByIdAndUpdate(user._id, {
+            'security.lastLogin': new Date(),
+            'security.lastLoginIP': ip
+        });
 
         const token = jwt.sign({ user: { id: user._id } }, process.env.JWT_SECRET, { expiresIn: '24h' });
         res.json({ token, user: { username: user.username } });
@@ -164,7 +223,7 @@ exports.resetPassword = async (req, res) => {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(newPassword, salt);
-        
+
         await User.findByIdAndUpdate(decoded.id, { password: hashedPassword });
         res.json({ msg: "Access Key updated successfully." });
     } catch (err) {

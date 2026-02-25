@@ -1,9 +1,9 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence, useScroll, useSpring, useTransform } from 'framer-motion';
-import { 
+import {
   Zap, ShieldCheck, TrendingUp, MessageSquare, Mail, ChevronRight,
-  Play, Wand2, Sparkles, Trophy, Globe, Layers, Cpu, Radio, 
-  ArrowRight, Menu, X, MousePointer2, Banknote, Landmark, Rocket, 
+  Play, Wand2, Sparkles, Trophy, Globe, Layers, Cpu, Radio,
+  ArrowRight, Menu, X, MousePointer2, Banknote, Landmark, Rocket,
   Sun, Moon, Instagram, Twitter, Target
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -15,7 +15,7 @@ import { getOptimizedImage } from '../protocol/cdnHelper';
 
 const Home = () => {
   const navigate = useNavigate();
-  
+
   // --- UNIFIED GLOBAL THEME PROTOCOL ---
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('dropPayTheme') || 'dark';
@@ -28,9 +28,9 @@ const Home = () => {
   const toggleTheme = useCallback(() => setTheme(prev => prev === 'dark' ? 'light' : 'dark'), []);
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [activeAlert, setActiveAlert] = useState(0); 
+  const [activeAlert, setActiveAlert] = useState(0);
   const [isSynced, setIsSynced] = useState(true);
-  
+
   // --- KINETIC FLIGHT STATES ---
   const [showPreview, setShowPreview] = useState(false);
   const [isFlying, setIsFlying] = useState(false);
@@ -38,7 +38,7 @@ const Home = () => {
 
   // --- SOCKET MODAL STATE ---
   const [isSocketModalOpen, setIsSocketModalOpen] = useState(false);
-  
+
   // --- REAL GOAL BAR LOGIC ---
   const [goalAmount, setGoalAmount] = useState(75000);
   const goalTarget = 100000;
@@ -55,13 +55,13 @@ const Home = () => {
 
     setTimeout(() => {
       setHasClickedDemo(true);
-      setIsFlying(true); 
+      setIsFlying(true);
 
       setTimeout(() => {
-        setIsFlying(false); 
-        setActiveAlert(prev => (prev + 1) % alertVariants.length); 
-        setShowPreview(true); 
-        setGoalAmount(prev => Math.min(prev + calcAmount, goalTarget)); 
+        setIsFlying(false);
+        setActiveAlert(prev => (prev + 1) % alertVariants.length);
+        setShowPreview(true);
+        setGoalAmount(prev => Math.min(prev + calcAmount, goalTarget));
 
         setTimeout(() => {
           setShowPreview(false);
@@ -90,21 +90,19 @@ const Home = () => {
   };
 
   return (
-    <div 
+    <div
       onMouseMove={handleMouseMove}
-      className={`min-h-screen font-sans selection:bg-[#10B981]/30 transition-colors duration-700 overflow-x-hidden ${
-        theme === 'dark' ? 'bg-[#050505] text-slate-100' : 'bg-slate-50 text-slate-900'
-      }`}
+      className={`min-h-screen font-sans selection:bg-[#10B981]/30 transition-colors duration-700 overflow-x-hidden ${theme === 'dark' ? 'bg-[#050505] text-slate-100' : 'bg-slate-50 text-slate-900'
+        }`}
     >
       <motion.div style={{ scaleX }} className="fixed top-0 left-0 right-0 h-1 bg-[#10B981] z-[120] origin-left" />
 
       {/* 1. KINETIC BACKGROUND */}
       <motion.div style={{ y: backgroundY }} className="fixed inset-0 pointer-events-none z-0">
-        <motion.div 
+        <motion.div
           animate={{ x: mousePos.x * 60, y: mousePos.y * 60 }}
-          className={`absolute top-[-10%] left-[-10%] w-[70%] h-[70%] rounded-full transition-all duration-700 ${
-            theme === 'dark' ? 'bg-[#10B981]/10 blur-[120px]' : 'bg-[#10B981]/5 blur-[80px]'
-          }`} 
+          className={`absolute top-[-10%] left-[-10%] w-[70%] h-[70%] rounded-full transition-all duration-700 ${theme === 'dark' ? 'bg-[#10B981]/10 blur-[120px]' : 'bg-[#10B981]/5 blur-[80px]'
+            }`}
         />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-10">
           <MousePointer2 className="w-64 h-64 text-[#10B981]" />
@@ -116,12 +114,12 @@ const Home = () => {
         {isFlying && (
           <>
             {/* MOBILE ARC */}
-            <motion.div 
+            <motion.div
               initial={{ scale: 0, top: "45%", left: "50%", x: "-50%", y: "-50%", rotate: -45 }}
-              animate={{ 
+              animate={{
                 scale: [0, 1.5, 1.5, 0],
-                top: ["45%", "25%", "80%"], 
-                rotate: [-45, 90, 180] 
+                top: ["45%", "25%", "80%"],
+                rotate: [-45, 90, 180]
               }}
               transition={{ duration: 0.8, times: [0, 0.4, 1], ease: "easeInOut" }}
               className="fixed z-[300] pointer-events-none text-[#10B981] md:hidden"
@@ -130,13 +128,13 @@ const Home = () => {
             </motion.div>
 
             {/* DESKTOP ARC */}
-            <motion.div 
+            <motion.div
               initial={{ scale: 0, top: "60%", left: "25%", x: "-50%", y: "-50%", rotate: 0 }}
-              animate={{ 
+              animate={{
                 scale: [0, 1.5, 1.5, 0],
-                top: ["60%", "30%", "50%"], 
+                top: ["60%", "30%", "50%"],
                 left: ["25%", "50%", "75%"],
-                rotate: [0, 45, 90] 
+                rotate: [0, 45, 90]
               }}
               transition={{ duration: 0.8, times: [0, 0.4, 1], ease: "easeInOut" }}
               className="fixed z-[300] pointer-events-none text-[#10B981] hidden md:block"
@@ -148,11 +146,13 @@ const Home = () => {
       </AnimatePresence>
 
       {/* --- NAVIGATION HUB --- */}
-      <nav className={`fixed top-0 left-0 right-0 z-[100] border-b backdrop-blur-2xl transition-all ${
-        theme === 'dark' ? 'bg-[#050505]/80 border-white/5' : 'bg-white/80 border-slate-200'
-      }`}>
+      <nav className={`fixed top-0 left-0 right-0 z-[100] border-b backdrop-blur-2xl transition-all ${theme === 'dark' ? 'bg-[#050505]/80 border-white/5' : 'bg-white/80 border-slate-200'
+        }`}>
         <div className="max-w-[1440px] mx-auto px-6 sm:px-10 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-2 cursor-pointer z-[110]" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}>
+          <div className="flex items-center gap-2 cursor-pointer z-[110]" onClick={() => {
+            if (localStorage.getItem('token')) navigate('/dashboard');
+            else window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}>
             <Zap className={`w-8 h-8 text-[#10B981] fill-[#10B981]`} />
             <span className="text-2xl font-black italic tracking-tighter">DropPay</span>
           </div>
@@ -181,14 +181,13 @@ const Home = () => {
         {/* --- MOBILE SIDEBAR --- */}
         <AnimatePresence>
           {isMobileMenuOpen && (
-            <motion.div 
-              initial={{ opacity: 0, x: '100%' }} 
-              animate={{ opacity: 1, x: 0 }} 
+            <motion.div
+              initial={{ opacity: 0, x: '100%' }}
+              animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className={`fixed inset-0 z-[999] flex flex-col items-center justify-center gap-12 ${
-                theme === 'dark' ? 'bg-[#050505]' : 'bg-slate-50'
-              }`}
+              className={`fixed inset-0 z-[999] flex flex-col items-center justify-center gap-12 ${theme === 'dark' ? 'bg-[#050505]' : 'bg-slate-50'
+                }`}
             >
               <button onClick={() => setIsMobileMenuOpen(false)} className="absolute top-6 right-6 p-4 text-[#10B981] transition-transform active:scale-90">
                 <X className="w-10 h-10" />
@@ -229,15 +228,14 @@ const Home = () => {
               <button onClick={() => navigate('/signup')} className="bg-[#10B981] text-white px-10 py-5 rounded-2xl font-black uppercase italic text-sm shadow-2xl flex items-center gap-3 active:scale-95 transition-all">
                 <Play className="w-4 h-4 fill-white" /> Start Hub
               </button>
-              
+
               <div className="relative group">
-                <button 
-                  onClick={triggerDemo} 
-                  className={`px-10 py-5 rounded-2xl font-black uppercase italic text-sm transition-all flex items-center gap-3 active:scale-95 border ${
-                    theme === 'dark' 
-                      ? 'bg-white/5 border-white/10 text-white hover:bg-white/10' 
-                      : 'bg-white border-slate-200 text-slate-900 hover:bg-slate-100 shadow-sm'
-                  }`}
+                <button
+                  onClick={triggerDemo}
+                  className={`px-10 py-5 rounded-2xl font-black uppercase italic text-sm transition-all flex items-center gap-3 active:scale-95 border ${theme === 'dark'
+                    ? 'bg-white/5 border-white/10 text-white hover:bg-white/10'
+                    : 'bg-white border-slate-200 text-slate-900 hover:bg-slate-100 shadow-sm'
+                    }`}
                 >
                   <Sparkles className="w-4 h-4 text-[#10B981]" /> {getOptimizedImage('Inject Demo')}
                 </button>
@@ -256,7 +254,7 @@ const Home = () => {
               <div className="min-h-[300px] flex items-center justify-center relative">
                 <AnimatePresence mode="wait">
                   {!showPreview && (
-                    <motion.div 
+                    <motion.div
                       key="awaiting"
                       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                       className="text-center flex flex-col items-center justify-center"
@@ -271,15 +269,16 @@ const Home = () => {
                   )}
 
                   {showPreview && (
-                    <motion.div 
-                      key="alert" 
-                      initial={{ opacity: 0, scale: 0.9, y: 20 }} 
-                      animate={{ opacity: 1, scale: 1, y: 0 }} 
-                      exit={{ opacity: 0, scale: 0.9, y: -20 }} 
+                    <motion.div
+                      key="alert"
+                      initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.9, y: -20 }}
                       className="w-full"
                     >
-                      <AlertPreview 
+                      <AlertPreview
                         variant={alertVariants[activeAlert]}
+                        tier={activeAlert === 2 ? "legend" : activeAlert === 1 ? "pro" : "starter"}
                         donorName={activeAlert === 2 ? "Royal Supporter" : activeAlert === 1 ? "Cyber Streamer" : "Zap Node"}
                         amount={calcAmount}
                         message="Atomic split verified! 🚀"
@@ -296,16 +295,15 @@ const Home = () => {
 
       {/* --- FEATURES & GOAL --- */}
       <section id="features" className="py-20 px-6 max-w-[1440px] mx-auto">
-        <div className={`relative overflow-hidden p-8 sm:p-12 rounded-[3rem] border transition-all mb-12 ${
-          theme === 'dark' 
-            ? 'bg-[#0a0a0a] border-[#10B981]/30 shadow-[0_0_50px_rgba(16,185,129,0.15)]' 
-            : 'bg-white border-emerald-300 shadow-2xl'
-        }`}>
+        <div className={`relative overflow-hidden p-8 sm:p-12 rounded-[3rem] border transition-all mb-12 ${theme === 'dark'
+          ? 'bg-[#0a0a0a] border-[#10B981]/30 shadow-[0_0_50px_rgba(16,185,129,0.15)]'
+          : 'bg-white border-emerald-300 shadow-2xl'
+          }`}>
           <div className="absolute -top-20 -right-20 w-64 h-64 bg-[#10B981]/15 blur-[100px] rounded-full pointer-events-none" />
           <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-4">
             <div>
               <h2 className={`text-3xl sm:text-4xl font-black italic uppercase tracking-tighter flex items-center gap-4 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-                <Target className="text-[#10B981] w-8 h-8 sm:w-10 sm:h-10 drop-shadow-[0_0_15px_rgba(16,185,129,0.8)]" /> 
+                <Target className="text-[#10B981] w-8 h-8 sm:w-10 sm:h-10 drop-shadow-[0_0_15px_rgba(16,185,129,0.8)]" />
                 Dream PC Setup
               </h2>
               <p className="text-[#10B981] text-[10px] font-black uppercase tracking-[0.3em] mt-2">Live Node Funding Status</p>
@@ -320,7 +318,7 @@ const Home = () => {
             </div>
           </div>
           <div className={`relative h-6 sm:h-8 rounded-full overflow-visible p-1 border shadow-inner ${theme === 'dark' ? 'bg-black/60 border-white/10' : 'bg-slate-200 border-slate-300'}`}>
-            <motion.div 
+            <motion.div
               initial={{ width: 0 }} animate={{ width: `${currentProgress}%` }} transition={{ type: "spring", stiffness: 40, damping: 15 }}
               className="relative h-full bg-gradient-to-r from-[#064E3B] to-[#10B981] rounded-full shadow-[0_0_20px_#10B981]"
             >
@@ -354,9 +352,8 @@ const Home = () => {
 
       {/* --- ECONOMIC CALCULATOR (FIXED UHD) --- */}
       <section id="payouts" className="py-32 px-6">
-        <div className={`max-w-4xl mx-auto border backdrop-blur-3xl p-8 sm:p-14 rounded-[4rem] relative overflow-hidden transition-all ${
-          theme === 'dark' ? 'bg-[#0a0a0a]/80 border-[#10B981]/20 shadow-2xl' : 'bg-white border-slate-200 shadow-2xl'
-        }`}>
+        <div className={`max-w-4xl mx-auto border backdrop-blur-3xl p-8 sm:p-14 rounded-[4rem] relative overflow-hidden transition-all ${theme === 'dark' ? 'bg-[#0a0a0a]/80 border-[#10B981]/20 shadow-2xl' : 'bg-white border-slate-200 shadow-2xl'
+          }`}>
           <div className="absolute top-0 right-0 p-10 opacity-[0.03] rotate-12 pointer-events-none">
             <Landmark className={`w-64 h-64 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`} />
           </div>
@@ -371,7 +368,7 @@ const Home = () => {
                 <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#10B981] mt-1">Real-Time Economic Protocol</p>
               </div>
             </div>
-            
+
             <div className="grid lg:grid-cols-12 gap-12 items-end">
               <div className="lg:col-span-7 space-y-6">
                 <label className="text-[11px] font-black uppercase tracking-[0.4em] text-slate-500 flex items-center gap-3 ml-2">
@@ -379,31 +376,28 @@ const Home = () => {
                 </label>
                 <div className="relative group">
                   <div className="absolute inset-0 bg-[#10B981]/5 blur-2xl rounded-3xl group-focus-within:bg-[#10B981]/10 transition-all" />
-                  <input 
-                    type="number" 
-                    value={calcAmount} 
+                  <input
+                    type="number"
+                    value={calcAmount}
                     onChange={(e) => setCalcAmount(Number(e.target.value))}
-                    className={`relative w-full border rounded-[2.5rem] p-8 text-5xl font-black italic outline-none transition-all ${
-                      theme === 'dark' 
-                        ? 'bg-black/40 border-white/10 text-[#10B981] focus:border-[#10B981] shadow-inner' 
-                        : 'bg-slate-100/50 border-slate-200 text-[#10B981] focus:border-[#10B981] shadow-inner'
-                    }`}
+                    className={`relative w-full border rounded-[2.5rem] p-8 text-5xl font-black italic outline-none transition-all ${theme === 'dark'
+                      ? 'bg-black/40 border-white/10 text-[#10B981] focus:border-[#10B981] shadow-inner'
+                      : 'bg-slate-100/50 border-slate-200 text-[#10B981] focus:border-[#10B981] shadow-inner'
+                      }`}
                   />
                   <span className="absolute right-8 top-1/2 -translate-y-1/2 text-2xl font-black italic opacity-20">INR</span>
                 </div>
               </div>
 
               <div className="lg:col-span-5 space-y-5">
-                <div className={`p-8 rounded-[2.5rem] border transition-all ${
-                  theme === 'dark' ? 'bg-[#10B981]/5 border-[#10B981]/20' : 'bg-emerald-50 border-emerald-200'
-                }`}>
+                <div className={`p-8 rounded-[2.5rem] border transition-all ${theme === 'dark' ? 'bg-[#10B981]/5 border-[#10B981]/20' : 'bg-emerald-50 border-emerald-200'
+                  }`}>
                   <p className="text-[10px] font-black uppercase tracking-widest text-[#10B981] mb-2">Your Split (95%)</p>
                   <p className={`text-4xl font-black italic drop-shadow-[0_0_15px_rgba(16,185,129,0.3)] ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>₹{streamerCut}</p>
                 </div>
-                
-                <div className={`p-6 rounded-[2rem] border transition-all opacity-60 ${
-                  theme === 'dark' ? 'bg-white/5 border-white/5' : 'bg-slate-50 border-slate-200'
-                }`}>
+
+                <div className={`p-6 rounded-[2rem] border transition-all opacity-60 ${theme === 'dark' ? 'bg-white/5 border-white/5' : 'bg-slate-50 border-slate-200'
+                  }`}>
                   <p className="text-[10px] font-black uppercase text-slate-500 mb-1">Node Fee (5%)</p>
                   <p className="text-xl font-black italic text-slate-500">₹{platformFee}</p>
                 </div>
@@ -441,8 +435,8 @@ const Home = () => {
             <div className="absolute -right-20 -bottom-20 w-64 h-64 bg-[#10B981]/10 blur-[80px] rounded-full pointer-events-none" />
             <div className="relative z-10 text-center md:text-left">
               <div className="flex items-center justify-center md:justify-start gap-3 mb-4">
-                 <div className="w-2.5 h-2.5 rounded-full bg-[#10B981] animate-pulse" />
-                 <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#10B981]">Core Engineers Online</span>
+                <div className="w-2.5 h-2.5 rounded-full bg-[#10B981] animate-pulse" />
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#10B981]">Core Engineers Online</span>
               </div>
               <h2 className={`text-4xl md:text-5xl font-black italic uppercase tracking-tighter mb-4 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
                 Need Custom <span className="text-[#10B981]">Architecture?</span>
@@ -453,7 +447,7 @@ const Home = () => {
             </div>
             <div className="relative z-10 shrink-0 w-full md:w-auto">
               {/* TRIGGER MODAL */}
-              <button 
+              <button
                 onClick={() => setIsSocketModalOpen(true)}
                 className={`w-full md:w-auto px-10 py-5 rounded-2xl font-black uppercase italic tracking-widest text-sm transition-all flex items-center justify-center gap-3 border ${theme === 'dark' ? 'bg-white/5 border-[#10B981]/30 text-[#10B981] hover:bg-[#10B981]/10' : 'bg-white border-[#10B981]/30 text-[#10B981] hover:bg-emerald-50 shadow-md'}`}>
                 <Radio className="w-5 h-5" /> Open Socket
@@ -466,25 +460,28 @@ const Home = () => {
       {/* --- FOOTER --- */}
       <footer className="py-24 border-t border-white/5">
         <div className="max-w-[1440px] mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-12 text-slate-600">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 cursor-pointer" onClick={() => {
+            if (localStorage.getItem('token')) navigate('/dashboard');
+            else window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}>
             <Zap className="w-8 h-8 text-[#10B981] fill-[#10B981]" />
             <span className="text-2xl font-black italic tracking-tighter">DropPay</span>
           </div>
           <div className="flex items-center gap-6">
-             <Mail className="w-5 h-5 cursor-pointer hover:text-[#10B981] transition-colors" />
-             <Instagram className="w-5 h-5 cursor-pointer hover:text-[#10B981] transition-colors" />
-             <Twitter className="w-5 h-5 cursor-pointer hover:text-[#10B981] transition-colors" />
-             <Rocket className="w-5 h-5 cursor-pointer hover:text-[#10B981] transition-colors" />
+            <Mail className="w-5 h-5 cursor-pointer hover:text-[#10B981] transition-colors" />
+            <Instagram className="w-5 h-5 cursor-pointer hover:text-[#10B981] transition-colors" />
+            <Twitter className="w-5 h-5 cursor-pointer hover:text-[#10B981] transition-colors" />
+            <Rocket className="w-5 h-5 cursor-pointer hover:text-[#10B981] transition-colors" />
           </div>
           <p className="text-[10px] font-black uppercase tracking-[0.5em]">© 2026 Core Engineering.</p>
         </div>
       </footer>
 
       {/* --- TECHNICAL SOCKET MODAL (GIANT-TIER) --- */}
-      <SocketModal 
-        isOpen={isSocketModalOpen} 
-        onClose={() => setIsSocketModalOpen(false)} 
-        theme={theme} 
+      <SocketModal
+        isOpen={isSocketModalOpen}
+        onClose={() => setIsSocketModalOpen(false)}
+        theme={theme}
       />
     </div>
   );

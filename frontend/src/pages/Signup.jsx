@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
-import { 
-  User, Mail, Phone, Lock, ChevronRight, CheckCircle, 
-  Loader2, Zap, ArrowLeft, AlertCircle, Shield, Sun, Moon, 
-  MousePointer2, Eye, EyeOff 
+import {
+  User, Mail, Phone, Lock, ChevronRight, CheckCircle,
+  Loader2, Zap, ArrowLeft, AlertCircle, Shield, Sun, Moon,
+  MousePointer2, Eye, EyeOff, UserPlus
 } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 
@@ -20,13 +20,13 @@ const itemVariants = {
 
 const Signup = () => {
   const navigate = useNavigate();
-  const [step, setStep] = useState(1); 
+  const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(''); 
+  const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [otp, setOtp] = useState(['', '', '', '', '', '']); 
+  const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [formData, setFormData] = useState({
-    username: '', email: '', phone: '', password: '', streamerId: ''
+    username: '', email: '', phone: '', password: '', referralCode: ''
   });
 
   const [theme, setTheme] = useState(() => localStorage.getItem('dropPayTheme') || 'dark');
@@ -49,7 +49,7 @@ const Signup = () => {
   }, [formData.password]);
 
   const handleChange = (e) => {
-    setError(''); 
+    setError('');
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -76,16 +76,20 @@ const Signup = () => {
     e.preventDefault();
     if (strength < 4) {
       setError("Security protocol rejected. Password too weak.");
-      return; 
+      return;
     }
     setLoading(true);
     try {
-      const submissionData = { 
-        ...formData, 
-        email: formData.email.trim().toLowerCase() 
+      const submissionData = {
+        ...formData,
+        email: formData.email.trim().toLowerCase()
       };
-      await axios.post('http://localhost:5001/api/auth/signup', submissionData);
-      setStep(2); 
+      const response = await axios.post('http://localhost:5001/api/auth/signup', submissionData);
+
+      // Handle both 201 (Created) and 206 (Partial Content - Existing Unverified)
+      if (response.status === 201 || response.status === 206) {
+        setStep(2);
+      }
     } catch (err) {
       setError(err.response?.data?.msg || "Identity node connection failed.");
     } finally { setLoading(false); }
@@ -97,28 +101,28 @@ const Signup = () => {
     setLoading(true);
     setError('');
     try {
-      const res = await axios.post('http://localhost:5001/api/auth/verify-email', { 
-        email: formData.email.trim().toLowerCase(), 
+      const res = await axios.post('http://localhost:5001/api/auth/verify-email', {
+        email: formData.email.trim().toLowerCase(),
         otp: combinedOtp
       });
       if (res.data.token) {
         localStorage.setItem('token', res.data.token);
         window.location.href = '/subscription';
       }
-    } catch (err) { 
-      setError(err.response?.data?.msg || "Invalid Transmission Key."); 
+    } catch (err) {
+      setError(err.response?.data?.msg || "Invalid Transmission Key.");
     } finally { setLoading(false); }
   };
 
   return (
-    <div 
+    <div
       onMouseMove={handleMouseMove}
       className={`flex flex-col items-center justify-start sm:justify-center min-h-screen w-full p-4 relative overflow-hidden font-sans transition-colors duration-700 ${theme === 'dark' ? 'bg-[#050505]' : 'bg-slate-50'}`}
     >
       <div className="fixed inset-0 pointer-events-none z-0">
-        <motion.div 
-          animate={{ x: mousePos.x * 60, y: mousePos.y * 60 }} 
-          className={`absolute top-[-10%] left-[-10%] w-[70%] h-[70%] rounded-full transition-all duration-700 ${theme === 'dark' ? 'bg-[#10B981]/10 blur-[120px]' : 'bg-[#10B981]/5 blur-[80px]'}`} 
+        <motion.div
+          animate={{ x: mousePos.x * 60, y: mousePos.y * 60 }}
+          className={`absolute top-[-10%] left-[-10%] w-[70%] h-[70%] rounded-full transition-all duration-700 ${theme === 'dark' ? 'bg-[#10B981]/10 blur-[120px]' : 'bg-[#10B981]/5 blur-[80px]'}`}
         />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.03]">
           <MousePointer2 className="w-96 h-96 text-[#10B981]" />
@@ -135,20 +139,23 @@ const Signup = () => {
         </button>
       </div>
 
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
         className={`w-full max-w-lg p-6 sm:p-10 rounded-[3rem] backdrop-blur-3xl border transition-all relative z-10 ${theme === 'dark' ? 'bg-[#0a0a0a]/80 border-white/5 shadow-2xl' : 'bg-white/80 border-slate-200 shadow-xl'}`}
       >
         <AnimatePresence mode="wait">
           {step === 1 ? (
             <motion.div key="signup" exit={{ opacity: 0, x: -20 }}>
-              <div className="flex items-center gap-3 mb-6">
+              <div className="flex items-center gap-3 mb-6 cursor-pointer" onClick={() => {
+                if (localStorage.getItem('token')) navigate('/dashboard');
+                else navigate('/');
+              }}>
                 <Zap className="w-7 h-7 text-[#10B981] fill-[#10B981]" />
                 <span className={`text-xl font-black italic tracking-tighter uppercase ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>DropPay</span>
               </div>
               <h1 className={`text-3xl sm:text-4xl font-black italic uppercase mb-1 tracking-tighter leading-none ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Create Account.</h1>
               <p className="text-slate-500 mb-6 text-[9px] font-black uppercase tracking-[0.2em]">Deploy your streaming node today.</p>
-              
+
               <AnimatePresence>
                 {error && (
                   <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="bg-rose-500/10 border border-rose-500/20 text-rose-500 px-3 py-2.5 rounded-xl flex items-center gap-2 mb-4 overflow-hidden">
@@ -161,10 +168,10 @@ const Signup = () => {
 
               <motion.form onSubmit={handleSignup} className="space-y-3" variants={containerVariants} initial="hidden" animate="show">
                 {[
-                  { icon: User, name: "username", placeholder: "Full Name", type: "text" },
-                  { icon: null, name: "streamerId", placeholder: "streamer-handle", type: "text", prefix: "@" },
+                  { icon: User, name: "username", placeholder: "Display Name (Unique)", type: "text" },
                   { icon: Mail, name: "email", placeholder: "Email Address", type: "email" },
                   { icon: Phone, name: "phone", placeholder: "Phone Number", type: "text" },
+                  { icon: UserPlus, name: "referralCode", placeholder: "Referral Code (Optional)", type: "text" },
                   { icon: Lock, name: "password", placeholder: "Password", type: showPassword ? "text" : "password", hasTelemetry: true, isPassword: true }
                 ].map((field, i) => (
                   <motion.div key={i} variants={itemVariants} className="relative group">
@@ -198,11 +205,11 @@ const Signup = () => {
             <motion.div key="otp" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center">
               {/* SUCCESS INDICATOR INTEGRATION */}
               <div className="w-20 h-20 bg-[#10B981]/10 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-[#10B981]/20 shadow-[0_0_30px_rgba(16,185,129,0.1)] relative overflow-hidden">
-                 <Shield className="w-8 h-8 text-[#10B981] animate-pulse relative z-10" />
-                 <CheckCircle className="absolute w-12 h-12 text-[#10B981]/5 -bottom-2 -right-2 rotate-12" />
+                <Shield className="w-8 h-8 text-[#10B981] animate-pulse relative z-10" />
+                <CheckCircle className="absolute w-12 h-12 text-[#10B981]/5 -bottom-2 -right-2 rotate-12" />
               </div>
               <h2 className={`text-3xl font-black italic uppercase mb-2 tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Confirm Identity.</h2>
-              <p className="text-slate-500 mb-10 text-[10px] font-black uppercase tracking-[0.2em] leading-relaxed max-w-[280px] mx-auto">Authorization code sent to your mail node:<br/><span className="text-[#10B981]">{formData.email}</span></p>
+              <p className="text-slate-500 mb-10 text-[10px] font-black uppercase tracking-[0.2em] leading-relaxed max-w-[280px] mx-auto">Authorization code sent to your mail node:<br /><span className="text-[#10B981]">{formData.email}</span></p>
 
               <div className="flex justify-center gap-2 mb-10">
                 {otp.map((digit, index) => (

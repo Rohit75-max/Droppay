@@ -3,24 +3,29 @@ import { motion } from 'framer-motion';
 // --- Protocol Engine ---
 import { calculateTierStatus } from '../protocol/tierProtocol';
 
-import { 
-  User, UploadCloud, Edit3, Save, BadgeCheck, Crown, Zap, ShieldCheck, 
-  UserCircle, Hash, Mail as MailIcon, Phone, MessageSquare, Landmark, 
+import {
+  User, UploadCloud, Edit3, Save, BadgeCheck, Crown, Zap, ShieldCheck,
+  UserCircle, Hash, Mail as MailIcon, Phone, MessageSquare, Landmark,
   ShieldCheck as ShieldCheckIcon, CreditCard, Loader2, ChevronRight, Trophy,
   Target, Crosshair, Sparkles, ArrowRight
 } from 'lucide-react';
 
-const AccountsHub = ({ 
-  theme, user, isEditing, setIsEditing, editForm, setEditForm, 
-  profilePreview, handleImageChange, saveProfileUpdates, fileInputRef,
-  handleBankLink, isLinkingBank, setActiveSection 
+const AccountsHub = ({
+  theme, user, isEditing, setIsEditing, editForm, setEditForm,
+  profilePreview, handleImageChange, saveProfileUpdates, saveContactUpdate, fileInputRef,
+  handleBankLink, isLinkingBank, setActiveSection
 }) => {
-  
+  const [isEditingEmail, setIsEditingEmail] = React.useState(false);
+  const [emailInput, setEmailInput] = React.useState(user?.email || '');
+  const [isEditingPhone, setIsEditingPhone] = React.useState(false);
+  const [phoneInput, setPhoneInput] = React.useState(user?.phone || '');
+  const [isSendingOtp, setIsSendingOtp] = React.useState(false);
+
   const status = calculateTierStatus(user?.tier || 'starter', user?.referralCount || 0);
 
   const getCardStyle = () => {
-    return theme === 'dark' 
-      ? 'bg-[#0a0a0a]/80 border-white/5 shadow-xl' 
+    return theme === 'dark'
+      ? 'bg-[#0a0a0a]/80 border-white/5 shadow-xl'
       : 'bg-white border-slate-200 shadow-md';
   };
 
@@ -31,17 +36,17 @@ const AccountsHub = ({
   };
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       className="max-w-6xl mx-auto space-y-8 font-sans pb-20 w-full"
     >
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start w-full">
-        
+
         {/* --- IDENTITY HUB --- */}
         <div className={`w-full lg:col-span-8 border rounded-[2.5rem] p-8 lg:p-12 relative overflow-hidden transition-all ${getCardStyle()}`}>
           <div className="relative z-10 flex flex-col md:flex-row justify-between items-start gap-12 mb-12">
-            
+
             {/* Avatar Protocol */}
             <div className="relative group/avatar shrink-0">
               <div className={`w-36 h-36 rounded-[2.5rem] border-2 border-dashed flex items-center justify-center overflow-hidden transition-all group-hover/avatar:border-[#10B981] ${theme === 'dark' ? 'bg-black border-white/10' : 'bg-slate-50 border-slate-200'}`}>
@@ -56,15 +61,15 @@ const AccountsHub = ({
                 </button>
               </div>
               <input type="file" ref={fileInputRef} className="hidden" onChange={handleImageChange} accept="image/*" />
-              
+
               {status.badge && (
                 <div className={`absolute -bottom-2 -right-2 p-2 rounded-2xl border bg-black shadow-2xl flex items-center gap-2 border-white/10 ${status.badge.flair}`}>
-                   {status.badge.icon === 'Target' && <Target className="w-3.5 h-3.5 text-cyan-400" />}
-                   {status.badge.icon === 'Crosshair' && <Crosshair className="w-3.5 h-3.5 text-indigo-400" />}
-                   {status.badge.icon === 'Sparkles' && <Sparkles className="w-3.5 h-3.5 text-amber-400" />}
-                   <span className={`text-[8px] font-black uppercase italic tracking-widest ${status.badge.color}`}>
-                     {status.badge.name}
-                   </span>
+                  {status.badge.icon === 'Target' && <Target className="w-3.5 h-3.5 text-cyan-400" />}
+                  {status.badge.icon === 'Crosshair' && <Crosshair className="w-3.5 h-3.5 text-indigo-400" />}
+                  {status.badge.icon === 'Sparkles' && <Sparkles className="w-3.5 h-3.5 text-amber-400" />}
+                  <span className={`text-[8px] font-black uppercase italic tracking-widest ${status.badge.color}`}>
+                    {status.badge.name}
+                  </span>
                 </div>
               )}
             </div>
@@ -78,14 +83,14 @@ const AccountsHub = ({
                     <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em]">Identity Synchronized</p>
                   </div>
                 </div>
-                <button 
-                  onClick={() => isEditing ? saveProfileUpdates() : setIsEditing(true)} 
+                <button
+                  onClick={() => isEditing ? saveProfileUpdates() : setIsEditing(true)}
                   className={`flex items-center justify-center gap-3 px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border ${isEditing ? 'bg-[#10B981] text-black border-[#10B981]' : theme === 'dark' ? 'bg-white/5 text-white border-white/10 hover:bg-white hover:text-black' : 'bg-slate-900 text-white border-slate-900 hover:bg-[#10B981] hover:border-[#10B981]'}`}
                 >
                   {isEditing ? <><Save className="w-4 h-4" /> Save Node</> : <><Edit3 className="w-4 h-4" /> Edit Profile</>}
                 </button>
               </div>
-              
+
               <div className="flex flex-wrap items-center gap-3">
                 <div className="px-4 py-2 bg-[#10B981]/10 border border-[#10B981]/20 text-[#10B981] rounded-xl text-[9px] font-black uppercase flex items-center gap-2">
                   <BadgeCheck className="w-3 h-3" /> Verified Node
@@ -105,7 +110,7 @@ const AccountsHub = ({
             <div className="space-y-3 w-full">
               <label className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-500 tracking-widest ml-1"><UserCircle className="w-3.5 h-3.5" /> Full Name</label>
               {isEditing ? (
-                <input value={editForm.username} onChange={(e) => setEditForm({...editForm, username: e.target.value})} className={`w-full rounded-2xl p-5 text-sm font-bold outline-none border-2 transition-all ${getInputStyle()}`} />
+                <input value={editForm.username} onChange={(e) => setEditForm({ ...editForm, username: e.target.value })} className={`w-full rounded-2xl p-5 text-sm font-bold outline-none border-2 transition-all ${getInputStyle()}`} />
               ) : (
                 <div className={`w-full rounded-2xl p-5 border ${theme === 'dark' ? 'bg-white/5 border-white/5' : 'bg-slate-50 border-slate-100'}`}>
                   <p className={`text-sm font-black italic ${theme === 'dark' ? 'text-slate-200' : 'text-slate-900'}`}>{user.username}</p>
@@ -116,7 +121,7 @@ const AccountsHub = ({
             <div className="space-y-3 w-full">
               <label className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-500 tracking-widest ml-1"><Hash className="w-3.5 h-3.5" /> Streamer ID</label>
               {isEditing ? (
-                <input value={editForm.streamerId} onChange={(e) => setEditForm({...editForm, streamerId: e.target.value})} className={`w-full rounded-2xl p-5 text-sm font-mono font-bold outline-none border-2 transition-all ${getInputStyle()}`} />
+                <input value={editForm.streamerId} onChange={(e) => setEditForm({ ...editForm, streamerId: e.target.value })} className={`w-full rounded-2xl p-5 text-sm font-mono font-bold outline-none border-2 transition-all ${getInputStyle()}`} />
               ) : (
                 <div className={`w-full rounded-2xl p-5 border ${theme === 'dark' ? 'bg-white/5 border-white/5' : 'bg-slate-50 border-slate-100'}`}>
                   <p className="text-sm font-mono font-bold text-[#10B981]">@{user.streamerId}</p>
@@ -125,16 +130,62 @@ const AccountsHub = ({
             </div>
 
             <div className="space-y-3 w-full">
-              <label className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-500 tracking-widest ml-1"><MailIcon className="w-3.5 h-3.5" /> Email</label>
-              <div className={`w-full rounded-2xl p-5 border opacity-50 ${theme === 'dark' ? 'bg-white/5 border-white/5' : 'bg-slate-50 border-slate-100'}`}>
-                <p className="text-sm font-bold text-slate-400">{user.email}</p>
+              <div className="flex items-center justify-between">
+                <label className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-500 tracking-widest ml-1"><MailIcon className="w-3.5 h-3.5" /> Email</label>
+                {!isEditingEmail && (
+                  <button onClick={() => { setIsEditingEmail(true); setEmailInput(user.email || ''); }} className={`text-[9px] font-black uppercase tracking-widest hover:text-[#10B981] transition-colors ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
+                    Edit Data
+                  </button>
+                )}
               </div>
+              {isEditingEmail ? (
+                <div className="flex gap-2">
+                  <input value={emailInput} onChange={(e) => setEmailInput(e.target.value)} className={`w-full rounded-2xl p-5 text-sm font-bold outline-none border-2 transition-all ${getInputStyle()}`} />
+                  <button
+                    disabled={isSendingOtp}
+                    onClick={async () => {
+                      setIsSendingOtp(true);
+                      const success = await saveContactUpdate('email', emailInput);
+                      setIsSendingOtp(false);
+                      if (success) setIsEditingEmail(false);
+                    }}
+                    className="px-6 rounded-2xl bg-[#10B981] text-black font-black uppercase text-[10px] tracking-widest hover:bg-[#0fa672] transition-colors shadow-lg disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {isSendingOtp ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Verify'}
+                  </button>
+                </div>
+              ) : (
+                <div className={`w-full rounded-2xl p-5 border opacity-50 ${theme === 'dark' ? 'bg-white/5 border-white/5' : 'bg-slate-50 border-slate-100'}`}>
+                  <p className="text-sm font-bold text-slate-400">{user.email}</p>
+                </div>
+              )}
             </div>
 
             <div className="space-y-3 w-full">
-              <label className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-500 tracking-widest ml-1"><Phone className="w-3.5 h-3.5" /> Contact Number</label>
-              {isEditing ? (
-                <input value={editForm.phone} onChange={(e) => setEditForm({...editForm, phone: e.target.value})} className={`w-full rounded-2xl p-5 text-sm font-bold outline-none border-2 transition-all ${getInputStyle()}`} />
+              <div className="flex items-center justify-between">
+                <label className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-500 tracking-widest ml-1"><Phone className="w-3.5 h-3.5" /> Contact Number</label>
+                {!isEditingPhone && (
+                  <button onClick={() => { setIsEditingPhone(true); setPhoneInput(user.phone || ''); }} className={`text-[9px] font-black uppercase tracking-widest hover:text-[#10B981] transition-colors ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
+                    Edit Data
+                  </button>
+                )}
+              </div>
+              {isEditingPhone ? (
+                <div className="flex gap-2">
+                  <input value={phoneInput} onChange={(e) => setPhoneInput(e.target.value)} className={`w-full rounded-2xl p-5 text-sm font-bold outline-none border-2 transition-all ${getInputStyle()}`} />
+                  <button
+                    disabled={isSendingOtp}
+                    onClick={async () => {
+                      setIsSendingOtp(true);
+                      const success = await saveContactUpdate('phone', phoneInput);
+                      setIsSendingOtp(false);
+                      if (success) setIsEditingPhone(false);
+                    }}
+                    className="px-6 rounded-2xl bg-[#10B981] text-black font-black uppercase text-[10px] tracking-widest hover:bg-[#0fa672] transition-colors shadow-lg disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {isSendingOtp ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Verify'}
+                  </button>
+                </div>
               ) : (
                 <div className={`w-full rounded-2xl p-5 border ${theme === 'dark' ? 'bg-white/5 border-white/5' : 'bg-slate-50 border-slate-100'}`}>
                   <p className={`text-sm font-bold ${theme === 'dark' ? 'text-slate-200' : 'text-slate-900'}`}>{user.phone || "No contact linked"}</p>
@@ -145,7 +196,7 @@ const AccountsHub = ({
             <div className="space-y-3 w-full md:col-span-2 mt-4">
               <label className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-500 tracking-widest ml-1"><MessageSquare className="w-3.5 h-3.5" /> Bio</label>
               {isEditing ? (
-                <textarea value={editForm.bio} onChange={(e) => setEditForm({...editForm, bio: e.target.value})} className={`w-full rounded-2xl p-5 text-sm font-bold outline-none border-2 transition-all resize-none min-h-[100px] ${getInputStyle()}`} />
+                <textarea value={editForm.bio} onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })} className={`w-full rounded-2xl p-5 text-sm font-bold outline-none border-2 transition-all resize-none min-h-[100px] ${getInputStyle()}`} />
               ) : (
                 <div className={`w-full rounded-2xl p-5 border ${theme === 'dark' ? 'bg-white/5 border-white/5' : 'bg-slate-50 border-slate-100'}`}>
                   <p className={`text-sm font-medium italic ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>"{user.bio || 'Signal established.'}"</p>
@@ -183,7 +234,19 @@ const AccountsHub = ({
                     <CreditCard className="w-5 h-5 text-indigo-500 mb-4" />
                     <p className="text-[11px] text-slate-500 font-bold uppercase leading-tight italic">Initialize bank node for Split-Payment protocol.</p>
                   </div>
-                  <button onClick={handleBankLink} disabled={isLinkingBank} className={`w-full py-5 rounded-2xl font-black uppercase italic text-[11px] transition-all flex items-center justify-center gap-3 ${theme === 'dark' ? 'bg-white text-black' : 'bg-slate-900 text-white hover:bg-[#10B981]'}`}>
+
+                  {!user.isPhoneVerified && (
+                    <div className="p-4 rounded-2xl border border-red-500/30 bg-red-500/10 text-red-500 flex items-start gap-3">
+                      <ShieldCheckIcon className="w-6 h-6 shrink-0" />
+                      <p className="text-[10px] font-black uppercase tracking-widest mt-1">Action Required: Verify Contact Number in Identity Hub to unlock Banking Engine.</p>
+                    </div>
+                  )}
+
+                  <button
+                    onClick={handleBankLink}
+                    disabled={isLinkingBank || !user.isPhoneVerified}
+                    className={`w-full py-5 rounded-2xl font-black uppercase italic text-[11px] transition-all flex items-center justify-center gap-3 ${!(isLinkingBank || !user.isPhoneVerified) ? (theme === 'dark' ? 'bg-white text-black hover:bg-[#10B981]' : 'bg-slate-900 text-white hover:bg-[#10B981]') : 'bg-slate-500/20 text-slate-500 cursor-not-allowed border border-white/5'}`}
+                  >
                     {isLinkingBank ? <Loader2 className="animate-spin w-5 h-5" /> : <>Onboard Node <ArrowRight className="w-4 h-4" /></>}
                   </button>
                 </div>
@@ -192,11 +255,11 @@ const AccountsHub = ({
           </div>
 
           <div onClick={() => setActiveSection('growth')} className={`w-full rounded-[2rem] p-6 flex items-center justify-between transition-all cursor-pointer group border ${theme === 'dark' ? 'bg-black/40 border-white/5 hover:border-indigo-500/30' : 'bg-slate-50 border-slate-200 hover:border-indigo-500'}`}>
-             <div className="flex items-center gap-5">
-                <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20 group-hover:bg-indigo-500 group-hover:text-white transition-all shadow-inner"><Trophy className="w-6 h-6" /></div>
-                <p className="text-[11px] font-black uppercase italic text-slate-500 group-hover:text-indigo-500 transition-colors tracking-widest">Upgrade Tier</p>
-             </div>
-             <ChevronRight className="w-5 h-5 text-indigo-500 group-hover:translate-x-2 transition-transform" />
+            <div className="flex items-center gap-5">
+              <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20 group-hover:bg-indigo-500 group-hover:text-white transition-all shadow-inner"><Trophy className="w-6 h-6" /></div>
+              <p className="text-[11px] font-black uppercase italic text-slate-500 group-hover:text-indigo-500 transition-colors tracking-widest">Upgrade Tier</p>
+            </div>
+            <ChevronRight className="w-5 h-5 text-indigo-500 group-hover:translate-x-2 transition-transform" />
           </div>
         </div>
       </div>
