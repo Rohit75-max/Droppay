@@ -16,6 +16,7 @@ import GoalOverlay from './pages/GoalOverlay';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import AdminSecurePortal from './pages/AdminSecurePortal';
+import AdminLogin from './pages/AdminLogin';
 
 // --- PROFESSIONAL GATE: SECURE UPLINK ---
 const MissionGate = ({ children }) => {
@@ -96,6 +97,7 @@ const AnimatedRoutes = () => {
         <Route path="/subscribe" element={<Navigate to="/subscription" replace />} />
 
         {/* 5. ENTERPRISE ADMIN HUB */}
+        <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin/secure-portal" element={<AdminSecurePortal />} />
 
         {/* 6. SECURE DASHBOARD NEXUS */}

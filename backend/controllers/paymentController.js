@@ -94,7 +94,7 @@ exports.verifyPayment = async (req, res) => {
                     "financialMetrics.totalLifetimeEarnings": Number(amount)
                 }
             },
-            { new: true }
+            { returnDocument: 'after' }
         );
 
         // Enterprise Ledger Extraction
@@ -134,10 +134,10 @@ exports.getGoal = async (req, res) => {
         const safeQuery = { $regex: new RegExp(`^${escapeRegex(cleanStreamerId)}$`, 'i') };
         const user = await User.findOne({
             $or: [{ streamerId: safeQuery }, { username: safeQuery }]
-        }).select('goalSettings tier username bio streamerId');
+        }).select('goalSettings overlaySettings tier username bio streamerId');
         if (!user) return res.status(404).json({ msg: "Not found" });
         if (user.security?.accountStatus?.isBanned) return res.status(403).json({ msg: "Node Suspended" });
-        res.status(200).json({ ...user.goalSettings.toObject(), tier: user.tier, username: user.username, bio: user.bio, streamerId: user.streamerId });
+        res.status(200).json({ ...user.goalSettings.toObject(), overlaySettings: user.overlaySettings, tier: user.tier, username: user.username, bio: user.bio, streamerId: user.streamerId });
     } catch (error) { res.status(500).send(); }
 };
 

@@ -3,13 +3,21 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const User = require('../models/User');
 const { createOnboardingLink } = require('../controllers/onboardingController');
-const { requestWithdrawal } = require('../controllers/userController');
+const { requestWithdrawal, purchasePremiumStyle, purchasePremiumAlert } = require('../controllers/userController');
 // @route   POST api/user/link-bank
 router.post('/link-bank', auth, createOnboardingLink);
 
 // @route   POST api/user/withdraw
 // @desc    Process autonomous node payout requests
 router.post('/withdraw', auth, requestWithdrawal);
+
+// @route   POST api/user/buy-premium-style
+// @desc    Purchase Elite Goal overlay using Wallet Balance
+router.post('/buy-premium-style', auth, purchasePremiumStyle);
+
+// @route   POST api/user/buy-premium-alert
+// @desc    Purchase Premium Alert overlay using Wallet Balance
+router.post('/buy-premium-alert', auth, purchasePremiumAlert);
 
 // @route   GET api/user/profile
 router.get('/profile', auth, async (req, res) => {
@@ -26,18 +34,24 @@ router.get('/profile', auth, async (req, res) => {
 // @route   POST api/user/update-goal
 router.post('/update-goal', auth, async (req, res) => {
     try {
-        const { title, targetAmount, showOnDashboard } = req.body;
+        const { title, targetAmount, showOnDashboard, stylePreference } = req.body;
         const user = await User.findByIdAndUpdate(
             req.user.id,
             {
                 $set: {
                     "goalSettings.title": title,
                     "goalSettings.targetAmount": Number(targetAmount),
-                    "goalSettings.showOnDashboard": showOnDashboard
+                    "goalSettings.showOnDashboard": showOnDashboard,
+                    "goalSettings.stylePreference": stylePreference
                 }
             },
-            { new: true }
+            { returnDocument: 'after' }
         ).select('-password');
+        const authIo = req.app.get('io');
+        if (authIo) {
+            authIo.to(user.streamerId).emit('goal-update', user.goalSettings);
+        }
+
         res.json(user.goalSettings);
     } catch (err) {
         res.status(500).json({ msg: 'Server Error' });
@@ -157,6 +171,14 @@ router.post('/update-profile', auth, async (req, res) => {
         }
 
         await user.save();
+
+        // FIRING WEBSOCKETS TO FORCE OBS COMPONENT RERENDERS
+        const io = req.app.get('io');
+        if (io && req.body.overlaySettings) {
+            if (user.obsKey) io.to(user.obsKey).emit('settings-update', user.overlaySettings);
+            if (user.streamerId) io.to(user.streamerId).emit('settings-update', user.overlaySettings);
+        }
+
         res.status(200).json(user);
 
     } catch (err) {

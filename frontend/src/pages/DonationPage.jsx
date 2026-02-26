@@ -6,11 +6,19 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Player } from '@lottiefiles/react-lottie-player';
 import {
   Send, ShieldCheck, Zap, IndianRupee, MessageSquare, Loader2, Sparkles,
-  CheckCircle, Award, Trophy, User, Crown, Smile, Volume2, Lock, Target, Crosshair, UserCircle, Gift
+  CheckCircle, Award, Trophy, User, Crown, Smile, Volume2, Lock, Target, UserCircle, Gift
 } from 'lucide-react';
 
 // --- MODULAR IMPORT ---
 import AlertPreview from '../components/AlertPreview';
+import CyberGoalBar from '../components/CyberGoalBar';
+import PremiumGoalOverlays from '../components/PremiumGoalOverlays';
+import DigitalStore from '../components/DigitalStore';
+
+const PREMIUM_GOAL_STYLES = [
+  'black_hole', 'hex_core', 'rune_monolith', 'hologram_glitch',
+  'alchemist_flask', 'redline_dash', 'loot_dispenser', 'mecha_lens'
+];
 
 const globalStickers = [
   { id: 'hype_zap', url: 'https://fonts.gstatic.com/s/e/notoemoji/latest/26a1/lottie.json', price: 20, color: 'from-yellow-400 to-orange-500', sound: '/sounds/zap.mp3' },
@@ -47,6 +55,9 @@ const DonationPage = () => {
   const [isSuccess, setIsSuccess] = useState(false);
   const [playingSound, setPlayingSound] = useState(null);
 
+  // New State for Top-Level Toggle
+  const [storeMode, setStoreMode] = useState('classic'); // 'classic' or 'premium'
+
   const [goal, setGoal] = useState({ title: "Loading...", currentProgress: 0, targetAmount: 100 });
   const [isGoalActive, setIsGoalActive] = useState(false);
   const [runnerUrl, setRunnerUrl] = useState(runnerMap.star);
@@ -65,7 +76,7 @@ const DonationPage = () => {
         setTopDonors(t.data.slice(0, 3));
         if (g.data) {
           const settings = g.data.goalSettings || g.data.goal || g.data;
-          setGoal({ title: settings.title || "Active Objective", currentProgress: settings.currentProgress || 0, targetAmount: settings.targetAmount || 100 });
+          setGoal({ title: settings.title || "Active Objective", currentProgress: settings.currentProgress || 0, targetAmount: settings.targetAmount || 100, stylePreference: settings.stylePreference || 'modern' });
           setIsGoalActive(settings.isActive ?? false);
           const rType = settings.runnerType || 'star';
           setRunnerUrl(rType === 'custom' ? settings.customRunnerUrl : (runnerMap[rType] || runnerMap.star));
@@ -80,11 +91,21 @@ const DonationPage = () => {
     const socket = io('http://localhost:5001');
     socket.emit('join-room', streamerId);
     socket.on('goal-update', (updatedGoal) => {
-      setGoal(updatedGoal);
+      setGoal(prev => ({ ...prev, ...updatedGoal }));
       if (updatedGoal.isActive !== undefined) setIsGoalActive(updatedGoal.isActive);
       if (updatedGoal.runnerType) {
         setRunnerUrl(updatedGoal.runnerType === 'custom' ? updatedGoal.customRunnerUrl : (runnerMap[updatedGoal.runnerType] || runnerMap.star));
       }
+    });
+
+    socket.on('settings-update', (updatedSettings) => {
+      setStreamer(prev => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          overlaySettings: { ...prev.overlaySettings, ...updatedSettings }
+        };
+      });
     });
 
     socket.on('new-drop', (data) => {
@@ -119,7 +140,11 @@ const DonationPage = () => {
   };
 
   const handlePayment = async (e) => {
-    e.preventDefault(); if (!window.Razorpay) return;
+    e.preventDefault();
+    if (!window.Razorpay) {
+      alert("Error: Razorpay SDK failed to load. Please disable your adblocker or check your internet connection.");
+      return;
+    }
     setIsProcessing(true);
     try {
       const { data } = await axios.post('http://localhost:5001/api/payment/create-order', {
@@ -147,7 +172,7 @@ const DonationPage = () => {
     }
   };
 
-  if (loading) return <div className="min-h-screen bg-[#050505] flex items-center justify-center text-[#10B981]"><Loader2 className="animate-spin w-12 h-12" /></div>;
+  if (loading) return <div className="min-h-screen bg-slate-50 flex items-center justify-center text-[#10B981]"><Loader2 className="animate-spin w-12 h-12" /></div>;
 
   const isLegend = streamer?.tier === 'legend';
   const hasCustomPack = streamer?.tier === 'pro' || streamer?.tier === 'legend'; // VARIABLE NOW USED BELOW
@@ -155,84 +180,144 @@ const DonationPage = () => {
   const currentTier = amount >= 2000 ? 'legendary' : amount >= 500 ? 'epic' : 'standard';
 
   return (
-    <div className="min-h-screen lg:h-screen lg:overflow-hidden bg-[#050505] text-slate-100 font-sans relative flex flex-col px-4 md:px-8">
-      <header
-        className="absolute top-0 left-0 w-full p-4 lg:p-6 z-50 flex items-center gap-2"
-      >
-        <Zap className="w-5 h-5 text-[#10B981] fill-[#10B981]" />
-        <span className="text-lg font-black italic text-white tracking-tighter">DropPay</span>
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans relative flex flex-col pb-12">
+      {/* --- DONATION NEXUS NAVBAR --- */}
+      <header className="px-6 py-4 md:px-12 md:py-6 flex justify-between items-center z-40 bg-white border-b border-slate-200 shadow-sm mb-6 md:mb-10 w-full">
+        <div className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => navigate('/')}>
+          <Zap className="w-6 h-6 text-[#10B981] fill-[#10B981]" />
+          <span className="text-xl md:text-2xl font-black italic text-slate-900 tracking-tighter">DropPay</span>
+        </div>
+        <h1 className="text-lg md:text-2xl font-black italic uppercase tracking-tighter leading-none text-slate-900">
+          Donation <span className="text-[#10B981]">Nexus.</span>
+        </h1>
       </header>
+      <main className="max-w-[1400px] mx-auto w-full flex-1 flex flex-col z-10 px-4 md:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 w-full items-start">
 
-      <main className="max-w-[1400px] mx-auto pt-20 lg:pt-24 pb-4 lg:pb-8 w-full h-full flex flex-col z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full flex-1 min-h-0 items-stretch">
+          {/* LEFT COLUMN: 50% */}
+          <div className="lg:col-span-1 flex flex-col h-full space-y-6 lg:space-y-8 min-h-0">
+            {/* TOP ROW: ACCOUNT & SUPPORTERS */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch shrink-0">
 
-          {/* COLUMN 1 */}
-          <div className="lg:col-span-3 flex flex-col justify-center h-full">
-            <div className={`relative overflow-hidden border ${isLegend ? 'bg-amber-500/10 border-amber-500/30' : 'bg-white/5 border-white/10'} backdrop-blur-2xl rounded-[2.5rem] p-6 text-center flex flex-col items-center shadow-2xl`}>
-              <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]" />
-              <div className={`relative w-20 h-20 rounded-full p-1 mb-4 ${isLegend ? 'bg-amber-500' : 'bg-[#10B981]'} z-10`}><div className="w-full h-full rounded-full bg-[#050505] flex items-center justify-center border-4 border-[#111]"><User className="w-8 h-8 text-slate-400" /></div></div>
-              {streamer?.tier && streamer.tier !== 'none' && (
-                <div className={`relative z-10 inline-flex items-center gap-2 px-3 py-1.5 rounded-full border mb-4 text-[9px] font-black uppercase italic ${isLegend ? 'text-amber-500 border-amber-500/30' : 'text-[#10B981] border-[#10B981]/30'}`}><Crown className="w-3 h-3" /> {streamer.tier} Verified</div>
-              )}
-              <p className="relative z-10 text-lg font-mono font-black mb-3">@{streamer?.streamerId}</p>
-            </div>
-          </div>
-
-          {/* COLUMN 2 */}
-          <div className="lg:col-span-5 xl:col-span-4 flex flex-col justify-center h-full gap-6">
-            {isGoalActive && (
-              <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="relative w-full h-[72px] z-20">
-                <div className="absolute inset-0 bg-[#050505]/80 backdrop-blur-2xl rounded-full border border-white/10 flex items-center px-4 gap-3 overflow-hidden">
-                  <div className="flex items-center gap-3 w-auto shrink-0 relative z-10">
-                    <div className="relative w-10 h-10 flex items-center justify-center shrink-0">
-                      <div className="absolute inset-0 rounded-full border border-dashed animate-[spin_4s_linear_infinite] border-[#10B981]/50" />
-                      <Target className="w-4 h-4 text-[#10B981]" />
-                    </div>
-                    <div className="flex flex-col min-w-0 pt-0.5">
-                      <p className="text-[8px] font-black uppercase tracking-[0.2em] text-[#10B981]"><Crosshair className="inline w-2 h-2 mr-1" /> Active Mission</p>
-                      <h2 className="text-white text-xs font-black italic uppercase truncate max-w-[120px]">{goal.title}</h2>
-                    </div>
+              {/* ACCOUNT CARD */}
+              <div className={`relative overflow-hidden border ${isLegend ? 'bg-amber-500/10 border-amber-500/30' : 'bg-white/5 border-slate-200'} backdrop-blur-2xl rounded-[2rem] lg:rounded-[2.5rem] p-6 text-center flex flex-col items-center justify-center shadow-2xl min-h-[180px] lg:min-h-[220px]`}>
+                <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]" />
+                <div className={`relative w-16 h-16 lg:w-20 lg:h-20 rounded-full p-1 mb-4 ${isLegend ? 'bg-amber-500' : 'bg-[#10B981]'} z-10`}>
+                  <div className="w-full h-full rounded-full bg-slate-50 flex items-center justify-center border-4 border-[#111]">
+                    <User className="w-6 h-6 lg:w-8 lg:h-8 text-slate-600" />
                   </div>
-                  <div className="flex-1 relative h-2 bg-[#000000] rounded-full border border-white/5"><motion.div initial={{ width: 0 }} animate={{ width: `${goalPercentage}%` }} className="h-full relative rounded-full bg-[#10B981]"><div className="absolute right-[-16px] top-1/2 -translate-y-1/2 w-10 h-10"><Player autoplay loop src={runnerUrl} /></div></motion.div></div>
                 </div>
-              </motion.div>
-            )}
-            <div className="relative overflow-hidden border border-white/5 bg-[#111]/80 backdrop-blur-2xl rounded-[2.5rem] p-6 shadow-xl">
-              <div className="relative z-10 flex items-center gap-3 mb-5"><Trophy className="w-5 h-5 text-[#10B981]" /><h3 className="text-xs font-black uppercase tracking-widest text-white italic">Top Supporters <Award className="inline w-3 h-3 ml-1" /></h3></div>
-              <div className="relative z-10 space-y-3">
-                {topDonors.map((d, i) => (
-                  <div key={i} className="flex items-center gap-3 p-3 rounded-2xl border bg-[#0a0a0a] border-white/5"><div className="w-8 h-8 rounded-xl flex items-center justify-center font-black text-[10px] bg-[#1a1a1a] text-white">#{i + 1}</div><p className="font-black text-[10px] uppercase truncate text-white">{d._id}</p><p className="font-black text-xs italic ml-auto text-[#10B981]">₹{d.totalAmount || d.total}</p></div>
-                ))}
+                {streamer?.tier && streamer.tier !== 'none' && (
+                  <div className={`relative z-10 inline-flex items-center gap-2 px-3 py-1.5 rounded-full border mb-3 lg:mb-4 text-[8px] lg:text-[9px] font-black uppercase italic ${isLegend ? 'text-amber-500 border-amber-500/30' : 'text-[#10B981] border-[#10B981]/30'} bg-slate-50`}>
+                    <Crown className="w-3 h-3" /> {streamer.tier} Verified
+                  </div>
+                )}
+                <p className="relative z-10 text-base lg:text-lg font-mono font-black mb-1 lg:mb-3">@{streamer?.streamerId}</p>
               </div>
+
+              {/* TOP SUPPORTERS CARD */}
+              <div className="relative overflow-hidden border border-slate-200 bg-white backdrop-blur-2xl rounded-[2rem] lg:rounded-[2.5rem] p-6 shadow-xl flex flex-col min-h-[180px] lg:min-h-[220px]">
+                <div className="relative z-10 flex items-center gap-3 mb-4 lg:mb-5">
+                  <Trophy className="w-4 h-4 lg:w-5 lg:h-5 text-[#10B981]" />
+                  <h3 className="text-[10px] lg:text-xs font-black uppercase tracking-widest text-slate-900 italic">Top Supporters <Award className="inline w-3 h-3 ml-1" /></h3>
+                </div>
+                <div className="relative z-10 space-y-2 lg:space-y-3 flex-1 flex flex-col justify-center">
+                  {topDonors.length > 0 ? topDonors.slice(0, 3).map((d, i) => (
+                    <div key={i} className="flex items-center gap-3 p-2 lg:p-3 rounded-xl lg:rounded-2xl border bg-white border-slate-200">
+                      <div className="w-6 h-6 lg:w-8 lg:h-8 rounded-lg lg:rounded-xl flex items-center justify-center font-black text-[9px] lg:text-[10px] bg-slate-100 text-slate-900">#{i + 1}</div>
+                      <p className="font-black text-[9px] lg:text-[10px] uppercase truncate text-slate-900 max-w-[80px] lg:max-w-[120px]">{d._id}</p>
+                      <p className="font-black text-[10px] lg:text-xs italic ml-auto text-[#10B981]">₹{d.totalAmount || d.total}</p>
+                    </div>
+                  )) : (
+                    <div className="text-center py-6 opacity-30 italic text-[10px] font-bold uppercase tracking-widest">Awaiting First Drop...</div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* BOTTOM AREA: ACTIVE GOAL BAR (Minimal Container) */}
+            <div className="flex-1 min-h-0 relative overflow-visible flex flex-col justify-center py-4">
+              <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]" />
+              {isGoalActive ? (
+                <div className="relative z-10 w-full flex items-center justify-center">
+                  {PREMIUM_GOAL_STYLES.includes(goal.stylePreference) ? (
+                    <PremiumGoalOverlays
+                      goal={goal}
+                      percentage={goalPercentage}
+                      isComplete={goal.currentProgress >= goal.targetAmount}
+                    />
+                  ) : (
+                    <CyberGoalBar
+                      goal={goal}
+                      tier={streamer?.tier || 'starter'}
+                      runnerUrl={runnerUrl}
+                      percentage={goalPercentage}
+                      isComplete={goal.currentProgress >= goal.targetAmount}
+                      goalStylePreference={goal.stylePreference || streamer?.goalSettings?.stylePreference || 'modern'}
+                    />
+                  )}
+                </div>
+              ) : (
+                <div className="relative z-10 text-center flex flex-col items-center justify-center opacity-40">
+                  <Target className="w-12 h-12 lg:w-16 lg:h-16 mb-4 text-slate-600" />
+                  <p className="text-xs lg:text-sm font-black uppercase tracking-widest text-slate-500">No Active Mission</p>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* COLUMN 3 */}
-          <div className="lg:col-span-4 xl:col-span-5 flex flex-col h-full min-h-0">
-            <div className="shrink-0 mb-4 bg-[#050505]/95">
-              <p className="text-[9px] font-black uppercase tracking-widest mb-2 text-center italic text-[#10B981]">Alert Preview</p>
-              <div className="scale-[0.8] origin-top mt-[-10px] mb-[-40px]">
-                <AlertPreview donorName={donorName || 'Donor'} amount={Number(amount) || 0} message={message || 'Message...'} sticker={selectedSticker} tier={streamer?.tier || 'starter'} stylePreference={streamer?.overlaySettings?.stylePreference || 'modern'} />
+          {/* RIGHT COLUMN: 50% (PREVIEW + FORM) */}
+          <div className="lg:col-span-1 flex flex-col h-full min-h-0 space-y-6 lg:space-y-8">
+
+            {/* COMPACT ALERT PREVIEW (Only show in Classic Mode for now to save space, or keep it small) */}
+            {storeMode === 'classic' && (
+              <div className="shrink-0 bg-slate-50 rounded-[2rem] lg:rounded-[2.5rem] border border-slate-200 p-4 lg:p-6 lg:pb-8 flex flex-col items-center justify-center relative min-h-[160px] lg:min-h-[200px]">
+                <p className="absolute top-4 lg:top-5 left-0 w-full text-[10px] font-black uppercase tracking-[0.2em] mb-0 text-center italic text-slate-500 z-10">Live Preview</p>
+
+                <div className="w-full flex justify-center items-center mt-6 lg:mt-8 pointer-events-none">
+                  <div className="scale-[0.6] sm:scale-[0.7] lg:scale-[0.8] origin-center flex justify-center w-full">
+                    <AlertPreview theme='light' donorName={donorName || 'Donor'} amount={Number(amount) || 0} message={message || 'Message...'} sticker={selectedSticker} tier={streamer?.tier || 'starter'} stylePreference={streamer?.overlaySettings?.stylePreference || 'modern'} />
+                  </div>
+                </div>
               </div>
+            )}
+
+            {/* TOP LEVEL TOGGLE */}
+            <div className="flex bg-white p-1.5 rounded-2xl border border-slate-200 shrink-0">
+              <button
+                onClick={() => setStoreMode('classic')}
+                className={`flex-1 py-3 lg:py-4 rounded-xl text-xs lg:text-sm font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${storeMode === 'classic' ? 'bg-[#10B981] text-black shadow-lg shadow-[#10B981]/20' : 'text-slate-500 hover:text-slate-900'}`}
+              >
+                <Zap className="w-4 h-4" /> Classic Drop
+              </button>
+              <button
+                onClick={() => setStoreMode('premium')}
+                className={`flex-1 py-3 lg:py-4 rounded-xl text-xs lg:text-sm font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${storeMode === 'premium' ? 'bg-indigo-500 text-slate-900 shadow-lg shadow-indigo-500/20' : 'text-slate-500 hover:text-slate-900'}`}
+              >
+                <Sparkles className="w-4 h-4" /> Premium Store
+              </button>
             </div>
 
-            <motion.div layout className="flex-1 bg-[#0a0a0a] border border-white/5 rounded-[2.5rem] p-7 shadow-2xl relative overflow-y-auto scrollbar-hide">
-              <AnimatePresence mode="wait">
-                {!isSuccess ? (
-                  <form key="form" onSubmit={handlePayment} className="space-y-6">
-                    <div className="space-y-4">
-                      <div className="flex gap-4 border-b border-white/5">
-                        <button type="button" onClick={() => setActiveTab('global')} className={`pb-1.5 text-[9px] font-black uppercase tracking-widest transition-all ${activeTab === 'global' ? 'border-b-2 border-[#10B981] text-[#10B981]' : 'text-slate-500'}`}>Global Pack</button>
+            {/* CONDITIONAL RENDER: CLASSIC FORM OR DIGITAL STORE */}
+            {storeMode === 'classic' ? (
+              <motion.div layout className="flex-1 bg-white border border-slate-200 rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-7 shadow-2xl relative lg:overflow-y-auto lg:scrollbar-hide flex flex-col">
+                <AnimatePresence mode="wait">
+                  {!isSuccess ? (
+                    <form key="form" onSubmit={handlePayment} className="space-y-6">
+                      <div className="flex gap-4 border-b border-slate-200 pb-2">
+                        <button type="button" onClick={() => setActiveTab('global')} className={`pb-2 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'global' ? 'border-b-2 border-[#10B981] text-[#10B981]' : 'text-slate-500'}`}>Global Pack</button>
+
                         {/* FIXED: hasCustomPack USED TO SHOW LOCK ICON */}
-                        <button type="button" onClick={() => setActiveTab('partner')} className={`pb-1.5 text-[9px] font-black uppercase transition-all flex items-center gap-2 ${activeTab === 'partner' ? 'border-b-2 border-amber-500 text-amber-500' : 'text-slate-500'}`}>
-                          Partner Pack {!hasCustomPack && <Lock className="w-2.5 h-2.5" />}
+                        <button type="button" onClick={() => setActiveTab('partner')} className={`pb-2 text-[10px] sm:text-xs font-black uppercase transition-all flex items-center gap-2 ${activeTab === 'partner' ? 'border-b-2 border-amber-500 text-amber-500' : 'text-slate-500'}`}>
+                          Partner Pack {!hasCustomPack && <Lock className="w-3 h-3" />}
                         </button>
                       </div>
-                      <div className="min-h-[90px]">
+
+                      <div className="min-h-[140px]">
                         <div className="grid grid-cols-5 gap-1.5">
                           {activeTab === 'global' ? (
                             globalStickers.map(s => (
-                              <div key={s.id} onClick={() => { setSelectedSticker(s.url); setAmount(s.price); }} className={`relative py-2.5 rounded-xl border-2 cursor-pointer transition-all flex flex-col items-center ${selectedSticker === s.url ? 'bg-[#10B981]/10 border-[#10B981]' : 'bg-[#111] border-white/5'}`}>
+                              <div key={s.id} onClick={() => { setSelectedSticker(s.url); setAmount(s.price); }} className={`relative py-2.5 rounded-xl border-2 cursor-pointer transition-all flex flex-col items-center ${selectedSticker === s.url ? 'bg-[#10B981]/10 border-[#10B981]' : 'bg-white border-slate-200'}`}>
                                 <button type="button" onClick={(e) => playSoundPreview(e, s.id, s.sound)} className={`absolute top-1 right-1 p-0.5 rounded-full ${playingSound === s.id ? 'bg-[#10B981] text-black' : 'text-slate-500'}`}><Volume2 className="w-2 h-2" /></button>
                                 <Player autoplay loop src={s.url} style={{ height: '40px', width: '40px' }} />
                                 <span className="text-[8px] font-black mt-1">₹{s.price}</span>
@@ -242,14 +327,14 @@ const DonationPage = () => {
                             /* FIXED: hasCustomPack USED TO RENDER GRID OR LOCK MESSAGE */
                             hasCustomPack ? (
                               streamer?.partnerPack?.map((s, idx) => (
-                                <div key={idx} onClick={() => { setSelectedSticker(s.lottieUrl); setAmount(s.minAmount); }} className={`relative py-2.5 rounded-xl border-2 cursor-pointer flex flex-col items-center ${selectedSticker === s.lottieUrl ? 'bg-amber-500/10 border-amber-500' : 'bg-[#111] border-white/5'}`}>
+                                <div key={idx} onClick={() => { setSelectedSticker(s.lottieUrl); setAmount(s.minAmount); }} className={`relative py-2.5 rounded-xl border-2 cursor-pointer flex flex-col items-center ${selectedSticker === s.lottieUrl ? 'bg-amber-500/10 border-amber-500' : 'bg-white border-slate-200'}`}>
                                   <Sparkles className="absolute top-1 right-1 w-2.5 h-2.5 text-amber-500" />
                                   <Player autoplay loop src={s.lottieUrl} style={{ height: '40px', width: '40px' }} />
                                   <span className="text-[8px] font-black mt-1">₹{s.minAmount}</span>
                                 </div>
                               ))
                             ) : (
-                              <div className="col-span-5 h-20 flex flex-col items-center justify-center border-2 border-dashed border-white/5 rounded-2xl opacity-40">
+                              <div className="col-span-5 h-20 flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-2xl opacity-40">
                                 <Lock className="w-5 h-5 mb-1" />
                                 <p className="text-[8px] font-black uppercase">Reach Pro Node Tier</p>
                               </div>
@@ -257,44 +342,79 @@ const DonationPage = () => {
                           )}
                         </div>
                       </div>
-                    </div>
 
-                    <div className="space-y-5">
-                      <div className="grid md:grid-cols-2 gap-4">
-                        <div className="relative"><UserCircle className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 w-5 h-5" /><input placeholder="Name" value={donorName} className="w-full bg-[#111] border border-white/5 rounded-xl py-5 px-12 font-bold text-white outline-none" onChange={e => setDonorName(e.target.value)} /></div>
-                        <div className="relative"><IndianRupee className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 w-5 h-5" /><input type="number" value={amount} className="w-full bg-[#111] border border-white/5 rounded-xl py-5 px-12 font-black italic text-white outline-none" onChange={e => setAmount(e.target.value)} /></div>
-                      </div>
-                      <div className="relative">
-                        <MessageSquare className="absolute left-4 top-6 text-slate-600 w-5 h-5" />
-                        <textarea placeholder="Message..." maxLength={100} value={message} className="w-full bg-[#111] border border-white/5 rounded-2xl py-6 px-12 text-white min-h-[140px] outline-none resize-none" onChange={e => setMessage(e.target.value)} />
-                        <div className="absolute bottom-5 left-12 right-5 flex items-center gap-1.5 overflow-x-auto scrollbar-hide py-1">
-                          <Smile className="w-4 h-4 text-slate-600 mr-2 shrink-0" />
-                          {quickEmotes.map(e => (
-                            <button key={e} type="button" onClick={() => setMessage(p => (p + e).slice(0, 100))} className="w-7 h-7 rounded-md bg-[#1a1a1a] text-xs hover:border-indigo-500">{e}</button>
-                          ))}
+                      <div className="flex-1 flex flex-col space-y-4 lg:space-y-5">
+                        <div className="grid grid-cols-2 gap-4 shrink-0">
+                          <div className="relative">
+                            <UserCircle className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 w-5 h-5" />
+                            <input placeholder="Name" value={donorName} className="w-full bg-white border border-slate-200 rounded-xl py-3 lg:py-5 px-12 text-xs lg:text-sm font-bold text-slate-900 outline-none focus:border-[#10B981]/50 transition-colors" onChange={e => setDonorName(e.target.value)} />
+                          </div>
+                          <div className="relative">
+                            <IndianRupee className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 w-5 h-5" />
+                            <input type="number" value={amount} className="w-full bg-white border border-slate-200 rounded-xl py-3 lg:py-5 px-12 text-xs lg:text-sm font-black italic text-slate-900 outline-none focus:border-[#10B981]/50 transition-colors" onChange={e => setAmount(e.target.value)} />
+                            <div className={`absolute right-4 top-1/2 -translate-y-1/2 px-2 py-0.5 rounded text-[7px] lg:text-[8px] font-black uppercase tracking-widest pointer-events-none hidden sm:block ${currentTier === 'legendary' ? 'bg-amber-500/20 text-amber-500 border border-amber-500/30' :
+                              currentTier === 'epic' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' :
+                                'bg-white/5 text-slate-600 border border-slate-200'
+                              }`}>
+                              {currentTier} Drop
+                            </div>
+                          </div>
+                        </div>
+                        <div className="relative flex-1 flex flex-col min-h-[100px] lg:min-h-[120px]">
+                          <MessageSquare className="absolute left-4 top-4 text-slate-600 w-5 h-5" />
+                          <textarea placeholder="Message..." maxLength={100} value={message} className="w-full h-full flex-1 bg-white border border-slate-200 rounded-xl py-4 lg:py-6 px-12 text-xs lg:text-sm text-slate-900 outline-none resize-none focus:border-[#10B981]/50 transition-colors" onChange={e => setMessage(e.target.value)} />
+                          <div className="absolute bottom-3 left-12 right-4 flex items-center gap-1.5 overflow-x-auto scrollbar-hide py-1">
+                            <Smile className="w-4 h-4 text-slate-600 mr-2 shrink-0" />
+                            {quickEmotes.map(e => (
+                              <button key={e} type="button" onClick={() => setMessage(p => (p + e).slice(0, 100))} className="w-6 h-6 lg:w-7 lg:h-7 rounded-md bg-slate-100 text-xs hover:border hover:border-slate-300 transition-all">{e}</button>
+                            ))}
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    <button disabled={isProcessing} className="w-full bg-[#10B981] py-5 rounded-2xl text-lg text-black font-black flex items-center justify-center gap-3 uppercase italic transition hover:bg-emerald-400 shadow-lg shadow-[#10B981]/20">
-                      {isProcessing ? <Loader2 className="animate-spin w-3 h-3" /> : <>Execute Drop <Zap className="w-4 h-4" /> <Send className="w-4 h-4" /></>}
-                    </button>
+                      <div className="shrink-0 pt-2 lg:pt-4 space-y-2 mt-auto">
+                        <button type="submit" disabled={isProcessing} className="w-full bg-[#10B981] py-4 lg:py-5 rounded-xl lg:rounded-2xl text-sm lg:text-lg text-black font-black flex items-center justify-center gap-3 uppercase italic transition hover:bg-emerald-400 shadow-lg shadow-[#10B981]/20">
+                          {isProcessing ? <Loader2 className="animate-spin w-4 h-4 lg:w-5 lg:h-5" /> : <>Execute Drop <Zap className="w-4 h-4 lg:w-5 lg:h-5" /> <Send className="w-4 h-4 lg:w-5 lg:h-5" /></>}
+                        </button>
 
-                    <div className="flex items-center justify-center gap-4 text-slate-600 text-[7px] font-black uppercase pt-1">
-                      <div className="flex items-center gap-1.5"><ShieldCheck className="w-3 h-3" /> Secure Node</div>
-                      <div className="flex items-center gap-1.5"><Sparkles className="w-3 h-3" /> <Gift className="w-3 h-3" /> Razorpay Verified</div>
+                        <div className="flex items-center justify-center gap-4 text-slate-600 text-[6px] lg:text-[7px] font-black uppercase pt-1">
+                          <div className="flex items-center gap-1.5"><ShieldCheck className="w-3 h-3" /> Secure Node</div>
+                          <div className="flex items-center gap-1.5"><Sparkles className="w-3 h-3" /> <Gift className="w-3 h-3" /> Razorpay Verified</div>
+                        </div>
+                      </div>
+                    </form>
+                  ) : (
+                    <div className="text-center py-12">
+                      <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+                      <h2 className="text-2xl font-black italic uppercase">Drop Confirmed!</h2>
+                      <button onClick={() => setIsSuccess(false)} className="mt-8 bg-white/5 border border-slate-200 px-8 py-4 rounded-xl text-xs font-black uppercase">
+                        Send Another
+                      </button>
                     </div>
-                  </form>
-                ) : (
-                  <div className="text-center py-12"><CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" /><h2 className="text-2xl font-black italic uppercase">Drop Confirmed!</h2><button onClick={() => setIsSuccess(false)} className="mt-8 bg-white/5 border border-white/10 px-8 py-4 rounded-xl text-xs font-black uppercase">Send Another</button></div>
-                )}
-              </AnimatePresence>
-            </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            ) : (
+              <motion.div layout initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex-1 flex flex-col min-h-0">
+                <DigitalStore
+                  streamer={streamer}
+                  amount={amount}
+                  setAmount={setAmount}
+                  donorName={donorName}
+                  setDonorName={setDonorName}
+                  message={message}
+                  setMessage={setMessage}
+                  handlePayment={handlePayment}
+                  isProcessing={isProcessing}
+                />
+              </motion.div>
+            )}
           </div>
+
         </div>
-      </main>
+      </main >
       <style dangerouslySetInnerHTML={{ __html: `.scrollbar-hide::-webkit-scrollbar { display: none; }` }} />
-    </div>
+    </div >
   );
 };
 

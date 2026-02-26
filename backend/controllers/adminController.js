@@ -83,7 +83,7 @@ exports.updateTier = async (req, res) => {
         const validTiers = ['none', 'starter', 'pro', 'legend'];
         if (!validTiers.includes(targetTier)) return res.status(400).json({ msg: "Invalid Tier Classification." });
 
-        const user = await User.findByIdAndUpdate(id, { tier: targetTier }, { new: true });
+        const user = await User.findByIdAndUpdate(id, { tier: targetTier }, { returnDocument: 'after' });
         res.status(200).json({ msg: "Tier Override Successful", tier: user.tier });
     } catch (err) {
         res.status(500).json({ msg: "Override Failed." });
@@ -102,7 +102,7 @@ exports.updateRole = async (req, res) => {
             return res.status(403).json({ msg: "You cannot demote your own Master Node." });
         }
 
-        const user = await User.findByIdAndUpdate(id, { role: targetRole }, { new: true });
+        const user = await User.findByIdAndUpdate(id, { role: targetRole }, { returnDocument: 'after' });
         res.status(200).json({ msg: `Node Clearance Updated to ${targetRole.toUpperCase()}`, role: user.role });
     } catch (err) {
         res.status(500).json({ msg: "Clearance Override Failed." });

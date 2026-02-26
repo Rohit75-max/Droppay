@@ -19,7 +19,7 @@ const promoteAdmin = async () => {
         const user = await User.findOneAndUpdate(
             { $or: [{ email: cleanTarget }, { streamerId: cleanTarget }] },
             { role: 'admin' },
-            { new: true }
+            { returnDocument: 'after' }
         );
 
         if (user) {

@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import {
     Users, Activity, ShieldAlert, ChevronLeft, ChevronRight,
-    Search, Shield, ShieldOff, ArrowUpRight, Sun, Moon, Zap, Star,
-    Wallet, Banknote, TrendingUp, Landmark, CheckCircle2
+    Search, ShieldOff, ArrowUpRight, Sun, Moon, Zap, Star,
+    Wallet, TrendingUp, Landmark, CheckCircle2
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -27,7 +27,7 @@ const AdminSecurePortal = () => {
     useEffect(() => { localStorage.setItem('dropPayTheme', theme); }, [theme]);
     const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
 
-    const fetchMetrics = async () => {
+    const fetchMetrics = useCallback(async () => {
         try {
             const token = localStorage.getItem('token');
             const res = await axios.get('http://localhost:5001/api/admin/metrics', {
@@ -37,9 +37,9 @@ const AdminSecurePortal = () => {
         } catch (err) {
             if (err.response?.status === 403 || err.response?.status === 401) navigate('/dashboard');
         }
-    };
+    }, [navigate]);
 
-    const fetchNodes = async () => {
+    const fetchNodes = useCallback(async () => {
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
@@ -53,9 +53,9 @@ const AdminSecurePortal = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [page, search, roleFilter]);
 
-    const fetchPayoutQueue = async () => {
+    const fetchPayoutQueue = useCallback(async () => {
         try {
             const token = localStorage.getItem('token');
             const res = await axios.get('http://localhost:5001/api/admin/payouts', {
@@ -63,13 +63,13 @@ const AdminSecurePortal = () => {
             });
             setPayoutQueue(res.data);
         } catch (err) { console.error(err); }
-    };
+    }, []);
 
     useEffect(() => {
         fetchMetrics();
         if (activeTab === 'directory') fetchNodes();
         if (activeTab === 'economy') fetchPayoutQueue();
-    }, [page, search, roleFilter, activeTab]);
+    }, [fetchMetrics, fetchNodes, fetchPayoutQueue, activeTab]);
 
     const toggleBan = async (id, currentStatus) => {
         if (!window.confirm(`Are you sure you want to ${currentStatus ? 'REINSTATE' : 'SUSPEND'} this node?`)) return;

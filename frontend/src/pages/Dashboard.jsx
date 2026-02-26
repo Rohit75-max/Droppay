@@ -16,10 +16,12 @@ import AccountsHub from '../components/AccountsHub';
 import GrowthMissions from '../components/GrowthMissions';
 import HelpCenter from '../components/HelpCenter';
 import FeedbackStation from '../components/FeedbackStation';
+import DashboardStore from './DashboardStore';
 
 const navItems = [
   { id: 'dashboard', label: 'Nexus', icon: LayoutDashboard },
   { id: 'settings', label: 'Control', icon: Settings },
+  { id: 'store', label: 'Store', icon: Zap },
   { id: 'accounts', label: 'Identity', icon: UserCircle },
   { id: 'growth', label: 'Growth', icon: Trophy },
   { id: 'help', label: 'Support', icon: HelpCircle },
@@ -42,9 +44,8 @@ const Dashboard = () => {
   const [topDonors, setTopDonors] = useState([]);
   const [chartData, setChartData] = useState([]);
   const [timeRange, setTimeRange] = useState('7D');
-  const [isTesting, setIsTesting] = useState(false);
 
-  const [goalForm, setGoalForm] = useState({ title: '', targetAmount: 0, showOnDashboard: true });
+  const [goalForm, setGoalForm] = useState({ title: '', targetAmount: 0, showOnDashboard: true, stylePreference: 'modern' });
   const [editForm, setEditForm] = useState({ username: '', bio: '', streamerId: '' });
   const [alertConfig, setAlertConfig] = useState({ ttsEnabled: false, volume: 50 });
   const [partnerStickers, setPartnerStickers] = useState([]);
@@ -95,7 +96,8 @@ const Dashboard = () => {
       setGoalForm({
         title: res.data.goalSettings?.title || "New Mission",
         targetAmount: res.data.goalSettings?.targetAmount || 0,
-        showOnDashboard: res.data.goalSettings?.showOnDashboard ?? true
+        showOnDashboard: res.data.goalSettings?.showOnDashboard ?? true,
+        stylePreference: res.data.goalSettings?.stylePreference || "modern"
       });
       setEditForm({
         username: res.data.username || "",
@@ -146,9 +148,6 @@ const Dashboard = () => {
     });
 
     socket.on('new-drop', (data) => {
-      // PREVENT TEST SIGNALS FROM INFLATING DASHBOARD METRICS
-      if (data.isTest) return;
-
       // 1. LIVE NODE BALANCE UPDATE
       setUser(prev => ({ ...prev, walletBalance: (prev.walletBalance || 0) + Number(data.amount) }));
 
@@ -191,25 +190,28 @@ const Dashboard = () => {
 
     socket.on('goal-update', (updatedGoal) => {
       setUser(prev => ({ ...prev, goalSettings: updatedGoal }));
-      setGoalForm({
-        title: updatedGoal.title,
-        targetAmount: updatedGoal.targetAmount,
-        showOnDashboard: updatedGoal.showOnDashboard
-      });
+      setGoalForm(prev => ({ ...prev, ...updatedGoal }));
+    });
+
+    socket.on('settings-update', (updatedSettings) => {
+      setUser(prev => ({ ...prev, overlaySettings: updatedSettings }));
+      setAlertConfig(updatedSettings);
     });
 
     return () => socket.disconnect();
   }, [user?.obsKey]);
 
-  const updateGoalSettings = async () => {
+  const updateGoalSettings = async (overrideData) => {
     setIsUpdatingGoal(true);
     try {
       const token = localStorage.getItem('token');
-      await axios.post('http://localhost:5001/api/user/update-goal', goalForm, {
+      await axios.post('http://localhost:5001/api/user/update-goal', overrideData || goalForm, {
         headers: { Authorization: `Bearer ${token}` }
       });
       await fetchProfileData();
-      alert("Mission Deployed Successfully");
+      if (!overrideData) {
+        alert("Mission Deployed Successfully");
+      }
     } catch (err) {
       console.error("Goal update failed", err);
     } finally {
@@ -373,23 +375,6 @@ const Dashboard = () => {
     setTimeout(() => setCopiedType(null), 2000);
   };
 
-  const triggerTestDrop = async () => {
-    setIsTesting(true);
-    try {
-      await axios.post('http://localhost:5001/api/payment/test-drop', {
-        streamerId: user.streamerId, amount: 500, donorName: "DropPay Tester", sticker: "zap"
-      });
-      // REMOVED fetchProfileData() - Test drops don't change real graphs, avoids massive API spam!
-    } catch (err) {
-      if (err.response?.status === 429) {
-        alert("Anti-Spam Protocol Active. Please wait a moment before sending more signals.");
-      } else {
-        console.error("Test failed");
-      }
-    }
-    finally { setIsTesting(false); }
-  };
-
   const getProgressPercentage = () => {
     if (!user?.goalSettings?.targetAmount) return 0;
     return Math.min((user.goalSettings.currentProgress / user.goalSettings.targetAmount) * 100, 100);
@@ -419,7 +404,7 @@ const Dashboard = () => {
     <div className={`h-screen flex flex-col lg:flex-row overflow-hidden transition-colors duration-500 ${theme === 'dark' ? 'bg-[#050505] text-white' : 'bg-slate-50 text-slate-900'}`}>
 
       {/* SIDEBAR */}
-      <aside className={`hidden lg:flex w-20 hover:w-64 group transition-all duration-500 flex-col py-8 border-r ${theme === 'dark' ? 'border-white/5 bg-[#080808]' : 'border-slate-200 bg-white'} z-50`}>
+      <aside className={`hidden lg:flex w-20 hover:w-64 group transition-all duration-500 flex-col py-8 border-r shrink-0 overflow-y-auto custom-scrollbar ${theme === 'dark' ? 'border-white/5 bg-[#080808]' : 'border-slate-200 bg-white'} z-50`}>
         <div
           className="flex items-center px-6 mb-12 gap-4 cursor-pointer"
           onClick={() => setActiveSection('dashboard')}
@@ -438,7 +423,16 @@ const Dashboard = () => {
             </button>
           ))}
         </nav>
-        <button onClick={() => { localStorage.removeItem('token'); navigate('/login'); }} className="px-7 py-4 text-rose-500 flex items-center gap-4 hover:text-rose-400 transition-colors">
+
+        {/* SECURE ADMIN ENTRY */}
+        {user?.role === 'admin' && (
+          <button onClick={() => navigate('/admin/secure-portal')} className="px-7 py-4 mt-auto mb-2 text-rose-500 flex items-center gap-4 hover:text-rose-400 hover:bg-rose-500/10 transition-colors border-t border-rose-500/20">
+            <ShieldAlert className="w-6 h-6 flex-shrink-0 animate-pulse" />
+            <span className="font-black italic uppercase text-[10px] tracking-widest opacity-0 group-hover:opacity-100 transition-all whitespace-nowrap">Admin Portal</span>
+          </button>
+        )}
+
+        <button onClick={() => { localStorage.removeItem('token'); navigate('/login'); }} className={`px-7 py-4 text-rose-500 flex items-center gap-4 hover:text-rose-400 transition-colors ${user?.role !== 'admin' ? 'mt-auto' : ''}`}>
           <LogOut className="w-6 h-6 flex-shrink-0" />
           <span className="font-black italic uppercase text-[10px] tracking-widest opacity-0 group-hover:opacity-100 transition-all whitespace-nowrap">Exit</span>
         </button>
@@ -458,58 +452,59 @@ const Dashboard = () => {
       {/* MOBILE MENU */}
       <AnimatePresence>
         {isMobileMenuOpen && (
-          <motion.div initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} transition={{ type: 'spring', damping: 25, stiffness: 200 }} className={`fixed inset-0 z-[150] p-10 flex flex-col lg:hidden transition-colors duration-500 ${theme === 'dark' ? 'bg-[#050505] text-white' : 'bg-white text-slate-900'}`}>
-            <div className="flex justify-between items-center mb-12">
+          <motion.div initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} transition={{ type: 'spring', damping: 25, stiffness: 200 }} className={`fixed inset-0 z-[150] p-6 flex flex-col lg:hidden transition-colors duration-500 ${theme === 'dark' ? 'bg-[#050505] text-white' : 'bg-white text-slate-900'}`}>
+            <div className="flex justify-between items-center mb-6">
               <div className="flex items-center gap-2 cursor-pointer" onClick={() => { setActiveSection('dashboard'); setIsMobileMenuOpen(false); }}>
-                <Zap className="w-10 h-10 text-[#10B981]" />
-                <span className={`text-2xl font-black italic tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>DropPay</span>
+                <Zap className="w-8 h-8 text-[#10B981]" />
+                <span className={`text-xl font-black italic tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>DropPay</span>
               </div>
-              <button onClick={() => setIsMobileMenuOpen(false)} className={theme === 'dark' ? 'text-white' : 'text-slate-900'}><X className="w-8 h-8" /></button>
+              <button onClick={() => setIsMobileMenuOpen(false)} className={`p-2 rounded-xl border ${theme === 'dark' ? 'text-white border-white/10' : 'text-slate-900 border-slate-200'}`}><X className="w-5 h-5" /></button>
             </div>
-            <div className="space-y-4">
+            <div className="space-y-2 flex-1 overflow-y-auto scrollbar-hide pr-2">
               {navItems.map((item) => (
-                <button key={item.id} onClick={() => { setActiveSection(item.id); setIsMobileMenuOpen(false); }} className={`w-full flex items-center justify-between py-5 text-2xl font-black italic uppercase border-b ${theme === 'dark' ? 'border-white/5' : 'border-slate-100'} transition-all ${activeSection === item.id ? 'text-[#10B981]' : 'text-slate-500'}`}>
-                  <div className="flex items-center gap-6"><item.icon className="w-8 h-8" /> {item.label}</div>
-                  <ChevronRight className={`w-6 h-6 ${activeSection === item.id ? 'opacity-100' : 'opacity-0'}`} />
+                <button key={item.id} onClick={() => { setActiveSection(item.id); setIsMobileMenuOpen(false); }} className={`w-full flex items-center justify-between py-3 md:py-4 text-base md:text-lg font-black italic uppercase border-b ${theme === 'dark' ? 'border-white/5' : 'border-slate-100'} transition-all ${activeSection === item.id ? 'text-[#10B981]' : 'text-slate-500'}`}>
+                  <div className="flex items-center gap-4"><item.icon className="w-5 h-5 md:w-6 md:h-6" /> {item.label}</div>
+                  <ChevronRight className={`w-5 h-5 ${activeSection === item.id ? 'opacity-100' : 'opacity-0'}`} />
                 </button>
               ))}
             </div>
-            <button onClick={() => { localStorage.removeItem('token'); navigate('/login'); }} className={`mt-auto py-5 text-rose-500 font-black italic uppercase text-xl flex items-center gap-4 border-t ${theme === 'dark' ? 'border-white/5' : 'border-slate-100'}`}><LogOut className="w-8 h-8" /> Exit Protocol</button>
+
+            <div className="pt-2 shrink-0 border-t border-slate-200 dark:border-white/10 mt-2">
+              {/* MOBILE SECURE ADMIN ENTRY */}
+              {user?.role === 'admin' && (
+                <button onClick={() => { navigate('/admin/secure-portal'); setIsMobileMenuOpen(false); }} className={`w-full mb-2 py-3 md:py-4 text-rose-500 font-black italic uppercase text-base md:text-lg flex items-center gap-4 border-b border-rose-500/20`}>
+                  <ShieldAlert className="w-5 h-5 md:w-6 md:h-6 animate-pulse" /> Admin Portal
+                </button>
+              )}
+
+              <button onClick={() => { localStorage.removeItem('token'); navigate('/login'); }} className={`w-full py-3 md:py-4 text-rose-500 font-black italic uppercase text-base md:text-lg flex items-center gap-4`}><LogOut className="w-5 h-5 md:w-6 md:h-6" /> Exit Protocol</button>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
 
       <main className="flex-1 flex flex-col relative overflow-hidden pt-20 lg:pt-0">
-        <header className="px-6 py-6 md:px-12 md:py-8 flex justify-between items-center z-40">
+        <header className="px-6 py-3 md:px-12 md:py-4 flex justify-between items-center z-40">
           <h1 className={`text-2xl md:text-3xl font-black italic uppercase tracking-tighter leading-none ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
             {activeSection} <span className="text-[#10B981]">Nexus.</span>
           </h1>
           <div className="flex items-center gap-2 md:gap-4">
-            <button
-              onClick={triggerTestDrop}
-              disabled={isTesting}
-              className={`flex items-center gap-1.5 md:gap-2 px-3 md:px-6 py-2.5 md:py-3 rounded-xl font-black italic text-[8px] md:text-[9px] tracking-widest transition-all ${theme === 'dark' ? 'bg-white text-black hover:bg-[#10B981]' : 'bg-slate-900 text-white hover:bg-[#10B981]'}`}
-            >
-              {isTesting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Play className="w-3 h-3 fill-current" />}
-              <span className="hidden sm:inline">TEST SIGNAL</span>
-              <span className="sm:hidden">TEST</span>
-            </button>
             <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className="p-2.5 md:p-3 rounded-xl md:rounded-2xl border border-white/5 bg-white/5 text-slate-500 hover:text-[#10B981] transition-all">
               {theme === 'dark' ? <Sun className="w-4 h-4 md:w-5 md:h-5" /> : <Moon className="w-4 h-4 md:w-5 md:h-5" />}
             </button>
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto custom-scrollbar px-6 md:px-12 pb-12">
+        <div className="flex-1 overflow-y-auto custom-scrollbar px-4 md:px-8 pb-12">
           <AnimatePresence mode="wait">
-            <motion.div key={activeSection} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }} transition={{ duration: 0.3 }} className="max-w-6xl mx-auto w-full flex flex-col items-center">
-              <div className={`w-full ${activeSection === 'dashboard' ? '' : 'max-w-4xl'}`}>
+            <motion.div key={activeSection} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }} transition={{ duration: 0.3 }} className={`${activeSection === 'accounts' ? 'max-w-7xl' : 'max-w-6xl'} mx-auto w-full flex flex-col items-center transition-all duration-500`}>
+              <div className={`w-full ${activeSection === 'dashboard' || activeSection === 'accounts' ? '' : 'max-w-4xl'}`}>
                 {activeSection === 'dashboard' && (
                   <DashboardSummary {...{
                     theme, user, chartData, timeRange, setTimeRange,
                     recentDrops, topDonors, getProgressPercentage,
                     handleWithdrawRequest, isProcessingWithdraw,
-                    triggerTestDrop, isTesting, Play
+                    Play
                   }} />
                 )}
                 {activeSection === 'settings' && (
@@ -527,13 +522,12 @@ const Dashboard = () => {
                     isSavingStickers={isSavingStickers}
                     copyToClipboard={copyToClipboard}
                     copiedType={copiedType}
-                    triggerTestDrop={triggerTestDrop}
-                    isTesting={isTesting}
                   />
                 )}
-                {activeSection === 'accounts' && <AccountsHub theme={theme} user={user} editForm={editForm} setEditForm={setEditForm} isEditing={isEditing} setIsEditing={setIsEditing} saveProfileUpdates={saveProfileUpdates} saveContactUpdate={saveContactUpdate} profilePreview={profilePreview} handleImageChange={handleImageChange} fileInputRef={fileInputRef} handleBankLink={handleBankLink} isLinkingBank={isLinkingBank} setActiveSection={setActiveSection} />}
+                {activeSection === 'accounts' && <AccountsHub theme={theme} user={user} editForm={editForm} setEditForm={setEditForm} isEditing={isEditing} setIsEditing={setIsEditing} saveProfileUpdates={saveProfileUpdates} saveContactUpdate={saveContactUpdate} profilePreview={profilePreview} handleImageChange={handleImageChange} fileInputRef={fileInputRef} handleBankLink={handleBankLink} isLinkingBank={isLinkingBank} setActiveSection={setActiveSection} copyToClipboard={copyToClipboard} copiedType={copiedType} />}
                 {activeSection === 'growth' && <GrowthMissions theme={theme} user={user} copyToClipboard={copyToClipboard} copiedType={copiedType} />}
                 {activeSection === 'help' && <HelpCenter theme={theme} user={user} />}
+                {activeSection === 'store' && <DashboardStore theme={theme} user={user} setUser={setUser} />}
                 {activeSection === 'feedback' && (
                   <FeedbackStation
                     theme={theme} user={user}

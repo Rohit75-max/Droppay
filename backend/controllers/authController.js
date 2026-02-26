@@ -176,6 +176,11 @@ exports.login = async (req, res) => {
         // Changed as requested: Show "Account not exist" instead of verification prompt
         if (!user.isEmailVerified) return res.status(401).json({ msg: "Account not exist. Signup/Create account" });
 
+        // FORTIFIED: Restrict Admins from using the public login surface
+        if (user.role === 'admin') {
+            return res.status(403).json({ msg: "Security Protocol Violation: Master Nodes must authenticate via the Secure Admin Portal." });
+        }
+
         // Enterprise Upgrades: Log Auditable Access Telemetry
         const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
         await User.findByIdAndUpdate(user._id, {
@@ -187,6 +192,38 @@ exports.login = async (req, res) => {
         res.json({ token, user: { username: user.username } });
     } catch (err) {
         res.status(500).json({ msg: "Login Node Error." });
+    }
+};
+
+// 3.5 ADMIN LOGIN (Exclusive Route)
+exports.adminLogin = async (req, res) => {
+    try {
+        const email = req.body.email.trim().toLowerCase();
+        const { password, adminSecret } = req.body; // Optional layer: can require an extra secret key later
+        const user = await User.findOne({ email });
+
+        if (!user || !user.password) return res.status(400).json({ msg: "Admin Authentication Failed." });
+
+        if (user.role !== 'admin') {
+            return res.status(403).json({ msg: "Clearance Denied. Standard users cannot access this portal." });
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) return res.status(400).json({ msg: "Admin Authentication Failed. Invalid Key." });
+
+        if (!user.isEmailVerified) return res.status(401).json({ msg: "Node Identity not verified." });
+
+        // Security Telemetry
+        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        await User.findByIdAndUpdate(user._id, {
+            'security.lastLogin': new Date(),
+            'security.lastLoginIP': ip
+        });
+
+        const token = jwt.sign({ user: { id: user._id } }, process.env.JWT_SECRET, { expiresIn: '12h' }); // Shorter expiry for Admin
+        res.json({ token, user: { username: user.username, role: user.role } });
+    } catch (err) {
+        res.status(500).json({ msg: "Admin Portal Error." });
     }
 };
 

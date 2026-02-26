@@ -125,7 +125,12 @@ const UserSchema = new mongoose.Schema({
   },
 
   overlaySettings: {
-    stylePreference: { type: String, enum: ['modern', 'comic', 'playful'], default: 'modern' },
+    stylePreference: {
+      type: String,
+      enum: ['modern', 'comic', 'playful', 'pixel', 'kawaii', 'cyberhud', 'bgmi', 'gta', 'coc', 'avatar', 'godzilla', 'subway_dash', 'orbital_strike', 'loot_crate', 'neon_billboard', 'celestial_blessing', 'gacha_pull', 'arcade_ko', 'paranormal_tape', 'holo_tcg', 'beat_drop', 'mainframe_breach', 'dragon_hoard', 'casino_jackpot', 'mecha_assembly', 'hyperdrive_warp', 'dimensional_rift', 'abyssal_kraken', 'pharaoh_tomb', 'cybernetic_brain', 'celestial_zodiac'],
+      default: 'modern'
+    },
+    unlockedPremiumAlerts: [{ type: String }], // ADDED: Tracks Elite alerts purchased from Dashboard Store
     volume: { type: Number, default: 50 },
     activeStickerSet: { type: String, default: 'classic' },
     isPanicMode: { type: Boolean, default: false },
@@ -146,7 +151,9 @@ const UserSchema = new mongoose.Schema({
     title: { type: String, default: "New Stream Equipment" },
     targetAmount: { type: Number, default: 5000 },
     currentProgress: { type: Number, default: 0 },
-    isActive: { type: Boolean, default: true }
+    isActive: { type: Boolean, default: true },
+    stylePreference: { type: String, enum: ['modern', 'glass_jar', 'gta', 'coc', 'bgmi', 'avatar', 'godzilla', 'arc_reactor_horizontal', 'arc_reactor_circular', 'boss_fight', 'plasma_battery', 'pixel_coin_row', 'pixel_coin_vault', 'black_hole', 'hex_core', 'rune_monolith', 'hologram_glitch', 'alchemist_flask', 'redline_dash', 'loot_dispenser', 'mecha_lens'], default: 'modern' },
+    unlockedPremiumStyles: [{ type: String }] // ADDED: Tracks Elite overlays purchased from Dashboard Store
   },
 
   partnerPack: [

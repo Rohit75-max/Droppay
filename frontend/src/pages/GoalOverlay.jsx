@@ -5,6 +5,12 @@ import io from 'socket.io-client';
 
 // --- MODULAR IMPORTS ---
 import CyberGoalBar from '../components/CyberGoalBar';
+import PremiumGoalOverlays from '../components/PremiumGoalOverlays';
+
+const PREMIUM_GOAL_STYLES = [
+  'black_hole', 'hex_core', 'rune_monolith', 'hologram_glitch',
+  'alchemist_flask', 'redline_dash', 'loot_dispenser', 'mecha_lens'
+];
 
 const runnerMap = {
   star: 'https://fonts.gstatic.com/s/e/notoemoji/latest/2b50/lottie.json',
@@ -31,7 +37,8 @@ const GoalOverlay = () => {
         setGoal({
           title: settings.title || "Active Objective",
           currentProgress: settings.currentProgress || 0,
-          targetAmount: settings.targetAmount || 100
+          targetAmount: settings.targetAmount || 100,
+          stylePreference: settings.stylePreference || "modern"
         });
 
         setTier(res.data.tier || 'starter');
@@ -56,7 +63,7 @@ const GoalOverlay = () => {
     socket.emit('join-room', trueStreamerId);
 
     socket.on('goal-update', (updatedGoal) => {
-      setGoal(updatedGoal);
+      setGoal(prev => ({ ...prev, ...updatedGoal }));
       if (updatedGoal.isActive !== undefined) setIsActive(updatedGoal.isActive);
       if (updatedGoal.runnerType) {
         setRunnerUrl(updatedGoal.runnerType === 'custom' ? updatedGoal.customRunnerUrl : (runnerMap[updatedGoal.runnerType] || runnerMap.star));
@@ -73,13 +80,22 @@ const GoalOverlay = () => {
 
   return (
     <div className="w-screen h-screen flex items-start justify-center bg-transparent pointer-events-none p-8 font-sans">
-      <CyberGoalBar
-        goal={goal}
-        tier={tier}
-        runnerUrl={runnerUrl}
-        percentage={percentage}
-        isComplete={isComplete}
-      />
+      {PREMIUM_GOAL_STYLES.includes(goal.stylePreference) ? (
+        <PremiumGoalOverlays
+          goal={goal}
+          percentage={percentage}
+          isComplete={isComplete}
+        />
+      ) : (
+        <CyberGoalBar
+          goal={goal}
+          tier={tier}
+          runnerUrl={runnerUrl}
+          percentage={percentage}
+          isComplete={isComplete}
+          goalStylePreference={goal.stylePreference || 'modern'}
+        />
+      )}
       <style dangerouslySetInnerHTML={{
         __html: `
         @keyframes scan { 0% { transform: translateX(-100%) skewX(-15deg); } 50% { transform: translateX(200%) skewX(-15deg); } 100% { transform: translateX(200%) skewX(-15deg); } }

@@ -4,6 +4,12 @@ import {
   Wallet, BarChart3, Target, Trophy, TrendingUp, Loader2, Zap, Activity
 } from 'lucide-react';
 import CyberGoalBar from './CyberGoalBar';
+import PremiumGoalOverlays from './PremiumGoalOverlays';
+
+const PREMIUM_GOAL_STYLES = [
+  'black_hole', 'hex_core', 'rune_monolith', 'hologram_glitch',
+  'alchemist_flask', 'redline_dash', 'loot_dispenser', 'mecha_lens'
+];
 
 const runnerMap = {
   star: 'https://fonts.gstatic.com/s/e/notoemoji/latest/2b50/lottie.json',
@@ -15,8 +21,7 @@ const runnerMap = {
 const DashboardSummary = ({
   theme, user, chartData, timeRange, setTimeRange,
   topDonors, recentDrops, handleWithdrawRequest,
-  isProcessingWithdraw, getProgressPercentage,
-  triggerTestDrop, isTesting // CONTEXTUAL PROPS FOR TEST SIGNAL
+  isProcessingWithdraw, getProgressPercentage
 }) => {
 
   const stickerMap = {
@@ -90,17 +95,31 @@ const DashboardSummary = ({
         {/* MISSION STATUS - WITH VISIBILITY PROTOCOL */}
         {user.goalSettings?.isActive !== false && (
           <div className="flex justify-center w-full mt-2 mb-6">
-            <CyberGoalBar
-              goal={{ title: user.goalSettings?.title || "Active Objective", currentProgress: user.goalSettings?.currentProgress || 0, targetAmount: user.goalSettings?.targetAmount || 100 }}
-              tier={user.tier || 'starter'}
-              runnerUrl={
-                user.goalSettings?.runnerType === 'custom'
-                  ? user.goalSettings?.customRunnerUrl
-                  : (runnerMap[user.goalSettings?.runnerType] || runnerMap.star)
-              }
-              percentage={getProgressPercentage()}
-              isComplete={getProgressPercentage() >= 100}
-            />
+            {PREMIUM_GOAL_STYLES.includes(user.goalSettings?.stylePreference) ? (
+              <PremiumGoalOverlays
+                goal={{
+                  title: user.goalSettings?.title || "Active Objective",
+                  currentProgress: user.goalSettings?.currentProgress || 0,
+                  targetAmount: user.goalSettings?.targetAmount || 100,
+                  stylePreference: user.goalSettings?.stylePreference
+                }}
+                percentage={getProgressPercentage()}
+                isComplete={getProgressPercentage() >= 100}
+              />
+            ) : (
+              <CyberGoalBar
+                goal={{ title: user.goalSettings?.title || "Active Objective", currentProgress: user.goalSettings?.currentProgress || 0, targetAmount: user.goalSettings?.targetAmount || 100 }}
+                tier={user.tier || 'starter'}
+                runnerUrl={
+                  user.goalSettings?.runnerType === 'custom'
+                    ? user.goalSettings?.customRunnerUrl
+                    : (runnerMap[user.goalSettings?.runnerType] || runnerMap.star)
+                }
+                percentage={getProgressPercentage()}
+                isComplete={getProgressPercentage() >= 100}
+                goalStylePreference={user.goalSettings?.stylePreference || 'modern'}
+              />
+            )}
           </div>
         )}
 
