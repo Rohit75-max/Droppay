@@ -74,23 +74,10 @@ const CruiserRevenueChart = ({ chartData, isDemo = false, recentDrops = [], them
                         <motion.div
                             key="sun"
                             initial={{ y: 200, opacity: 0 }}
-                            animate={{
-                                y: 0,
-                                opacity: [0.6, 0.8, 0.6],
-                                scale: [1, 1.08, 1],
-                                boxShadow: [
-                                    "0 0 60px 30px rgba(251,191,36,0.3)",
-                                    "0 0 90px 45px rgba(251,191,36,0.4)",
-                                    "0 0 60px 30px rgba(251,191,36,0.3)"
-                                ]
-                            }}
+                            animate={{ y: 0, opacity: 1 }}
                             exit={{ y: 200, opacity: 0 }}
-                            transition={{
-                                duration: 4,
-                                repeat: Infinity,
-                                ease: "easeInOut"
-                            }}
-                            className="absolute right-12 top-9 w-16 h-16 rounded-full bg-gradient-to-tr from-yellow-200 to-amber-500 z-0 flex items-center justify-center"
+                            transition={{ duration: 1.5, type: 'spring' }}
+                            className="absolute right-12 top-9 w-16 h-16 rounded-full bg-gradient-to-tr from-yellow-200 to-amber-500 shadow-[0_0_60px_30px_rgba(251,191,36,0.3)] z-0 flex items-center justify-center opacity-70"
                         >
                             <motion.div
                                 animate={{ scale: [1, 1.05, 1], opacity: [0.8, 1, 0.8] }}
@@ -103,23 +90,10 @@ const CruiserRevenueChart = ({ chartData, isDemo = false, recentDrops = [], them
                         <motion.div
                             key="moon"
                             initial={{ y: 200, opacity: 0 }}
-                            animate={{
-                                y: 0,
-                                opacity: [0.3, 0.5, 0.3],
-                                scale: [1, 1.05, 1],
-                                boxShadow: [
-                                    "0 0 60px 20px rgba(255,255,255,0.2)",
-                                    "0 0 80px 30px rgba(255,255,255,0.3)",
-                                    "0 0 60px 20px rgba(255,255,255,0.2)"
-                                ]
-                            }}
+                            animate={{ y: 0, opacity: 1 }}
                             exit={{ y: 200, opacity: 0 }}
-                            transition={{
-                                duration: 5,
-                                repeat: Infinity,
-                                ease: "easeInOut"
-                            }}
-                            className="absolute right-12 top-9 w-14 h-14 rounded-full bg-slate-200 z-0 flex items-center justify-center overflow-hidden"
+                            transition={{ duration: 1.5, type: 'spring' }}
+                            className="absolute right-12 top-9 w-14 h-14 rounded-full bg-slate-200 shadow-[0_0_60px_20px_rgba(255,255,255,0.2)] z-0 flex items-center justify-center overflow-hidden opacity-40"
                         >
                             <motion.div
                                 animate={{ scale: [1, 1.03, 1] }}
