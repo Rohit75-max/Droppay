@@ -31,5 +31,6 @@ router.post('/withdraw', paymentController.handleWithdrawRequest);
 
 // OVERLAY SETTINGS
 router.get('/overlay-settings/:obsKey', paymentController.getOverlaySettings || ((req, res) => res.json({})));
+router.get('/goal-by-key/:obsKey', paymentController.getGoalByKey);
 
 module.exports = router;

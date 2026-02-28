@@ -69,22 +69,18 @@ const AccountsHub = ({
   const status = calculateTierStatus(user?.tier || 'starter', user?.referralCount || 0);
 
   const getCardStyle = () => {
-    return theme === 'dark'
-      ? 'bg-[#0a0a0a]/80 border-white/5 shadow-xl'
-      : 'bg-white border-slate-200 shadow-md';
+    return 'bg-[var(--nexus-panel)] border-[var(--nexus-border)] text-[var(--nexus-text)] shadow-[var(--nexus-glow)] nexus-card';
   };
 
   const getInputStyle = () => {
-    return theme === 'dark'
-      ? 'bg-black/40 border-white/5 text-white focus:border-[#10B981]'
-      : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-[#10B981]';
+    return 'bg-[var(--nexus-bg)]/40 border-[var(--nexus-border)] text-[var(--nexus-text)] focus:border-[var(--nexus-accent)] transition-all outline-none';
   };
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
-      className="max-w-6xl mx-auto space-y-8 font-sans pb-20 w-full"
+      className="max-w-7xl mx-auto space-y-10 font-sans pb-20 pt-4 w-full"
     >
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start w-full">
 
@@ -96,10 +92,10 @@ const AccountsHub = ({
             {/* Header Block */}
             <div className="flex justify-between items-start mb-10 w-full relative z-10">
               <div className="flex flex-wrap items-center gap-3">
-                <div className="px-4 py-2 bg-[#10B981]/10 border border-[#10B981]/20 text-[#10B981] rounded-xl text-[9px] font-black uppercase flex items-center gap-2">
+                <div className="px-4 py-2 bg-[var(--nexus-accent)]/10 border border-[var(--nexus-accent)]/20 text-[var(--nexus-accent)] rounded-xl text-[9px] font-black uppercase flex items-center gap-2">
                   <BadgeCheck className="w-3 h-3" /> Verified Node
                 </div>
-                <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl border ${user.tier === 'legend' ? 'bg-amber-500/10 border-amber-500/30 text-amber-500' : user.tier === 'pro' ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-400' : 'bg-slate-500/10 border-white/10 text-slate-400'}`}>
+                <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl border ${user.tier === 'legend' ? 'bg-amber-500/10 border-amber-500/30 text-amber-500' : user.tier === 'pro' ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-400' : 'bg-[var(--nexus-bg)]/40 border-[var(--nexus-border)] text-[var(--nexus-text-muted)]'}`}>
                   {user.tier === 'legend' && <Crown className="w-3.5 h-3.5 fill-amber-500" />}
                   {user.tier === 'pro' && <Zap className="w-3.5 h-3.5 fill-indigo-400" />}
                   {user.tier === 'starter' && <ShieldCheck className="w-3.5 h-3.5" />}
@@ -108,7 +104,7 @@ const AccountsHub = ({
               </div>
               <button
                 onClick={() => isEditing ? saveProfileUpdates() : setIsEditing(true)}
-                className={`flex items-center justify-center gap-3 px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border ${isEditing ? 'bg-[#10B981] text-black border-[#10B981]' : theme === 'dark' ? 'bg-white/5 text-white border-white/10 hover:bg-white hover:text-black' : 'bg-slate-900 text-white border-slate-900 hover:bg-[#10B981] hover:border-[#10B981]'}`}
+                className={`flex items-center justify-center gap-3 px-6 py-3 rounded-[var(--nexus-radius)] text-[10px] font-black uppercase tracking-widest transition-all border nexus-btn ${isEditing ? 'bg-[var(--nexus-accent)] text-black border-[var(--nexus-accent)]' : 'bg-[var(--nexus-panel)] text-[var(--nexus-text)] border-[var(--nexus-border)] hover:bg-[var(--nexus-accent)] hover:text-black hover:border-[var(--nexus-accent)]'}`}
               >
                 {isEditing ? <><Save className="w-4 h-4" /> Save</> : <><Edit3 className="w-4 h-4" /> Edit Profile</>}
               </button>
@@ -120,48 +116,53 @@ const AccountsHub = ({
               {/* Left Side: Avatar & Name */}
               <div className="flex flex-col items-center md:items-start shrink-0 space-y-6">
                 <div className="relative group/avatar shrink-0">
-                  <div className={`w-36 h-36 md:w-48 md:h-48 rounded-[2.5rem] border-2 border-dashed flex items-center justify-center overflow-hidden transition-all group-hover/avatar:border-[#10B981] ${theme === 'dark' ? 'bg-black border-white/10' : 'bg-slate-50 border-slate-200'}`}>
+                  <div className={`w-36 h-36 md:w-48 md:h-48 rounded-[var(--nexus-radius)] border-2 border-dashed flex items-center justify-center overflow-hidden transition-all group-hover/avatar:border-[var(--nexus-accent)] bg-[var(--nexus-bg)] border-[var(--nexus-border)]`}>
                     {profilePreview ? (
                       <img src={profilePreview} alt="Profile" className="w-full h-full object-cover" />
                     ) : (
-                      <User className={`w-14 h-14 md:w-20 md:h-20 ${theme === 'dark' ? 'text-white/20' : 'text-slate-300'}`} />
+                      <User className={`w-14 h-14 md:w-20 md:h-20 text-[var(--nexus-text-muted)] opacity-30`} />
                     )}
                     <button onClick={() => fileInputRef.current.click()} className="absolute inset-0 bg-black/70 opacity-0 group-hover/avatar:opacity-100 flex flex-col items-center justify-center transition-all duration-300">
-                      <UploadCloud className="w-8 h-8 text-[#10B981] mb-2" />
+                      <UploadCloud className="w-8 h-8 text-[var(--nexus-accent)] mb-2" />
                       <span className="text-[10px] font-black uppercase tracking-widest text-white">Upload</span>
                     </button>
                   </div>
                   <input type="file" ref={fileInputRef} className="hidden" onChange={handleImageChange} accept="image/*" />
 
                   {status.badge && (
-                    <div className={`absolute -bottom-3 -right-3 p-3 rounded-2xl border bg-black shadow-2xl flex items-center gap-2 border-white/10 ${status.badge.flair}`}>
+                    <div className={`absolute -bottom-3 -right-3 p-3 rounded-2xl border bg-black shadow-2xl flex items-center gap-2 border-[var(--nexus-border)] ${status.badge.flair}`}>
                       {status.badge.icon === 'Target' && <Target className="w-4 h-4 text-cyan-400" />}
                       {status.badge.icon === 'Crosshair' && <Crosshair className="w-4 h-4 text-indigo-400" />}
                       {status.badge.icon === 'Sparkles' && <Sparkles className="w-4 h-4 text-amber-400" />}
-                      <span className={`text-[10px] font-black uppercase italic tracking-widest ${status.badge.color}`}>
+                      <span className={`text-[10px] font-black uppercase italic tracking-widest text-[var(--nexus-accent)]`}>
                         {status.badge.name}
                       </span>
                     </div>
                   )}
                 </div>
 
-                <div className="w-full flex justify-center text-center">
-                  <div className="space-y-3 w-full">
-                    {isEditing ? (
+                <div className="space-y-3 w-full">
+                  {isEditing ? (
+                    <div className="space-y-3 w-full">
                       <div>
-                        <label className="flex items-center justify-center gap-2 text-[10px] font-black uppercase text-slate-500 tracking-widest mb-1.5"><UserCircle className="w-3 h-3" /> Full Name</label>
-                        <input value={editForm.username} onChange={(e) => setEditForm({ ...editForm, username: e.target.value })} className={`w-full rounded-2xl p-4 text-center text-sm font-bold outline-none border-2 transition-all ${getInputStyle()}`} />
+                        <label className="flex items-center justify-center gap-2 text-[10px] font-black uppercase text-[var(--nexus-text-muted)] tracking-widest mb-1.5"><UserCircle className="w-3 h-3" /> Full Name</label>
+                        <input value={editForm.fullName} onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })} placeholder="Full Name (Display)" className={`w-full rounded-2xl p-4 text-center text-sm font-bold outline-none border-2 transition-all ${getInputStyle()}`} />
                       </div>
-                    ) : (
-                      <div className="w-full">
-                        <label className="flex items-center justify-center gap-2 text-[10px] font-black uppercase text-slate-500 tracking-widest mb-1.5"><UserCircle className="w-3 h-3" /> Full Name</label>
-                        <p className={`text-xl font-black italic tracking-tighter ${theme === 'dark' ? 'text-slate-200' : 'text-slate-900'}`}>{user.username}</p>
+                      <div>
+                        <label className="flex items-center justify-center gap-2 text-[10px] font-black uppercase text-[var(--nexus-text-muted)] tracking-widest mb-1.5"><Hash className="w-3 h-3" /> Unique Handle</label>
+                        <input value={editForm.username} onChange={(e) => setEditForm({ ...editForm, username: e.target.value.toLowerCase().replace(/\s+/g, '') })} placeholder="Unique Handle (Username)" className={`w-full rounded-2xl p-4 text-center text-sm font-mono font-bold outline-none border-2 transition-all ${getInputStyle()}`} />
                       </div>
-                    )}
-                    <div className="flex items-center justify-center gap-2 mt-4 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
-                      <div className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
-                      <p className="text-[#10B981] text-[9px] font-black uppercase tracking-[0.2em]">Identity Synchronized</p>
                     </div>
+                  ) : (
+                    <div className="w-full">
+                      <label className="flex items-center justify-center gap-2 text-[10px] font-black uppercase text-[var(--nexus-text-muted)] tracking-widest mb-1.5"><UserCircle className="w-3 h-3" /> Display Name</label>
+                      <p className={`text-xl font-black italic tracking-tighter text-[var(--nexus-text)]`}>{user.fullName || user.username}</p>
+                      <p className="text-[10px] font-mono font-bold text-[var(--nexus-accent)] opacity-60 mt-1">@{user.username}</p>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-center gap-2 mt-4 px-4 py-2 bg-[var(--nexus-accent)]/10 border border-[var(--nexus-accent)]/20 rounded-xl">
+                    <div className="w-2 h-2 rounded-full bg-[var(--nexus-accent)] animate-pulse" />
+                    <p className="text-[var(--nexus-accent)] text-[9px] font-black uppercase tracking-[0.2em]">Identity Synchronized</p>
                   </div>
                 </div>
               </div>
@@ -169,24 +170,19 @@ const AccountsHub = ({
               {/* Right Side: Data Stack */}
               <div className="flex-1 space-y-5 w-full min-w-0">
 
-                {/* Username / Streamer ID Block */}
                 <div className="space-y-2">
-                  <label className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-500 tracking-widest ml-1"><Hash className="w-3.5 h-3.5" /> Username (Streamer ID)</label>
-                  {isEditing ? (
-                    <input value={editForm.streamerId} onChange={(e) => setEditForm({ ...editForm, streamerId: e.target.value })} className={`w-full rounded-2xl p-4 text-sm font-mono font-bold outline-none border-2 transition-all ${getInputStyle()}`} />
-                  ) : (
-                    <div className={`w-full rounded-2xl p-4 border ${theme === 'dark' ? 'bg-white/5 border-white/5' : 'bg-slate-50 border-slate-100'}`}>
-                      <p className="text-sm font-mono font-bold text-[#10B981]">@{user.streamerId}</p>
-                    </div>
-                  )}
+                  <label className="flex items-center gap-2 text-[10px] font-black uppercase text-[var(--nexus-text-muted)] tracking-widest ml-1"><Hash className="w-3.5 h-3.5" /> Identity Hash (Handle)</label>
+                  <div className={`w-full rounded-[var(--nexus-radius)] p-4 border bg-[var(--nexus-bg)]/40 border-[var(--nexus-border)]`}>
+                    <p className="text-sm font-mono font-bold text-[var(--nexus-accent)]">@{user.username}</p>
+                  </div>
                 </div>
 
                 {/* Email Block */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-500 tracking-widest ml-1"><MailIcon className="w-3.5 h-3.5" /> Email</label>
+                    <label className="flex items-center gap-2 text-[10px] font-black uppercase text-[var(--nexus-text-muted)] tracking-widest ml-1"><MailIcon className="w-3.5 h-3.5" /> Email</label>
                     {!isEditingEmail && (
-                      <button onClick={() => { setIsEditingEmail(true); setEmailInput(user.email || ''); }} className={`text-[9px] font-black uppercase tracking-widest hover:text-[#10B981] transition-colors ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
+                      <button onClick={() => { setIsEditingEmail(true); setEmailInput(user.email || ''); }} className={`text-[9px] font-black uppercase tracking-widest hover:text-[var(--nexus-accent)] transition-colors text-[var(--nexus-text-muted)]`}>
                         Edit
                       </button>
                     )}
@@ -194,20 +190,20 @@ const AccountsHub = ({
                   {isEditingEmail ? (
                     <div className="flex gap-2">
                       <input value={emailInput} onChange={(e) => setEmailInput(e.target.value)} className={`w-full rounded-2xl p-4 text-sm font-bold outline-none border-2 transition-all ${getInputStyle()}`} />
-                      <button disabled={isSendingOtp} onClick={async () => { setIsSendingOtp(true); const success = await saveContactUpdate('email', emailInput); setIsSendingOtp(false); if (success) setIsEditingEmail(false); }} className="px-5 rounded-2xl bg-[#10B981] text-black font-black uppercase text-[10px] tracking-widest hover:bg-[#0fa672] transition-colors shadow-lg disabled:opacity-50 flex items-center gap-2">
+                      <button disabled={isSendingOtp} onClick={async () => { setIsSendingOtp(true); const success = await saveContactUpdate('email', emailInput); setIsSendingOtp(false); if (success) setIsEditingEmail(false); }} className="px-5 rounded-[var(--nexus-radius)] bg-[var(--nexus-accent)] text-black font-black uppercase text-[10px] tracking-widest hover:brightness-110 transition-colors shadow-lg disabled:opacity-50 flex items-center gap-2 nexus-btn">
                         {isSendingOtp ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Verify'}
                       </button>
                     </div>
                   ) : (
-                    <div className={`w-full rounded-2xl p-4 border flex items-center justify-between transition-all ${theme === 'dark' ? 'bg-white/5 border-white/5' : 'bg-slate-50 border-slate-100'}`}>
-                      <p className={`text-sm font-bold truncate pr-4 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>{user.email}</p>
+                    <div className={`w-full rounded-2xl p-4 border flex items-center justify-between transition-all bg-[var(--nexus-panel)] border-[var(--nexus-border)]`}>
+                      <p className={`text-sm font-bold truncate pr-4 text-[var(--nexus-text)]`}>{user.email}</p>
                       {user.isEmailVerified ? (
-                        <div className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl border ${theme === 'dark' ? 'bg-[#10B981]/10 border-[#10B981]/20 text-[#10B981]' : 'bg-emerald-50 border-emerald-200 text-emerald-600'}`}>
+                        <div className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl border bg-[var(--nexus-accent)]/10 border-[var(--nexus-accent)]/20 text-[var(--nexus-accent)]`}>
                           <CheckCircle2 className="w-3.5 h-3.5" />
                           <span className="text-[9px] font-black uppercase tracking-widest">Verified</span>
                         </div>
                       ) : (
-                        <button onClick={() => requestVerification('email')} disabled={isRequestingOtp} className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all ${theme === 'dark' ? 'bg-amber-500/10 border-amber-500/20 text-amber-500 hover:bg-amber-500 hover:text-black' : 'bg-amber-50 border-amber-200 text-amber-600 hover:bg-amber-500 hover:text-white hover:border-amber-500'}`}>
+                        <button onClick={() => requestVerification('email')} disabled={isRequestingOtp} className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all nexus-btn bg-amber-500/10 border-amber-500/20 text-amber-500 hover:bg-amber-500 hover:text-black`}>
                           {isRequestingOtp && verifyType === 'email' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <AlertCircle className="w-3.5 h-3.5" />}
                           <span className="text-[9px] font-black uppercase tracking-widest">{isRequestingOtp && verifyType === 'email' ? 'Gen...' : 'Verify'}</span>
                         </button>
@@ -219,9 +215,9 @@ const AccountsHub = ({
                 {/* Contact Number Block */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-500 tracking-widest ml-1"><Phone className="w-3.5 h-3.5" /> Contact Number</label>
+                    <label className="flex items-center gap-2 text-[10px] font-black uppercase text-[var(--nexus-text-muted)] tracking-widest ml-1"><Phone className="w-3.5 h-3.5" /> Contact Number</label>
                     {!isEditingPhone && (
-                      <button onClick={() => { setIsEditingPhone(true); setPhoneInput(user.phone || ''); }} className={`text-[9px] font-black uppercase tracking-widest hover:text-[#10B981] transition-colors ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
+                      <button onClick={() => { setIsEditingPhone(true); setPhoneInput(user.phone || ''); }} className={`text-[9px] font-black uppercase tracking-widest hover:text-[var(--nexus-accent)] transition-colors text-[var(--nexus-text-muted)]`}>
                         Edit
                       </button>
                     )}
@@ -229,21 +225,21 @@ const AccountsHub = ({
                   {isEditingPhone ? (
                     <div className="flex gap-2">
                       <input value={phoneInput} onChange={(e) => setPhoneInput(e.target.value)} className={`w-full rounded-2xl p-4 text-sm font-bold outline-none border-2 transition-all ${getInputStyle()}`} />
-                      <button disabled={isSendingOtp} onClick={async () => { setIsSendingOtp(true); const success = await saveContactUpdate('phone', phoneInput); setIsSendingOtp(false); if (success) setIsEditingPhone(false); }} className="px-5 rounded-2xl bg-[#10B981] text-black font-black uppercase text-[10px] tracking-widest hover:bg-[#0fa672] transition-colors shadow-lg disabled:opacity-50 flex items-center gap-2">
+                      <button disabled={isSendingOtp} onClick={async () => { setIsSendingOtp(true); const success = await saveContactUpdate('phone', phoneInput); setIsSendingOtp(false); if (success) setIsEditingPhone(false); }} className="px-5 rounded-[var(--nexus-radius)] bg-[var(--nexus-accent)] text-black font-black uppercase text-[10px] tracking-widest hover:brightness-110 transition-colors shadow-lg disabled:opacity-50 flex items-center gap-2 nexus-btn">
                         {isSendingOtp ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Verify'}
                       </button>
                     </div>
                   ) : (
-                    <div className={`w-full rounded-2xl p-4 border flex items-center justify-between transition-all ${theme === 'dark' ? 'bg-white/5 border-white/5' : 'bg-slate-50 border-slate-100'}`}>
-                      <p className={`text-sm font-bold truncate pr-4 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>{user.phone || "No contact linked"}</p>
+                    <div className={`w-full rounded-2xl p-4 border flex items-center justify-between transition-all bg-[var(--nexus-panel)] border-[var(--nexus-border)]`}>
+                      <p className={`text-sm font-bold truncate pr-4 text-[var(--nexus-text)]`}>{user.phone || "No contact linked"}</p>
                       {user.phone && (
                         user.isPhoneVerified ? (
-                          <div className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl border ${theme === 'dark' ? 'bg-[#10B981]/10 border-[#10B981]/20 text-[#10B981]' : 'bg-emerald-50 border-emerald-200 text-emerald-600'}`}>
+                          <div className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl border bg-[var(--nexus-accent)]/10 border-[var(--nexus-accent)]/20 text-[var(--nexus-accent)]`}>
                             <CheckCircle2 className="w-3.5 h-3.5" />
                             <span className="text-[9px] font-black uppercase tracking-widest">Verified</span>
                           </div>
                         ) : (
-                          <button onClick={() => requestVerification('phone')} disabled={isRequestingOtp} className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all ${theme === 'dark' ? 'bg-amber-500/10 border-amber-500/20 text-amber-500 hover:bg-amber-500 hover:text-black' : 'bg-amber-50 border-amber-200 text-amber-600 hover:bg-amber-500 hover:text-white hover:border-amber-500'}`}>
+                          <button onClick={() => requestVerification('phone')} disabled={isRequestingOtp} className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all nexus-btn bg-amber-500/10 border-amber-500/20 text-amber-500 hover:bg-amber-500 hover:text-black`}>
                             {isRequestingOtp && verifyType === 'phone' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <AlertCircle className="w-3.5 h-3.5" />}
                             <span className="text-[9px] font-black uppercase tracking-widest">{isRequestingOtp && verifyType === 'phone' ? 'Gen...' : 'Verify'}</span>
                           </button>
@@ -255,12 +251,12 @@ const AccountsHub = ({
 
                 {/* Bio Block */}
                 <div className="space-y-2 pt-2">
-                  <label className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-500 tracking-widest ml-1"><MessageSquare className="w-3.5 h-3.5" /> Bio</label>
+                  <label className="flex items-center gap-2 text-[10px] font-black uppercase text-[var(--nexus-text-muted)] tracking-widest ml-1"><MessageSquare className="w-3.5 h-3.5" /> Bio</label>
                   {isEditing ? (
                     <textarea value={editForm.bio} onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })} className={`w-full rounded-2xl p-4 text-sm font-bold outline-none border-2 transition-all resize-none min-h-[90px] ${getInputStyle()}`} />
                   ) : (
-                    <div className={`w-full rounded-2xl p-4 border ${theme === 'dark' ? 'bg-white/5 border-white/5' : 'bg-slate-50 border-slate-100'}`}>
-                      <p className={`text-sm font-medium italic ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>"{user.bio || 'Signal established.'}"</p>
+                    <div className={`w-full rounded-2xl p-4 border bg-[var(--nexus-bg)]/40 border-[var(--nexus-border)]`}>
+                      <p className={`text-sm font-medium italic text-[var(--nexus-text-muted)]`}>"{user.bio || 'Signal established.'}"</p>
                     </div>
                   )}
                 </div>
@@ -268,31 +264,30 @@ const AccountsHub = ({
               </div>
             </div>
           </div>
-
           {/* --- IDENTITY HANDSHAKE (MODULAR CARD) --- */}
           <div className={`w-full flex flex-col border rounded-[2.5rem] p-8 lg:p-10 relative transition-all ${getCardStyle()}`}>
             <div className="flex items-center gap-4 mb-8">
-              <div className={`p-3 rounded-2xl ${theme === 'dark' ? 'bg-[#10B981]/10 text-[#10B981]' : 'bg-emerald-50 text-emerald-600'}`}>
+              <div className={`p-3 rounded-[var(--nexus-radius)] bg-[var(--nexus-accent)]/10 text-[var(--nexus-accent)]`}>
                 <Globe className="w-5 h-5" />
               </div>
-              <h3 className="text-sm font-black uppercase italic tracking-widest">Identity Handshake</h3>
+              <h3 className="text-sm font-black uppercase italic tracking-widest text-[var(--nexus-text)]">Identity Handshake</h3>
             </div>
 
             <div className="space-y-6">
               {/* 1. ALERT SOURCE */}
               <div className="flex flex-col gap-3 group">
-                <label className="text-[9px] font-black uppercase text-slate-500 tracking-[0.2em] flex justify-between h-3">
+                <label className="text-[9px] font-black uppercase text-[var(--nexus-text-muted)] tracking-[0.2em] flex justify-between h-3">
                   Live Alert Source
-                  {copiedType === 'obs' && <span className="text-[#10B981] animate-pulse">✓ COPIED</span>}
+                  {copiedType === 'obs' && <span className="text-[var(--nexus-accent)] animate-pulse">✓ COPIED</span>}
                 </label>
                 <div className="flex items-center gap-3">
                   <div
                     onClick={() => copyToClipboard(`${BASE_URL}/overlay/${user?.obsKey}`, 'obs')}
-                    className={`flex-1 cursor-pointer p-4 rounded-2xl border transition-all ${theme === 'dark' ? 'bg-black/40 border-white/5 hover:border-[#10B981]' : 'bg-slate-50 border-slate-200 hover:border-[#10B981]'}`}
+                    className={`flex-1 cursor-pointer p-4 rounded-[var(--nexus-radius)] border transition-all bg-[var(--nexus-bg)]/40 border-[var(--nexus-border)] hover:border-[var(--nexus-accent)]`}
                   >
-                    <input readOnly value={`${BASE_URL}/overlay/${user?.obsKey}`} className="w-full bg-transparent border-none outline-none text-[10px] font-mono text-[#10B981] truncate pointer-events-none" />
+                    <input readOnly value={`${BASE_URL}/overlay/${user?.obsKey}`} className="w-full bg-transparent border-none outline-none text-[10px] font-mono text-[var(--nexus-accent)] truncate pointer-events-none" />
                   </div>
-                  <button onClick={() => copyToClipboard(`${BASE_URL}/overlay/${user?.obsKey}`, 'obs')} className={`p-4 rounded-2xl transition-all shadow-md ${theme === 'dark' ? 'bg-[#10B981] text-black hover:bg-emerald-400' : 'bg-slate-900 text-white hover:bg-[#10B981]'}`}>
+                  <button onClick={() => copyToClipboard(`${BASE_URL}/overlay/${user?.obsKey}`, 'obs')} className={`p-4 rounded-[var(--nexus-radius)] transition-all shadow-md nexus-btn bg-[var(--nexus-accent)] text-black hover:brightness-110`}>
                     {copiedType === 'obs' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                   </button>
                 </div>
@@ -300,18 +295,18 @@ const AccountsHub = ({
 
               {/* 2. GOAL SOURCE */}
               <div className="flex flex-col gap-3 group">
-                <label className="text-[9px] font-black uppercase text-slate-500 tracking-[0.2em] flex justify-between h-3">
+                <label className="text-[9px] font-black uppercase text-[var(--nexus-text-muted)] tracking-[0.2em] flex justify-between h-3">
                   Mission Goal Source
                   {copiedType === 'goal' && <span className="text-amber-500 animate-pulse">✓ COPIED</span>}
                 </label>
                 <div className="flex items-center gap-3">
                   <div
                     onClick={() => copyToClipboard(`${BASE_URL}/goal/${user?.username}`, 'goal')}
-                    className={`flex-1 cursor-pointer p-4 rounded-2xl border transition-all ${theme === 'dark' ? 'bg-black/40 border-white/5 hover:border-amber-500' : 'bg-slate-50 border-slate-200 hover:border-amber-500'}`}
+                    className={`flex-1 cursor-pointer p-4 rounded-2xl border transition-all bg-[var(--nexus-panel)] border-[var(--nexus-border)] hover:border-amber-500 shadow-inner`}
                   >
                     <input readOnly value={`${BASE_URL}/goal/${user?.username}`} className="w-full bg-transparent border-none outline-none text-[10px] font-mono text-amber-500 truncate pointer-events-none" />
                   </div>
-                  <button onClick={() => copyToClipboard(`${BASE_URL}/goal/${user?.username}`, 'goal')} className={`p-4 rounded-2xl transition-all shadow-md ${theme === 'dark' ? 'bg-amber-500 text-black hover:bg-amber-400' : 'bg-slate-900 text-white hover:bg-amber-500'}`}>
+                  <button onClick={() => copyToClipboard(`${BASE_URL}/goal/${user?.username}`, 'goal')} className={`p-4 rounded-[var(--nexus-radius)] transition-all shadow-md nexus-btn bg-amber-500 text-black hover:bg-amber-400`}>
                     {copiedType === 'goal' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                   </button>
                 </div>
@@ -319,19 +314,38 @@ const AccountsHub = ({
 
               {/* 3. DONATION PAGE */}
               <div className="flex flex-col gap-3 group">
-                <label className="text-[9px] font-black uppercase text-slate-500 tracking-[0.2em] flex justify-between h-3">
+                <label className="text-[9px] font-black uppercase text-[var(--nexus-text-muted)] tracking-[0.2em] flex justify-between h-3">
                   Public Node (Payment Page)
-                  {copiedType === 'pay' && <span className="text-[#10B981] animate-pulse">✓ COPIED</span>}
+                  {copiedType === 'pay' && <span className="text-[var(--nexus-accent)] animate-pulse">✓ COPIED</span>}
                 </label>
                 <div className="flex items-center gap-3">
                   <div
                     onClick={() => copyToClipboard(`${BASE_URL}/pay/${user?.username}`, 'pay')}
-                    className={`flex-1 cursor-pointer p-4 rounded-2xl border transition-all ${theme === 'dark' ? 'bg-black/40 border-white/5 hover:border-[#10B981]' : 'bg-slate-50 border-slate-200 hover:border-[#10B981]'}`}
+                    className={`flex-1 cursor-pointer p-4 rounded-[var(--nexus-radius)] border transition-all bg-[var(--nexus-bg)]/40 border-[var(--nexus-border)] hover:border-[var(--nexus-accent)]`}
                   >
-                    <input readOnly value={`${BASE_URL}/pay/${user?.username}`} className="w-full bg-transparent border-none outline-none text-[10px] font-mono text-[#10B981] truncate pointer-events-none" />
+                    <input readOnly value={`${BASE_URL}/pay/${user?.username}`} className="w-full bg-transparent border-none outline-none text-[10px] font-mono text-[var(--nexus-accent)] truncate pointer-events-none" />
                   </div>
-                  <button onClick={() => copyToClipboard(`${BASE_URL}/pay/${user?.username}`, 'pay')} className={`p-4 rounded-2xl transition-all shadow-md ${theme === 'dark' ? 'bg-[#10B981] text-black hover:bg-emerald-400' : 'bg-slate-900 text-white hover:bg-[#10B981]'}`}>
+                  <button onClick={() => copyToClipboard(`${BASE_URL}/pay/${user?.username}`, 'pay')} className={`p-4 rounded-[var(--nexus-radius)] transition-all shadow-md nexus-btn bg-[var(--nexus-accent)] text-black hover:brightness-110`}>
                     {copiedType === 'pay' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* 4. MASTER OBS OVERLAY */}
+              <div className="flex flex-col gap-3 group">
+                <label className="text-[9px] font-black uppercase text-[var(--nexus-text-muted)] tracking-[0.2em] flex justify-between h-3">
+                  Master OBS Overlay (All-In-One)
+                  {copiedType === 'master' && <span className="text-indigo-400 animate-pulse">✓ COPIED</span>}
+                </label>
+                <div className="flex items-center gap-3">
+                  <div
+                    onClick={() => copyToClipboard(`${BASE_URL}/overlay/master/${user?.obsKey}`, 'master')}
+                    className={`flex-1 cursor-pointer p-4 rounded-[var(--nexus-radius)] border transition-all bg-[var(--nexus-bg)]/40 border-[var(--nexus-border)] hover:border-indigo-500 shadow-inner`}
+                  >
+                    <input readOnly value={`${BASE_URL}/overlay/master/${user?.obsKey}`} className="w-full bg-transparent border-none outline-none text-[10px] font-mono text-indigo-500 truncate pointer-events-none" />
+                  </div>
+                  <button onClick={() => copyToClipboard(`${BASE_URL}/overlay/master/${user?.obsKey}`, 'master')} className={`p-4 rounded-[var(--nexus-radius)] transition-all shadow-md nexus-btn bg-indigo-500 text-black hover:bg-indigo-400`}>
+                    {copiedType === 'master' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                   </button>
                 </div>
               </div>
@@ -345,27 +359,27 @@ const AccountsHub = ({
             <div className="flex items-center gap-4 mb-10">
               <div className="p-3.5 bg-indigo-500/10 rounded-2xl text-indigo-500 border border-indigo-500/20"><Landmark className="w-7 h-7" /></div>
               <div>
-                <h3 className={`text-sm font-black uppercase italic tracking-widest ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Banking Node</h3>
-                <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Protocol v2.45</p>
+                <h3 className={`text-sm font-black uppercase italic tracking-widest text-[var(--nexus-text)]`}>Banking Node</h3>
+                <p className="text-[8px] font-black text-[var(--nexus-text-muted)] uppercase tracking-widest">Protocol v2.45</p>
               </div>
             </div>
 
             <div className="space-y-8 flex-1 z-10 w-full">
               {user.razorpayAccountId && user.payoutSettings?.bankDetailsLinked ? (
                 <div className="space-y-6 w-full">
-                  <div className={`p-6 rounded-[2rem] border flex items-center gap-5 ${theme === 'dark' ? 'bg-[#10B981]/5 border-[#10B981]/20' : 'bg-green-50 border-green-100'}`}>
+                  <div className={`p-6 rounded-[2rem] border flex items-center gap-5 bg-[var(--nexus-accent)]/10 border-[var(--nexus-accent)]/20 shadow-inner`}>
                     <ShieldCheckIcon className="w-7 h-7 text-[#10B981]" />
                     <div className="min-w-0">
                       <p className="text-[10px] font-black uppercase text-[#10B981] tracking-widest">Node Secured</p>
-                      <p className="text-xs font-mono font-bold text-slate-500 mt-1 truncate">{user.razorpayAccountId}</p>
+                      <p className="text-xs font-mono font-bold text-[var(--nexus-text-muted)] mt-1 truncate">{user.razorpayAccountId}</p>
                     </div>
                   </div>
                 </div>
               ) : (
                 <div className="space-y-8 w-full">
-                  <div className={`p-6 rounded-[2rem] border-2 border-dashed ${theme === 'dark' ? 'bg-black/40 border-white/10' : 'bg-slate-50 border-slate-200'}`}>
+                  <div className={`p-6 rounded-[2rem] border-2 border-dashed bg-[var(--nexus-bg)]/40 border-[var(--nexus-border)]`}>
                     <CreditCard className="w-5 h-5 text-indigo-500 mb-4" />
-                    <p className="text-[11px] text-slate-500 font-bold uppercase leading-tight italic">Initialize bank node for Split-Payment protocol.</p>
+                    <p className="text-[11px] text-[var(--nexus-text-muted)] font-bold uppercase leading-tight italic">Initialize bank node for Split-Payment protocol.</p>
                   </div>
 
                   {!user.isPhoneVerified && (
@@ -378,7 +392,7 @@ const AccountsHub = ({
                   <button
                     onClick={handleBankLink}
                     disabled={isLinkingBank || !user.isPhoneVerified}
-                    className={`w-full py-5 rounded-2xl font-black uppercase italic text-[11px] transition-all flex items-center justify-center gap-3 ${!(isLinkingBank || !user.isPhoneVerified) ? (theme === 'dark' ? 'bg-white text-black hover:bg-[#10B981]' : 'bg-slate-900 text-white hover:bg-[#10B981]') : 'bg-slate-500/20 text-slate-500 cursor-not-allowed border border-white/5'}`}
+                    className={`w-full py-5 rounded-2xl font-black uppercase italic text-[11px] transition-all flex items-center justify-center gap-3 ${!(isLinkingBank || !user.isPhoneVerified) ? 'bg-[var(--nexus-text)] text-[var(--nexus-bg)] hover:bg-[var(--nexus-accent)]' : 'bg-slate-500/20 text-slate-500 cursor-not-allowed border border-white/5 shadow-inner'}`}
                   >
                     {isLinkingBank ? <Loader2 className="animate-spin w-5 h-5" /> : <>Onboard Node <ArrowRight className="w-4 h-4" /></>}
                   </button>
@@ -387,10 +401,10 @@ const AccountsHub = ({
             </div>
           </div>
 
-          <div onClick={() => setActiveSection('growth')} className={`w-full shrink-0 rounded-[2rem] p-6 flex items-center justify-between transition-all cursor-pointer group border ${theme === 'dark' ? 'bg-black/40 border-white/5 hover:border-indigo-500/30' : 'bg-slate-50 border-slate-200 hover:border-indigo-500'}`}>
+          <div onClick={() => setActiveSection('growth')} className={`w-full shrink-0 rounded-[2rem] p-6 flex items-center justify-between transition-all cursor-pointer group border bg-[var(--nexus-panel)] border-[var(--nexus-border)] hover:border-indigo-500/30 shadow-[var(--nexus-glow)]`}>
             <div className="flex items-center gap-5">
               <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20 group-hover:bg-indigo-500 group-hover:text-white transition-all shadow-inner"><Trophy className="w-6 h-6" /></div>
-              <p className="text-[11px] font-black uppercase italic text-slate-500 group-hover:text-indigo-500 transition-colors tracking-widest">Upgrade Tier</p>
+              <p className="text-[11px] font-black uppercase italic text-[var(--nexus-text-muted)] group-hover:text-indigo-500 transition-colors tracking-widest">Upgrade Tier</p>
             </div>
             <ChevronRight className="w-5 h-5 text-indigo-500 group-hover:translate-x-2 transition-transform" />
           </div>
@@ -398,10 +412,10 @@ const AccountsHub = ({
       </div >
 
       {/* INDEPENDENT OTP VERIFICATION MODAL */}
-      < AnimatePresence >
+      <AnimatePresence>
         {showVerifyModal && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-            <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} className={`w-full max-w-md p-8 rounded-[2.5rem] border shadow-2xl relative overflow-hidden ${theme === 'dark' ? 'bg-[#0a0a0a] border-white/10' : 'bg-white border-slate-200'}`}>
+            <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} className={`w-full max-w-md p-8 rounded-[2.5rem] border shadow-2xl relative overflow-hidden bg-[var(--nexus-panel)] border-[var(--nexus-border)]`}>
 
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#10B981] to-transparent" />
 
@@ -411,11 +425,11 @@ const AccountsHub = ({
                 </div>
 
                 <div>
-                  <h3 className={`text-2xl font-black uppercase italic tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Node Verification</h3>
+                  <h3 className={`text-2xl font-black uppercase italic tracking-tighter text-[var(--nexus-text)]`}>Node Verification</h3>
                   <p className="text-[10px] font-black uppercase tracking-widest text-[#10B981] mt-1">{verifyType === 'email' ? 'Email Endpoint' : 'Mobile Endpoint'}</p>
                 </div>
 
-                <p className={`text-sm italic ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
+                <p className={`text-sm italic text-[var(--nexus-text-muted)]`}>
                   We've transmitted a 6-digit cryptographic key to your {verifyType === 'email' ? 'email' : 'phone'}. Enter it below to irrevocably secure this node.
                 </p>
 
@@ -426,13 +440,13 @@ const AccountsHub = ({
                     value={otpInput}
                     onChange={(e) => setOtpInput(e.target.value.replace(/\D/g, ''))}
                     placeholder="000000"
-                    className={`w-full text-center text-3xl tracking-[0.5em] font-black p-4 rounded-2xl outline-none border transition-all ${theme === 'dark' ? 'bg-black/40 border-white/5 text-white focus:border-[#10B981]' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-[#10B981] shadow-inner'}`}
+                    className={`w-full text-center text-3xl tracking-[0.5em] font-black p-4 rounded-2xl outline-none border transition-all bg-[var(--nexus-bg)]/40 border-[var(--nexus-border)] text-[var(--nexus-text)] focus:border-[#10B981] shadow-inner`}
                   />
 
                   <div className="flex gap-3">
                     <button
                       onClick={() => setShowVerifyModal(false)}
-                      className={`flex-1 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest transition-colors border shadow-sm ${theme === 'dark' ? 'bg-white/5 text-slate-300 border-white/5 hover:bg-white/10' : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'}`}
+                      className={`flex-1 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest transition-colors border shadow-sm bg-[var(--nexus-accent)]/5 text-[var(--nexus-text-muted)] border-[var(--nexus-border)] hover:bg-[var(--nexus-accent)]/10`}
                     >
                       Abort
                     </button>
@@ -449,8 +463,8 @@ const AccountsHub = ({
             </motion.div>
           </motion.div>
         )}
-      </AnimatePresence >
-    </motion.div >
+      </AnimatePresence>
+    </motion.div>
   );
 };
 

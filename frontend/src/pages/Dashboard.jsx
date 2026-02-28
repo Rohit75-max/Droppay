@@ -4,8 +4,8 @@ import axios from 'axios';
 import { io } from 'socket.io-client';
 import {
   LayoutDashboard, Settings, UserCircle, Trophy, HelpCircle,
-  MessageSquare, Zap, ChevronRight, LogOut, Sun, Moon,
-  ShieldAlert, Activity, Menu, X, Play, Loader2
+  MessageSquare, Zap, ChevronRight, LogOut,
+  ShieldAlert, Activity, X, Play, Loader2, IndianRupee
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -17,6 +17,7 @@ import GrowthMissions from '../components/GrowthMissions';
 import HelpCenter from '../components/HelpCenter';
 import FeedbackStation from '../components/FeedbackStation';
 import DashboardStore from './DashboardStore';
+import MobileBottomNav from '../components/navigation/MobileBottomNav';
 
 const navItems = [
   { id: 'dashboard', label: 'Nexus', icon: LayoutDashboard },
@@ -28,15 +29,44 @@ const navItems = [
   { id: 'feedback', label: 'Signal', icon: MessageSquare },
 ];
 
+// --- DYNAMIC INFRASTRUCTURE (Fixes Mobile Persistence) ---
+const API_BASE = `http://${window.location.hostname}:5001`;
+
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [activeSection, setActiveSection] = useState('dashboard');
+  const [activeSection, setActiveSection] = useState(() => {
+    return localStorage.getItem('dropPayActiveSection') || 'dashboard';
+  });
   const [user, setUser] = useState(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('dropPayTheme') || 'dark';
   });
+
+  const [nexusTheme, setNexusTheme] = useState(() => {
+    return localStorage.getItem('nexusTheme') || 'void';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('dropPayActiveSection', activeSection);
+  }, [activeSection]);
+
+  useEffect(() => {
+    localStorage.setItem('dropPayTheme', theme);
+    document.documentElement.classList.remove('dark', 'light');
+    document.documentElement.classList.add(theme);
+
+    // Apply Nexus Theme
+    const body = document.body;
+    body.className = body.className.replace(/theme-\S+/g, '').trim();
+    if (nexusTheme !== 'void') {
+      body.classList.add(`theme-${nexusTheme}`);
+    }
+
+    // Sync with global engine in App.js
+    window.dispatchEvent(new CustomEvent('nexus-theme-change', { detail: { theme: nexusTheme } }));
+  }, [theme, nexusTheme]);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -46,7 +76,7 @@ const Dashboard = () => {
   const [timeRange, setTimeRange] = useState('7D');
 
   const [goalForm, setGoalForm] = useState({ title: '', targetAmount: 0, showOnDashboard: true, stylePreference: 'modern' });
-  const [editForm, setEditForm] = useState({ username: '', bio: '', streamerId: '' });
+  const [editForm, setEditForm] = useState({ fullName: '', username: '', bio: '', streamerId: '' });
   const [alertConfig, setAlertConfig] = useState({ ttsEnabled: false, volume: 50 });
   const [partnerStickers, setPartnerStickers] = useState([]);
   const [isSavingStickers, setIsSavingStickers] = useState(false);
@@ -58,6 +88,8 @@ const Dashboard = () => {
   const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
   const [isProcessingWithdraw, setIsProcessingWithdraw] = useState(false);
   const [isLinkingBank, setIsLinkingBank] = useState(false);
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+  const [withdrawalAmount, setWithdrawalAmount] = useState(1000);
 
   // AVATAR UPLOAD STATES
   const fileInputRef = useRef(null);
@@ -74,32 +106,33 @@ const Dashboard = () => {
   const [feedbackText, setFeedbackText] = useState("");
   const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
 
-  useEffect(() => {
-    localStorage.setItem('dropPayTheme', theme);
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [theme]);
 
   const fetchProfileData = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) { navigate('/login'); return; }
 
-      const res = await axios.get('http://localhost:5001/api/user/profile', {
+      const res = await axios.get(`${API_BASE}/api/user/profile`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
       setUser(res.data);
+      if (res.data.nexusTheme) {
+        setNexusTheme(res.data.nexusTheme);
+        localStorage.setItem('nexusTheme', res.data.nexusTheme);
+      }
+      if (res.data.nexusThemeMode) {
+        setTheme(res.data.nexusThemeMode);
+        localStorage.setItem('dropPayTheme', res.data.nexusThemeMode);
+      }
       setGoalForm({
         title: res.data.goalSettings?.title || "New Mission",
         targetAmount: res.data.goalSettings?.targetAmount || 0,
         showOnDashboard: res.data.goalSettings?.showOnDashboard ?? true,
-        stylePreference: res.data.goalSettings?.stylePreference || "modern"
+        stylePreference: res.data.goalSettings?.stylePreference || "glass_jar"
       });
       setEditForm({
+        fullName: res.data.fullName || "",
         username: res.data.username || "",
         bio: res.data.bio || "",
         streamerId: res.data.streamerId || ""
@@ -132,6 +165,10 @@ const Dashboard = () => {
       setLoading(false);
     }
   }, [navigate, timeRange]);
+
+  const handleLogoClick = () => {
+    fetchProfileData(); // Standardized Refresh Handshake
+  };
 
   useEffect(() => {
     fetchProfileData();
@@ -229,6 +266,67 @@ const Dashboard = () => {
       setAlertConfig(newConfig);
     } catch (err) {
       console.error("Failed to sync overlay settings", err);
+    }
+  };
+
+  const saveNexusTheme = async (newTheme) => {
+    try {
+      // Optimistic Update
+      setNexusTheme(newTheme);
+      localStorage.setItem('nexusTheme', newTheme);
+      setUser(prev => ({ ...prev, nexusTheme: newTheme }));
+      window.dispatchEvent(new CustomEvent('nexus-theme-change', { detail: { theme: newTheme } }));
+
+      const token = localStorage.getItem('token');
+      await axios.post(`${API_BASE}/api/user/update-profile`,
+        { nexusTheme: newTheme },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    } catch (err) {
+      console.error("Failed to sync nexus theme", err);
+    }
+  };
+
+  const equipAsset = async (category, assetId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.post('http://localhost:5001/api/user/equip-asset',
+        { category, assetId },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      // Update the right slice of user state based on category
+      if (category === 'theme') {
+        setNexusTheme(assetId);
+        localStorage.setItem('nexusTheme', assetId);
+        setUser(prev => ({ ...prev, nexusTheme: assetId }));
+        window.dispatchEvent(new CustomEvent('nexus-theme-change', { detail: { theme: assetId } }));
+      } else if (category === 'alert') {
+        setAlertConfig(res.data.overlaySettings);
+        setUser(prev => ({ ...prev, overlaySettings: res.data.overlaySettings }));
+      } else if (category === 'goal') {
+        setGoalForm(prev => ({ ...prev, stylePreference: assetId }));
+        setUser(prev => ({ ...prev, goalSettings: { ...prev.goalSettings, stylePreference: assetId } }));
+      } else if (category === 'widget') {
+        setUser(prev => ({ ...prev, activeRevenueWidget: assetId }));
+      }
+    } catch (err) {
+      console.error(`Failed to equip ${category} asset`, err);
+    }
+  };
+
+
+  const triggerTestSignal = async (sticker = 'zap') => {
+    try {
+      if (!user?.streamerId) return;
+      await axios.post('http://localhost:5001/api/payment/test-drop', {
+        streamerId: user.streamerId,
+        donorName: "Top_Supporter_77",
+        amount: 500,
+        message: "This is a real-time signal test! 🚀",
+        sticker: sticker
+      });
+    } catch (err) {
+      console.error("Test signal failed", err);
     }
   };
 
@@ -352,15 +450,15 @@ const Dashboard = () => {
     }
   };
 
-  const handleWithdrawRequest = async () => {
-    if (!window.confirm("Initialize payout sequence? Minimum ₹100 required.")) return;
+  const handleWithdrawRequest = async (amount) => {
     setIsProcessingWithdraw(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.post('http://localhost:5001/api/user/withdraw', {}, {
+      const res = await axios.post('http://localhost:5001/api/user/withdraw', { amount }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       alert(res.data.msg || "Withdrawal sequence initiated.");
+      setShowWithdrawModal(false);
       await fetchProfileData(); // Refresh wallet UI instantly
     } catch (err) {
       alert(err.response?.data?.msg || "Payout sequence failed.");
@@ -381,7 +479,7 @@ const Dashboard = () => {
   };
 
   if (loading) return (
-    <div className="h-screen bg-[#050505] flex flex-col items-center justify-center gap-6">
+    <div className="h-screen bg-[var(--nexus-bg)] flex flex-col items-center justify-center gap-6">
       <div className="relative">
         <Loader2 className="w-12 h-12 text-[#10B981] animate-spin" />
         <Activity className="w-6 h-6 text-[#10B981] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-50" />
@@ -401,148 +499,239 @@ const Dashboard = () => {
   );
 
   return (
-    <div className={`h-screen flex flex-col lg:flex-row overflow-hidden transition-colors duration-500 ${theme === 'dark' ? 'bg-[#050505] text-white' : 'bg-slate-50 text-slate-900'}`}>
+    <div className={`h-screen flex flex-col md:flex-row overflow-hidden transition-all duration-500 bg-[var(--nexus-bg)]/40 text-[var(--nexus-text)] relative`}>
+      {/* Background layer is now handled globally by LiveThemeEngine in App.js */}
 
-      {/* SIDEBAR */}
-      <aside className={`hidden lg:flex w-20 hover:w-64 group transition-all duration-500 flex-col py-8 border-r shrink-0 overflow-y-auto custom-scrollbar ${theme === 'dark' ? 'border-white/5 bg-[#080808]' : 'border-slate-200 bg-white'} z-50`}>
-        <div
-          className="flex items-center px-6 mb-12 gap-4 cursor-pointer"
-          onClick={() => setActiveSection('dashboard')}
-        >
-          <Zap className="w-8 h-8 text-[#10B981] flex-shrink-0" />
-          <span className="text-xl font-black italic tracking-tighter opacity-0 group-hover:opacity-100 transition-all whitespace-nowrap">DropPay</span>
-        </div>
-        <nav className="flex-1 space-y-2 px-4">
-          {navItems.map((item) => (
-            <button key={item.id} onClick={() => setActiveSection(item.id)} className={`w-full flex items-center justify-between gap-4 p-3 rounded-2xl transition-all ${activeSection === item.id ? 'bg-[#10B981] text-black shadow-lg' : 'text-slate-500 hover:bg-white/5'}`}>
-              <div className="flex items-center gap-4">
-                <item.icon className="w-6 h-6 flex-shrink-0" />
-                <span className="font-black italic uppercase text-[10px] tracking-widest opacity-0 group-hover:opacity-100 transition-all whitespace-nowrap">{item.label}</span>
-              </div>
-              <ChevronRight className={`w-4 h-4 transition-all ${activeSection === item.id ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2'}`} />
+      <div className="flex flex-col md:flex-row w-full h-full relative z-10 overflow-hidden">
+        {/* SIDEBAR */}
+        <aside className={`md:flex hidden w-20 hover:w-64 group transition-all duration-500 flex-col py-8 border-r basis-auto shrink-0 overflow-y-auto custom-scrollbar border-[var(--nexus-border)] bg-[var(--nexus-panel)] z-[120]`}>
+          <div
+            className="flex items-center px-6 mb-12 gap-4 cursor-pointer"
+            onClick={handleLogoClick}
+          >
+            <Zap className="w-8 h-8 text-[var(--nexus-accent)] flex-shrink-0" />
+            <span className="text-xl font-black italic tracking-tighter opacity-0 group-hover:opacity-100 transition-all whitespace-nowrap">DropPay</span>
+          </div>
+          <nav className="flex-1 space-y-2 px-4">
+            {navItems.map((item) => (
+              <button key={item.id} onClick={() => setActiveSection(item.id)} className={`w-full flex items-center justify-between gap-4 p-3 rounded-[var(--nexus-radius)] transition-all theme-btn ${activeSection === item.id ? 'bg-[var(--nexus-accent)] text-black shadow-lg' : 'text-[var(--nexus-text-muted)] hover:bg-[var(--nexus-accent)]/10'}`}>
+                <div className="flex items-center gap-4">
+                  <item.icon className="w-6 h-6 flex-shrink-0" />
+                  <span className="font-black italic uppercase text-[10px] tracking-widest opacity-0 group-hover:opacity-100 transition-all whitespace-nowrap">{item.label}</span>
+                </div>
+                <ChevronRight className={`w-4 h-4 transition-all ${activeSection === item.id ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2'}`} />
+              </button>
+            ))}
+          </nav>
+
+          {/* SECURE ADMIN ENTRY */}
+          {user?.role === 'admin' && (
+            <button onClick={() => navigate('/admin/secure-portal')} className="px-7 py-4 mt-auto mb-2 text-rose-500 flex items-center gap-4 hover:text-rose-400 hover:bg-rose-500/10 transition-colors border-t border-rose-500/20">
+              <ShieldAlert className="w-6 h-6 flex-shrink-0 animate-pulse" />
+              <span className="font-black italic uppercase text-[10px] tracking-widest opacity-0 group-hover:opacity-100 transition-all whitespace-nowrap">Admin Portal</span>
             </button>
-          ))}
-        </nav>
+          )}
 
-        {/* SECURE ADMIN ENTRY */}
-        {user?.role === 'admin' && (
-          <button onClick={() => navigate('/admin/secure-portal')} className="px-7 py-4 mt-auto mb-2 text-rose-500 flex items-center gap-4 hover:text-rose-400 hover:bg-rose-500/10 transition-colors border-t border-rose-500/20">
-            <ShieldAlert className="w-6 h-6 flex-shrink-0 animate-pulse" />
-            <span className="font-black italic uppercase text-[10px] tracking-widest opacity-0 group-hover:opacity-100 transition-all whitespace-nowrap">Admin Portal</span>
+          <button onClick={() => {
+            localStorage.removeItem('token');
+            localStorage.removeItem('nexusTheme');
+            localStorage.removeItem('dropPayTheme');
+            navigate('/login');
+          }} className={`px-7 py-4 text-rose-500 flex items-center gap-4 hover:text-rose-400 transition-colors ${user?.role !== 'admin' ? 'mt-auto' : ''}`}>
+            <LogOut className="w-6 h-6 flex-shrink-0" />
+            <span className="font-black italic uppercase text-[10px] tracking-widest opacity-0 group-hover:opacity-100 transition-all whitespace-nowrap">Exit</span>
           </button>
-        )}
+        </aside>
 
-        <button onClick={() => { localStorage.removeItem('token'); navigate('/login'); }} className={`px-7 py-4 text-rose-500 flex items-center gap-4 hover:text-rose-400 transition-colors ${user?.role !== 'admin' ? 'mt-auto' : ''}`}>
-          <LogOut className="w-6 h-6 flex-shrink-0" />
-          <span className="font-black italic uppercase text-[10px] tracking-widest opacity-0 group-hover:opacity-100 transition-all whitespace-nowrap">Exit</span>
-        </button>
-      </aside>
 
-      {/* MOBILE HEADER */}
-      <header className={`lg:hidden fixed top-0 left-0 right-0 h-20 px-6 flex justify-between items-center z-[100] backdrop-blur-xl border-b transition-colors ${theme === 'dark' ? 'border-white/5' : 'border-slate-200'}`}>
-        <div className="flex items-center gap-2 cursor-pointer" onClick={() => setActiveSection('dashboard')}>
-          <Zap className="w-6 h-6 text-[#10B981]" />
-          <span className={`text-xl font-black italic tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>DropPay</span>
-        </div>
-        <button onClick={() => setIsMobileMenuOpen(true)} className="p-3 rounded-2xl bg-[#10B981] text-black shadow-lg">
-          <Menu className="w-5 h-5" />
-        </button>
-      </header>
-
-      {/* MOBILE MENU */}
-      <AnimatePresence>
-        {isMobileMenuOpen && (
-          <motion.div initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} transition={{ type: 'spring', damping: 25, stiffness: 200 }} className={`fixed inset-0 z-[150] p-6 flex flex-col lg:hidden transition-colors duration-500 ${theme === 'dark' ? 'bg-[#050505] text-white' : 'bg-white text-slate-900'}`}>
-            <div className="flex justify-between items-center mb-6">
-              <div className="flex items-center gap-2 cursor-pointer" onClick={() => { setActiveSection('dashboard'); setIsMobileMenuOpen(false); }}>
-                <Zap className="w-8 h-8 text-[#10B981]" />
-                <span className={`text-xl font-black italic tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>DropPay</span>
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <motion.div
+              initial={{ x: '-100%', opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: '-100%', opacity: 0 }}
+              transition={{ type: 'tween', ease: 'easeOut', duration: 0.25 }}
+              className={`fixed inset-0 z-[150] p-6 flex flex-col lg:hidden bg-[var(--nexus-bg)] text-[var(--nexus-text)]`}
+            >
+              <div className="flex justify-between items-center mb-6">
+                <div className="flex items-center gap-2 cursor-pointer" onClick={() => { handleLogoClick(); setIsMobileMenuOpen(false); }}>
+                  <Zap className="w-8 h-8 text-[var(--nexus-accent)]" />
+                  <span className={`text-xl font-black italic tracking-tighter text-[var(--nexus-text)]`}>DropPay</span>
+                </div>
+                <button
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`p-2 rounded-xl border border-[var(--nexus-border)] text-[var(--nexus-text)]`}
+                >
+                  <X className="w-5 h-5" />
+                </button>
               </div>
-              <button onClick={() => setIsMobileMenuOpen(false)} className={`p-2 rounded-xl border ${theme === 'dark' ? 'text-white border-white/10' : 'text-slate-900 border-slate-200'}`}><X className="w-5 h-5" /></button>
-            </div>
-            <div className="space-y-2 flex-1 overflow-y-auto scrollbar-hide pr-2">
-              {navItems.map((item) => (
-                <button key={item.id} onClick={() => { setActiveSection(item.id); setIsMobileMenuOpen(false); }} className={`w-full flex items-center justify-between py-3 md:py-4 text-base md:text-lg font-black italic uppercase border-b ${theme === 'dark' ? 'border-white/5' : 'border-slate-100'} transition-all ${activeSection === item.id ? 'text-[#10B981]' : 'text-slate-500'}`}>
-                  <div className="flex items-center gap-4"><item.icon className="w-5 h-5 md:w-6 md:h-6" /> {item.label}</div>
-                  <ChevronRight className={`w-5 h-5 ${activeSection === item.id ? 'opacity-100' : 'opacity-0'}`} />
-                </button>
-              ))}
-            </div>
+              <div className="space-y-2 flex-1 overflow-y-auto scrollbar-hide pr-2">
+                {navItems.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => { setActiveSection(item.id); setIsMobileMenuOpen(false); }}
+                    className={`w-full flex items-center justify-between py-3 md:py-4 text-base md:text-lg font-black italic uppercase border-b border-[var(--nexus-border)] transition-all ${activeSection === item.id ? 'text-[var(--nexus-accent)]' : 'text-[var(--nexus-text-muted)]'}`}
+                  >
+                    <div className="flex items-center gap-4"><item.icon className="w-5 h-5 md:w-6 md:h-6" /> {item.label}</div>
+                    <ChevronRight className={`w-5 h-5 ${activeSection === item.id ? 'opacity-100 text-[var(--nexus-accent)]' : 'opacity-0'}`} />
+                  </button>
+                ))}
+              </div>
 
-            <div className="pt-2 shrink-0 border-t border-slate-200 dark:border-white/10 mt-2">
-              {/* MOBILE SECURE ADMIN ENTRY */}
-              {user?.role === 'admin' && (
-                <button onClick={() => { navigate('/admin/secure-portal'); setIsMobileMenuOpen(false); }} className={`w-full mb-2 py-3 md:py-4 text-rose-500 font-black italic uppercase text-base md:text-lg flex items-center gap-4 border-b border-rose-500/20`}>
-                  <ShieldAlert className="w-5 h-5 md:w-6 md:h-6 animate-pulse" /> Admin Portal
-                </button>
-              )}
+              <div className="pt-2 shrink-0 border-t border-[var(--nexus-border)] mt-2">
+                {/* MOBILE SECURE ADMIN ENTRY */}
+                {user?.role === 'admin' && (
+                  <button onClick={() => { navigate('/admin/secure-portal'); setIsMobileMenuOpen(false); }} className={`w-full mb-2 py-3 md:py-4 text-rose-500 font-black italic uppercase text-base md:text-lg flex items-center gap-4 border-b border-rose-500/20`}>
+                    <ShieldAlert className="w-5 h-5 md:w-6 md:h-6 animate-pulse" /> Admin Portal
+                  </button>
+                )}
 
-              <button onClick={() => { localStorage.removeItem('token'); navigate('/login'); }} className={`w-full py-3 md:py-4 text-rose-500 font-black italic uppercase text-base md:text-lg flex items-center gap-4`}><LogOut className="w-5 h-5 md:w-6 md:h-6" /> Exit Protocol</button>
+                <button onClick={() => {
+                  localStorage.removeItem('token');
+                  localStorage.removeItem('nexusTheme');
+                  localStorage.removeItem('dropPayTheme');
+                  navigate('/login');
+                }} className={`w-full py-3 md:py-4 text-rose-500 font-black italic uppercase text-base md:text-lg flex items-center gap-4`}><LogOut className="w-5 h-5 md:w-6 md:h-6" /> Exit Protocol</button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <main className="flex-1 flex flex-col relative overflow-hidden pt-0">
+          <header className="px-6 py-3 md:px-12 md:py-4 flex justify-between items-center z-40">
+            <div className="flex flex-col">
+              <span className="text-[10px] font-black tracking-[0.3em] text-[var(--nexus-accent)] opacity-50 uppercase mb-1">Control Hub</span>
+              <h1 className={`text-2xl md:text-3xl font-black uppercase tracking-tighter leading-none text-[var(--nexus-text)]`}>
+                {activeSection} <span className="text-[var(--nexus-accent)]">NEXUS.</span>
+              </h1>
             </div>
+            {/* Dark mode toggle removed per user request */}
+          </header>
+
+          <div className="flex-1 overflow-y-auto custom-scrollbar px-4 md:px-8 pb-24 md:pb-12">
+            <AnimatePresence mode="wait">
+              <motion.div key={activeSection} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }} transition={{ duration: 0.2 }} className="max-w-7xl mx-auto w-full flex flex-col items-center transition-all duration-500">
+                <div className="w-full">
+                  {activeSection === 'dashboard' && (
+                    <DashboardSummary {...{
+                      theme, user, chartData, timeRange, setTimeRange,
+                      recentDrops, topDonors, getProgressPercentage,
+                      handleWithdrawRequest, isProcessingWithdraw,
+                      nexusTheme, setShowWithdrawModal,
+                      Play
+                    }} />
+                  )}
+                  {activeSection === 'settings' && (
+                    <ControlCenter
+                      theme={theme} user={user}
+                      goalForm={goalForm} setGoalForm={setGoalForm}
+                      updateGoalSettings={updateGoalSettings}
+                      isUpdatingGoal={isUpdatingGoal}
+                      alertConfig={alertConfig} setAlertConfig={setAlertConfig}
+                      saveAlertSettings={saveAlertSettings}
+                      nexusTheme={nexusTheme}
+                      saveNexusTheme={saveNexusTheme}
+                      equipAsset={equipAsset}
+                      partnerStickers={partnerStickers}
+                      addStickerSlot={addStickerSlot}
+                      removeStickerSlot={removeStickerSlot}
+                      savePartnerPack={savePartnerPack}
+                      isSavingStickers={isSavingStickers}
+                      copyToClipboard={copyToClipboard}
+                      copiedType={copiedType}
+                      triggerTestSignal={triggerTestSignal}
+                      setActiveSection={setActiveSection}
+                    />
+                  )}
+                  {activeSection === 'accounts' && <AccountsHub theme={theme} user={user} editForm={editForm} setEditForm={setEditForm} isEditing={isEditing} setIsEditing={setIsEditing} saveProfileUpdates={saveProfileUpdates} saveContactUpdate={saveContactUpdate} profilePreview={profilePreview} handleImageChange={handleImageChange} fileInputRef={fileInputRef} handleBankLink={handleBankLink} isLinkingBank={isLinkingBank} setActiveSection={setActiveSection} copyToClipboard={copyToClipboard} copiedType={copiedType} />}
+                  {activeSection === 'growth' && <GrowthMissions theme={theme} user={user} copyToClipboard={copyToClipboard} copiedType={copiedType} />}
+                  {activeSection === 'help' && <HelpCenter theme={theme} user={user} />}
+                  {activeSection === 'store' && <DashboardStore theme={theme} user={user} setUser={setUser} fetchProfileData={fetchProfileData} />}
+                  {activeSection === 'feedback' && (
+                    <FeedbackStation
+                      theme={theme} user={user}
+                      feedbackType={feedbackType} setFeedbackType={setFeedbackType}
+                      rating={rating} setRating={setRating}
+                      feedbackText={feedbackText} setFeedbackText={setFeedbackText}
+                      isSubmittingFeedback={isSubmittingFeedback}
+                      setIsSubmittingFeedback={setIsSubmittingFeedback}
+                    />
+                  )}
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </main>
+      </div>
+
+      {/* WITHDRAWAL MODAL */}
+      <AnimatePresence>
+        {showWithdrawModal && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+            <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} className={`w-full max-w-md p-8 rounded-[2.5rem] border shadow-2xl relative overflow-hidden ${theme === 'dark' ? 'bg-[#0a0a0a] border-white/10' : 'bg-white border-slate-200'}`}>
+              <div className="absolute top-0 left-0 w-full h-1 bg-[var(--nexus-accent)]" />
+              <div className="flex flex-col items-center text-center space-y-6">
+                <div className="w-16 h-16 rounded-full bg-[var(--nexus-accent)]/10 flex items-center justify-center border-2 border-[var(--nexus-accent)]/20 shadow-inner">
+                  <IndianRupee className="w-8 h-8 text-[var(--nexus-accent)]" />
+                </div>
+                <div>
+                  <h3 className={`text-2xl font-black uppercase italic tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Withdraw Funds</h3>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-[var(--nexus-accent)] mt-1">Initiating Payout Sequence</p>
+                </div>
+                <div className="w-full space-y-4">
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center justify-between px-2">
+                      <span className="text-[10px] uppercase font-black tracking-widest text-[var(--nexus-text-muted)]">Wallet Balance</span>
+                      <span className="text-xs font-mono font-bold text-[var(--nexus-text)]">₹{user.walletBalance?.toLocaleString('en-IN')}</span>
+                    </div>
+                    <div className="relative">
+                      <IndianRupee className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--nexus-accent)]" />
+                      <input
+                        type="number"
+                        min={1000}
+                        max={user.walletBalance}
+                        value={withdrawalAmount}
+                        onChange={(e) => setWithdrawalAmount(Number(e.target.value))}
+                        className={`w-full text-center text-3xl font-black p-5 pl-10 rounded-2xl outline-none border transition-all ${theme === 'dark' ? 'bg-black/40 border-white/5 text-white focus:border-[var(--nexus-accent)]' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-[var(--nexus-accent)]'}`}
+                      />
+                    </div>
+                    <p className={`text-[9px] font-bold italic ${theme === 'dark' ? 'text-slate-500' : 'text-slate-400'}`}>Minimum withdrawal: ₹1,000</p>
+                  </div>
+
+                  <div className="flex items-center gap-2 overflow-x-auto py-2 scrollbar-hide">
+                    {[1000, 2500, 5000, user.walletBalance].map(amt => (
+                      <button
+                        key={amt}
+                        onClick={() => setWithdrawalAmount(Math.floor(amt))}
+                        className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase border transition-all whitespace-nowrap ${withdrawalAmount === Math.floor(amt) ? 'bg-[var(--nexus-accent)] text-black border-[var(--nexus-accent)]' : 'bg-white/5 text-[var(--nexus-text-muted)] border-[var(--nexus-border)] hover:border-[var(--nexus-accent)]/50'}`}
+                      >
+                        ₹{Math.floor(amt).toLocaleString()}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="flex gap-3 pt-2">
+                    <button
+                      onClick={() => setShowWithdrawModal(false)}
+                      className={`flex-1 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest transition-colors border shadow-sm ${theme === 'dark' ? 'bg-white/5 text-slate-300 border-white/5 hover:bg-white/10' : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'}`}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => handleWithdrawRequest(withdrawalAmount)}
+                      disabled={isProcessingWithdraw || withdrawalAmount < 1000 || withdrawalAmount > user.walletBalance}
+                      className="flex-[2] py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest bg-[var(--nexus-accent)] text-black hover:brightness-110 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-[var(--nexus-accent)]/20"
+                    >
+                      {isProcessingWithdraw ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirm Payout'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <main className="flex-1 flex flex-col relative overflow-hidden pt-20 lg:pt-0">
-        <header className="px-6 py-3 md:px-12 md:py-4 flex justify-between items-center z-40">
-          <h1 className={`text-2xl md:text-3xl font-black italic uppercase tracking-tighter leading-none ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-            {activeSection} <span className="text-[#10B981]">Nexus.</span>
-          </h1>
-          <div className="flex items-center gap-2 md:gap-4">
-            <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className="p-2.5 md:p-3 rounded-xl md:rounded-2xl border border-white/5 bg-white/5 text-slate-500 hover:text-[#10B981] transition-all">
-              {theme === 'dark' ? <Sun className="w-4 h-4 md:w-5 md:h-5" /> : <Moon className="w-4 h-4 md:w-5 md:h-5" />}
-            </button>
-          </div>
-        </header>
-
-        <div className="flex-1 overflow-y-auto custom-scrollbar px-4 md:px-8 pb-12">
-          <AnimatePresence mode="wait">
-            <motion.div key={activeSection} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }} transition={{ duration: 0.3 }} className={`${activeSection === 'accounts' ? 'max-w-7xl' : 'max-w-6xl'} mx-auto w-full flex flex-col items-center transition-all duration-500`}>
-              <div className={`w-full ${activeSection === 'dashboard' || activeSection === 'accounts' ? '' : 'max-w-4xl'}`}>
-                {activeSection === 'dashboard' && (
-                  <DashboardSummary {...{
-                    theme, user, chartData, timeRange, setTimeRange,
-                    recentDrops, topDonors, getProgressPercentage,
-                    handleWithdrawRequest, isProcessingWithdraw,
-                    Play
-                  }} />
-                )}
-                {activeSection === 'settings' && (
-                  <ControlCenter
-                    theme={theme} user={user}
-                    goalForm={goalForm} setGoalForm={setGoalForm}
-                    updateGoalSettings={updateGoalSettings}
-                    isUpdatingGoal={isUpdatingGoal}
-                    alertConfig={alertConfig} setAlertConfig={setAlertConfig}
-                    saveAlertSettings={saveAlertSettings}
-                    partnerStickers={partnerStickers}
-                    addStickerSlot={addStickerSlot}
-                    removeStickerSlot={removeStickerSlot}
-                    savePartnerPack={savePartnerPack}
-                    isSavingStickers={isSavingStickers}
-                    copyToClipboard={copyToClipboard}
-                    copiedType={copiedType}
-                  />
-                )}
-                {activeSection === 'accounts' && <AccountsHub theme={theme} user={user} editForm={editForm} setEditForm={setEditForm} isEditing={isEditing} setIsEditing={setIsEditing} saveProfileUpdates={saveProfileUpdates} saveContactUpdate={saveContactUpdate} profilePreview={profilePreview} handleImageChange={handleImageChange} fileInputRef={fileInputRef} handleBankLink={handleBankLink} isLinkingBank={isLinkingBank} setActiveSection={setActiveSection} copyToClipboard={copyToClipboard} copiedType={copiedType} />}
-                {activeSection === 'growth' && <GrowthMissions theme={theme} user={user} copyToClipboard={copyToClipboard} copiedType={copiedType} />}
-                {activeSection === 'help' && <HelpCenter theme={theme} user={user} />}
-                {activeSection === 'store' && <DashboardStore theme={theme} user={user} setUser={setUser} />}
-                {activeSection === 'feedback' && (
-                  <FeedbackStation
-                    theme={theme} user={user}
-                    feedbackType={feedbackType} setFeedbackType={setFeedbackType}
-                    rating={rating} setRating={setRating}
-                    feedbackText={feedbackText} setFeedbackText={setFeedbackText}
-                    isSubmittingFeedback={isSubmittingFeedback}
-                    setIsSubmittingFeedback={setIsSubmittingFeedback}
-                  />
-                )}
-              </div>
-            </motion.div>
-          </AnimatePresence>
-        </div>
-      </main>
       {/* OTP SECURITY MODAL */}
       <AnimatePresence>
         {showOtpModal && (
@@ -574,7 +763,6 @@ const Dashboard = () => {
                     placeholder="000000"
                     className={`w-full text-center text-3xl tracking-[0.5em] font-black p-4 rounded-2xl outline-none border transition-all ${theme === 'dark' ? 'bg-black/40 border-white/5 text-white focus:border-[#10B981]' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-[#10B981]'}`}
                   />
-
                   <div className="flex gap-3">
                     <button
                       onClick={() => setShowOtpModal(false)}
@@ -599,7 +787,21 @@ const Dashboard = () => {
       </AnimatePresence>
 
       <style dangerouslySetInnerHTML={{ __html: `.custom-scrollbar::-webkit-scrollbar { width: 4px; } .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(16, 185, 129, 0.2); border-radius: 10px; }` }} />
-    </div>
+
+      {/* MOBILE BOTTOM NAV — hidden on lg+ */}
+      <MobileBottomNav
+        activeSection={activeSection}
+        setActiveSection={setActiveSection}
+        user={user}
+        theme={theme}
+        onLogout={() => {
+          localStorage.removeItem('token');
+          localStorage.removeItem('nexusTheme');
+          localStorage.removeItem('dropPayTheme');
+          navigate('/login');
+        }}
+      />
+    </div >
   );
 };
 

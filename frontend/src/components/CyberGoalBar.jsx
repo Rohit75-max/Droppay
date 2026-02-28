@@ -465,6 +465,7 @@ const CyberGoalBar = ({ goal, tier, runnerUrl, percentage, isComplete, goalStyle
               <lottie-player src={runnerUrl} background="transparent" speed="1" loop autoplay style={{ width: '100%', height: '100%' }}></lottie-player>
             </motion.div>
             {(tier === 'pro' || tier === 'legend') && !isComplete && (<div className="absolute right-0 h-full w-24 bg-gradient-to-l from-white/60 to-transparent blur-[2px] pointer-events-none rounded-r-full" />)}
+            {!isComplete && <div className="absolute right-0 top-0 bottom-0 w-1.5 sm:w-2 rounded-full goal-spark opacity-0 transition-opacity duration-1000" style={{ opacity: percentage > 5 ? 1 : 0 }} />}
           </motion.div>
         </div>
         <div className="flex flex-col items-end justify-center w-auto sm:w-[25%] shrink-0 relative z-10 pt-1">

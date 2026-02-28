@@ -3,22 +3,35 @@ const User = require('../models/User');
 exports.requestWithdrawal = async (req, res) => {
     try {
         const userId = req.user.id;
+        const { amount } = req.body;
         const user = await User.findById(userId);
 
         if (!user) return res.status(404).json({ msg: "Node Not Found" });
 
-        if (user.walletBalance < 100) {
-            return res.status(400).json({ msg: "Insufficient Liquidity. Minimum withdrawal is ₹100." });
+        const MIN_WITHDRAWAL = 1000;
+
+        if (user.walletBalance < MIN_WITHDRAWAL) {
+            return res.status(400).json({ msg: `Insufficient Liquidity. Minimum node balance required for payout is ₹${MIN_WITHDRAWAL}.` });
         }
 
-        const payoutAmount = user.walletBalance;
+        if (!amount || isNaN(amount) || amount < MIN_WITHDRAWAL) {
+            return res.status(400).json({ msg: `Invalid Amount. Minimum withdrawal is ₹${MIN_WITHDRAWAL}.` });
+        }
 
-        // Secure state transfer: Deduct balance & move to pending lock
-        user.walletBalance = 0;
-        user.financialMetrics.pendingPayouts += payoutAmount;
+        if (amount > user.walletBalance) {
+            return res.status(400).json({ msg: "Withdrawal exceeds available balance." });
+        }
+
+        // Secure state transfer: Deduct requested amount & move to pending lock
+        user.walletBalance -= amount;
+        user.financialMetrics.pendingPayouts += amount;
 
         await user.save();
-        res.status(200).json({ msg: `Withdrawal of ₹${payoutAmount} requested successfully.` });
+        res.status(200).json({
+            msg: `Withdrawal of ₹${amount} initiated successfully.`,
+            walletBalance: user.walletBalance,
+            pendingPayouts: user.financialMetrics.pendingPayouts
+        });
 
     } catch (err) {
         console.error("Payout Request Error:", err);
@@ -186,5 +199,214 @@ exports.purchasePremiumAlert = async (req, res) => {
     } catch (err) {
         console.error("Purchase Alert Error:", err);
         res.status(500).json({ msg: "System override failed." });
+    }
+};
+
+exports.purchaseNexusTheme = async (req, res) => {
+    try {
+        const { themeId } = req.body;
+        const PRICE = 10000;
+
+        if (!themeId) return res.status(400).json({ msg: "Theme ID required" });
+
+        const user = await User.findById(req.user.id);
+        if (!user) return res.status(404).json({ msg: "User not found" });
+
+        // Initialize array if missing
+        if (!user.unlockedNexusThemes) {
+            user.unlockedNexusThemes = [];
+        }
+
+        // Check if already unlocked
+        if (user.unlockedNexusThemes.includes(themeId)) {
+            user.nexusTheme = themeId;
+            await user.save();
+            return res.status(200).json({ msg: "Theme Equipped!", nexusTheme: user.nexusTheme });
+        }
+
+        // Check balance
+        if (user.walletBalance < PRICE) {
+            return res.status(400).json({ msg: `Insufficient Wallet Balance. ₹${PRICE} required to unlock this environment.` });
+        }
+
+        // Deduct & Unlock
+        user.walletBalance -= PRICE;
+        user.unlockedNexusThemes.push(themeId);
+        user.nexusTheme = themeId; // Auto-Equip
+
+        await user.save();
+
+        // Ledger Entry
+        await Drop.create({
+            streamerId: user.streamerId,
+            donorName: "SYSTEM_DEBIT",
+            amount: -PRICE,
+            message: `Purchased Elite Workspace Theme: [${themeId.toUpperCase()}]`,
+            sticker: 'zap',
+            status: 'completed',
+            razorpayPaymentId: 'internal_wallet_txn_theme',
+            razorpayOrderId: 'internal_wallet_txn_theme'
+        });
+
+        res.status(200).json({
+            msg: "Elite Environment Synchronized & Active!",
+            walletBalance: user.walletBalance,
+            nexusTheme: user.nexusTheme,
+            unlockedNexusThemes: user.unlockedNexusThemes
+        });
+
+    } catch (err) {
+        console.error("Purchase Theme Error:", err);
+        res.status(500).json({ msg: "Environment synthesis failed." });
+    }
+};
+
+// ==================== WIDGET PURCHASE ====================
+const WIDGET_CATALOG = {
+    wd4: { name: 'Midnight Cruiser Matrix', price: 12000 }
+};
+
+exports.purchaseWidget = async (req, res) => {
+    try {
+        const { widgetId } = req.body;
+        const catalog = WIDGET_CATALOG[widgetId];
+        if (!catalog) return res.status(400).json({ msg: "Unknown widget ID." });
+
+        const user = await User.findById(req.user.id);
+        if (!user) return res.status(404).json({ msg: "User not found." });
+
+        if (!user.ownedWidgets) user.ownedWidgets = [];
+
+        // Already owned — just equip
+        if (user.ownedWidgets.includes(widgetId)) {
+            user.activeRevenueWidget = widgetId;
+            await user.save();
+            return res.status(200).json({
+                msg: "Widget already owned — equipped!",
+                ownedWidgets: user.ownedWidgets,
+                activeRevenueWidget: user.activeRevenueWidget
+            });
+        }
+
+        if (user.walletBalance < catalog.price) {
+            return res.status(400).json({ msg: `Insufficient balance. ₹${catalog.price} required.` });
+        }
+
+        user.walletBalance -= catalog.price;
+        user.ownedWidgets.push(widgetId);
+        user.activeRevenueWidget = widgetId; // Auto-equip on purchase
+        await user.save();
+
+        await Drop.create({
+            streamerId: user.streamerId,
+            donorName: "SYSTEM_DEBIT",
+            amount: -catalog.price,
+            message: `Purchased Widget: [${catalog.name.toUpperCase()}]`,
+            sticker: 'zap',
+            status: 'completed',
+            razorpayPaymentId: 'internal_wallet_txn_widget',
+            razorpayOrderId: 'internal_wallet_txn_widget'
+        });
+
+        res.status(200).json({
+            msg: `${catalog.name} activated!`,
+            walletBalance: user.walletBalance,
+            ownedWidgets: user.ownedWidgets,
+            activeRevenueWidget: user.activeRevenueWidget
+        });
+    } catch (err) {
+        console.error("Purchase Widget Error:", err);
+        res.status(500).json({ msg: "Widget deployment failed." });
+    }
+};
+
+// ==================== WIDGET EQUIP ====================
+exports.equipWidget = async (req, res) => {
+    try {
+        const { widgetId } = req.body;
+        const user = await User.findById(req.user.id);
+        if (!user) return res.status(404).json({ msg: "User not found." });
+
+        const ownedWidgets = user.ownedWidgets || [];
+        if (widgetId !== 'default' && !ownedWidgets.includes(widgetId)) {
+            return res.status(403).json({ msg: "Widget not owned." });
+        }
+
+        user.activeRevenueWidget = widgetId;
+        await user.save();
+
+        res.status(200).json({
+            msg: `Widget equipped: ${widgetId}`,
+            activeRevenueWidget: user.activeRevenueWidget
+        });
+    } catch (err) {
+        console.error("Equip Widget Error:", err);
+        res.status(500).json({ msg: "Equip failed." });
+    }
+};
+
+// ==================== UNIVERSAL EQUIP ASSET ====================
+exports.equipAsset = async (req, res) => {
+    try {
+        const { category, assetId } = req.body;
+        if (!category || !assetId) return res.status(400).json({ msg: "category and assetId required." });
+
+        const user = await User.findById(req.user.id);
+        if (!user) return res.status(404).json({ msg: "User not found." });
+
+        let responsePayload = {};
+
+        switch (category) {
+            case 'theme': {
+                const owned = user.unlockedNexusThemes || [];
+                if (assetId !== 'void' && assetId !== 'aero' && assetId !== 'kawaii' && assetId !== 'arcade' && assetId !== 'bgmi' && !owned.includes(assetId)) {
+                    return res.status(403).json({ msg: "Theme not owned." });
+                }
+                user.nexusTheme = assetId;
+                await user.save();
+                responsePayload = { category: 'theme', equipped: user.nexusTheme, nexusTheme: user.nexusTheme };
+                break;
+            }
+            case 'alert': {
+                const ownedAlerts = user.overlaySettings?.unlockedPremiumAlerts || [];
+                const freeAlerts = ['modern', 'comic', 'playful', 'pixel', 'kawaii', 'cyberhud', 'bgmi', 'gta', 'coc', 'avatar', 'godzilla', 'default'];
+                if (!freeAlerts.includes(assetId) && !ownedAlerts.includes(assetId)) {
+                    return res.status(403).json({ msg: "Alert not owned." });
+                }
+                user.overlaySettings.stylePreference = assetId;
+                await user.save();
+                responsePayload = { category: 'alert', equipped: assetId, overlaySettings: user.overlaySettings };
+                break;
+            }
+            case 'goal': {
+                const ownedGoals = user.goalSettings?.unlockedPremiumStyles || [];
+                const freeGoals = ['modern', 'glass_jar', 'gta', 'coc', 'bgmi', 'avatar', 'godzilla', 'arc_reactor_horizontal', 'arc_reactor_circular', 'boss_fight', 'plasma_battery', 'pixel_coin_row', 'pixel_coin_vault', 'default'];
+                if (!freeGoals.includes(assetId) && !ownedGoals.includes(assetId)) {
+                    return res.status(403).json({ msg: "Goal style not owned." });
+                }
+                user.goalSettings.stylePreference = assetId;
+                await user.save();
+                responsePayload = { category: 'goal', equipped: assetId, goalSettings: user.goalSettings };
+                break;
+            }
+            case 'widget': {
+                const ownedWidgets = user.ownedWidgets || [];
+                if (assetId !== 'default' && !ownedWidgets.includes(assetId)) {
+                    return res.status(403).json({ msg: "Widget not owned." });
+                }
+                user.activeRevenueWidget = assetId;
+                await user.save();
+                responsePayload = { category: 'widget', equipped: assetId, activeRevenueWidget: assetId };
+                break;
+            }
+            default:
+                return res.status(400).json({ msg: `Unknown category: ${category}` });
+        }
+
+        res.status(200).json({ msg: `Equipped successfully!`, ...responsePayload });
+
+    } catch (err) {
+        console.error("Universal Equip Error:", err);
+        res.status(500).json({ msg: "Equip failed." });
     }
 };

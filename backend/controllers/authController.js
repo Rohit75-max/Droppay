@@ -46,18 +46,19 @@ const sendOTPEmail = async (email, otpCode) => {
 // 1. SIGNUP: Hardened with Identity Conflict Protocol
 exports.signup = async (req, res) => {
     try {
-        const { username, phone, password, referralCode } = req.body;
+        const { fullName, username, phone, password, referralCode } = req.body;
         const email = req.body.email.trim().toLowerCase();
 
-        // Auto-generate Streamer ID from Username (strip spaces, lowercase)
-        const cleanStreamerId = username.trim().toLowerCase().replace(/\s+/g, '');
+        // Username is the Primary Identity Key
+        const cleanHandle = username.trim().toLowerCase().replace(/\s+/g, '');
+        const cleanStreamerId = cleanHandle; // Synced
 
         // Check for Identity Conflicts across the dual-namespace
         const identityConflict = await User.findOne({
             $or: [
-                { username: { $regex: new RegExp(`^${escapeRegex(username.trim())}$`, 'i') } },
+                { username: cleanHandle },
                 { streamerId: cleanStreamerId },
-                { phone: phone.trim() } // ADDED: Fortified Phone Uniqueness Protocol
+                { phone: phone.trim() }
             ],
             isEmailVerified: true
         });
@@ -108,7 +109,7 @@ exports.signup = async (req, res) => {
             }
 
             user = new User({
-                username, email, phone, streamerId: cleanStreamerId,
+                fullName, username: cleanHandle, email, phone, streamerId: cleanStreamerId,
                 password: hashedPassword, isEmailVerified: false,
                 otp: { code: otpCode, expiresAt: Date.now() + 600000 },
                 referredBy: referrer ? referrer._id : undefined

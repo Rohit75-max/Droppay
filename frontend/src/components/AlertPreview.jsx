@@ -27,7 +27,8 @@ const AlertPreview = React.memo(({
   theme = 'dark',
   customAvatar,
   tier = 'starter',
-  stylePreference = 'modern'
+  stylePreference = 'modern',
+  hideSticker = false
 }) => {
 
   const isComic = stylePreference === 'comic';
@@ -61,6 +62,7 @@ const AlertPreview = React.memo(({
         message={message}
         customAvatar={customAvatar}
         stylePreference={stylePreference}
+        hideSticker={hideSticker}
       />
     );
   }
@@ -135,13 +137,15 @@ const AlertPreview = React.memo(({
       `}</style>
 
       {/* 1. KINETIC LOTTIE NODE */}
-      <motion.div
-        animate={{ y: [-10, 10, -10], scale: [1, 1.05, 1] }}
-        transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
-        className="w-24 h-24 sm:w-28 sm:h-28 z-20 mb-[-30px] drop-shadow-2xl"
-      >
-        <Player autoplay loop src={lottieUrl} style={{ height: '100%', width: '100%' }} />
-      </motion.div>
+      {!hideSticker && (
+        <motion.div
+          animate={{ y: [-10, 10, -10], scale: [1, 1.05, 1] }}
+          transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+          className="w-24 h-24 sm:w-28 sm:h-28 z-20 mb-[-30px] drop-shadow-2xl"
+        >
+          <Player autoplay loop src={lottieUrl} style={{ height: '100%', width: '100%' }} />
+        </motion.div>
+      )}
 
       {/* 2. MAIN ALERT BODY (HEIGHT FIXED & MODERN LAYOUT RESTORED) */}
       <div

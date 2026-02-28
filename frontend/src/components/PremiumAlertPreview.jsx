@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 // All 22 unique icons required for all 20 styles
-import { Target, Zap, RadioReceiver, Feather, Box, Activity, FastForward, PaintBucket, Star, Sparkles, Hexagon, Eye, Sun, Shield, Globe, Flame, Cpu, Rocket, Swords, Camera, Music, Terminal } from 'lucide-react';
+import { Target, Zap, RadioReceiver, Feather, Box, Activity, FastForward, PaintBucket, Star, Sparkles, Hexagon, Eye, Sun, Shield, Globe, Flame, Cpu, Rocket, Swords, Camera, Music, Terminal, Trophy } from 'lucide-react';
 import { getOptimizedImage } from '../protocol/cdnHelper'; // Ensure path is correct
 
 /**
@@ -803,6 +803,122 @@ const PremiumAlertPreview = React.memo(({
                     <circle cx="75%" cy="45%" r="4" fill="#fde047" />
                     <circle cx="85%" cy="15%" r="4" fill="#fde047" />
                 </svg>
+            </div>
+        );
+    }
+
+    // ==========================================
+    // 21. PLINKO DROP (Elite Triangle Arcade) - [₹12,000 TIER]
+    // ==========================================
+    if (stylePreference === 'plinko_drop') {
+        // --- 1. CONFIGURATION (Edit prizes here) ---
+        const buckets = [
+            { label: 'Pushups x10', color: 'text-slate-500' },
+            { label: 'VIP BADGE', color: 'text-emerald-400' },
+            { label: 'JACKPOT x2', color: 'text-yellow-400', glow: true }, // The winning bucket
+            { label: 'Sing a Song', color: 'text-cyan-400' },
+            { label: 'No Prize', color: 'text-red-500' }
+        ];
+
+        // --- 2. ADVANCED PHYSICS SIMULATION KEYFRAMES ---
+        // Suspenseful, chaotic path bouncing off pegs, then hitting Jackpot
+        const coinPathX = [0, -40, 60, -80, 20, -100, 30, -50, 0, 0];
+        const coinPathY = [0, 40, 80, 120, 160, 200, 240, 280, 320, 340];
+        const coinRotate = [0, 180, -180, 360, -360, 720, -720, 1080, 1440, 0];
+
+        // Pegs layout (Pyramid/Triangle formation)
+        const totalRows = 8;
+
+        return (
+            <div className="relative w-full max-w-lg mx-auto h-[400px] flex items-center justify-center overflow-hidden bg-[#020617] rounded-b-3xl shadow-[0_30px_60px_rgba(0,0,0,1)] perspective-1000">
+
+                {/* GLOBAL KEYFRAMES & STYLES (Scope to this style only) */}
+                <style>{`
+                  @keyframes neon-peg { 0%, 100% { box-shadow: 0 0 5px #facc15; } 50% { box-shadow: 0 0 15px #facc15, 0 0 20px #fff; } }
+                  @keyframes laser-grid { 0% { background-position: 0 0; } 100% { background-position: 0 1000px; } }
+                `}</style>
+
+                {/* Background Atmosphere: Scrolling Laser Grid */}
+                <div className="absolute inset-0 bg-[#020617] bg-[linear-gradient(rgba(34,211,238,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,0.1)_1px,transparent_1px)] bg-[size:30px_30px] opacity-30 animate-[laser-grid_10s_linear_infinite]" />
+
+                {/* 1. Main Triangle Container (The Plinko Board) */}
+                <div className="relative w-full h-[350px] bg-slate-900 border-[10px] border-slate-800" style={{ clipPath: 'polygon(50% 0%, 100% 100%, 0% 100%)' }}>
+                    <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-black/80" />
+
+                    {/* Interior Glowing Edges */}
+                    <div className="absolute inset-0 shadow-[inset_0_0_50px_rgba(34,211,238,0.3)] pointer-events-none z-10" />
+
+                    {/* Pegs Generation (Pyramid shape) */}
+                    <div className="absolute inset-0 flex flex-col pt-16 z-10 px-6">
+                        {Array.from({ length: totalRows }).map((_, rowIndex) => {
+                            const pegsInRow = rowIndex + 2; // Rows increase by 1 peg
+                            const stagger = rowIndex % 2 === 0;
+
+                            return (
+                                <div key={rowIndex} className={`flex justify-center gap-6 ${stagger ? 'pl-8' : 'pr-8'} mb-6`}>
+                                    {Array.from({ length: pegsInRow }).map((_, pegIndex) => (
+                                        <motion.div
+                                            key={`${rowIndex}-${pegIndex}`}
+                                            animate={{ scale: [1, 1.3, 1] }}
+                                            transition={{ repeat: Infinity, duration: 2 + Math.random(), delay: Math.random() }}
+                                            className="w-3 h-3 bg-yellow-400 rounded-full border-2 border-white animate-[neon-peg_2s_infinite]"
+                                        />
+                                    ))}
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                {/* 2. Top Spawner Hook */}
+                <div className="absolute top-0 w-40 h-10 bg-slate-800 border-b-4 border-cyan-500 rounded-b-xl z-20 flex items-center justify-center shadow-lg transform translate-y-[-50%]">
+                    <span className="text-cyan-300 font-mono font-black text-[10px] tracking-widest uppercase flex gap-1 items-center">
+                        <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" /> INCOMING COIN
+                    </span>
+                </div>
+
+                {/* 3. The Dropping Coin ( suspenseful physics ) */}
+                <motion.div
+                    initial={{ y: 0, x: 0 }}
+                    animate={{ y: coinPathY, x: coinPathX, rotate: coinRotate }}
+                    transition={{ duration: 3.5, ease: "linear" }} // Increased duration for suspense
+                    className="absolute top-[-10px] z-30 w-16 h-16 rounded-full overflow-hidden flex items-center justify-center border-[6px] border-yellow-400 bg-slate-950 shadow-[0_0_50px_rgba(250,204,21,0.6)] backdrop-blur-sm transform-style-3d"
+                >
+                    <div className="absolute inset-0 border-[6px] border-dashed border-white opacity-40 rounded-full animate-[spin_5s_linear_infinite]" />
+                    {customAvatar ? (
+                        <img src={getOptimizedImage(customAvatar, 200)} alt="Donor" className="w-full h-full object-cover" />
+                    ) : (
+                        <span className="text-yellow-400 font-black text-3xl font-mono">₹</span>
+                    )}
+                </motion.div>
+
+                {/* 4. Bottom Prize Buckets (Aligned to triangle base) */}
+                <div className="absolute bottom-0 w-[96%] h-24 flex z-20 rounded-t-xl overflow-hidden border-t-8 border-slate-700">
+                    {buckets.map((bucket, index) => (
+                        <div key={index} className={`flex-1 border-r-2 border-slate-800 last:border-r-0 flex flex-col items-center justify-end pb-3 text-center px-1 ${bucket.glow ? 'bg-yellow-950/40 shadow-[inset_0_-30px_60px_rgba(234,179,8,0.5)]' : 'bg-slate-950'}`}>
+                            <span className={`font-black text-[9px] uppercase tracking-widest ${bucket.color}`}>{bucket.label}</span>
+                            {bucket.glow && <div className="absolute bottom-1 w-12 h-1 bg-yellow-400 rounded-full blur-[4px] animate-pulse" />}
+                        </div>
+                    ))}
+                </div>
+
+                {/* 5. Winner Reveal Banner (Appears with delay) */}
+                <motion.div
+                    initial={{ y: 200, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 3.8, type: "spring", bounce: 0.6 }}
+                    className="absolute bottom-28 w-[90%] bg-black/90 p-4 rounded-2xl border-4 border-yellow-400 shadow-[0_0_50px_rgba(250,204,21,0.6)] z-40 text-center"
+                >
+                    <Sparkles className="absolute top-2 right-2 w-5 h-5 text-yellow-400 opacity-50" />
+                    <h4 className="text-slate-400 text-[10px] uppercase font-mono tracking-widest mb-1 flex items-center gap-1 justify-center">
+                        <Trophy className="w-3 h-3 text-yellow-500" /> SUPPORTER DEPOSIT ACCEPTED
+                    </h4>
+                    <h2 className="text-white font-serif font-black text-4xl uppercase tracking-tighter drop-shadow-[0_0_10px_#fff] leading-tight">{donorName}</h2>
+                    <div className="bg-yellow-950 px-8 py-2 border-y-2 border-yellow-500 my-2 shadow-inner">
+                        <span className="text-yellow-300 font-black text-4xl font-mono">₹{amount.toLocaleString('en-IN')}</span>
+                    </div>
+                    <p className="text-yellow-100 italic text-sm line-clamp-2 px-6">"{message}"</p>
+                </motion.div>
             </div>
         );
     }

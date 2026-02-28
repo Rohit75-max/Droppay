@@ -2,7 +2,8 @@ const mongoose = require('mongoose');
 const { v4: uuidv4 } = require('uuid');
 
 const UserSchema = new mongoose.Schema({
-  username: { type: String, required: true, trim: true },
+  fullName: { type: String, trim: true },
+  username: { type: String, required: true, unique: true, trim: true },
   role: {
     type: String,
     enum: ['user', 'moderator', 'admin'],
@@ -109,7 +110,11 @@ const UserSchema = new mongoose.Schema({
     expiryDate: { type: Date }
   },
 
-  walletBalance: { type: Number, default: 0 },
+  nexusTheme: { type: String, enum: ['void', 'cyber', 'aero', 'kawaii', 'arcade', 'bgmi', 'live_space', 'live_erangel', 'live_cyber', 'live_synthwave', 'live_kawaii', 'live_dragon', 'aero-light', 'nebula-void', 'alabaster-pulse', 'midnight-obsidian', 'kawaii-desk', 'bgmi-tactical'], default: 'void' },
+  nexusThemeMode: { type: String, enum: ['dark', 'light'], default: 'dark' },
+  unlockedNexusThemes: [{ type: String }], // ADDED: Tracks Elite workspace themes purchased from Store
+  ownedWidgets: [{ type: String }], // ADDED: Tracks premium dashboard widgets purchased from Store
+  activeRevenueWidget: { type: String, default: 'default' }, // ADDED: Currently equipped revenue chart widget
 
   razorpayAccountId: { type: String, default: null, index: true }, // ADDED: Fast payout lookups
 
@@ -144,7 +149,8 @@ const UserSchema = new mongoose.Schema({
 
     ttsEnabled: { type: Boolean, default: false },
     ttsMinAmount: { type: Number, default: 500 },
-    ttsVoice: { type: String, default: 'female' }
+    ttsVoice: { type: String, default: 'female' },
+    leaderboardStyle: { type: String, default: 'royal_throne' }
   },
 
   goalSettings: {
@@ -152,7 +158,7 @@ const UserSchema = new mongoose.Schema({
     targetAmount: { type: Number, default: 5000 },
     currentProgress: { type: Number, default: 0 },
     isActive: { type: Boolean, default: true },
-    stylePreference: { type: String, enum: ['modern', 'glass_jar', 'gta', 'coc', 'bgmi', 'avatar', 'godzilla', 'arc_reactor_horizontal', 'arc_reactor_circular', 'boss_fight', 'plasma_battery', 'pixel_coin_row', 'pixel_coin_vault', 'black_hole', 'hex_core', 'rune_monolith', 'hologram_glitch', 'alchemist_flask', 'redline_dash', 'loot_dispenser', 'mecha_lens'], default: 'modern' },
+    stylePreference: { type: String, enum: ['modern', 'glass_jar', 'gta', 'coc', 'bgmi', 'avatar', 'godzilla', 'arc_reactor_horizontal', 'arc_reactor_circular', 'boss_fight', 'plasma_battery', 'pixel_coin_row', 'pixel_coin_vault', 'black_hole', 'hex_core', 'rune_monolith', 'hologram_glitch', 'alchemist_flask', 'redline_dash', 'loot_dispenser', 'mecha_lens'], default: 'glass_jar' },
     unlockedPremiumStyles: [{ type: String }] // ADDED: Tracks Elite overlays purchased from Dashboard Store
   },
 

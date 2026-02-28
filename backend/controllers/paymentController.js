@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const User = require('../models/User');
 const Drop = require('../models/Drop');
 const PlatformMetrics = require('../models/PlatformMetrics');
+const TugOfWarEvent = require('../models/TugOfWarEvent');
 
 const razorpay = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID,
@@ -45,7 +46,8 @@ exports.verifyPayment = async (req, res) => {
     try {
         const {
             razorpay_order_id, razorpay_payment_id, razorpay_signature,
-            streamerId, donorName, message, sticker, amount
+            streamerId, donorName, message, sticker, amount,
+            tugOfWarSide // Added for Tug-of-War integration
         } = req.body;
 
         const body = razorpay_order_id + "|" + razorpay_payment_id;
@@ -108,6 +110,31 @@ exports.verifyPayment = async (req, res) => {
             razorpayPaymentId: razorpay_payment_id, razorpayOrderId: razorpay_order_id
         });
 
+        // --- TUG-OF-WAR ENGINE UPDATE ---
+        let towUpdate = null;
+        if (tugOfWarSide === 'A' || tugOfWarSide === 'B') {
+            const activeEvent = await TugOfWarEvent.findOne({
+                streamerId: streamer.streamerId,
+                isActive: true,
+                expiresAt: { $gt: new Date() }
+            });
+
+            if (activeEvent) {
+                const updateField = tugOfWarSide === 'A' ? 'teamAAmount' : 'teamBAmount';
+                towUpdate = await TugOfWarEvent.findByIdAndUpdate(activeEvent._id, {
+                    $inc: { [updateField]: Number(amount) },
+                    $set: {
+                        lastStrike: {
+                            name: donorName || "Anonymous",
+                            amount: Number(amount),
+                            side: tugOfWarSide,
+                            timestamp: new Date()
+                        }
+                    }
+                }, { new: true });
+            }
+        }
+
         const io = req.app.get('io');
         if (io) {
             // Emit to OBS Browser Source Overlay (Secret Key)
@@ -119,6 +146,12 @@ exports.verifyPayment = async (req, res) => {
             // Emit to Dashboard UI Control Panel (Public ID / Socket Room)
             io.to(streamer.streamerId).emit('new-drop', { donorName, amount, message, sticker, tier: streamer.tier, isTest: false });
             io.to(streamer.streamerId).emit('goal-update', updatedStreamer.goalSettings);
+
+            // TUG-OF-WAR BROADCAST
+            if (towUpdate) {
+                if (streamer.obsKey) io.to(streamer.obsKey).emit('tug-of-war-update', towUpdate);
+                io.to(streamer.streamerId).emit('tug-of-war-update', towUpdate);
+            }
         }
 
         res.status(200).json({ status: "success" });
@@ -208,6 +241,24 @@ exports.getOverlaySettings = async (req, res) => {
     } catch (err) {
         res.status(500).json({});
     }
+};
+
+exports.getGoalByKey = async (req, res) => {
+    try {
+        const user = await User.findOne({ obsKey: req.params.obsKey })
+            .select('goalSettings overlaySettings tier username bio streamerId nexusTheme nexusThemeMode');
+        if (!user) return res.status(404).json({ msg: "Invalid Key" });
+        res.status(200).json({
+            ...user.goalSettings.toObject(),
+            overlaySettings: user.overlaySettings,
+            tier: user.tier,
+            username: user.username,
+            bio: user.bio,
+            streamerId: user.streamerId,
+            nexusTheme: user.nexusTheme,
+            nexusThemeMode: user.nexusThemeMode
+        });
+    } catch (error) { res.status(500).send(); }
 };
 
 /**

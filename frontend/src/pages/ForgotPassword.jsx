@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import {
-  Mail, Zap, Loader2, ArrowLeft, CheckCircle,
-  AlertCircle, Sun, Moon, MousePointer2, Send
+  Mail, Zap, Loader2, CheckCircle,
+  AlertCircle, MousePointer2, Send
 } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 
@@ -18,6 +18,8 @@ const itemVariants = {
   show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
 };
 
+const API_BASE = `http://${window.location.hostname}:5001`;
+
 const ForgotPassword = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
@@ -26,9 +28,8 @@ const ForgotPassword = () => {
   const [error, setError] = useState('');
 
   // --- GLOBAL THEME SYNC ---
-  const [theme, setTheme] = useState(() => localStorage.getItem('dropPayTheme') || 'dark');
+  const [theme] = useState(() => localStorage.getItem('dropPayTheme') || 'dark');
   useEffect(() => { localStorage.setItem('dropPayTheme', theme); }, [theme]);
-  const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
 
   // --- KINETIC BACKGROUND PHYSICS ---
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
@@ -41,8 +42,8 @@ const ForgotPassword = () => {
     setLoading(true);
     setError('');
     try {
-      await axios.post('http://localhost:5001/api/auth/forgot-password', { email });
-      setSent(true);
+      const res = await axios.post(`${API_BASE}/api/auth/forgot-password`, { email });
+      if (res.data) setSent(true);
     } catch (err) {
       setError(err.response?.data?.msg || "Recovery transmission failed. Node rejected email.");
     } finally {
@@ -66,16 +67,6 @@ const ForgotPassword = () => {
         </div>
       </div>
 
-      {/* 2. DYNAMIC CONTROLS */}
-      <div className="fixed top-6 left-6 right-6 flex justify-between items-center z-50">
-        <Link to="/login" className={`flex items-center gap-2 transition-colors group ${theme === 'dark' ? 'text-slate-500 hover:text-[#10B981]' : 'text-slate-400 hover:text-[#10B981]'}`}>
-          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          <span className="text-[10px] font-black uppercase tracking-[0.3em] hidden sm:block">Back to Login</span>
-        </Link>
-        <button onClick={toggleTheme} className={`p-2.5 rounded-xl border transition-all backdrop-blur-md ${theme === 'dark' ? 'border-white/10 bg-white/5 hover:bg-white/10' : 'border-slate-200 bg-white/80 hover:bg-slate-50 shadow-sm'}`}>
-          {theme === 'dark' ? <Sun className="w-4 h-4 text-emerald-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
-        </button>
-      </div>
 
       {/* 3. RECOVERY PANEL */}
       <motion.div

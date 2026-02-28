@@ -1,3 +1,742 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+    --nexus-bg: #050505;
+    --nexus-panel: #0a0a0a;
+    --nexus-accent: #10B981;
+    --nexus-text: #ffffff;
+    --nexus-text-muted: #94a3b8;
+    --nexus-border: rgba(255, 255, 255, 0.05);
+    --nexus-radius: 1.5rem;
+    --nexus-glow: 0 0 30px rgba(16, 185, 129, 0.1);
+}
+
+/* Scrollbar Hide Utility */
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+body {
+    background-color: var(--nexus-bg);
+    margin: 0;
+    transition: background-color 0.3s ease, background 0.3s ease;
+}
+
+
+/* CYBER OS THEME */
+body.theme-cyber {
+    --nexus-bg: #000800;
+    --nexus-panel: #001200;
+    --nexus-accent: #39ff14;
+    --nexus-text: #39ff14;
+    --nexus-text-muted: #1e6d10;
+    --nexus-border: #39ff14;
+    --nexus-radius: 0;
+    --nexus-glow: 0 0 20px rgba(57, 255, 20, 0.4);
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.theme-cyber .nexus-card {
+    background-image: linear-gradient(rgba(57, 255, 20, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(57, 255, 20, 0.05) 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+/* AERO (GLASSMORPHISM) THEME */
+body.theme-aero {
+    --nexus-bg: #0f172a;
+    --nexus-panel: rgba(255, 255, 255, 0.05);
+    --nexus-accent: #38bdf8;
+    --nexus-text: #f8fafc;
+    --nexus-text-muted: #cbd5e1;
+    --nexus-border: rgba(255, 255, 255, 0.1);
+    --nexus-radius: 2.5rem;
+    --nexus-glow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    background: radial-gradient(circle at top left, #1e293b, #0f172a, #020617);
+}
+
+.theme-aero .nexus-card {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+/* KAWAII DESK THEME */
+body.theme-kawaii {
+    --nexus-bg: #fff1f2;
+    --nexus-panel: #ffffff;
+    --nexus-accent: #fb7185;
+    --nexus-text: #881337;
+    --nexus-text-muted: #e11d48;
+    --nexus-border: #fecdd3;
+    --nexus-radius: 3rem;
+    --nexus-glow: 0 10px 20px rgba(251, 113, 133, 0.2);
+}
+
+.theme-kawaii .nexus-btn:active {
+    transform: scale(0.9) !important;
+}
+
+/* ARCADE CABINET THEME */
+body.theme-arcade {
+    --nexus-bg: #1a0b16;
+    --nexus-panel: #2b1225;
+    --nexus-accent: #facc15;
+    --nexus-text: #ffffff;
+    --nexus-text-muted: #d946ef;
+    --nexus-border: 4px solid #333;
+    --nexus-radius: 0.5rem;
+    --nexus-glow: 0 0 40px rgba(217, 70, 239, 0.3);
+}
+
+.theme-arcade .nexus-card {
+    box-shadow: 8px 8px 0px #000;
+}
+
+/* Light Mode Overrides (Default) */
+.light:not([class*="theme-"]) {
+    --nexus-bg: #f8fafc;
+    --nexus-panel: #ffffff;
+    --nexus-accent: #10B981;
+    --nexus-text: #0f172a;
+    --nexus-text-muted: #64748b;
+    --nexus-border: #e2e8f0;
+}
+
+/* Light Mode Overrides (Theme Specific) */
+.light.theme-cyber {
+    --nexus-bg: #f0f7f0;
+    --nexus-panel: #ffffff;
+    --nexus-text: #004d00;
+    --nexus-text-muted: #1e6d10;
+    --nexus-border: #39ff14;
+    --nexus-glow: 0 0 10px rgba(57, 255, 20, 0.2);
+}
+
+.light.theme-aero {
+    --nexus-bg: #f1f5f9;
+    --nexus-panel: rgba(255, 255, 255, 0.7);
+    --nexus-accent: #10B981;
+    --nexus-text: #0f172a;
+    --nexus-text-muted: #475569;
+    --nexus-border: rgba(16, 185, 129, 0.2);
+    --nexus-glow: 0 10px 30px rgba(16, 185, 129, 0.1);
+    background: radial-gradient(circle at top left, #ffffff, #f1f5f9, #e2e8f0);
+}
+
+.light.theme-kawaii {
+    /* Kawaii is already light-optimized, but let's ensure it stays clean */
+    --nexus-bg: #fff1f2;
+    --nexus-panel: #ffffff;
+}
+
+.light.theme-arcade {
+    --nexus-bg: #fdf4ff;
+    --nexus-panel: #ffffff;
+    --nexus-text: #1a0b16;
+    --nexus-text-muted: #701a75;
+    --nexus-border: 2px solid #333;
+    --nexus-glow: 0 4px 0px rgba(0, 0, 0, 0.1);
+}
+
+/* ========================================== */
+/* BGMI THEME (PREMIUM TACTICAL ESPORTS)      */
+/* ========================================== */
+
+body.theme-bgmi {
+    /* Pitch black / Carbon Fiber base */
+    --nexus-bg: #050505;
+    /* Deep matte gunmetal for cards */
+    --nexus-panel: #0f1115;
+    /* Piercing Tactical Orange */
+    --nexus-accent: #f97316;
+    --nexus-text: #ffffff;
+    /* Muted silver for secondary text */
+    --nexus-text-muted: #a1a1aa;
+    /* Sharp, subtle grey border */
+    --nexus-border: #27272a;
+    /* ZERO rounded corners allowed in tactical theme */
+    --nexus-radius: 0;
+    --nexus-glow: 0 20px 40px rgba(0, 0, 0, 0.8);
+
+    /* User provided legacy variable mapping */
+    --bg-main: #050505;
+    --bg-card: #0f1115;
+    --border-color: #27272a;
+    --text-primary: #ffffff;
+    --text-secondary: #a1a1aa;
+    --accent-primary: #f97316;
+    --accent-secondary: #ea580c;
+    --card-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
+}
+
+.light.theme-bgmi {
+    /* Crisp Desert/Arctic Camo Metal */
+    --nexus-bg: #e2e8f0;
+    --nexus-panel: #f8fafc;
+    --nexus-accent: #ea580c;
+    --nexus-text: #0f172a;
+    --nexus-text-muted: #64748b;
+    --nexus-border: #cbd5e1;
+    --nexus-radius: 0;
+    --nexus-glow: 0 10px 20px rgba(0, 0, 0, 0.1);
+
+    /* User provided legacy variable mapping */
+    --bg-main: #e2e8f0;
+    --bg-card: #f8fafc;
+    --border-color: #cbd5e1;
+    --text-primary: #0f172a;
+    --text-secondary: #64748b;
+    --accent-primary: #ea580c;
+    --accent-secondary: #c2410c;
+    --card-shadow: 4px 4px 0px rgba(15, 23, 42, 0.1);
+}
+
+/* Sharp, aggressive chamfered cuts for cards */
+.theme-bgmi .nexus-card {
+    clip-path: polygon(0 0, 96% 0, 100% 8%, 100% 100%, 4% 100%, 0 92%);
+    position: relative;
+    overflow: hidden;
+    border-radius: 0 !important;
+}
+
+/* Premium Top-Edge Glow (Replaces the ugly diagonal stripes) */
+.theme-bgmi .nexus-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--nexus-accent);
+    z-index: 10;
+    box-shadow: 0 0 15px var(--nexus-accent);
+}
+
+/* Optional: Subtle tech grid overlay instead of thick stripes */
+.theme-bgmi .nexus-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: 0.15;
+    pointer-events: none;
+    background-image: radial-gradient(var(--nexus-text-muted) 1px, transparent 1px);
+    background-size: 16px 16px;
+    z-index: 0;
+}
+
+
+/* ========================================== */
+/* ELITE LIVE THEMES (Glassmorphism & FX)     */
+/* ========================================== */
+
+/* Make the dashboard background transparent so the Engine shows through */
+body[class*="live_"] {
+    background-color: transparent !important;
+}
+
+/* 1. GLASSMORPHISM (For Zero-Gravity & Live Themes) */
+body[class*="live_"] .nexus-card,
+body[class*="live_"] .bg-\[var\(--bg-card\)\] {
+    background: rgba(10, 10, 15, 0.4) !important;
+    /* Heavy transparency */
+    backdrop-filter: blur(16px);
+    /* The frosted glass effect */
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+}
+
+/* 2. HACKER GLITCH EFFECT (Hovering over text in Live Cyber) */
+.live_cyber .glitch-hover:hover {
+    animation: glitch-anim 0.3s cubic-bezier(.25, .46, .45, .94) both infinite;
+    color: #fff;
+    text-shadow: 2px 0 #39ff14, -2px 0 #ff003c;
+}
+
+@keyframes glitch-anim {
+    0% {
+        transform: translate(0)
+    }
+
+    20% {
+        transform: translate(-2px, 2px)
+    }
+
+    40% {
+        transform: translate(-2px, -2px)
+    }
+
+    60% {
+        transform: translate(2px, 2px)
+    }
+
+    80% {
+        transform: translate(2px, -2px)
+    }
+
+    100% {
+        transform: translate(0)
+    }
+}
+
+/* 3. RED ZONE SHAKE (For Erangel Live Theme) */
+.live_erangel .nexus-card {
+    border: 1px solid rgba(220, 38, 38, 0.2);
+    /* Make the cards shake subtly every few seconds like artillery hitting */
+    animation: red-zone-quake 7s infinite;
+}
+
+@keyframes red-zone-quake {
+
+    0%,
+    90%,
+    100% {
+        transform: translate(0, 0);
+    }
+
+    92% {
+        transform: translate(-2px, 1px);
+    }
+
+    94% {
+        transform: translate(2px, -1px);
+    }
+
+    96% {
+        transform: translate(-1px, 2px);
+    }
+
+    98% {
+        transform: translate(1px, -2px);
+    }
+}
+
+/* ========================================== */
+/* ELITE LIVE THEMES (Glassmorphism & FX)     */
+/* ========================================== */
+
+/* Make the dashboard background transparent so the Live Engine shows through */
+body[class*="live_"] {
+    background-color: transparent !important;
+}
+
+/* Base Glassmorphism (Frosted Glass) for all Live Themes */
+body[class*="live_"] .nexus-card {
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    position: relative;
+    overflow: hidden;
+}
+
+/* ------------------------------------------ */
+/* 1. NEON OVERDRIVE (Synthwave)              */
+/* ------------------------------------------ */
+
+/* The infinite scrolling 3D grid animation */
+.synthwave-grid-anim {
+    animation: grid-scroll 2s linear infinite;
+}
+
+@keyframes grid-scroll {
+    0% {
+        background-position: 0 0;
+    }
+
+    100% {
+        background-position: 0 60px;
+    }
+}
+
+/* Synthwave Glassmorphism Tint */
+body.live_synthwave .nexus-card,
+.theme-live_synthwave .nexus-card {
+    background: rgba(10, 0, 20, 0.6) !important;
+    border: 1px solid rgba(0, 255, 255, 0.3) !important;
+    box-shadow: inset 0 0 20px rgba(255, 0, 170, 0.1), 0 10px 30px rgba(0, 0, 0, 0.8) !important;
+    border-radius: 0 !important;
+    /* Sharp corners for 80s tech look */
+}
+
+/* --- KAPPA (PURPLE/DARK) --- */
+.theme-kappa {
+    --nexus-bg: #09090b;
+    /* Very dark zinc */
+    --nexus-panel: rgba(24, 24, 27, 0.8);
+    /* Zinc 900 */
+    --nexus-border: rgba(168, 85, 247, 0.2);
+    --nexus-text: #fafafa;
+    --nexus-text-muted: #a1a1aa;
+    --nexus-accent: #a855f7;
+    /* Purple 500 */
+    --nexus-glow: rgba(168, 85, 247, 0.15);
+}
+
+/* --- NEW: AERO LIGHT --- */
+.theme-aero-light {
+    --nexus-bg: #ffffff;
+    --nexus-panel: rgba(255, 228, 230, 0.4);
+    --nexus-border: rgba(252, 231, 243, 1);
+    /* pink-100 */
+    --nexus-text: #1e293b;
+    --nexus-text-muted: #64748b;
+    --nexus-accent: #ec4899;
+    /* pink-500 */
+    --nexus-glow: rgba(236, 72, 153, 0.1);
+}
+
+/* --- NEW: NEBULA VOID --- */
+.theme-nebula-void {
+    --nexus-bg: #0A0A0B;
+    --nexus-panel: rgba(22, 22, 24, 0.95);
+    --nexus-border: rgba(139, 92, 246, 0.1);
+    /* violet-500/10 */
+    --nexus-text: #ffffff;
+    --nexus-text-muted: rgba(255, 255, 255, 0.5);
+    --nexus-accent: #8B5CF6;
+    /* violet-500 */
+    --nexus-glow: rgba(139, 92, 246, 0.15);
+}
+
+/* --- NEW: ALABASTER PULSE --- */
+.theme-alabaster-pulse {
+    --nexus-bg: #F8FAFC;
+    --nexus-panel: #ffffff;
+    --nexus-border: rgba(59, 130, 246, 0.05);
+    /* blue-500/5 */
+    --nexus-text: #1e293b;
+    --nexus-text-muted: #64748b;
+    --nexus-accent: #3B82F6;
+    /* blue-500 */
+    --nexus-glow: rgba(59, 130, 246, 0.1);
+}
+
+/* --- KINETIC OBSIDIAN (ELITE FX) --- */
+.theme-midnight-obsidian {
+    --nexus-bg: #020203;
+    --nexus-panel: #0A0A0C;
+    --nexus-border: rgba(245, 158, 11, 0.2);
+    --nexus-text: #ffffff;
+    --nexus-text-muted: #a1a1aa;
+    --nexus-accent: #F59E0B;
+    --nexus-glow: rgba(245, 158, 11, 0.15);
+}
+
+/* 1. Liquid Gold Border Animation (Midnight Obsidian Exclusive) */
+.theme-midnight-obsidian .liquid-gold-border {
+    position: relative;
+    background: #020203;
+    padding: 2px;
+    /* Border thickness */
+    overflow: hidden;
+    border: none !important;
+}
+
+.theme-midnight-obsidian .liquid-gold-border::before {
+    content: '';
+    position: absolute;
+    width: 150%;
+    height: 150%;
+    top: -25%;
+    left: -25%;
+    background: conic-gradient(transparent, #F59E0B, transparent 30%);
+    animation: rotate-gold 6s linear infinite;
+    z-index: 0;
+}
+
+.theme-midnight-obsidian .liquid-gold-border>* {
+    position: relative;
+    z-index: 10;
+    background: var(--nexus-panel);
+    height: 100%;
+    border-radius: inherit;
+}
+
+@keyframes rotate-gold {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* 2. Text Shimmer for the Balance */
+.theme-midnight-obsidian .gold-text-shimmer {
+    background: linear-gradient(90deg, #F59E0B, #FFF, #F59E0B);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gold-shine 3s linear infinite;
+}
+
+@keyframes gold-shine {
+    to {
+        background-position: 200% center;
+    }
+}
+
+/* 3. Golden Spark particles for the Goal Bar */
+.theme-midnight-obsidian .goal-spark {
+    box-shadow: 0 0 15px #F59E0B, 0 0 30px #D97706 !important;
+    filter: blur(1px) !important;
+}
+
+/* 4. Obsidian Drift Background */
+.theme-midnight-obsidian .obsidian-drift-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image: radial-gradient(circle at center, rgba(245, 158, 11, 0.15) 1px, transparent 1px);
+    background-size: 50px 50px;
+    animation: drift 20s linear infinite;
+    opacity: 0.5;
+}
+
+@keyframes drift {
+    0% {
+        background-position: 0 0;
+    }
+
+    100% {
+        background-position: 50px -50px;
+    }
+}
+
+/* ------------------------------------------ */
+/* THEME UTILITIES                            */
+/* ------------------------------------------ */
+.theme-btn-active {
+    border: 2px solid #10B981 !important;
+    /* DropPay Emerald */
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.2) !important;
+    transform: scale(1.05) !important;
+}
+
+/* ------------------------------------------ */
+/* BASE OVERRIDES (Used to apply the variables) */
+/* ------------------------------------------ */
+
+/* 2. THE DRAGON'S HOARD (Fantasy)            */
+/* ------------------------------------------ */
+
+/* Obsidian/Leather Glassmorphism Tint */
+body.live_dragon .nexus-card,
+.theme-live_dragon .nexus-card {
+    background: rgba(20, 15, 10, 0.7) !important;
+    border: 1px solid rgba(251, 191, 36, 0.2) !important;
+    box-shadow: inset 0 0 30px rgba(245, 158, 11, 0.05), 0 15px 40px rgba(0, 0, 0, 0.9) !important;
+    border-radius: 0.5rem !important;
+    /* Slight fantasy curve */
+}
+
+/* Sharp gold glint at the top of the cards */
+body.live_dragon .nexus-card::before,
+.theme-live_dragon .nexus-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.8), transparent);
+    z-index: 10;
+}
+
+/* ------------------------------------------ */
+/* 3. SKY SANCTUARY (Kawaii/VTuber)           */
+/* ------------------------------------------ */
+
+/* Clean, soft frosted glass */
+body.live_kawaii .nexus-card,
+.theme-live_kawaii .nexus-card {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border: 1px solid rgba(255, 255, 255, 0.4) !important;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1) !important;
+    border-radius: 2rem !important;
+    /* Bubbly, soft corners */
+}
+
+/* ------------------------------------------ */
+/* OBS BROWSER SOURCE TRANSPARENCY OVERRIDE   */
+/* ------------------------------------------ */
+body:has(.overlay-content),
+html:has(.overlay-content) {
+    background-color: transparent !important;
+    background-image: none !important;
+}
+
+#root:has(.overlay-content)>div {
+    background-color: transparent !important;
+    background-image: none !important;
+}
+
+/* ------------------------------------------ */
+/* DONATION TICKER (STREAMER STOREFRONT)      */
+/* ------------------------------------------ */
+.ticker-wrap {
+    width: 100%;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(34, 197, 94, 0.2);
+    /* Emerald accent */
+}
+
+.ticker-move {
+    display: flex;
+    width: fit-content;
+    animation: ticker-loop 30s linear infinite;
+}
+
+.ticker-item {
+    flex-shrink: 0;
+    padding: 0 2rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    color: white;
+}
+
+@keyframes ticker-loop {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+/* ------------------------------------------ */
+/* MOBILE SCROLL LIBERATION (STOREFRONT)      */
+/* ------------------------------------------ */
+@media (max-width: 1024px) {
+    .donation-page-root {
+        height: auto !important;
+        min-height: 100vh;
+        overflow-y: auto !important;
+        display: block;
+        /* Ensures stacking instead of flex-clipping */
+    }
+}
+
+/* ------------------------------------------ */
+/* TICKER RECOVERY & CELEBRATION THEME        */
+/* ------------------------------------------ */
+
+/* Ensure the ticker bar is a fixed height shell */
+.ticker-shell {
+    height: 3rem;
+    /* h-12 */
+    position: relative;
+    z-index: 55;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    flex-wrap: nowrap;
+    overflow: hidden;
+}
+
+/* Individual items that never overlap */
+.ticker-event-item {
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    flex-shrink: 0;
+    will-change: transform;
+    padding-right: 4rem;
+    /* or gap-16 equivalent */
+}
+
+/* Celebration Glow */
+.celebration-ignite {
+    animation: ignite-pulse 0.4s ease-in-out infinite alternate;
+    box-shadow: 0 0 30px #10B981;
+    /* Emerald for Default */
+}
+
+@keyframes ignite-pulse {
+    to {
+        filter: brightness(2) contrast(1.2);
+    }
+}
+
+/* ============================================== */
+/* PAYOUT SIMULATOR — Animated Gradient Card Glow */
+/* ============================================== */
+
+@property --angle {
+    syntax: '<angle>';
+    initial-value: 0deg;
+    inherits: false;
+}
+
+@keyframes border-spin {
+    to {
+        --angle: 360deg;
+    }
+}
+
+.simulator-glow-card {
+    background:
+        linear-gradient(#070d0a, #070d0a) padding-box,
+        conic-gradient(from var(--angle),
+            #10B981 0deg,
+            #3b82f6 90deg,
+            #8b5cf6 180deg,
+            #f59e0b 270deg,
+            #10B981 360deg) border-box;
+    border: 1.5px solid transparent !important;
+    animation: border-spin 5s linear infinite;
+    box-shadow:
+        0 0 50px rgba(16, 185, 129, 0.18),
+        0 0 120px rgba(16, 185, 129, 0.07),
+        0 0 200px rgba(59, 130, 246, 0.05),
+        inset 0 0 80px rgba(16, 185, 129, 0.04);
+}
+
+/* ============================================== */
+/* NEXUS RACER PROTOCOL (GAMIFIED GOAL SYNC)      */
+/* ============================================== */
+
+/* The Rail Container */
+.racer-container {
+    position: relative;
+    width: 100%;
+    height: clamp(100px, 15vh, 150px);
+    background: rgba(15, 23, 42, 0.2) !important;
+    border-radius: 2rem;
+    overflow: hidden;
+}
+
+/* Vehicle Path Locking */
+.nexus-vehicle {
+    /* The Exact Path Coordinates */
+    offset-path: path('M 0 60 L 200 60 C 250 60 280 110 350 110 S 450 10 550 10 S 700 60 750 60 L 1000 60');
+    offset-rotate: auto;
+    width: 40px;
+    height: 40px;
+    position: absolute;
+    transition: offset-distance 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+    /* Make sure it sits dead center vertically */
+    top: -20px;
+}
+
+/* The Neon Track Line */
+.track-rail {
+    stroke-dasharray: 10, 5;
+    animation: track-flow 2s linear infinite;
+}
+
+@keyframes track-flow {
+    from {
+        stroke-dashoffset: 30;
+    }
+
+    to {
+        stroke-dashoffset: 0;
+    }
+}

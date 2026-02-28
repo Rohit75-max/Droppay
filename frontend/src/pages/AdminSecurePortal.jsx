@@ -3,14 +3,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import {
     Users, Activity, ShieldAlert, ChevronLeft, ChevronRight,
-    Search, ShieldOff, ArrowUpRight, Sun, Moon, Zap, Star,
+    Search, ShieldOff, ArrowUpRight, Zap, Star,
     Wallet, TrendingUp, Landmark, CheckCircle2
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const AdminSecurePortal = () => {
     const navigate = useNavigate();
-    const [theme, setTheme] = useState(() => localStorage.getItem('dropPayTheme') || 'dark');
+    const [theme] = useState(() => localStorage.getItem('dropPayTheme') || 'dark');
     const [metrics, setMetrics] = useState({
         totalUsers: 0, activeSubscriptions: 0, totalVolume: 0,
         totalUnsettledDebt: 0, platformCommission: 0, platformSubscriptions: 0, platformPayouts: 0
@@ -25,7 +25,6 @@ const AdminSecurePortal = () => {
     const [totalPages, setTotalPages] = useState(1);
 
     useEffect(() => { localStorage.setItem('dropPayTheme', theme); }, [theme]);
-    const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
 
     const fetchMetrics = useCallback(async () => {
         try {
@@ -137,9 +136,7 @@ const AdminSecurePortal = () => {
                     </div>
 
                     <div className="flex items-center gap-4">
-                        <button onClick={toggleTheme} className={`p-3 rounded-2xl border transition-all ${theme === 'dark' ? 'border-white/10 bg-white/5 hover:bg-white/10' : 'border-slate-200 bg-white hover:bg-slate-50 shadow-sm'}`}>
-                            {theme === 'dark' ? <Sun className="w-5 h-5 text-emerald-400" /> : <Moon className="w-5 h-5 text-slate-600" />}
-                        </button>
+                        {/* Theme toggle removed per user request */}
                         <button onClick={() => navigate('/dashboard')} className="px-6 py-3 bg-[#10B981] hover:shadow-[0_0_20px_#10B981] text-white font-black uppercase text-xs tracking-widest rounded-2xl transition-all">
                             Exit Portal
                         </button>

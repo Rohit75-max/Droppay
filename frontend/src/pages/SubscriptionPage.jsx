@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Zap, Gift, CheckCircle, Clock,
-  Rocket, Crown, Sparkles, LogOut, Loader2,
+  Gift, CheckCircle, Clock,
+  Rocket, Crown, Sparkles, Loader2,
   ArrowRight, ShieldCheck, Cpu, Database, Activity, Target
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+
+const API_BASE = `http://${window.location.hostname}:5001`;
 
 const SubscriptionPage = () => {
   const navigate = useNavigate();
@@ -24,7 +26,7 @@ const SubscriptionPage = () => {
 
     const fetchUserStatus = async () => {
       try {
-        const res = await axios.get('http://localhost:5001/api/user/profile', {
+        const res = await axios.get(`${API_BASE}/api/user/profile`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setUserProfile(res.data);
@@ -43,10 +45,6 @@ const SubscriptionPage = () => {
     return () => clearInterval(timer);
   }, [navigate]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/login');
-  };
 
   const getPriceData = (base) => {
     const original = base * billingCycle;
@@ -117,18 +115,6 @@ const SubscriptionPage = () => {
         ${selectedPlan === 'legend' ? 'bg-amber-400/10' : selectedPlan === 'starter' ? 'bg-slate-400/10' : 'bg-[#10B981]/15'}`}
       />
 
-      <nav className="w-full max-w-[1440px] mx-auto flex justify-between items-center px-6 py-3 md:px-12 relative z-50 backdrop-blur-md">
-        <div className="flex items-center gap-2 cursor-pointer" onClick={() => {
-          if (localStorage.getItem('token')) navigate('/dashboard');
-          else navigate('/');
-        }}>
-          <Zap className="w-6 h-6 text-[#10B981] fill-[#10B981]" />
-          <span className="text-xl font-black italic tracking-tighter uppercase">DropPay</span>
-        </div>
-        <button onClick={handleLogout} className="flex items-center gap-2 text-rose-500 font-black uppercase text-[10px] tracking-[0.2em] group">
-          <LogOut className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Exit Terminal
-        </button>
-      </nav>
 
       <main className="flex-1 w-full max-w-[1440px] mx-auto px-4 md:px-10 overflow-y-auto no-scrollbar relative z-10 pb-8">
 
@@ -203,8 +189,8 @@ const SubscriptionPage = () => {
                     onClick={(e) => { e.stopPropagation(); handleSubscribe(plan.id); }}
                     disabled={loadingPlan !== null}
                     className={`w-full py-4 rounded-2xl font-black uppercase italic text-[10px] tracking-[0.3em] transition-all flex justify-center items-center gap-3 ${isThisLoading
-                        ? 'bg-slate-800 text-slate-500'
-                        : isActive ? (plan.id === 'legend' ? 'bg-amber-400 text-black' : plan.id === 'starter' ? 'bg-slate-400 text-black' : 'bg-[#10B981] text-white') : 'bg-white text-black hover:bg-slate-200'
+                      ? 'bg-slate-800 text-slate-500'
+                      : isActive ? (plan.id === 'legend' ? 'bg-amber-400 text-black' : plan.id === 'starter' ? 'bg-slate-400 text-black' : 'bg-[#10B981] text-white') : 'bg-white text-black hover:bg-slate-200'
                       }`}
                   >
                     {isThisLoading ? <Loader2 className="animate-spin w-4 h-4" /> : <>Deploy Node <ArrowRight className="w-4 h-4" /></>}

@@ -17,6 +17,12 @@ import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import AdminSecurePortal from './pages/AdminSecurePortal';
 import AdminLogin from './pages/AdminLogin';
+import TugOfWarOverlay from './pages/TugOfWarOverlay';
+import MasterOverlay from './pages/MasterOverlay';
+import LiveThemeEngine from './components/LiveThemeEngine';
+
+// --- DYNAMIC INFRASTRUCTURE (Fixes Mobile Persistence) ---
+const API_BASE = `http://${window.location.hostname}:5001`;
 
 // --- PROFESSIONAL GATE: SECURE UPLINK ---
 const MissionGate = ({ children }) => {
@@ -32,7 +38,7 @@ const MissionGate = ({ children }) => {
         return;
       }
       try {
-        const res = await axios.get('http://localhost:5001/api/user/profile', {
+        const res = await axios.get(`${API_BASE}/api/user/profile`, {
           headers: { Authorization: `Bearer ${token}` }
         });
 
@@ -89,6 +95,9 @@ const AnimatedRoutes = () => {
         {/* 3. OBS OVERLAY NODES */}
         <Route path="/overlay/:obsKey" element={<Overlay />} />
         <Route path="/goal/:streamerId" element={<GoalOverlay />} />
+        <Route path="/overlay/tug-of-war/:obsKey" element={<TugOfWarOverlay />} />
+        <Route path="/overlay/master/:obsKey" element={<MasterOverlay />} />
+        bench
 
         {/* 4. USER ONBOARDING (FIXED PATHS) */}
         {/* This matches the redirect in your Signup.jsx */}
@@ -117,19 +126,59 @@ const AnimatedRoutes = () => {
   );
 };
 
-function App() {
+function AppContent() {
+  const [nexusTheme, setNexusTheme] = useState(() => {
+    return localStorage.getItem('nexusTheme') || 'void';
+  });
+
+  const location = useLocation();
+  const isOverlay = location.pathname.includes('/overlay') || location.pathname.includes('/goal');
+
+  // Listen for custom theme change events (fired from Dashboard)
+  useEffect(() => {
+    const handleThemeSync = (e) => {
+      if (e.detail?.theme) {
+        setNexusTheme(e.detail.theme);
+      }
+    };
+    window.addEventListener('nexus-theme-change', handleThemeSync);
+
+    // Apply classes to body for CSS-based themes
+    const body = document.body;
+    body.className = body.className.replace(/theme-\S+/g, '').trim();
+    if (nexusTheme !== 'void') {
+      body.classList.add(`theme-${nexusTheme}`);
+    }
+
+    return () => window.removeEventListener('nexus-theme-change', handleThemeSync);
+  }, [nexusTheme]);
+
   return (
-    <Router>
-      <div className="min-h-screen bg-[#050505] text-slate-100 selection:bg-emerald-500/30">
+    <div className={`min-h-screen relative overflow-hidden text-slate-100 selection:bg-emerald-500/30 ${isOverlay ? 'bg-transparent' : (nexusTheme === 'void' ? 'bg-[var(--nexus-bg)]' : 'bg-transparent')}`}>
+      {!isOverlay && (
         <Helmet>
           <title>DropPay | The Ultimate Streamer Protocol</title>
           <meta name="description" content="Empower your stream with custom 3D alerts and optimized creator revenue." />
           <meta name="theme-color" content="#10B981" />
           <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
         </Helmet>
+      )}
 
+      {/* GLOBAL LIVE THEME ENGINE */}
+      {!isOverlay && <LiveThemeEngine currentTheme={nexusTheme} />}
+
+      {/* MAIN APPLICATION CONTENT */}
+      <div className="relative z-10 min-h-screen">
         <AnimatedRoutes />
       </div>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AppContent />
     </Router>
   );
 }

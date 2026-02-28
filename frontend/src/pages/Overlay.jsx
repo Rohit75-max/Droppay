@@ -78,7 +78,7 @@ const Overlay = () => {
 
   return (
     <div
-      className="w-screen h-screen overflow-hidden bg-transparent pointer-events-none relative flex items-center justify-center"
+      className="overlay-content w-screen h-screen overflow-hidden bg-transparent pointer-events-none relative flex items-center justify-center"
       style={{ fontFamily: settings.fontFamily || 'sans-serif' }}
     >
       <AnimatePresence>

@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import {
-  Mail, Lock, Zap, Loader2, ArrowRight, ArrowLeft,
-  Shield, Sun, Moon, MousePointer2, AlertCircle, Eye, EyeOff
+  Mail, Lock, Zap, Loader2, ArrowRight,
+  Shield, MousePointer2, AlertCircle, Eye, EyeOff, ArrowLeft
 } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 
@@ -17,6 +17,8 @@ const itemVariants = {
   show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
 };
 
+const API_BASE = `http://${window.location.hostname}:5001`;
+
 const Login = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -25,9 +27,8 @@ const Login = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [formData, setFormData] = useState({ email: '', password: '' });
 
-  const [theme, setTheme] = useState(() => localStorage.getItem('dropPayTheme') || 'dark');
+  const [theme] = useState(() => localStorage.getItem('dropPayTheme') || 'dark');
   useEffect(() => { localStorage.setItem('dropPayTheme', theme); }, [theme]);
-  const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
 
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const handleMouseMove = (e) => {
@@ -56,7 +57,7 @@ const Login = () => {
     setLoading(true);
     setError('');
     try {
-      const response = await axios.post('http://localhost:5001/api/auth/login', {
+      const response = await axios.post(`${API_BASE}/api/auth/login`, {
         email: formData.email.trim().toLowerCase(),
         password: formData.password
       });
@@ -80,8 +81,23 @@ const Login = () => {
   return (
     <div
       onMouseMove={handleMouseMove}
-      className={`flex items-center justify-center min-h-screen w-full p-4 relative overflow-hidden font-sans transition-colors duration-700 ${theme === 'dark' ? 'bg-[#050505]' : 'bg-slate-50'}`}
+      className={`flex items-center justify-center min-h-screen w-full p-4 pt-20 sm:pt-4 relative overflow-hidden font-sans transition-colors duration-700 ${theme === 'dark' ? 'bg-[#050505]' : 'bg-slate-50'}`}
     >
+      {/* STICKY ESCAPE HATCH */}
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        className="fixed top-4 left-4 sm:top-12 sm:left-12 z-50"
+      >
+        <Link
+          to="/"
+          className={`flex items-center gap-3 py-2 px-4 rounded-full border transition-all group ${theme === 'dark' ? 'border-white/5 bg-white/5 text-slate-400 hover:bg-white/10 hover:text-[#10B981]' : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-100 hover:text-[#10B981]'}`}
+        >
+          <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+          <span className="text-[10px] font-black uppercase tracking-widest leading-none">Back to Protocol</span>
+        </Link>
+      </motion.div>
+
       {/* KINETIC BACKGROUND */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <motion.div animate={{ x: mousePos.x * 60, y: mousePos.y * 60 }} className={`absolute top-[-10%] left-[-10%] w-[70%] h-[70%] rounded-full transition-all duration-700 ${theme === 'dark' ? 'bg-[#10B981]/10 blur-[120px]' : 'bg-[#10B981]/5 blur-[80px]'}`} />
@@ -90,16 +106,6 @@ const Login = () => {
         </div>
       </div>
 
-      {/* TOP CONTROLS */}
-      <div className="fixed top-6 left-6 right-6 flex justify-between items-center z-50">
-        <button onClick={() => navigate('/')} className={`flex items-center gap-2 transition-colors group ${theme === 'dark' ? 'text-slate-500 hover:text-[#10B981]' : 'text-slate-400 hover:text-[#10B981]'}`}>
-          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          <span className="text-[10px] font-black uppercase tracking-[0.3em] hidden sm:block">Back to Protocol</span>
-        </button>
-        <button onClick={toggleTheme} className={`p-2.5 rounded-xl border transition-all backdrop-blur-md ${theme === 'dark' ? 'border-white/10 bg-white/5 hover:bg-white/10' : 'border-slate-200 bg-white/80 hover:bg-slate-50 shadow-sm'}`}>
-          {theme === 'dark' ? <Sun className="w-4 h-4 text-emerald-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
-        </button>
-      </div>
 
       <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className={`w-full max-w-lg p-6 sm:p-10 rounded-[3rem] backdrop-blur-3xl border transition-all relative z-10 ${theme === 'dark' ? 'bg-[#0a0a0a]/80 border-white/5 shadow-2xl' : 'bg-white/80 border-slate-200 shadow-xl'}`}>
         <div className="flex items-center gap-3 mb-6 cursor-pointer" onClick={() => {
@@ -107,7 +113,7 @@ const Login = () => {
           else navigate('/');
         }}>
           <Zap className="w-7 h-7 text-[#10B981] fill-[#10B981]" />
-          <span className={`text-xl font-black italic tracking-tighter uppercase ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>DropPay</span>
+          <span className={`text-xl font-black italic tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>DropPay</span>
         </div>
         <h1 className={`text-3xl sm:text-4xl font-black italic uppercase mb-1 tracking-tighter leading-none ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Welcome Back.</h1>
         <p className="text-slate-500 mb-6 text-[9px] font-black uppercase tracking-[0.2em]">Authorize your streaming node.</p>
@@ -162,13 +168,16 @@ const Login = () => {
           </motion.button>
         </motion.form>
 
-        <div className="mt-6 pt-5 border-t border-slate-500/10">
+        <div className="mt-6 pt-5 border-t border-slate-500/10 space-y-3">
           <Link to="/signup" className={`w-full flex items-center justify-center py-3.5 rounded-xl border font-black italic uppercase tracking-widest text-[9px] gap-3 transition-all ${theme === 'dark' ? 'border-white/5 bg-white/5 text-slate-400 hover:bg-white/10' : 'border-slate-200 bg-slate-50 text-slate-500 hover:bg-slate-100'}`}>
             <Shield className="w-3.5 h-3.5" /> Initialize New Account
           </Link>
+          <Link to="/admin/login" className="w-full flex items-center justify-center py-2 text-[8px] font-black uppercase tracking-[0.4em] text-slate-600 hover:text-[#10B981] transition-colors opacity-40 hover:opacity-100">
+            Secure Admin Portal
+          </Link>
         </div>
       </motion.div>
-    </div>
+    </div >
   );
 };
 

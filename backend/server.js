@@ -57,6 +57,7 @@ app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/user', require('./routes/userRoutes'));
 app.use('/api/payment', require('./routes/paymentRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
+app.use('/api/tug-of-war', require('./routes/tugOfWarRoutes'));
 
 // 6. MISSION CHECKER
 cron.schedule('0 0 * * *', () => {

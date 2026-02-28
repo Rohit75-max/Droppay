@@ -79,7 +79,7 @@ const GoalOverlay = () => {
   if (!isActive) return null;
 
   return (
-    <div className="w-screen h-screen flex items-start justify-center bg-transparent pointer-events-none p-8 font-sans">
+    <div className="overlay-content w-screen h-screen flex items-start justify-center bg-transparent pointer-events-none p-8 font-sans">
       {PREMIUM_GOAL_STYLES.includes(goal.stylePreference) ? (
         <PremiumGoalOverlays
           goal={goal}

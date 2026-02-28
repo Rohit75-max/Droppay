@@ -3,10 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import {
   User, Mail, Phone, Lock, ChevronRight, CheckCircle,
-  Loader2, Zap, ArrowLeft, AlertCircle, Shield, Sun, Moon,
-  MousePointer2, Eye, EyeOff, UserPlus
+  MousePointer2, Eye, EyeOff, UserPlus, Zap, Shield, AlertCircle, Loader2, ArrowLeft, Hash
 } from 'lucide-react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -18,20 +17,27 @@ const itemVariants = {
   show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
 };
 
+const API_BASE = `http://${window.location.hostname}:5001`;
+
 const Signup = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [formData, setFormData] = useState({
-    username: '', email: '', phone: '', password: '', referralCode: ''
+    fullName: '',
+    username: '',
+    email: '',
+    phone: '',
+    password: '',
+    referralCode: searchParams.get('ref') || ''
   });
 
-  const [theme, setTheme] = useState(() => localStorage.getItem('dropPayTheme') || 'dark');
+  const [theme] = useState(() => localStorage.getItem('dropPayTheme') || 'dark');
   useEffect(() => { localStorage.setItem('dropPayTheme', theme); }, [theme]);
-  const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
 
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const handleMouseMove = (e) => {
@@ -84,7 +90,7 @@ const Signup = () => {
         ...formData,
         email: formData.email.trim().toLowerCase()
       };
-      const response = await axios.post('http://localhost:5001/api/auth/signup', submissionData);
+      const response = await axios.post(`${API_BASE}/api/auth/signup`, submissionData);
 
       // Handle both 201 (Created) and 206 (Partial Content - Existing Unverified)
       if (response.status === 201 || response.status === 206) {
@@ -101,7 +107,7 @@ const Signup = () => {
     setLoading(true);
     setError('');
     try {
-      const res = await axios.post('http://localhost:5001/api/auth/verify-email', {
+      const res = await axios.post(`${API_BASE}/api/auth/verify-email`, {
         email: formData.email.trim().toLowerCase(),
         otp: combinedOtp
       });
@@ -117,8 +123,23 @@ const Signup = () => {
   return (
     <div
       onMouseMove={handleMouseMove}
-      className={`flex flex-col items-center justify-start sm:justify-center min-h-screen w-full p-4 relative overflow-hidden font-sans transition-colors duration-700 ${theme === 'dark' ? 'bg-[#050505]' : 'bg-slate-50'}`}
+      className={`flex flex-col items-center justify-start sm:justify-center min-h-screen w-full p-4 pt-20 sm:pt-4 relative overflow-hidden font-sans transition-colors duration-700 ${theme === 'dark' ? 'bg-[#050505]' : 'bg-slate-50'}`}
     >
+      {/* STICKY ESCAPE HATCH */}
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        className="fixed top-4 left-4 sm:top-12 sm:left-12 z-50"
+      >
+        <Link
+          to="/"
+          className={`flex items-center gap-3 py-2 px-4 rounded-full border transition-all group ${theme === 'dark' ? 'border-white/5 bg-white/5 text-slate-400 hover:bg-white/10 hover:text-[#10B981]' : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-100 hover:text-[#10B981]'}`}
+        >
+          <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+          <span className="text-[10px] font-black uppercase tracking-widest leading-none">Back to Protocol</span>
+        </Link>
+      </motion.div>
+
       <div className="fixed inset-0 pointer-events-none z-0">
         <motion.div
           animate={{ x: mousePos.x * 60, y: mousePos.y * 60 }}
@@ -129,15 +150,6 @@ const Signup = () => {
         </div>
       </div>
 
-      <div className="w-full max-w-lg flex justify-between items-center mb-6 mt-4 relative z-50 px-2">
-        <button onClick={() => navigate('/')} className="flex items-center gap-2 transition-colors group text-slate-500 hover:text-[#10B981]">
-          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          <span className="text-[10px] font-black uppercase tracking-[0.3em]">Protocol Home</span>
-        </button>
-        <button onClick={toggleTheme} className={`p-2.5 rounded-xl border transition-all backdrop-blur-md ${theme === 'dark' ? 'border-white/10 bg-white/5 hover:bg-white/10' : 'border-slate-200 bg-white/80 hover:bg-slate-50 shadow-sm'}`}>
-          {theme === 'dark' ? <Sun className="w-4 h-4 text-emerald-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
-        </button>
-      </div>
 
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
@@ -151,7 +163,7 @@ const Signup = () => {
                 else navigate('/');
               }}>
                 <Zap className="w-7 h-7 text-[#10B981] fill-[#10B981]" />
-                <span className={`text-xl font-black italic tracking-tighter uppercase ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>DropPay</span>
+                <span className={`text-xl font-black italic tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>DropPay</span>
               </div>
               <h1 className={`text-3xl sm:text-4xl font-black italic uppercase mb-1 tracking-tighter leading-none ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Create Account.</h1>
               <p className="text-slate-500 mb-6 text-[9px] font-black uppercase tracking-[0.2em]">Deploy your streaming node today.</p>
@@ -167,8 +179,36 @@ const Signup = () => {
               </AnimatePresence>
 
               <motion.form onSubmit={handleSignup} className="space-y-3" variants={containerVariants} initial="hidden" animate="show">
+                {/* FULL NAME INPUT */}
+                <motion.div variants={itemVariants} className="relative group">
+                  <User className={`absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors ${theme === 'dark' ? 'text-slate-500 group-focus-within:text-[#10B981]' : 'text-slate-500 group-focus-within:text-[#10B981]'}`} />
+                  <input
+                    name="fullName"
+                    type="text"
+                    placeholder="Full Name"
+                    value={formData.fullName}
+                    onChange={handleChange}
+                    className={`w-full border rounded-xl py-3.5 pl-12 pr-12 outline-none text-sm font-medium italic transition-all ${theme === 'dark' ? 'bg-white/5 border-white/10 text-white focus:border-[#10B981]' : 'bg-slate-100 border-slate-200 text-slate-900 focus:border-[#10B981]'}`}
+                    required
+                  />
+                </motion.div>
+
+                {/* UNIQUE USERNAME (HANDLE) INPUT */}
+                <motion.div variants={itemVariants} className="relative group">
+                  <Hash className={`absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors ${theme === 'dark' ? 'text-slate-500 group-focus-within:text-[#10B981]' : 'text-slate-500 group-focus-within:text-[#10B981]'}`} />
+                  <input
+                    name="username"
+                    type="text"
+                    placeholder="Unique Username (Streamer ID)"
+                    value={formData.username}
+                    onChange={(e) => setFormData({ ...formData, username: e.target.value.toLowerCase().replace(/\s+/g, '') })}
+                    className={`w-full border rounded-xl py-3.5 pl-12 pr-12 outline-none text-sm font-medium italic transition-all ${theme === 'dark' ? 'bg-white/5 border-white/10 text-white focus:border-[#10B981]' : 'bg-slate-100 border-slate-200 text-slate-900 focus:border-[#10B981]'}`}
+                    required
+                  />
+                  <div className="absolute right-5 top-1/2 -translate-y-1/2 text-[10px] font-black text-[#10B981] opacity-40 group-focus-within:opacity-100 transition-opacity uppercase tracking-tighter">Handle</div>
+                </motion.div>
+
                 {[
-                  { icon: User, name: "username", placeholder: "Display Name (Unique)", type: "text" },
                   { icon: Mail, name: "email", placeholder: "Email Address", type: "email" },
                   { icon: Phone, name: "phone", placeholder: "Phone Number", type: "text" },
                   { icon: UserPlus, name: "referralCode", placeholder: "Referral Code (Optional)", type: "text" },
@@ -180,7 +220,7 @@ const Signup = () => {
                     ) : (
                       <field.icon className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500 w-4 h-4 transition-colors group-focus-within:text-[#10B981]" />
                     )}
-                    <input name={field.name} type={field.type} value={formData[field.name]} onChange={handleChange} placeholder={field.placeholder} className={`w-full border rounded-xl py-3.5 pl-12 pr-12 outline-none text-sm font-medium italic transition-all ${theme === 'dark' ? 'bg-white/5 border-white/10 text-white focus:border-[#10B981]' : 'bg-slate-100 border-slate-200 text-slate-900 focus:border-[#10B981]'}`} required />
+                    <input name={field.name} type={field.type} value={formData[field.name]} onChange={handleChange} placeholder={field.placeholder} className={`w-full border rounded-xl py-3.5 pl-12 pr-12 outline-none text-sm font-medium italic transition-all ${theme === 'dark' ? 'bg-white/5 border-white/10 text-white focus:border-[#10B981]' : 'bg-slate-100 border-slate-200 text-slate-900 focus:border-[#10B981]'}`} required={field.name !== "referralCode"} />
                     {field.isPassword && (
                       <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-[#10B981] transition-colors">
                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}

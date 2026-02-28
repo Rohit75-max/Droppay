@@ -3,7 +3,7 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const User = require('../models/User');
 const { createOnboardingLink } = require('../controllers/onboardingController');
-const { requestWithdrawal, purchasePremiumStyle, purchasePremiumAlert } = require('../controllers/userController');
+const { requestWithdrawal, purchasePremiumStyle, purchasePremiumAlert, purchaseNexusTheme, purchaseWidget, equipWidget, equipAsset } = require('../controllers/userController');
 // @route   POST api/user/link-bank
 router.post('/link-bank', auth, createOnboardingLink);
 
@@ -18,6 +18,22 @@ router.post('/buy-premium-style', auth, purchasePremiumStyle);
 // @route   POST api/user/buy-premium-alert
 // @desc    Purchase Premium Alert overlay using Wallet Balance
 router.post('/buy-premium-alert', auth, purchasePremiumAlert);
+
+// @route   POST api/user/buy-nexus-theme
+// @desc    Purchase Elite Nexus Theme using Wallet Balance
+router.post('/buy-nexus-theme', auth, purchaseNexusTheme);
+
+// @route   POST api/user/buy-widget
+// @desc    Purchase a premium dashboard widget using Wallet Balance
+router.post('/buy-widget', auth, purchaseWidget);
+
+// @route   POST api/user/equip-widget
+// @desc    Equip an owned widget as the active revenue chart
+router.post('/equip-widget', auth, equipWidget);
+
+// @route   POST api/user/equip-asset
+// @desc    Universal equip handler for all asset categories
+router.post('/equip-asset', auth, equipAsset);
 
 // @route   GET api/user/profile
 router.get('/profile', auth, async (req, res) => {
@@ -91,7 +107,7 @@ const createTransporter = () => {
 // @route   POST api/user/update-profile
 router.post('/update-profile', auth, async (req, res) => {
     try {
-        const { username, bio, streamerId, email, phone, avatar } = req.body;
+        const { fullName, username, bio, email, phone, avatar, nexusTheme, nexusThemeMode } = req.body;
         const user = await User.findById(req.user.id);
 
         let requiresOTP = false;
@@ -125,10 +141,15 @@ router.post('/update-profile', auth, async (req, res) => {
             user.otp = { code: otpCode, expiresAt: Date.now() + 600000 };
 
             // Only update non-sensitive fields instantly
-            if (username) user.username = username;
+            if (fullName) user.fullName = fullName;
+            if (username) {
+                user.username = username.trim().toLowerCase().replace(/\s+/g, '');
+                user.streamerId = user.username;
+            }
             if (bio) user.bio = bio;
-            if (streamerId) user.streamerId = streamerId;
             if (avatar) user.avatar = avatar;
+            if (nexusTheme) user.nexusTheme = nexusTheme;
+            if (nexusThemeMode) user.nexusThemeMode = nexusThemeMode;
 
             await user.save();
 
@@ -152,10 +173,15 @@ router.post('/update-profile', auth, async (req, res) => {
         }
 
         // 2. Direct Instant Update (No sensitive fields altered)
-        if (username) user.username = username;
+        if (fullName) user.fullName = fullName;
+        if (username) {
+            user.username = username.trim().toLowerCase().replace(/\s+/g, '');
+            user.streamerId = user.username;
+        }
         if (bio) user.bio = bio;
-        if (streamerId) user.streamerId = streamerId;
         if (avatar) user.avatar = avatar;
+        if (nexusTheme) user.nexusTheme = nexusTheme;
+        if (nexusThemeMode) user.nexusThemeMode = nexusThemeMode;
 
         // Single-key style backward compatibility
         if (req.body.alertStyle) user.overlaySettings.alertStyle = req.body.alertStyle;
@@ -224,7 +250,7 @@ router.get('/public/:streamerId', async (req, res) => {
         // Use regex for robust case-insensitive matching
         const safeQuery = { $regex: new RegExp(`^${(req.params.streamerId || '').replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')}$`, 'i') };
         const user = await User.findOne({ $or: [{ streamerId: safeQuery }, { username: safeQuery }] })
-            .select('username streamerId bio avatar tier partnerPack goalSettings overlaySettings');
+            .select('username streamerId bio avatar tier partnerPack goalSettings overlaySettings nexusTheme nexusThemeMode');
         if (!user) return res.status(404).json({ msg: 'Streamer not found' });
         res.json(user);
     } catch (err) {
