@@ -22,7 +22,9 @@ import MasterOverlay from './pages/MasterOverlay';
 import LiveThemeEngine from './components/LiveThemeEngine';
 
 // --- DYNAMIC INFRASTRUCTURE (Fixes Mobile Persistence) ---
-const API_BASE = `http://${window.location.hostname}:5001`;
+const API_BASE = window.location.hostname === 'localhost' 
+  ? 'http://localhost:5001' 
+  : 'https://droppay.onrender.com';
 
 // --- PROFESSIONAL GATE: SECURE UPLINK ---
 const MissionGate = ({ children }) => {
