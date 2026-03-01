@@ -50,10 +50,10 @@ const ControlCenter = ({
 
       {/* --- TOP NAV TABS — Overlapping Card Stack, Centered Desktop / Scrollable Mobile --- */}
       <div
-        className="w-full overflow-x-auto relative z-20 flex justify-center"
+        className="w-full overflow-x-auto relative z-20 flex md:justify-center justify-start scrollbar-hide"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
-        <div className="flex items-center min-w-max py-4 gap-1">
+        <div className="flex items-center min-w-max py-4 px-4 md:px-0 gap-1 md:gap-2">
           {['overlay', 'mission', 'nexus', 'stickers', 'widgets'].map((tab, idx) => {
             const isActive = activeTab === tab;
             return (
@@ -122,56 +122,56 @@ const ControlCenter = ({
                     </div>
                     <p className="text-[11px] font-bold text-[var(--nexus-text-muted)] italic leading-relaxed mb-6">Choose your live visual template. This instantly updates your OBS software and Donation page.</p>
 
-                    <div className={`grid grid-cols-2 lg:grid-cols-3 gap-4 border-t border-b py-6 ${theme === 'dark' ? 'border-white/5' : 'border-slate-100'}`}>
-                      <button onClick={() => handleStyleSwitch('modern')} className={`relative flex flex-col items-center justify-center gap-3 p-6 rounded-3xl border-2 transition-all overflow-hidden border-[var(--nexus-accent)] bg-[var(--nexus-accent)]/10 hover:bg-[var(--nexus-accent)]/20 ${currentStyle === 'modern' ? 'shadow-[var(--nexus-glow)] scale-[1.05]' : ''}`}>
-                        <Sparkles className={`w-8 h-8 text-[var(--nexus-accent)]`} />
-                        <span className={`text-[10px] font-black uppercase tracking-widest text-[var(--nexus-accent)]`}>Modern</span>
-                        {currentStyle === 'modern' && <div className="absolute top-4 right-4"><Check className="w-4 h-4 text-[var(--nexus-accent)]" /></div>}
+                    <div className={`grid grid-cols-2 sm:grid-cols-3 gap-3 md:gap-4 border-t border-b py-6 ${theme === 'dark' ? 'border-white/5' : 'border-slate-100'}`}>
+                      <button onClick={() => handleStyleSwitch('modern')} className={`relative flex flex-col items-center justify-center gap-2 md:gap-3 p-4 md:p-6 rounded-3xl border-2 transition-all overflow-hidden border-[var(--nexus-accent)] bg-[var(--nexus-accent)]/10 hover:bg-[var(--nexus-accent)]/20 ${currentStyle === 'modern' ? 'shadow-[var(--nexus-glow)] scale-[1.02] md:scale-[1.05]' : ''}`}>
+                        <Sparkles className={`w-6 h-6 md:w-8 md:h-8 text-[var(--nexus-accent)]`} />
+                        <span className={`text-[9px] md:text-[10px] font-black uppercase tracking-widest text-[var(--nexus-accent)]`}>Modern</span>
+                        {currentStyle === 'modern' && <div className="absolute top-3 right-3 md:top-4 md:right-4"><Check className="w-3 h-3 md:w-4 md:h-4 text-[var(--nexus-accent)]" /></div>}
                       </button>
-                      <button onClick={() => handleStyleSwitch('comic')} className={`relative flex flex-col items-center justify-center gap-3 p-6 rounded-3xl border-2 transition-all overflow-hidden border-black bg-[#FFDE00] hover:bg-[#ffe533] ${currentStyle === 'comic' ? 'shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] scale-[1.05]' : ''}`}>
-                        <Zap className={`w-8 h-8 text-black fill-black`} />
-                        <span className={`text-[10px] font-black uppercase tracking-widest text-black`}>Comic</span>
-                        {currentStyle === 'comic' && <div className="absolute top-4 right-4"><Check className="w-4 h-4 text-black" /></div>}
+                      <button onClick={() => handleStyleSwitch('comic')} className={`relative flex flex-col items-center justify-center gap-2 md:gap-3 p-4 md:p-6 rounded-3xl border-2 transition-all overflow-hidden border-black bg-[#FFDE00] hover:bg-[#ffe533] ${currentStyle === 'comic' ? 'shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] scale-[1.02] md:scale-[1.05]' : ''}`}>
+                        <Zap className={`w-6 h-6 md:w-8 md:h-8 text-black fill-black`} />
+                        <span className={`text-[9px] md:text-[10px] font-black uppercase tracking-widest text-black`}>Comic</span>
+                        {currentStyle === 'comic' && <div className="absolute top-3 right-3 md:top-4 md:right-4"><Check className="w-3 h-3 md:w-4 md:h-4 text-black" /></div>}
                       </button>
-                      <button onClick={() => handleStyleSwitch('playful')} className={`relative flex flex-col items-center justify-center gap-3 p-6 rounded-3xl border-2 transition-all overflow-hidden border-[#FF5F6D] bg-[#FF5F6D]/10 hover:bg-[#FF5F6D]/20 ${currentStyle === 'playful' ? 'shadow-[0_0_15px_rgba(255,95,109,0.3)] scale-[1.05]' : ''}`}>
-                        <Crown className={`w-8 h-8 text-[#FF5F6D] fill-[#FF5F6D]`} />
-                        <span className={`text-[10px] font-black uppercase tracking-widest text-[#FF5F6D]`}>Playful</span>
-                        {currentStyle === 'playful' && <div className="absolute top-4 right-4"><Check className="w-4 h-4 text-[#FF5F6D]" /></div>}
+                      <button onClick={() => handleStyleSwitch('playful')} className={`relative flex flex-col items-center justify-center gap-2 md:gap-3 p-4 md:p-6 rounded-3xl border-2 transition-all overflow-hidden border-[#FF5F6D] bg-[#FF5F6D]/10 hover:bg-[#FF5F6D]/20 ${currentStyle === 'playful' ? 'shadow-[0_0_15px_rgba(255,95,109,0.3)] scale-[1.02] md:scale-[1.05]' : ''}`}>
+                        <Crown className={`w-6 h-6 md:w-8 md:h-8 text-[#FF5F6D] fill-[#FF5F6D]`} />
+                        <span className={`text-[9px] md:text-[10px] font-black uppercase tracking-widest text-[#FF5F6D]`}>Playful</span>
+                        {currentStyle === 'playful' && <div className="absolute top-3 right-3 md:top-4 md:right-4"><Check className="w-3 h-3 md:w-4 md:h-4 text-[#FF5F6D]" /></div>}
                       </button>
-                      <button onClick={() => handleStyleSwitch('pixel')} className={`relative flex flex-col items-center justify-center gap-3 p-6 rounded-3xl border-2 transition-all overflow-hidden border-[#4CAF50] bg-[#4CAF50]/10 hover:bg-[#4CAF50]/20 ${currentStyle === 'pixel' ? 'shadow-[0_0_15px_rgba(76,175,80,0.3)] scale-[1.05]' : ''}`}>
-                        <Gamepad2 className={`w-8 h-8 text-[#4CAF50]`} />
-                        <span className={`text-[10px] font-black uppercase tracking-widest text-[#4CAF50]`}>Pixel</span>
-                        {currentStyle === 'pixel' && <div className="absolute top-4 right-4"><Check className="w-4 h-4 text-[#4CAF50]" /></div>}
+                      <button onClick={() => handleStyleSwitch('pixel')} className={`relative flex flex-col items-center justify-center gap-2 md:gap-3 p-4 md:p-6 rounded-3xl border-2 transition-all overflow-hidden border-[#4CAF50] bg-[#4CAF50]/10 hover:bg-[#4CAF50]/20 ${currentStyle === 'pixel' ? 'shadow-[0_0_15px_rgba(76,175,80,0.3)] scale-[1.02] md:scale-[1.05]' : ''}`}>
+                        <Gamepad2 className={`w-6 h-6 md:w-8 md:h-8 text-[#4CAF50]`} />
+                        <span className={`text-[9px] md:text-[10px] font-black uppercase tracking-widest text-[#4CAF50]`}>Pixel</span>
+                        {currentStyle === 'pixel' && <div className="absolute top-3 right-3 md:top-4 md:right-4"><Check className="w-3 h-3 md:w-4 md:h-4 text-[#4CAF50]" /></div>}
                       </button>
-                      <button onClick={() => handleStyleSwitch('kawaii')} className={`relative flex flex-col items-center justify-center gap-3 p-6 rounded-3xl border-2 transition-all overflow-hidden border-[#C26D7D] bg-[#C26D7D]/10 hover:bg-[#C26D7D]/20 ${currentStyle === 'kawaii' ? 'shadow-[0_0_15px_rgba(194,109,125,0.3)] scale-[1.05]' : ''}`}>
-                        <Heart className={`w-8 h-8 text-[#C26D7D] fill-[#C26D7D]`} />
-                        <span className={`text-[10px] font-black uppercase tracking-widest text-[#C26D7D]`}>Kawaii</span>
-                        {currentStyle === 'kawaii' && <div className="absolute top-4 right-4"><Check className="w-4 h-4 text-[#C26D7D]" /></div>}
+                      <button onClick={() => handleStyleSwitch('kawaii')} className={`relative flex flex-col items-center justify-center gap-2 md:gap-3 p-4 md:p-6 rounded-3xl border-2 transition-all overflow-hidden border-[#C26D7D] bg-[#C26D7D]/10 hover:bg-[#C26D7D]/20 ${currentStyle === 'kawaii' ? 'shadow-[0_0_15px_rgba(194,109,125,0.3)] scale-[1.02] md:scale-[1.05]' : ''}`}>
+                        <Heart className={`w-6 h-6 md:w-8 md:h-8 text-[#C26D7D] fill-[#C26D7D]`} />
+                        <span className={`text-[9px] md:text-[10px] font-black uppercase tracking-widest text-[#C26D7D]`}>Kawaii</span>
+                        {currentStyle === 'kawaii' && <div className="absolute top-3 right-3 md:top-4 md:right-4"><Check className="w-3 h-3 md:w-4 md:h-4 text-[#C26D7D]" /></div>}
                       </button>
-                      <button onClick={() => handleStyleSwitch('cyberhud')} className={`relative flex flex-col items-center justify-center gap-3 p-6 rounded-3xl border-2 transition-all overflow-hidden border-[#39ff14] bg-[#39ff14]/10 hover:bg-[#39ff14]/20 ${currentStyle === 'cyberhud' ? 'shadow-[0_0_20px_rgba(57,255,20,0.4)] scale-[1.05]' : ''}`}>
-                        <Activity className={`w-8 h-8 text-[#39ff14] animate-pulse`} />
-                        <span className={`text-[10px] font-mono uppercase tracking-widest text-[#39ff14]`}>Cyber HUD</span>
-                        {currentStyle === 'cyberhud' && <div className="absolute top-4 right-4"><Check className="w-4 h-4 text-[#39ff14]" /></div>}
+                      <button onClick={() => handleStyleSwitch('cyberhud')} className={`relative flex flex-col items-center justify-center gap-2 md:gap-3 p-4 md:p-6 rounded-3xl border-2 transition-all overflow-hidden border-[#39ff14] bg-[#39ff14]/10 hover:bg-[#39ff14]/20 ${currentStyle === 'cyberhud' ? 'shadow-[0_0_20px_rgba(57,255,20,0.4)] scale-[1.02] md:scale-[1.05]' : ''}`}>
+                        <Activity className={`w-6 h-6 md:w-8 md:h-8 text-[#39ff14] animate-pulse`} />
+                        <span className={`text-[9px] md:text-[10px] font-mono uppercase tracking-widest text-[#39ff14]`}>Cyber HUD</span>
+                        {currentStyle === 'cyberhud' && <div className="absolute top-3 right-3 md:top-4 md:right-4"><Check className="w-3 h-3 md:w-4 md:h-4 text-[#39ff14]" /></div>}
                       </button>
-                      <button onClick={() => handleStyleSwitch('bgmi')} className={`relative flex flex-col items-center justify-center gap-3 p-6 rounded-3xl border-2 transition-all overflow-hidden border-[#F97316] bg-[#F97316]/10 hover:bg-[#F97316]/20 ${currentStyle === 'bgmi' ? 'shadow-[0_0_20px_rgba(249,115,22,0.4)] scale-[1.05]' : ''}`}>
-                        <Target className={`w-8 h-8 text-[#F97316] animate-pulse`} />
-                        <span className={`text-[10px] font-mono uppercase tracking-widest text-[#F97316]`}>Airdrop</span>
-                        {currentStyle === 'bgmi' && <div className="absolute top-4 right-4"><Check className="w-4 h-4 text-[#F97316]" /></div>}
+                      <button onClick={() => handleStyleSwitch('bgmi')} className={`relative flex flex-col items-center justify-center gap-2 md:gap-3 p-4 md:p-6 rounded-3xl border-2 transition-all overflow-hidden border-[#F97316] bg-[#F97316]/10 hover:bg-[#F97316]/20 ${currentStyle === 'bgmi' ? 'shadow-[0_0_20px_rgba(249,115,22,0.4)] scale-[1.02] md:scale-[1.05]' : ''}`}>
+                        <Target className={`w-6 h-6 md:w-8 md:h-8 text-[#F97316] animate-pulse`} />
+                        <span className={`text-[9px] md:text-[10px] font-mono uppercase tracking-widest text-[#F97316]`}>Airdrop</span>
+                        {currentStyle === 'bgmi' && <div className="absolute top-3 right-3 md:top-4 md:right-4"><Check className="w-3 h-3 md:w-4 md:h-4 text-[#F97316]" /></div>}
                       </button>
-                      <button onClick={() => handleStyleSwitch('gta')} className={`relative flex flex-col items-center justify-center gap-3 p-6 rounded-3xl border-2 transition-all overflow-hidden border-[#FFD700] bg-black hover:bg-black/90 ${currentStyle === 'gta' ? 'shadow-[0_0_20px_rgba(255,215,0,0.4)] scale-[1.05]' : ''}`}>
-                        <Star className={`w-8 h-8 text-[#FFD700] fill-[#FFD700]`} />
-                        <span className={`text-[10px] font-black uppercase tracking-tighter text-[#FFD700]`}>Respect +</span>
-                        {currentStyle === 'gta' && <div className="absolute top-4 right-4"><Check className="w-4 h-4 text-[#FFD700]" /></div>}
+                      <button onClick={() => handleStyleSwitch('gta')} className={`relative flex flex-col items-center justify-center gap-2 md:gap-3 p-4 md:p-6 rounded-3xl border-2 transition-all overflow-hidden border-[#FFD700] bg-black hover:bg-black/90 ${currentStyle === 'gta' ? 'shadow-[0_0_20px_rgba(255,215,0,0.4)] scale-[1.02] md:scale-[1.05]' : ''}`}>
+                        <Star className={`w-6 h-6 md:w-8 md:h-8 text-[#FFD700] fill-[#FFD700]`} />
+                        <span className={`text-[9px] md:text-[10px] font-black uppercase tracking-tighter text-[#FFD700]`}>Respect +</span>
+                        {currentStyle === 'gta' && <div className="absolute top-3 right-3 md:top-4 md:right-4"><Check className="w-3 h-3 md:w-4 md:h-4 text-[#FFD700]" /></div>}
                       </button>
-                      <button onClick={() => handleStyleSwitch('coc')} className={`relative flex flex-col items-center justify-center gap-3 p-6 rounded-3xl border-2 transition-all overflow-hidden border-[#FBBF24] bg-[#451A03] hover:bg-[#572205] ${currentStyle === 'coc' ? 'shadow-[0_0_20px_rgba(251,191,36,0.4)] scale-[1.05]' : ''}`}>
-                        <Trophy className={`w-8 h-8 text-[#FBBF24] fill-[#FBBF24]`} />
-                        <span className={`text-[10px] font-black uppercase tracking-wider text-[#FBBF24]`}>Raid</span>
-                        {currentStyle === 'coc' && <div className="absolute top-4 right-4"><Check className="w-4 h-4 text-[#FBBF24]" /></div>}
+                      <button onClick={() => handleStyleSwitch('coc')} className={`relative flex flex-col items-center justify-center gap-2 md:gap-3 p-4 md:p-6 rounded-3xl border-2 transition-all overflow-hidden border-[#FBBF24] bg-[#451A03] hover:bg-[#572205] ${currentStyle === 'coc' ? 'shadow-[0_0_20px_rgba(251,191,36,0.4)] scale-[1.02] md:scale-[1.05]' : ''}`}>
+                        <Trophy className={`w-6 h-6 md:w-8 md:h-8 text-[#FBBF24] fill-[#FBBF24]`} />
+                        <span className={`text-[9px] md:text-[10px] font-black uppercase tracking-wider text-[#FBBF24]`}>Raid</span>
+                        {currentStyle === 'coc' && <div className="absolute top-3 right-3 md:top-4 md:right-4"><Check className="w-3 h-3 md:w-4 md:h-4 text-[#FBBF24]" /></div>}
                       </button>
-                      <button onClick={() => handleStyleSwitch('avatar')} className={`relative flex flex-col items-center justify-center gap-3 p-6 rounded-[3rem] border-2 transition-all overflow-hidden border-[#06B6D4] bg-[#040D14] hover:bg-[#061826] ${currentStyle === 'avatar' ? 'shadow-[0_0_20px_rgba(6,182,212,0.4)] scale-[1.05]' : ''}`}>
-                        <Leaf className={`w-8 h-8 text-[#22D3EE] animate-pulse`} />
-                        <span className={`text-[10px] uppercase font-light tracking-[0.3em] text-[#22D3EE]`}>Pandora</span>
-                        {currentStyle === 'avatar' && <div className="absolute top-4 right-4"><Check className="w-4 h-4 text-[#22D3EE]" /></div>}
+                      <button onClick={() => handleStyleSwitch('avatar')} className={`relative flex flex-col items-center justify-center gap-2 md:gap-3 p-4 md:p-6 rounded-[3rem] border-2 transition-all overflow-hidden border-[#06B6D4] bg-[#040D14] hover:bg-[#061826] ${currentStyle === 'avatar' ? 'shadow-[0_0_20px_rgba(6,182,212,0.4)] scale-[1.02] md:scale-[1.05]' : ''}`}>
+                        <Leaf className={`w-6 h-6 md:w-8 md:h-8 text-[#22D3EE] animate-pulse`} />
+                        <span className={`text-[9px] md:text-[10px] uppercase font-light tracking-[0.3em] text-[#22D3EE]`}>Pandora</span>
+                        {currentStyle === 'avatar' && <div className="absolute top-3 right-3 md:top-4 md:right-4"><Check className="w-3 h-3 md:w-4 md:h-4 text-[#22D3EE]" /></div>}
                       </button>
                       {/* Append Unlocked Premium Alerts */}
                       {(user?.overlaySettings?.unlockedPremiumAlerts || []).map(styleId => (
@@ -328,7 +328,7 @@ const ControlCenter = ({
                             <input
                               value={goalForm.title}
                               onChange={(e) => setGoalForm({ ...goalForm, title: e.target.value })}
-                              className={`w-full p-5 rounded-2xl border-2 outline-none font-black italic transition-all bg-[var(--nexus-panel)] border-[var(--nexus-border)] text-[var(--nexus-text)] focus:border-amber-500/50 focus:bg-amber-500/5 focus:shadow-[0_0_20px_rgba(245,158,11,0.1)] placeholder:text-[var(--nexus-text-muted)]`}
+                              className={`w-full p-4 md:p-5 rounded-2xl border-2 outline-none font-black italic transition-all bg-[var(--nexus-panel)] border-[var(--nexus-border)] text-[var(--nexus-text)] focus:border-amber-500/50 focus:bg-amber-500/5 focus:shadow-[0_0_20px_rgba(245,158,11,0.1)] placeholder:text-[var(--nexus-text-muted)] text-sm md:text-base`}
                               placeholder="e.g. PC Upgrade Fund"
                             />
                             <div className="absolute right-5 top-1/2 -translate-y-1/2 opacity-0 group-focus-within:opacity-100 transition-opacity">
@@ -340,12 +340,12 @@ const ControlCenter = ({
                         <div className="space-y-3 group">
                           <label className="text-[10px] font-black uppercase text-[var(--nexus-text-muted)] tracking-widest flex items-center gap-2 ml-1 transition-colors group-hover:text-amber-500/70"><Coins className="w-3 h-3" /> Target (₹)</label>
                           <div className="relative">
-                            <span className="absolute left-5 top-1/2 -translate-y-1/2 text-lg font-black text-[var(--nexus-text-muted)]">₹</span>
+                            <span className="absolute left-5 top-1/2 -translate-y-1/2 text-base md:text-lg font-black text-[var(--nexus-text-muted)]">₹</span>
                             <input
                               type="number"
                               value={goalForm.targetAmount}
                               onChange={(e) => setGoalForm({ ...goalForm, targetAmount: e.target.value })}
-                              className={`w-full p-5 pl-10 rounded-2xl border-2 outline-none font-black italic transition-all bg-[var(--nexus-panel)] border-[var(--nexus-border)] text-[var(--nexus-text)] focus:border-amber-500/50 focus:bg-amber-500/5 focus:shadow-[0_0_20px_rgba(245,158,11,0.1)] placeholder:text-[var(--nexus-text-muted)] text-xl`}
+                              className={`w-full p-4 md:p-5 pl-10 rounded-2xl border-2 outline-none font-black italic transition-all bg-[var(--nexus-panel)] border-[var(--nexus-border)] text-[var(--nexus-text)] focus:border-amber-500/50 focus:bg-amber-500/5 focus:shadow-[0_0_20px_rgba(245,158,11,0.1)] placeholder:text-[var(--nexus-text-muted)] text-lg md:text-xl`}
                               placeholder="10000"
                             />
                             <div className="absolute right-5 top-1/2 -translate-y-1/2 opacity-0 group-focus-within:opacity-100 transition-opacity">

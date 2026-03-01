@@ -52,13 +52,13 @@ const TickerItem = ({ donation }) => {
                 )}
             </div>
 
-            <span className="text-[var(--nexus-accent)] font-bold text-xs tracking-widest uppercase shrink-0">{donation.donorName}</span>
-            <span className="text-white/30 shrink-0">·</span>
-            <span className="text-white font-mono font-bold text-xs flex items-center gap-0.5 shrink-0"><IndianRupee className="w-3 h-3" />{donation.amount}</span>
+            <span className="text-[var(--nexus-accent)] font-black text-[10px] uppercase tracking-[0.2em] shrink-0">{donation.donorName}</span>
+            <span className="text-[var(--nexus-text-muted)] opacity-30 shrink-0">·</span>
+            <span className="text-[var(--nexus-text)] font-mono font-black text-xs flex items-center gap-0.5 shrink-0"><IndianRupee className="w-3 h-3" />{donation.amount}</span>
             {donation.message && (
                 <>
-                    <span className="text-white/30 shrink-0">·</span>
-                    <span className="text-slate-400 italic text-xs font-medium shrink-0">"{donation.message}"</span>
+                    <span className="text-[var(--nexus-text-muted)] opacity-30 shrink-0">·</span>
+                    <span className="text-[var(--nexus-text-muted)] italic text-[11px] font-medium shrink-0">"{donation.message}"</span>
                 </>
             )}
 

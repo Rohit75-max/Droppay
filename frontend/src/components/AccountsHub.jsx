@@ -147,7 +147,7 @@ const AccountsHub = ({
           <div className={`w-full flex flex-col border rounded-[2.5rem] p-6 lg:p-8 relative transition-all overflow-hidden ${getCardStyle()}`}>
 
             {/* Header Block */}
-            <div className="flex justify-between items-start mb-10 w-full relative z-10">
+            <div className="flex flex-col sm:flex-row sm:justify-between items-start mb-10 w-full relative z-10 gap-6">
               <div className="flex flex-wrap items-center gap-3">
                 <div className="px-4 py-2 bg-[var(--nexus-accent)]/10 border border-[var(--nexus-accent)]/20 text-[var(--nexus-accent)] rounded-xl text-[9px] font-black uppercase flex items-center gap-2">
                   <BadgeCheck className="w-3 h-3" /> Verified Node
@@ -161,7 +161,7 @@ const AccountsHub = ({
               </div>
               <button
                 onClick={() => isEditing ? saveProfileUpdates() : setIsEditing(true)}
-                className={`flex items-center justify-center gap-3 px-6 py-3 rounded-[var(--nexus-radius)] text-[10px] font-black uppercase tracking-widest transition-all border nexus-btn ${isEditing ? 'bg-[var(--nexus-accent)] text-black border-[var(--nexus-accent)]' : 'bg-[var(--nexus-panel)] text-[var(--nexus-text)] border-[var(--nexus-border)] hover:bg-[var(--nexus-accent)] hover:text-black hover:border-[var(--nexus-accent)]'}`}
+                className={`w-full sm:w-auto flex items-center justify-center gap-3 px-6 py-3 rounded-[var(--nexus-radius)] text-[10px] font-black uppercase tracking-widest transition-all border nexus-btn ${isEditing ? 'bg-[var(--nexus-accent)] text-black border-[var(--nexus-accent)]' : 'bg-[var(--nexus-panel)] text-[var(--nexus-text)] border-[var(--nexus-border)] hover:bg-[var(--nexus-accent)] hover:text-black hover:border-[var(--nexus-accent)]'}`}
               >
                 {isEditing ? <><Save className="w-4 h-4" /> Save</> : <><Edit3 className="w-4 h-4" /> Edit Profile</>}
               </button>
@@ -245,26 +245,28 @@ const AccountsHub = ({
                     )}
                   </div>
                   {isEditingEmail ? (
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <input value={emailInput} onChange={(e) => setEmailInput(e.target.value)} className={`w-full rounded-2xl p-4 text-sm font-bold outline-none border-2 transition-all ${getInputStyle()}`} />
-                      <button disabled={isSendingOtp} onClick={async () => { setIsSendingOtp(true); const success = await saveContactUpdate('email', emailInput); setIsSendingOtp(false); if (success) setIsEditingEmail(false); }} className="px-5 rounded-[var(--nexus-radius)] bg-[var(--nexus-accent)] text-black font-black uppercase text-[10px] tracking-widest hover:brightness-110 transition-colors shadow-lg disabled:opacity-50 flex items-center gap-2 nexus-btn">
+                      <button disabled={isSendingOtp} onClick={async () => { setIsSendingOtp(true); const success = await saveContactUpdate('email', emailInput); setIsSendingOtp(false); if (success) setIsEditingEmail(false); }} className="w-full sm:w-auto px-5 py-4 sm:py-0 rounded-[var(--nexus-radius)] bg-[var(--nexus-accent)] text-black font-black uppercase text-[10px] tracking-widest hover:brightness-110 transition-colors shadow-lg disabled:opacity-50 flex items-center justify-center gap-2 nexus-btn">
                         {isSendingOtp ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Verify'}
                       </button>
                     </div>
                   ) : (
-                    <div className={`w-full rounded-2xl p-4 border flex items-center justify-between transition-all bg-[var(--nexus-panel)] border-[var(--nexus-border)]`}>
-                      <p className={`text-sm font-bold truncate pr-4 text-[var(--nexus-text)]`}>{user.email}</p>
-                      {user.isEmailVerified ? (
-                        <div className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl border bg-[var(--nexus-accent)]/10 border-[var(--nexus-accent)]/20 text-[var(--nexus-accent)]`}>
-                          <CheckCircle2 className="w-3.5 h-3.5" />
-                          <span className="text-[9px] font-black uppercase tracking-widest">Verified</span>
-                        </div>
-                      ) : (
-                        <button onClick={() => requestVerification('email')} disabled={isRequestingOtp} className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all nexus-btn bg-amber-500/10 border-amber-500/20 text-amber-500 hover:bg-amber-500 hover:text-black`}>
-                          {isRequestingOtp && verifyType === 'email' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <AlertCircle className="w-3.5 h-3.5" />}
-                          <span className="text-[9px] font-black uppercase tracking-widest">{isRequestingOtp && verifyType === 'email' ? 'Gen...' : 'Verify'}</span>
-                        </button>
-                      )}
+                    <div className={`w-full rounded-2xl p-4 border flex flex-col sm:flex-row sm:items-center justify-between transition-all bg-[var(--nexus-panel)] border-[var(--nexus-border)] gap-4`}>
+                      <p className={`text-sm font-bold truncate text-[var(--nexus-text)]`}>{user.email}</p>
+                      <div className="flex justify-start sm:justify-end">
+                        {user.isEmailVerified ? (
+                          <div className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl border bg-[var(--nexus-accent)]/10 border-[var(--nexus-accent)]/20 text-[var(--nexus-accent)]`}>
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            <span className="text-[9px] font-black uppercase tracking-widest">Verified</span>
+                          </div>
+                        ) : (
+                          <button onClick={() => requestVerification('email')} disabled={isRequestingOtp} className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all nexus-btn bg-amber-500/10 border-amber-500/20 text-amber-500 hover:bg-amber-500 hover:text-black`}>
+                            {isRequestingOtp && verifyType === 'email' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <AlertCircle className="w-3.5 h-3.5" />}
+                            <span className="text-[9px] font-black uppercase tracking-widest">{isRequestingOtp && verifyType === 'email' ? 'Gen...' : 'Verify'}</span>
+                          </button>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -280,28 +282,30 @@ const AccountsHub = ({
                     )}
                   </div>
                   {isEditingPhone ? (
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <input value={phoneInput} onChange={(e) => setPhoneInput(e.target.value)} className={`w-full rounded-2xl p-4 text-sm font-bold outline-none border-2 transition-all ${getInputStyle()}`} />
-                      <button disabled={isSendingOtp} onClick={async () => { setIsSendingOtp(true); const success = await saveContactUpdate('phone', phoneInput); setIsSendingOtp(false); if (success) setIsEditingPhone(false); }} className="px-5 rounded-[var(--nexus-radius)] bg-[var(--nexus-accent)] text-black font-black uppercase text-[10px] tracking-widest hover:brightness-110 transition-colors shadow-lg disabled:opacity-50 flex items-center gap-2 nexus-btn">
+                      <button disabled={isSendingOtp} onClick={async () => { setIsSendingOtp(true); const success = await saveContactUpdate('phone', phoneInput); setIsSendingOtp(false); if (success) setIsEditingPhone(false); }} className="w-full sm:w-auto px-5 py-4 sm:py-0 rounded-[var(--nexus-radius)] bg-[var(--nexus-accent)] text-black font-black uppercase text-[10px] tracking-widest hover:brightness-110 transition-colors shadow-lg disabled:opacity-50 flex items-center justify-center gap-2 nexus-btn">
                         {isSendingOtp ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Verify'}
                       </button>
                     </div>
                   ) : (
-                    <div className={`w-full rounded-2xl p-4 border flex items-center justify-between transition-all bg-[var(--nexus-panel)] border-[var(--nexus-border)]`}>
-                      <p className={`text-sm font-bold truncate pr-4 text-[var(--nexus-text)]`}>{user.phone || "No contact linked"}</p>
-                      {user.phone && (
-                        user.isPhoneVerified ? (
-                          <div className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl border bg-[var(--nexus-accent)]/10 border-[var(--nexus-accent)]/20 text-[var(--nexus-accent)]`}>
-                            <CheckCircle2 className="w-3.5 h-3.5" />
-                            <span className="text-[9px] font-black uppercase tracking-widest">Verified</span>
-                          </div>
-                        ) : (
-                          <button onClick={() => requestVerification('phone')} disabled={isRequestingOtp} className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all nexus-btn bg-amber-500/10 border-amber-500/20 text-amber-500 hover:bg-amber-500 hover:text-black`}>
-                            {isRequestingOtp && verifyType === 'phone' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <AlertCircle className="w-3.5 h-3.5" />}
-                            <span className="text-[9px] font-black uppercase tracking-widest">{isRequestingOtp && verifyType === 'phone' ? 'Gen...' : 'Verify'}</span>
-                          </button>
-                        )
-                      )}
+                    <div className={`w-full rounded-2xl p-4 border flex flex-col sm:flex-row sm:items-center justify-between transition-all bg-[var(--nexus-panel)] border-[var(--nexus-border)] gap-4`}>
+                      <p className={`text-sm font-bold truncate text-[var(--nexus-text)]`}>{user.phone || "No contact linked"}</p>
+                      <div className="flex justify-start sm:justify-end">
+                        {user.phone && (
+                          user.isPhoneVerified ? (
+                            <div className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl border bg-[var(--nexus-accent)]/10 border-[var(--nexus-accent)]/20 text-[var(--nexus-accent)]`}>
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              <span className="text-[9px] font-black uppercase tracking-widest">Verified</span>
+                            </div>
+                          ) : (
+                            <button onClick={() => requestVerification('phone')} disabled={isRequestingOtp} className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all nexus-btn bg-amber-500/10 border-amber-500/20 text-amber-500 hover:bg-amber-500 hover:text-black`}>
+                              {isRequestingOtp && verifyType === 'phone' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <AlertCircle className="w-3.5 h-3.5" />}
+                              <span className="text-[9px] font-black uppercase tracking-widest">{isRequestingOtp && verifyType === 'phone' ? 'Gen...' : 'Verify'}</span>
+                            </button>
+                          )
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>

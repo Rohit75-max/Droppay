@@ -728,7 +728,7 @@ const Dashboard = () => {
                         max={user.walletBalance}
                         value={withdrawalAmount}
                         onChange={(e) => setWithdrawalAmount(Number(e.target.value))}
-                        className={`w-full text-center text-3xl font-black p-5 pl-10 rounded-2xl outline-none border transition-all ${theme === 'dark' ? 'bg-black/40 border-white/5 text-white focus:border-[var(--nexus-accent)]' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-[var(--nexus-accent)]'}`}
+                        className={`w-full text-center text-2xl sm:text-3xl font-black p-4 sm:p-5 pl-10 rounded-2xl outline-none border transition-all ${theme === 'dark' ? 'bg-black/40 border-white/5 text-white focus:border-[var(--nexus-accent)]' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-[var(--nexus-accent)]'}`}
                       />
                     </div>
                     <p className={`text-[9px] font-bold italic ${theme === 'dark' ? 'text-slate-500' : 'text-slate-400'}`}>Minimum withdrawal: ₹1,000</p>

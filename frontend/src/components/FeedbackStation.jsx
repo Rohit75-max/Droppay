@@ -52,16 +52,16 @@ const FeedbackStation = ({
       animate={{ opacity: 1, y: 0 }}
       className="max-w-7xl mx-auto space-y-10 font-sans pb-20 w-full px-2 pt-4"
     >
-      <div className="flex items-center justify-between w-full px-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-[var(--nexus-accent)]/10 rounded-xl border border-[var(--nexus-accent)]/20">
-            <Monitor className="w-5 h-5 text-[var(--nexus-accent)]" />
+      <div className="flex items-center justify-between w-full px-2 sm:px-4">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="p-2 sm:p-2.5 bg-[var(--nexus-accent)]/10 rounded-xl border border-[var(--nexus-accent)]/20">
+            <Monitor className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--nexus-accent)]" />
           </div>
           <div>
-            <h3 className={`text-xl font-black uppercase italic tracking-tighter text-[var(--nexus-text)]`}>
+            <h3 className={`text-lg sm:text-xl font-black uppercase italic tracking-tighter text-[var(--nexus-text)]`}>
               <span className="text-[var(--nexus-accent)]">Station</span>
             </h3>
-            <p className="text-[var(--nexus-text-muted)] text-[8px] font-black uppercase tracking-[0.3em] opacity-60">Engineering Uplink</p>
+            <p className="text-[var(--nexus-text-muted)] text-[7px] sm:text-[8px] font-black uppercase tracking-[0.3em] opacity-60">Engineering Uplink</p>
           </div>
         </div>
       </div>
@@ -95,11 +95,11 @@ const FeedbackStation = ({
           {/* RATING SYSTEM */}
           <div className="space-y-4">
             <label className="text-[9px] font-black uppercase text-[var(--nexus-text-muted)] tracking-[0.2em] ml-1">Experience Tier</label>
-            <div className={`flex gap-4 w-fit p-3 rounded-2xl border bg-white/5 border-[var(--nexus-border)]`}>
+            <div className={`flex gap-3 sm:gap-4 w-fit p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border bg-white/5 border-[var(--nexus-border)]`}>
               {[1, 2, 3, 4, 5].map((num) => (
                 <button key={num} onClick={() => setRating?.(num)} className="transition-all hover:scale-110 active:scale-90">
                   <Star
-                    className={`w-6 h-6 transition-all ${num <= (rating || 0)
+                    className={`w-5 h-5 sm:w-6 sm:h-6 transition-all ${num <= (rating || 0)
                       ? 'fill-amber-400 text-amber-400 drop-shadow-[0_0_10px_rgba(251,191,36,0.4)]'
                       : 'text-[var(--nexus-text-muted)] opacity-20'
                       }`}

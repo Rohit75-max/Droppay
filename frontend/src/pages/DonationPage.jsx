@@ -287,9 +287,9 @@ const DonationPage = () => {
         <aside className="w-full relative h-auto lg:w-80 lg:fixed lg:bottom-0 lg:top-[112px] lg:left-0 flex flex-col border-r border-[var(--nexus-border)] bg-[var(--nexus-panel)]/50 backdrop-blur-md lg:overflow-y-auto hide-scroll z-40 shrink-0">
           <div className="p-6 flex flex-col space-y-6">
             {/* ACCOUNT CARD */}
-            <div className={`relative overflow-hidden border ${isLegend ? 'bg-amber-500/10 border-amber-500/30' : 'bg-[var(--nexus-panel)] border-[var(--nexus-border)]'} backdrop-blur-2xl rounded-3xl p-6 text-center flex flex-col items-center justify-center shadow-lg nexus-card shrink-0 liquid-gold-border`}>
+            <div className={`relative overflow-hidden border ${isLegend ? 'bg-amber-500/10 border-amber-500/30' : 'bg-[var(--nexus-panel)] border-[var(--nexus-border)]'} backdrop-blur-2xl rounded-3xl p-4 sm:p-6 text-center flex flex-col items-center justify-center shadow-lg nexus-card shrink-0 liquid-gold-border`}>
               <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]" />
-              <div className={`relative w-16 h-16 rounded-full p-1 mb-3 ${isLegend ? 'bg-amber-500' : 'bg-[var(--nexus-accent)]'} z-10`}>
+              <div className={`relative w-14 h-14 sm:w-16 sm:h-16 rounded-full p-1 mb-3 ${isLegend ? 'bg-amber-500' : 'bg-[var(--nexus-accent)]'} z-10`}>
                 <div className="w-full h-full rounded-full bg-[var(--nexus-panel)] flex items-center justify-center border-2 border-[#111] relative overflow-hidden">
                   {streamer?.avatar ? (
                     <img src={streamer.avatar} alt="Avatar" className="w-full h-full object-cover" />
@@ -405,29 +405,29 @@ const DonationPage = () => {
                       </div>
 
                       <div className="min-h-[140px]">
-                        <div className="grid grid-cols-5 gap-1.5">
+                        <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 md:gap-3">
                           {activeTab === 'global' ? (
                             globalStickers.map(s => (
-                              <div key={s.id} onClick={() => { setSelectedSticker(s.url); setAmount(s.price); }} className={`relative py-2.5 rounded-xl border-2 cursor-pointer transition-all flex flex-col items-center ${selectedSticker === s.url ? 'bg-[var(--nexus-accent)]/10 border-[var(--nexus-accent)]' : 'bg-[var(--nexus-panel)] border-[var(--nexus-border)]'}`}>
-                                <button type="button" onClick={(e) => playSoundPreview(e, s.id, s.sound)} className={`absolute top-1 right-1 p-0.5 rounded-full ${playingSound === s.id ? 'bg-[var(--nexus-accent)] text-black' : 'text-[var(--nexus-text-muted)]'}`}><Volume2 className="w-2 h-2" /></button>
-                                <Player autoplay loop src={s.url} style={{ height: '40px', width: '40px' }} />
-                                <span className="text-[8px] font-black mt-1 text-[var(--nexus-text)]">₹{s.price}</span>
+                              <div key={s.id} onClick={() => { setSelectedSticker(s.url); setAmount(s.price); }} className={`relative py-3 rounded-xl border-2 cursor-pointer transition-all flex flex-col items-center justify-center ${selectedSticker === s.url ? 'bg-[var(--nexus-accent)]/10 border-[var(--nexus-accent)]' : 'bg-[var(--nexus-panel)] border-[var(--nexus-border)]'}`}>
+                                <button type="button" onClick={(e) => playSoundPreview(e, s.id, s.sound)} className={`absolute top-1 right-1 p-1 rounded-full ${playingSound === s.id ? 'bg-[var(--nexus-accent)] text-black' : 'text-[var(--nexus-text-muted)]'}`}><Volume2 className="w-3 h-3" /></button>
+                                <Player autoplay loop src={s.url} style={{ height: '48px', width: '48px' }} />
+                                <span className="text-[10px] font-black mt-1 text-[var(--nexus-text)]">₹{s.price}</span>
                               </div>
                             ))
                           ) : (
                             /* FIXED: hasCustomPack USED TO RENDER GRID OR LOCK MESSAGE */
                             hasCustomPack ? (
                               streamer?.partnerPack?.map((s, idx) => (
-                                <div key={idx} onClick={() => { setSelectedSticker(s.lottieUrl); setAmount(s.minAmount); }} className={`relative py-2.5 rounded-xl border-2 cursor-pointer flex flex-col items-center ${selectedSticker === s.lottieUrl ? 'bg-amber-500/10 border-amber-500' : 'bg-white border-slate-200'}`}>
-                                  <Sparkles className="absolute top-1 right-1 w-2.5 h-2.5 text-amber-500" />
-                                  <Player autoplay loop src={s.lottieUrl} style={{ height: '40px', width: '40px' }} />
-                                  <span className="text-[8px] font-black mt-1">₹{s.minAmount}</span>
+                                <div key={idx} onClick={() => { setSelectedSticker(s.lottieUrl); setAmount(s.minAmount); }} className={`relative py-3 rounded-xl border-2 cursor-pointer flex flex-col items-center justify-center ${selectedSticker === s.lottieUrl ? 'bg-amber-500/10 border-amber-500' : 'bg-white border-slate-200'}`}>
+                                  <Sparkles className="absolute top-1 right-1 w-3 h-3 text-amber-500" />
+                                  <Player autoplay loop src={s.lottieUrl} style={{ height: '48px', width: '48px' }} />
+                                  <span className="text-[10px] font-black mt-1">₹{s.minAmount}</span>
                                 </div>
                               ))
                             ) : (
-                              <div className="col-span-5 h-20 flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-2xl opacity-40">
-                                <Lock className="w-5 h-5 mb-1" />
-                                <p className="text-[8px] font-black uppercase">Reach Pro Node Tier</p>
+                              <div className="col-span-3 sm:col-span-5 h-24 flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-2xl opacity-40">
+                                <Lock className="w-6 h-6 mb-2" />
+                                <p className="text-[10px] font-black uppercase">Reach Pro Node Tier</p>
                               </div>
                             )
                           )}

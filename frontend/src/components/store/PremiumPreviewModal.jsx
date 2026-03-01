@@ -179,29 +179,26 @@ const PremiumPreviewModal = ({ isOpen, onClose, item, onUnlock, theme }) => {
 
                         {/* UNIVERSAL RESPONSIVE FOOTER */}
                         <div className="mt-auto pt-4 border-t border-[var(--nexus-border)]">
-                            {/* Price row: side-by-side on mobile to save vertical space */}
-                            <div className="flex flex-row items-center justify-between mb-3 sm:flex-col sm:items-start sm:gap-1 sm:mb-5">
+                            <div className="flex flex-row items-center justify-between mb-3 md:flex-col md:items-start md:gap-1 md:mb-5">
                                 <div className="flex flex-col">
                                     <span className="text-[10px] font-black uppercase tracking-widest text-[var(--nexus-text-muted)]">Market Price</span>
-                                    <span className="text-xl sm:text-3xl font-black text-[var(--nexus-text)]">
+                                    <span className="text-xl md:text-3xl font-black text-[var(--nexus-text)]">
                                         {item.isOwned ? 'SECURED' : item.price}
                                     </span>
                                 </div>
-                                {/* Wallet icon — compact on mobile, bigger on desktop */}
-                                <div className="p-2 sm:p-4 bg-emerald-500/10 rounded-xl sm:rounded-2xl border border-emerald-500/20">
-                                    <Wallet className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-500" />
+                                <div className="p-2 md:p-4 bg-emerald-500/10 rounded-xl md:rounded-2xl border border-emerald-500/20">
+                                    <Wallet className="w-5 h-5 md:w-6 md:h-6 text-emerald-500" />
                                 </div>
                             </div>
-                            {/* CTA — slimmer on mobile */}
                             <button
                                 onClick={() => {
                                     onUnlock(item);
                                     onClose();
                                 }}
-                                className="w-full py-3 sm:py-5 bg-[var(--nexus-accent)] hover:brightness-110 text-black font-black text-sm sm:text-lg uppercase tracking-[0.2em] italic flex items-center justify-center gap-3 shadow-[0_0_30px_var(--nexus-accent)] transition-all active:scale-95"
+                                className="w-full py-3.5 md:py-5 bg-[var(--nexus-accent)] hover:brightness-110 text-black font-black text-sm md:text-lg uppercase tracking-[0.2em] italic flex items-center justify-center gap-3 shadow-[0_0_30px_var(--nexus-accent)] transition-all active:scale-95"
                                 style={{ clipPath: 'polygon(5% 0, 100% 0, 95% 100%, 0 100%)' }}
                             >
-                                Acquire Asset <Zap className="w-4 h-4 sm:w-5 sm:h-5" />
+                                Acquire Asset <Zap className="w-4 h-4 md:w-5 md:h-5" />
                             </button>
                         </div>
                     </div>

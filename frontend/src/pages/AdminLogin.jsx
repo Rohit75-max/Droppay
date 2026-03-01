@@ -157,7 +157,7 @@ const AdminLogin = () => {
                 style={{ boxShadow: '0 30px 80px -20px rgba(0,0,0,0.12), 0 0 0 1px rgba(255,255,255,0.8)' }}
             >
                 {/* ── LEFT — Dark emerald branding panel ── */}
-                <div className="relative lg:w-[380px] shrink-0 bg-[#061a12] overflow-hidden flex flex-col justify-between p-6 lg:p-8 min-h-[260px] lg:min-h-0">
+                <div className="relative lg:w-[380px] shrink-0 bg-[#061a12] overflow-hidden flex flex-col justify-between p-5 sm:p-6 lg:p-8 min-h-[260px] lg:min-h-0">
 
                     {/* Floating orbs */}
                     <Orb size={260} x="-60px" y="-60px" color="rgba(16,185,129,0.22)" duration={7} delay={0} />
@@ -258,7 +258,7 @@ const AdminLogin = () => {
                 </div>
 
                 {/* ── RIGHT — Login form ── */}
-                <div className="flex-1 flex flex-col justify-center p-6 lg:p-10 bg-white">
+                <div className="flex-1 flex flex-col justify-center p-5 sm:p-8 lg:p-10 bg-white">
 
                     {/* Status strip */}
                     <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}

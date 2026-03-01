@@ -49,7 +49,15 @@ const Home = () => {
   const alertVariants = useMemo(() => ['zap', 'cyber', 'royal'], []);
   const [calcAmount, setCalcAmount] = useState(10000);
 
-  const [demoDrops, setDemoDrops] = useState([]);
+  const INITIAL_DEMO_DROPS = [
+    { id: 1, donorName: "Mortal Streamer", amount: 5000, sticker: "hype_zap", message: "DropPay is a game changer! 🚀" },
+    { id: 2, donorName: "Cyber King", amount: 10000, sticker: "fire_rocket", message: "To the moon! 🚀🚀🚀" },
+    { id: 3, donorName: "Royal Supporter", amount: 25000, sticker: "diamond_gem", message: "Premium experience!" },
+    { id: 4, donorName: "Zap Node", amount: 2000, sticker: "hype_zap", message: "Smooth as butter." },
+    { id: 5, donorName: "Hype Beast", amount: 7500, sticker: "super_heart", message: "Love the UI!" },
+  ];
+
+  const [demoDrops, setDemoDrops] = useState(INITIAL_DEMO_DROPS);
 
   // --- Kinetic Connection: Flight Path & Reset Logic ---
   const triggerDemo = useCallback(() => {
@@ -90,8 +98,17 @@ const Home = () => {
   // --- Heartbeat Protocol ---
   useEffect(() => {
     const syncTimer = setInterval(() => setIsSynced(prev => !prev), 2000);
-    return () => clearInterval(syncTimer);
-  }, []);
+
+    // AUTO-DEMO HEARTBEAT: Triggers a "perfect" demo drop every 15 seconds
+    const demoHeartbeat = setInterval(() => {
+      triggerDemo();
+    }, 15000);
+
+    return () => {
+      clearInterval(syncTimer);
+      clearInterval(demoHeartbeat);
+    };
+  }, [triggerDemo]);
 
   const streamerCut = useMemo(() => (calcAmount * 0.95).toLocaleString('en-IN'), [calcAmount]);
   const platformFee = useMemo(() => (calcAmount * 0.05).toLocaleString('en-IN'), [calcAmount]);
@@ -640,20 +657,20 @@ const Home = () => {
       <section className="relative pt-10 pb-32 px-6 overflow-hidden">
         <div className="max-w-[1280px] mx-auto grid lg:grid-cols-12 gap-12 items-center relative z-10">
           <div className="lg:col-span-6">
-            <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.3em] mb-8 border ${theme === 'dark' ? 'bg-[#10B981]/10 text-[#10B981] border-[#10B981]/20' : 'bg-emerald-50 text-emerald-600'}`}>
+            <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] md:tracking-[0.3em] mb-6 md:mb-8 border ${theme === 'dark' ? 'bg-[#10B981]/10 text-[#10B981] border-[#10B981]/20' : 'bg-emerald-50 text-emerald-600'}`}>
               <Globe className={`w-3 h-3 ${isSynced ? 'opacity-100 scale-125' : 'opacity-30 scale-100'} transition-all duration-700`} /> Node Sync Active
             </div>
             <motion.h1
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.4, ease: 'easeOut' }}
-              className="text-6xl md:text-8xl font-black italic uppercase tracking-tighter leading-[0.85] mb-8"
+              className="text-5xl md:text-8xl font-black italic uppercase tracking-tighter leading-[0.85] mb-8"
             >
               <motion.span
                 initial={{ opacity: 0, y: 40, skewY: 3 }}
                 animate={{ opacity: 1, y: 0, skewY: 0 }}
                 transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-                className="block text-4xl md:text-6xl leading-tight hero-title-main"
+                className="block text-3xl md:text-6xl leading-tight hero-title-main"
                 style={{ letterSpacing: '-0.02em' }}
               >
                 Monetize
@@ -663,7 +680,7 @@ const Home = () => {
                 initial={{ opacity: 0, y: 60, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-                className="block text-6xl md:text-8xl hero-shimmer-text leading-[0.9]"
+                className="block text-5xl md:text-8xl hero-shimmer-text leading-[0.9]"
                 style={{
                   fontFamily: 'Outfit, sans-serif',
                   fontWeight: 900,
@@ -677,19 +694,19 @@ const Home = () => {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4, ease: 'easeOut' }}
-              className="text-slate-500 text-lg font-medium max-w-xl mb-12 italic leading-relaxed"
+              className="text-slate-500 text-base md:text-lg font-medium max-w-xl mb-10 md:mb-12 italic leading-relaxed"
             >
               Instant bank settlements. Built for professional creators.
             </motion.p>
-            <div className="flex flex-wrap gap-6 relative mb-12">
-              <button onClick={() => navigate('/signup')} className="bg-[#10B981] text-white px-10 py-5 rounded-2xl font-black uppercase italic text-sm shadow-2xl flex items-center gap-3 active:scale-95 transition-all">
+            <div className="flex flex-col sm:flex-row gap-4 md:gap-6 relative mb-12">
+              <button onClick={() => navigate('/signup')} className="w-full sm:w-auto bg-[#10B981] text-white px-10 py-5 rounded-2xl font-black uppercase italic text-sm shadow-2xl flex items-center justify-center gap-3 active:scale-95 transition-all">
                 <Play className="w-4 h-4 fill-white" /> Start Hub
               </button>
 
-              <div className="relative group">
+              <div className="relative group w-full sm:w-auto">
                 <button
                   onClick={triggerDemo}
-                  className={`px-10 py-5 rounded-2xl font-black uppercase italic text-sm transition-all flex items-center gap-3 active:scale-95 border ${theme === 'dark'
+                  className={`w-full sm:w-auto px-10 py-5 rounded-2xl font-black uppercase italic text-sm transition-all flex items-center justify-center gap-3 active:scale-95 border ${theme === 'dark'
                     ? 'bg-white/5 border-white/10 text-white hover:bg-white/10'
                     : 'bg-white border-slate-200 text-slate-900 hover:bg-slate-100 shadow-sm'
                     }`}
@@ -722,13 +739,13 @@ const Home = () => {
             </motion.div>
           </div>
 
-          <div className="lg:col-span-6 relative">
+          <div className="lg:col-span-6 relative mt-12 lg:mt-0">
             {/* MINI-NEXUS PREVIEW — placed directly on the page */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, ease: 'easeOut' }}
-              className={`relative min-h-[480px] flex flex-col overflow-hidden rounded-[2.5rem] border ${theme === 'dark' ? 'bg-white/[0.03] border-white/[0.08] backdrop-blur-xl' : 'bg-white/60 border-white/70 backdrop-blur-xl shadow-xl'}`}
+              className={`relative min-h-[420px] md:min-h-[480px] flex flex-col overflow-hidden rounded-[2rem] md:rounded-[2.5rem] border ${theme === 'dark' ? 'bg-white/[0.03] border-white/[0.08] backdrop-blur-xl' : 'bg-white/60 border-white/70 backdrop-blur-xl shadow-xl'}`}
             >
               <div className="flex-1 flex flex-col p-5 gap-4">
 
@@ -842,9 +859,9 @@ const Home = () => {
       {/* --- ELITE FOUR FEATURES GRID --- */}
       <section className="py-16 px-6 bg-gradient-to-b from-transparent via-[#10B981]/5 to-transparent">
         <div className="max-w-[1280px] mx-auto w-full">
-          <div className="mb-10">
+          <div className="mb-8 md:mb-10">
             <h2 className="text-3xl md:text-5xl font-black italic uppercase tracking-tighter mb-2">Elite <span className="text-[#10B981]">Nexus.</span></h2>
-            <p className="text-slate-500 font-medium italic text-sm max-w-2xl">Refined architecture for high-concurrency streaming nodes.</p>
+            <p className="text-slate-500 font-medium italic text-xs md:text-sm max-w-2xl leading-relaxed">Refined architecture for high-concurrency streaming nodes.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
@@ -956,9 +973,9 @@ const Home = () => {
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.7, ease: "easeOut" }}
         >
-          <div className="flex flex-col items-center mb-10 px-6">
-            <h2 className={`text-4xl md:text-5xl font-black italic uppercase tracking-tighter mb-2 text-center ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Protocol Architecture</h2>
-            <div className={`p-2 rounded-2xl flex border ${theme === 'dark' ? 'bg-black/40 border-white/5' : 'bg-white shadow-md border-slate-100'}`}>
+          <div className="flex flex-col items-center mb-10 px-0 md:px-6">
+            <h2 className={`text-3xl md:text-5xl font-black italic uppercase tracking-tighter mb-6 text-center ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Protocol Architecture</h2>
+            <div className={`p-1.5 md:p-2 rounded-2xl flex flex-wrap justify-center md:flex-nowrap border ${theme === 'dark' ? 'bg-black/40 border-white/5' : 'bg-white shadow-md border-slate-100'}`}>
               {[
                 { id: 'streamers', label: 'Engine', icon: <Cpu className="w-4 h-4" /> },
                 { id: 'developers', label: 'Nodes', icon: <Monitor className="w-4 h-4" /> },
@@ -967,7 +984,7 @@ const Home = () => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`px-8 py-3 rounded-xl font-black uppercase italic text-[10px] tracking-widest transition-all flex items-center gap-2 ${activeTab === tab.id
+                  className={`px-4 md:px-8 py-2.5 md:py-3 rounded-xl font-black uppercase italic text-[9px] md:text-[10px] tracking-widest transition-all flex items-center gap-2 ${activeTab === tab.id
                     ? 'bg-[#10B981] text-white shadow-lg'
                     : 'text-slate-500 hover:text-[#10B981]'
                     }`}
@@ -998,30 +1015,30 @@ const Home = () => {
                     className="absolute -top-20 -right-20 w-64 h-64 bg-[#10B981]/10 blur-[80px] rounded-full pointer-events-none"
                   />
 
-                  <div className="grid md:grid-cols-2 gap-16 items-center relative z-10">
+                  <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center relative z-10">
                     <motion.div
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
-                      className="space-y-8"
+                      className="space-y-6 md:space-y-8"
                     >
-                      <div className="inline-flex items-center gap-3 px-4 py-2 rounded-2xl bg-[#10B981]/10 border border-[#10B981]/20 text-[#10B981] font-black uppercase text-[10px] tracking-widest">
-                        <BarChart3 className="w-4 h-4" /> Yield Optimization
+                      <div className="inline-flex items-center gap-3 px-3 py-1.5 md:px-4 md:py-2 rounded-2xl bg-[#10B981]/10 border border-[#10B981]/20 text-[#10B981] font-black uppercase text-[9px] md:text-[10px] tracking-widest">
+                        <BarChart3 className="w-3.5 h-3.5 md:w-4 md:h-4" /> Yield Optimization
                       </div>
-                      <h3 className={`text-4xl md:text-6xl font-black italic uppercase leading-[0.9] tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+                      <h3 className={`text-3xl md:text-6xl font-black italic uppercase leading-[1] md:leading-[0.9] tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
                         Maximize <br /> <span className="text-[#10B981]">Every Drop</span>
                       </h3>
-                      <p className="text-slate-500 font-medium text-lg leading-relaxed max-w-md">
+                      <p className="text-slate-500 font-medium text-base md:text-lg leading-relaxed max-w-md">
                         Our proprietary Razorpay Route integration ensures your revenue clears T+2 settlements with zero manual intervention.
                       </p>
-                      <div className="flex gap-6 items-center pt-2">
-                        <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
-                          <Smartphone className="w-6 h-6 text-slate-400" />
+                      <div className="flex gap-4 md:gap-6 items-center pt-2">
+                        <div className="p-2.5 md:p-3 rounded-2xl bg-white/5 border border-white/10">
+                          <Smartphone className="w-5 h-5 md:w-6 md:h-6 text-slate-400" />
                         </div>
-                        <div className="p-3 rounded-2xl bg-[#10B981]/20 border border-[#10B981]/30">
-                          <Monitor className="w-6 h-6 text-[#10B981]" />
+                        <div className="p-2.5 md:p-3 rounded-2xl bg-[#10B981]/20 border border-[#10B981]/30">
+                          <Monitor className="w-5 h-5 md:w-6 md:h-6 text-[#10B981]" />
                         </div>
-                        <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
-                          <PlaySquare className="w-6 h-6 text-slate-400" />
+                        <div className="p-2.5 md:p-3 rounded-2xl bg-white/5 border border-white/10">
+                          <PlaySquare className="w-5 h-5 md:w-6 md:h-6 text-slate-400" />
                         </div>
                       </div>
                     </motion.div>

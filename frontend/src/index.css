@@ -658,7 +658,7 @@ html:has(.overlay-content) {
     /* h-12 */
     position: relative;
     z-index: 55;
-    background: rgba(0, 0, 0, 0.9);
+    background: transparent;
     display: flex;
     flex-wrap: nowrap;
     overflow: hidden;
@@ -760,6 +760,7 @@ html:has(.overlay-content) {
         stroke-dashoffset: 0;
     }
 }
+
 /* ============================================== */
 /* HOLOGRAPHIC & SPOTLIGHT EFFECTS (LOGIN ONLY)   */
 /* ============================================== */
@@ -773,12 +774,12 @@ html:has(.overlay-content) {
     position: absolute;
     inset: 0;
     z-index: 1;
-    background: linear-gradient(135deg, 
-        transparent 0%, 
-        rgba(255, 255, 255, 0.05) 45%, 
-        rgba(255, 255, 255, 0.2) 50%, 
-        rgba(255, 255, 255, 0.05) 55%, 
-        transparent 100%);
+    background: linear-gradient(135deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.05) 45%,
+            rgba(255, 255, 255, 0.2) 50%,
+            rgba(255, 255, 255, 0.05) 55%,
+            transparent 100%);
     background-size: 200% 200%;
     pointer-events: none;
     mix-blend-mode: overlay;
@@ -792,8 +793,13 @@ html:has(.overlay-content) {
 }
 
 @keyframes holo-shine {
-    0% { background-position: 200% 200%; }
-    100% { background-position: -200% -200%; }
+    0% {
+        background-position: 200% 200%;
+    }
+
+    100% {
+        background-position: -200% -200%;
+    }
 }
 
 .spotlight-overlay {
@@ -801,11 +807,9 @@ html:has(.overlay-content) {
     inset: 0;
     z-index: 2;
     pointer-events: none;
-    background: radial-gradient(
-        circle 400px at var(--x) var(--y),
-        rgba(16, 185, 129, 0.15),
-        transparent 80%
-    );
+    background: radial-gradient(circle 400px at var(--x) var(--y),
+            rgba(16, 185, 129, 0.15),
+            transparent 80%);
 }
 
 .prism-border {
@@ -814,7 +818,7 @@ html:has(.overlay-content) {
     border: 1px solid transparent;
     border-radius: inherit;
     background: linear-gradient(var(--nexus-bg), var(--nexus-bg)) padding-box,
-                linear-gradient(135deg, #10B981, #3b82f6, #f472b6, #10B981) border-box;
+        linear-gradient(135deg, #10B981, #3b82f6, #f472b6, #10B981) border-box;
     opacity: 0.3;
     transition: opacity 0.3s ease;
 }

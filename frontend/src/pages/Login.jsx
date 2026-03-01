@@ -127,7 +127,7 @@ const Login = () => {
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          className="relative lg:w-[440px] shrink-0 bg-[#061a12] overflow-hidden flex flex-col justify-between p-8 lg:p-10 min-h-[300px] lg:min-h-[660px] z-20"
+          className="relative lg:w-[440px] shrink-0 bg-[#061a12] overflow-hidden flex flex-col justify-between p-6 sm:p-8 lg:p-10 min-h-[300px] lg:min-h-[660px] z-20"
         >
 
 
@@ -208,7 +208,7 @@ const Login = () => {
         </motion.div>
 
         {/* ── RIGHT — Login form (Static / Focused) ── */}
-        <div className="flex-1 flex flex-col justify-center p-8 lg:p-12 bg-white relative z-10">
+        <div className="flex-1 flex flex-col justify-center p-6 sm:p-8 lg:p-12 bg-white relative z-10">
 
           {/* Status strip */}
           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}

@@ -149,7 +149,7 @@ const Signup = () => {
         className="relative w-full max-w-[1000px] rounded-[2.5rem] overflow-hidden flex flex-col lg:flex-row border border-white/80 bg-white"
       >
         {/* ── LEFT — Dark branded panel ── */}
-        <div className="relative lg:w-[360px] shrink-0 bg-[#061a12] overflow-hidden flex flex-col justify-between p-6 lg:p-8 min-h-[220px] lg:min-h-0">
+        <div className="relative lg:w-[360px] shrink-0 bg-[#061a12] overflow-hidden flex flex-col justify-between p-5 sm:p-6 lg:p-8 min-h-[220px] lg:min-h-0">
           <Orb size={240} x="-50px" y="-50px" color="rgba(16,185,129,0.22)" duration={7} delay={0} />
           <Orb size={160} x="55%" y="50%" color="rgba(244,114,182,0.15)" duration={9} delay={2} />
           <Orb size={110} x="15%" y="65%" color="rgba(6,182,212,0.14)" duration={6} delay={1} />
