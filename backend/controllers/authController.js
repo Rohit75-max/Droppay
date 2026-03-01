@@ -190,6 +190,14 @@ exports.login = async (req, res) => {
         });
 
         const token = jwt.sign({ user: { id: user._id } }, process.env.JWT_SECRET, { expiresIn: '24h' });
+
+        // --- ADDED FOR LIVE PRODUCTION ---
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: true,      // Required for HTTPS (Render/Vercel)
+            sameSite: 'none',  // Required for cross-site communication
+            maxAge: 24 * 60 * 60 * 1000
+        });
         res.json({ token, user: { username: user.username } });
     } catch (err) {
         res.status(500).json({ msg: "Login Node Error." });
@@ -221,7 +229,16 @@ exports.adminLogin = async (req, res) => {
             'security.lastLoginIP': ip
         });
 
-        const token = jwt.sign({ user: { id: user._id } }, process.env.JWT_SECRET, { expiresIn: '12h' }); // Shorter expiry for Admin
+        const token = jwt.sign({ user: { id: user._id } }, process.env.JWT_SECRET, { expiresIn: '12h' });
+
+        // --- ADDED FOR LIVE PRODUCTION ---
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'none',
+            maxAge: 12 * 60 * 60 * 1000
+        });
+
         res.json({ token, user: { username: user.username, role: user.role } });
     } catch (err) {
         res.status(500).json({ msg: "Admin Portal Error." });

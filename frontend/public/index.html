@@ -4,9 +4,16 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>DropPay</title>
+
+  <title>DropPay | The Ultimate Streamer Tool</title>
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <link rel="shortcut icon" href="/favicon.ico">
+
   <script>
-    (function() {
+    (function () {
       try {
         var theme = localStorage.getItem('dropPayTheme');
         var supportLight = true; // We default to light now
@@ -15,7 +22,7 @@
           localStorage.setItem('dropPayTheme', 'light');
         }
         document.documentElement.classList.add(theme);
-      } catch (e) {}
+      } catch (e) { }
     })();
   </script>
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
