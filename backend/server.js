@@ -51,6 +51,7 @@ app.use(cors({
     credentials: true, // MUST BE TRUE to allow cookies
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
 }));
+app.use(express.json()); // CRITICAL: Enables parsing of JSON request bodies
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 

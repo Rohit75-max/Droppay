@@ -208,7 +208,8 @@ exports.login = async (req, res) => {
         });
         res.json({ token, user: { username: user.username } });
     } catch (err) {
-        res.status(500).json({ msg: "Login Node Error." });
+        console.error("LOGIN CRASH LOG:", err);
+        res.status(500).json({ msg: "Login Node Error.", error: err.message });
     }
 };
 
@@ -249,7 +250,8 @@ exports.adminLogin = async (req, res) => {
 
         res.json({ token, user: { username: user.username, role: user.role } });
     } catch (err) {
-        res.status(500).json({ msg: "Admin Portal Error." });
+        console.error("ADMIN LOGIN CRASH LOG:", err);
+        res.status(500).json({ msg: "Admin Portal Error.", error: err.message });
     }
 };
 
