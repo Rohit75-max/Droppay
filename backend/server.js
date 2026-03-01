@@ -13,11 +13,16 @@ const paymentController = require('./controllers/paymentController');
 
 const app = express();
 const server = http.createServer(app);
+const cookieParser = require('cookie-parser');
 
 // 1. SOCKET ENGINE (Logic Preserved)
 const setupSockets = async () => {
     const ioOptions = {
-        cors: { origin: process.env.FRONTEND_URL || "http://localhost:3000", methods: ["GET", "POST"] },
+        cors: {
+            origin: process.env.FRONTEND_URL || "http://localhost:3000",
+            methods: ["GET", "POST"],
+            credentials: true // Added to keep sockets synced with your new login
+        },
         transports: ['websocket', 'polling']
     };
     let io;
@@ -41,11 +46,13 @@ const setupSockets = async () => {
 connectDB();
 
 // 3. MIDDLEWARE
-app.use(cors());
-app.use(express.json({
-    verify: (req, res, buf) => { if (req.originalUrl.includes('/webhook')) req.rawBody = buf.toString(); }
+app.use(cors({
+    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    credentials: true, // MUST BE TRUE to allow cookies
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
 }));
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // 4. PROTECTION SYNC (Fixed Path Mismatch)
 // Added /signup to the strict limiter to prevent the "Connection Failed" loop

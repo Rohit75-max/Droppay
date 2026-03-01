@@ -155,6 +155,14 @@ exports.verifyEmail = async (req, res) => {
         }
 
         const token = jwt.sign({ user: { id: user._id } }, process.env.JWT_SECRET, { expiresIn: '24h' });
+        // --- ADDED FOR LIVE PRODUCTION ---
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: true,      // Required for HTTPS
+            sameSite: 'none',  // Required for cross-site
+            maxAge: 24 * 60 * 60 * 1000
+        });
+
         res.status(200).json({ token, user: { username: user.username } });
     } catch (err) {
         console.error("VERIFY OTP ERROR:", err);
