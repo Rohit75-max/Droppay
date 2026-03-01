@@ -5,9 +5,10 @@ import { motion, AnimatePresence } from 'framer-motion';
  * ELITE LIVE THEME ENGINE
  * Bulletproofed: Auto-maps store IDs, handles video loading safely, and supports Store Previews.
  */
-const LiveThemeEngine = ({ currentTheme, isPreview = false }) => {
+const LiveThemeEngine = ({ currentTheme, isPreview = false, theme = 'dark' }) => {
     const [isVideoLoaded, setIsVideoLoaded] = useState(false);
     const [isNightTime, setIsNightTime] = useState(false);
+    const isLight = theme === 'light' || (typeof document !== 'undefined' && document.documentElement.classList.contains('light'));
 
     // 1. THE ID TRANSLATOR (Fixes the blank screen issue in the store)
     const themeDictionary = {
@@ -50,7 +51,8 @@ const LiveThemeEngine = ({ currentTheme, isPreview = false }) => {
     if (!activeTheme?.startsWith('live_')) return null;
 
     return (
-        <div className={`${isPreview ? 'absolute' : 'fixed'} inset-0 z-0 pointer-events-none overflow-hidden bg-black`}>
+        <div className={`${isPreview ? 'absolute' : 'fixed'} inset-0 z-0 pointer-events-none overflow-hidden ${isLight ? 'bg-white/50 backdrop-blur-sm' : 'bg-black'
+            }`}>
 
             {/* ========================================== */}
             {/* 1. ZERO-GRAVITY (Space/Sci-Fi)             */}
@@ -67,7 +69,7 @@ const LiveThemeEngine = ({ currentTheme, isPreview = false }) => {
                         <source src="http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4" type="video/mp4" />
                     </video>
                     {/* Blue Atmospheric Glow */}
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#000_100%)] opacity-80" />
+                    <div className={`absolute inset-0 opacity-80 ${isLight ? 'bg-[radial-gradient(circle_at_center,transparent_0%,rgba(16,185,129,0.1)_100%)]' : 'bg-[radial-gradient(circle_at_center,transparent_0%,#000_100%)]'}`} />
                     {/* Floating CSS Stardust */}
                     <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] animate-[spin_200s_linear_infinite] opacity-30" />
                 </>
@@ -118,7 +120,7 @@ const LiveThemeEngine = ({ currentTheme, isPreview = false }) => {
                     {/* Scanline CRT Overlay */}
                     <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[size:100%_4px,3px_100%] pointer-events-none" />
                     {/* Heavy Dark Vignette */}
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#000500_90%)]" />
+                    <div className={`absolute inset-0 ${isLight ? 'bg-[radial-gradient(circle_at_center,transparent_0%,rgba(16,185,129,0.1)_90%)]' : 'bg-[radial-gradient(circle_at_center,transparent_0%,#000500_90%)]'}`} />
                 </>
             )}
 
@@ -135,9 +137,9 @@ const LiveThemeEngine = ({ currentTheme, isPreview = false }) => {
                         style={{ clipPath: 'polygon(0 0, 100% 0, 100% 50%, 0 50%, 0 55%, 100% 55%, 100% 65%, 0 65%, 0 72%, 100% 72%, 100% 82%, 0 82%, 0 95%, 100% 95%, 100% 100%, 0 100%)' }}
                     />
                     {/* Infinite 3D Scrolling Grid */}
-                    <div className="absolute bottom-0 w-[200%] h-[60%] -left-[50%] bg-[#02000d]" style={{ perspective: '600px' }}>
-                        <div className="w-full h-[200%] absolute bottom-0 synthwave-grid-anim border-t-2 border-[#00ffff] shadow-[0_-5px_30px_#00ffff]" style={{ transform: 'rotateX(75deg)' }}>
-                            <div className="absolute inset-0 bg-[linear-gradient(transparent_48%,#ff00aa_50%,transparent_52%),linear-gradient(90deg,transparent_48%,#00ffff_50%,transparent_52%)] bg-[size:60px_60px]" />
+                    <div className={`absolute bottom-0 w-[200%] h-[60%] -left-[50%] ${isLight ? 'bg-white' : 'bg-[#02000d]'}`} style={{ perspective: '600px' }}>
+                        <div className={`w-full h-[200%] absolute bottom-0 synthwave-grid-anim border-t-2 shadow-[0_-5px_30px_rgba(0,255,255,0.3)] ${isLight ? 'border-emerald-500' : 'border-[#00ffff]'}`} style={{ transform: 'rotateX(75deg)' }}>
+                            <div className={`absolute inset-0 ${isLight ? 'bg-[linear-gradient(transparent_48%,rgba(16,185,129,0.2)_50%,transparent_52%),linear-gradient(90deg,transparent_48%,rgba(16,185,129,0.2)_50%,transparent_52%)]' : 'bg-[linear-gradient(transparent_48%,#ff00aa_50%,transparent_52%),linear-gradient(90deg,transparent_48%,#00ffff_50%,transparent_52%)]'} bg-[size:60px_60px]`} />
                         </div>
                     </div>
                 </div>
@@ -176,7 +178,7 @@ const LiveThemeEngine = ({ currentTheme, isPreview = false }) => {
             {/* 6. THE DRAGON'S HOARD (Fantasy/RPG)        */}
             {/* ========================================== */}
             {activeTheme === 'live_dragon' && (
-                <div className="absolute inset-0 bg-[#060402] overflow-hidden">
+                <div className={`absolute inset-0 overflow-hidden ${theme === 'light' ? 'bg-emerald-50' : 'bg-[#060402]'}`}>
 
                     {/* Deep ember radial from bottom — atmospheric heat */}
                     <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_40%_at_50%_100%,rgba(251,191,36,0.08)_0%,transparent_70%)]" />

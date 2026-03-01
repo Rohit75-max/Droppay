@@ -306,59 +306,88 @@ const ControlCenter = ({
                 <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 mb-12">
 
                   {/* LEFT: MISSION CALIBRATION */}
-                  <div className={`xl:col-span-5 p-6 md:p-10 lg:p-12 rounded-[2rem] border transition-all ${getStudioStyle()}`}>
-                    <div className="flex items-center gap-4 mb-8">
-                      <div className={`p-3 rounded-2xl bg-amber-500/10 text-amber-500`}>
-                        <Target className="w-5 h-5" />
-                      </div>
-                      <h3 className="text-sm font-black uppercase italic tracking-widest text-amber-500">Mission Calibration</h3>
-                    </div>
+                  <div className={`xl:col-span-5 relative p-8 md:p-10 lg:p-12 rounded-[2.5rem] border bg-[var(--nexus-panel)] overflow-hidden shadow-2xl transition-all ${getStudioStyle()}`}>
+                    {/* Background glow effect */}
+                    <div className="absolute -top-32 -left-32 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
 
-                    <div className="space-y-6">
-                      <div className="space-y-3">
-                        <label className="text-[10px] font-black uppercase text-[var(--nexus-text-muted)] tracking-widest">Active Title</label>
-                        <input
-                          value={goalForm.title}
-                          onChange={(e) => setGoalForm({ ...goalForm, title: e.target.value })}
-                          className={`w-full p-4 rounded-2xl border-2 outline-none font-black italic transition-all bg-[var(--nexus-panel)] border-[var(--nexus-border)] text-[var(--nexus-text)] focus:border-amber-500 placeholder:text-[var(--nexus-text-muted)]`}
-                          placeholder="Mission Title..."
-                        />
-                      </div>
-                      <div className="space-y-3">
-                        <label className="text-[10px] font-black uppercase text-[var(--nexus-text-muted)] tracking-widest">Target (₹)</label>
-                        <input
-                          type="number"
-                          value={goalForm.targetAmount}
-                          onChange={(e) => setGoalForm({ ...goalForm, targetAmount: e.target.value })}
-                          className={`w-full p-4 rounded-2xl border-2 outline-none font-black italic transition-all bg-[var(--nexus-panel)] border-[var(--nexus-border)] text-[var(--nexus-text)] focus:border-amber-500 placeholder:text-[var(--nexus-text-muted)]`}
-                          placeholder="0"
-                        />
-                      </div>
-
-                      <div className={`flex items-center justify-between p-5 rounded-2xl border-2 bg-[var(--nexus-panel)] border-[var(--nexus-border)]`}>
-                        <div className="flex items-center gap-3">
-                          <Globe className="w-4 h-4 text-amber-500" />
-                          <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">Dashboard Visibility</span>
+                    <div className="relative z-10">
+                      <div className="flex items-center gap-4 mb-10">
+                        <div className={`p-4 rounded-3xl bg-gradient-to-br from-amber-400/20 to-orange-500/10 border border-amber-500/20 shadow-[0_0_30px_rgba(245,158,11,0.15)] text-amber-500`}>
+                          <Target className="w-6 h-6 animate-[pulse_3s_ease-in-out_infinite]" />
                         </div>
-                        <button onClick={() => setGoalForm({ ...goalForm, showOnDashboard: !goalForm.showOnDashboard })} className={`w-12 h-6 rounded-full relative transition-all shadow-inner ${goalForm.showOnDashboard ? 'bg-amber-500' : 'bg-slate-600'}`}>
-                          <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-md transition-all ${goalForm.showOnDashboard ? 'left-7' : 'left-1'}`} />
+                        <div>
+                          <h3 className="text-lg font-black uppercase italic tracking-widest bg-clip-text text-transparent bg-gradient-to-r from-amber-400 to-orange-500">Mission Calibration</h3>
+                          <p className="text-[10px] font-bold text-[var(--nexus-text-muted)] uppercase tracking-widest mt-1">Configure your primary objective.</p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-6">
+                        <div className="space-y-3 group">
+                          <label className="text-[10px] font-black uppercase text-[var(--nexus-text-muted)] tracking-widest flex items-center gap-2 ml-1 transition-colors group-hover:text-amber-500/70"><Gamepad2 className="w-3 h-3" /> Active Title</label>
+                          <div className="relative">
+                            <input
+                              value={goalForm.title}
+                              onChange={(e) => setGoalForm({ ...goalForm, title: e.target.value })}
+                              className={`w-full p-5 rounded-2xl border-2 outline-none font-black italic transition-all bg-[var(--nexus-panel)] border-[var(--nexus-border)] text-[var(--nexus-text)] focus:border-amber-500/50 focus:bg-amber-500/5 focus:shadow-[0_0_20px_rgba(245,158,11,0.1)] placeholder:text-[var(--nexus-text-muted)]`}
+                              placeholder="e.g. PC Upgrade Fund"
+                            />
+                            <div className="absolute right-5 top-1/2 -translate-y-1/2 opacity-0 group-focus-within:opacity-100 transition-opacity">
+                              <Sparkles className="w-4 h-4 text-amber-500" />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-3 group">
+                          <label className="text-[10px] font-black uppercase text-[var(--nexus-text-muted)] tracking-widest flex items-center gap-2 ml-1 transition-colors group-hover:text-amber-500/70"><Coins className="w-3 h-3" /> Target (₹)</label>
+                          <div className="relative">
+                            <span className="absolute left-5 top-1/2 -translate-y-1/2 text-lg font-black text-[var(--nexus-text-muted)]">₹</span>
+                            <input
+                              type="number"
+                              value={goalForm.targetAmount}
+                              onChange={(e) => setGoalForm({ ...goalForm, targetAmount: e.target.value })}
+                              className={`w-full p-5 pl-10 rounded-2xl border-2 outline-none font-black italic transition-all bg-[var(--nexus-panel)] border-[var(--nexus-border)] text-[var(--nexus-text)] focus:border-amber-500/50 focus:bg-amber-500/5 focus:shadow-[0_0_20px_rgba(245,158,11,0.1)] placeholder:text-[var(--nexus-text-muted)] text-xl`}
+                              placeholder="10000"
+                            />
+                            <div className="absolute right-5 top-1/2 -translate-y-1/2 opacity-0 group-focus-within:opacity-100 transition-opacity">
+                              <Activity className="w-4 h-4 text-amber-500 animate-pulse" />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className={`mt-8 mb-6 relative overflow-hidden flex items-center justify-between p-6 rounded-3xl border-2 transition-all cursor-pointer ${goalForm.showOnDashboard ? 'bg-amber-500/10 border-amber-500/30 shadow-[0_0_20px_rgba(245,158,11,0.15)]' : 'bg-[var(--nexus-panel)] border-[var(--nexus-border)] hover:border-amber-500/20'}`}
+                          onClick={() => setGoalForm({ ...goalForm, showOnDashboard: !goalForm.showOnDashboard })}>
+                          {goalForm.showOnDashboard && <div className="absolute inset-0 bg-gradient-to-r from-amber-500/0 via-amber-500/5 to-amber-500/0 translate-x-[-100%] animate-[shimmer_2s_infinite]" />}
+                          <div className="flex items-center gap-4 relative z-10">
+                            <div className={`p-2 rounded-xl ${goalForm.showOnDashboard ? 'bg-amber-500/20 text-amber-500' : 'bg-[var(--nexus-border)] text-[var(--nexus-text-muted)]'}`}>
+                              <Globe className="w-5 h-5" />
+                            </div>
+                            <div className="flex flex-col">
+                              <span className={`text-[11px] font-black uppercase tracking-wider ${goalForm.showOnDashboard ? 'text-amber-500' : 'text-[var(--nexus-text-muted)]'}`}>Dashboard Visibility</span>
+                              <span className="text-[9px] font-bold text-[var(--nexus-text-muted)] italic">Show live progress on Streamer ID page.</span>
+                            </div>
+                          </div>
+                          <button className={`w-14 h-7 rounded-full relative transition-all duration-300 shadow-inner z-10 ${goalForm.showOnDashboard ? 'bg-gradient-to-r from-amber-400 to-orange-500 shadow-[0_0_15px_rgba(245,158,11,0.4)]' : 'bg-slate-700'}`}>
+                            <div className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow-md transition-all duration-300 ${goalForm.showOnDashboard ? 'translate-x-8' : 'translate-x-1'}`} />
+                          </button>
+                        </div>
+
+                        <button
+                          onClick={() => {
+                            if (typeof updateGoalSettings === 'function') {
+                              updateGoalSettings();
+                            } else {
+                              console.error("Nexus Error: updateGoalSettings prop is missing from Dashboard.jsx");
+                              alert("Prop Handshake Failed: Please ensure updateGoalSettings is passed from Dashboard.");
+                            }
+                          }}
+                          disabled={isUpdatingGoal}
+                          className="group relative w-full py-5 bg-gradient-to-r from-amber-400 to-orange-500 text-black rounded-[1.5rem] font-black uppercase italic tracking-widest text-[11px] transition-all flex items-center justify-center gap-3 shadow-[0_10px_30px_rgba(245,158,11,0.3)] hover:shadow-[0_15px_40px_rgba(245,158,11,0.4)] hover:scale-[1.02] active:scale-[0.98] overflow-hidden"
+                        >
+                          <div className="absolute inset-0 bg-white/20 translate-y-[-100%] group-hover:translate-y-[100%] transition-transform duration-500 ease-in-out" />
+                          {isUpdatingGoal ? <Activity className="animate-spin w-5 h-5 relative z-10" /> : <Rocket className="w-5 h-5 relative z-10 group-hover:animate-bounce" />}
+                          <span className="relative z-10">Deploy Engine</span>
                         </button>
                       </div>
-
-                      <button
-                        onClick={() => {
-                          if (typeof updateGoalSettings === 'function') {
-                            updateGoalSettings();
-                          } else {
-                            console.error("Nexus Error: updateGoalSettings prop is missing from Dashboard.jsx");
-                            alert("Prop Handshake Failed: Please ensure updateGoalSettings is passed from Dashboard.");
-                          }
-                        }}
-                        disabled={isUpdatingGoal}
-                        className="w-full py-4 bg-amber-500 text-black rounded-2xl font-black uppercase italic tracking-widest text-[10px] transition-all flex items-center justify-center gap-3 shadow-lg hover:bg-amber-400 hover:scale-[1.02]"
-                      >
-                        {isUpdatingGoal ? <Activity className="animate-spin w-4 h-4" /> : <Save className="w-4 h-4" />} Deploy Engine
-                      </button>
                     </div>
                   </div>
 
@@ -588,8 +617,8 @@ const ControlCenter = ({
                 {(user?.unlockedNexusThemes || []).length === 0 && (
                   <div className="mt-10 flex flex-col items-center gap-3 text-center py-8 border border-dashed border-white/10 rounded-3xl">
                     <Crown className="w-8 h-8 text-yellow-400 opacity-50" />
-                    <p className="text-sm font-black uppercase italic tracking-wider text-slate-500">No Premium Environments Unlocked</p>
-                    <p className="text-[10px] text-slate-600 max-w-xs">Head to the <button onClick={() => setActiveSection && setActiveSection('store')} className="text-[var(--nexus-accent)] font-bold hover:underline transition-colors px-1 py-0.5 rounded hover:bg-[var(--nexus-accent)]/10">Store</button> tab to browse and purchase elite live themes for your dashboard.</p>
+                    <p className="text-sm font-black uppercase italic tracking-wider text-[var(--nexus-text-muted)]">No Premium Environments Unlocked</p>
+                    <p className="text-[10px] text-[var(--nexus-text-muted)] opacity-60 max-w-xs">Head to the <button onClick={() => setActiveSection && setActiveSection('store')} className="text-[var(--nexus-accent)] font-bold hover:underline transition-colors px-1 py-0.5 rounded hover:bg-[var(--nexus-accent)]/10">Store</button> tab to browse and purchase elite live themes for your dashboard.</p>
                   </div>
                 )}
               </div>
@@ -614,7 +643,7 @@ const ControlCenter = ({
                     </div>
                     <div className="flex flex-col gap-1">
                       <h3 className="text-xl font-black uppercase italic tracking-widest text-indigo-500">Partner Pack</h3>
-                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Customize your stream's signature stickers.</p>
+                      <p className="text-[10px] font-bold text-[var(--nexus-text-muted)] uppercase tracking-widest">Customize your stream's signature stickers.</p>
                     </div>
                   </div>
                 </div>

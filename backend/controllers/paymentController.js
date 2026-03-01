@@ -212,12 +212,49 @@ exports.getAnalytics = async (req, res) => {
         const user = await User.findOne({ $or: [{ streamerId: safeQuery }, { username: safeQuery }] }).select('streamerId');
         if (!user) return res.status(404).json({ msg: "Not found" });
 
+        const { range } = req.query; // 7D, 1M, 1Y
+        let daysToFetch = 7;
+        let format = "%Y-%m-%d";
+
+        if (range === '1M') daysToFetch = 30;
+        if (range === '1Y') {
+            daysToFetch = 12;
+            format = "%Y-%m";
+        }
+
         const stats = await Drop.aggregate([
-            { $match: { streamerId: user.streamerId, status: 'completed' } },
-            { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } }, total: { $sum: "$amount" } } },
+            {
+                $match: {
+                    streamerId: user.streamerId,
+                    status: 'completed',
+                    createdAt: { $gte: new Date(new Date().setDate(new Date().getDate() - (range === '1Y' ? 365 : daysToFetch))) }
+                }
+            },
+            {
+                $group: {
+                    _id: { $dateToString: { format: format, date: "$createdAt" } },
+                    total: { $sum: "$amount" }
+                }
+            },
             { $sort: { "_id": 1 } }
         ]);
-        res.json({ points: stats.map(s => s.total) });
+
+        // Map existing data
+        const dataMap = {};
+        stats.forEach(s => dataMap[s._id] = s.total);
+
+        // Fill in missing slots with 0
+        const points = [];
+        for (let i = daysToFetch - 1; i >= 0; i--) {
+            const d = new Date();
+            if (range === '1Y') d.setMonth(d.getMonth() - i);
+            else d.setDate(d.getDate() - i);
+
+            const dateStr = d.toISOString().split('T')[0].slice(0, format === "%Y-%m" ? 7 : 10);
+            points.push(dataMap[dateStr] || 0);
+        }
+
+        res.json({ points });
     } catch (error) { res.status(500).send(); }
 };
 

@@ -44,6 +44,35 @@ exports.getUsers = async (req, res) => {
     }
 };
 
+// --- 1.5. DEEP NODE INSPECTION (Fetch specific user by ID) ---
+exports.getUserDetails = async (req, res) => {
+    try {
+        console.log("[ADMIN API] Fetching details for Node ID:", req.params.id);
+        if (!req.params.id || req.params.id === 'undefined') {
+            return res.status(400).json({ msg: "Invalid Node ID provided to API." });
+        }
+        const user = await User.findById(req.params.id).lean();
+        if (!user) {
+            console.log("[ADMIN API] Node Not Found in Database:", req.params.id);
+            return res.status(404).json({ msg: "Node Not Found." });
+        }
+
+        // Append Recent Transactions for Finance Contexts (INCLUDING pending/failed withdrawals)
+        const recentTransactions = await Drop.find({ streamerId: user.streamerId })
+            .sort({ createdAt: -1 })
+            .limit(8)
+            .lean()
+            .select('donorName amount message status createdAt');
+
+        user.recentTransactions = recentTransactions || [];
+
+        res.status(200).json(user);
+    } catch (err) {
+        console.error("[ADMIN API] Deep Node Fetch Error:", err);
+        res.status(500).json({ msg: "Failed to fetch node details." });
+    }
+};
+
 // --- 2. MODERATION HAMMER (Suspend / Reinstate) ---
 exports.toggleBan = async (req, res) => {
     try {
@@ -113,7 +142,12 @@ exports.updateRole = async (req, res) => {
 exports.getSystemMetrics = async (req, res) => {
     try {
         const totalUsers = await User.countDocuments();
+
+        // Count active subscriptions specifically
         const activeSubscriptions = await User.countDocuments({ "subscription.status": "active" });
+
+        // Count ANY user who has a plan other than 'none' to represent lifetime/all-time subscribers
+        const lifetimeSubscribers = await User.countDocuments({ "subscription.plan": { $ne: "none" } });
 
         const tpvData = await User.aggregate([
             {
@@ -142,11 +176,12 @@ exports.getSystemMetrics = async (req, res) => {
         res.status(200).json({
             totalUsers,
             activeSubscriptions,
+            lifetimeSubscribers, // Included in the payload
             totalVolume,
             totalUnsettledDebt,
-            platformCommission: Math.max(0, dynamicCommission), // Prioritize dynamic math to ensure historic integrity
+            platformCommission: Math.max(0, dynamicCommission),
             platformSubscriptions: ledger.totalSubscriptionRevenue,
-            platformPayouts: totalSettledDebt // Trusting the user array over the singleton for exact debt tracking
+            platformPayouts: totalSettledDebt
         });
     } catch (err) {
         res.status(500).json({ msg: "Telemetry Compilation Failed." });
@@ -180,6 +215,12 @@ exports.executeSettlement = async (req, res) => {
         const ledger = await PlatformMetrics.getLedger();
         ledger.totalPayoutsSettled += payoutAmount;
         await ledger.save();
+
+        // Transition pending withdrawal drops to completed
+        await Drop.updateMany(
+            { streamerId: user.streamerId, donorName: "WITHDRAWAL", status: 'pending' },
+            { $set: { status: 'completed', message: "Payout Successfully Settled to Bank" } }
+        );
 
         res.status(200).json({ msg: "Settlement Executed Successfully.", settledAmount: payoutAmount });
     } catch (err) {

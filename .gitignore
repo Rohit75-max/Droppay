@@ -2,3 +2,9 @@ node_modules/
 backend/.env
 frontend/build/
 .DS_Store
+
+.env
+.env.local
+.env.development
+.env.production
+

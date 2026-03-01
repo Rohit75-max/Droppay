@@ -15,13 +15,15 @@ const PREMIUM_GOAL_STYLES = [
 const PremiumPreviewModal = ({ isOpen, onClose, item, onUnlock, theme }) => {
     if (!isOpen || !item) return null;
 
+    const isLight = theme === 'light' || document.documentElement.classList.contains('light');
+
     return (
         <AnimatePresence>
             <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="fixed inset-0 z-[110] flex items-center justify-center p-4 sm:p-8 bg-black/90 backdrop-blur-xl"
+                className={`fixed inset-0 z-[110] flex items-center justify-center p-4 sm:p-8 backdrop-blur-xl ${isLight ? 'bg-white/80' : 'bg-black/90'}`}
                 onClick={onClose}
             >
                 <motion.div
@@ -32,26 +34,26 @@ const PremiumPreviewModal = ({ isOpen, onClose, item, onUnlock, theme }) => {
                     className="relative w-full max-w-6xl h-[85vh] bg-[var(--nexus-panel)] border border-[var(--nexus-border)] flex flex-col md:flex-row overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.8)]"
                     style={{ clipPath: 'polygon(0 0, 98% 0, 100% 2%, 100% 100%, 2% 100%, 0 98%)' }}
                 >
-                    <button onClick={onClose} className="absolute top-4 right-4 z-50 p-2 bg-black/50 hover:bg-[var(--nexus-accent)] text-white transition-colors border border-[var(--nexus-border)] shadow-lg">
+                    <button onClick={onClose} className={`absolute top-4 right-4 z-50 p-2 transition-colors border shadow-lg ${isLight ? 'bg-white/80 hover:bg-emerald-500 hover:text-white border-emerald-100 text-emerald-900' : 'bg-black/50 hover:bg-[var(--nexus-accent)] text-white border-[var(--nexus-border)]'}`}>
                         <X className="w-6 h-6" />
                     </button>
 
-                    <div className={`w-full md:w-2/3 h-1/2 md:h-full relative border-r border-[var(--nexus-border)] flex items-center justify-center overflow-hidden ${theme === 'light' ? 'bg-slate-50' : 'bg-[#050505]'
+                    <div className={`w-full md:w-2/3 h-1/2 md:h-full relative border-r flex items-center justify-center overflow-hidden ${isLight ? 'bg-white border-emerald-100' : 'bg-[#050505] border-[var(--nexus-border)]'
                         }`}>
                         {item.category === 'themes' && (
                             <div className="absolute inset-0">
-                                <LiveThemeEngine currentTheme={item.id} isPreview={true} />
+                                <LiveThemeEngine currentTheme={item.id} isPreview={true} theme={theme} />
                                 <div className="relative z-10 w-full h-full p-8 flex flex-col gap-4">
                                     <div className="flex gap-4">
-                                        <div className="w-1/4 h-64 bg-white/5 backdrop-blur-md border border-white/10 rounded-lg" />
-                                        <div className="flex-1 h-[500px] bg-white/5 backdrop-blur-lg border border-white/20 rounded-xl" />
+                                        <div className={`w-1/4 h-64 backdrop-blur-md border rounded-lg ${isLight ? 'bg-white/40 border-emerald-200/50' : 'bg-white/5 border-white/10'}`} />
+                                        <div className={`flex-1 h-[500px] backdrop-blur-lg border rounded-xl ${isLight ? 'bg-white/40 border-emerald-200/50' : 'bg-white/5 border-white/20'}`} />
                                     </div>
                                 </div>
                             </div>
                         )}
 
                         {item.category === 'alerts' && (
-                            <div className={`w-full h-full relative flex flex-col items-center justify-center ${theme === 'light' ? 'bg-slate-50' : 'bg-[#050505]'}`}>
+                            <div className={`w-full h-full relative flex flex-col items-center justify-center ${isLight ? 'bg-white' : 'bg-[#050505]'}`}>
                                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(57,255,20,0.05)_0%,transparent_70%)] pointer-events-none" />
                                 <div className="relative z-10 w-full transform scale-75 md:scale-90 lg:scale-100 flex items-center justify-center">
                                     <PremiumAlertPreview
@@ -65,7 +67,7 @@ const PremiumPreviewModal = ({ isOpen, onClose, item, onUnlock, theme }) => {
                         )}
 
                         {item.category === 'goals' && (
-                            <div className={`w-full h-full relative flex flex-col items-center justify-center py-10 ${theme === 'light' ? 'bg-slate-50' : 'bg-[#050505]'}`}>
+                            <div className={`w-full h-full relative flex flex-col items-center justify-center py-10 ${isLight ? 'bg-white' : 'bg-[#050505]'}`}>
                                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.05)_0%,transparent_70%)] pointer-events-none" />
                                 <div className="relative z-10 w-full transform scale-90 md:scale-100">
                                     {PREMIUM_GOAL_STYLES.includes(item.id) ? (
@@ -96,7 +98,7 @@ const PremiumPreviewModal = ({ isOpen, onClose, item, onUnlock, theme }) => {
                         )}
 
                         {item.category === 'widgets' && (
-                            <div className={`w-full h-full relative flex flex-col items-center justify-center overflow-hidden ${theme === 'light' ? 'bg-slate-50' : 'bg-[#050505]'}`}>
+                            <div className={`w-full h-full relative flex flex-col items-center justify-center overflow-hidden ${isLight ? 'bg-white' : 'bg-[#050505]'}`}>
                                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.05)_0%,transparent_70%)] pointer-events-none" />
                                 <div className="relative z-10 w-full">
                                     {item.id === 'wd4' ? (
@@ -136,10 +138,10 @@ const PremiumPreviewModal = ({ isOpen, onClose, item, onUnlock, theme }) => {
                     <div className="w-full md:w-1/3 h-1/2 md:h-full p-5 sm:p-8 flex flex-col relative bg-[var(--nexus-panel)]">
                         <div className="flex-1 overflow-y-auto pr-1 scrollbar-hide">
                             <div className="flex items-center gap-2 mb-4">
-                                <span className="px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.2em] border border-[var(--nexus-accent)] bg-[var(--nexus-accent)]/10 text-[var(--nexus-accent)] flex items-center gap-1">
+                                <span className={`px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.2em] border flex items-center gap-1 ${isLight ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-600' : 'border-[var(--nexus-accent)] bg-[var(--nexus-accent)]/10 text-[var(--nexus-accent)]'}`}>
                                     <Sparkles className="w-3 h-3" /> Broadcast Tech
                                 </span>
-                                <span className={`px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.2em] border ${theme === 'light' ? 'border-slate-200 bg-slate-100 text-slate-500' : 'border-[var(--nexus-border)] bg-black/20 text-white/50'
+                                <span className={`px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.2em] border ${isLight ? 'border-emerald-100 bg-emerald-50 text-emerald-700/50' : 'border-[var(--nexus-border)] bg-black/20 text-white/50'
                                     }`}>
                                     SECURED
                                 </span>
@@ -156,42 +158,22 @@ const PremiumPreviewModal = ({ isOpen, onClose, item, onUnlock, theme }) => {
                             </p>
 
                             <div className="space-y-6 mb-12">
-                                <div className="flex items-start gap-4">
-                                    <div className="p-3 bg-[var(--nexus-accent)]/10 rounded-xl">
-                                        <Activity className="w-5 h-5 text-[var(--nexus-accent)]" />
+                                {[
+                                    { icon: Activity, label: 'Live Synchronization', desc: 'Instant deployment to your stream environment.' },
+                                    { icon: ShieldCheck, label: 'Elite Authorization', desc: 'Verified high-performance broadcast module.' },
+                                    { icon: Target, label: 'Dynamic Targeting', desc: 'Optimized for high-engagement viewer interactions.' },
+                                    { icon: Lock, label: 'Secure Licensing', desc: 'Permanent unlock tied to your broadcast node.' }
+                                ].map((feature, idx) => (
+                                    <div key={idx} className="flex items-start gap-4">
+                                        <div className={`p-3 rounded-xl ${isLight ? 'bg-emerald-100 text-emerald-600' : 'bg-[var(--nexus-accent)]/10 text-[var(--nexus-accent)]'}`}>
+                                            <feature.icon className="w-5 h-5" />
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className={`text-[10px] font-black uppercase tracking-widest ${isLight ? 'text-emerald-950' : 'text-[var(--nexus-text)]'}`}>{feature.label}</span>
+                                            <span className={`text-[10px] font-bold opacity-60 ${isLight ? 'text-emerald-800' : 'text-[var(--nexus-text-muted)]'}`}>{feature.desc}</span>
+                                        </div>
                                     </div>
-                                    <div className="flex flex-col">
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-[var(--nexus-text)]">Live Synchronization</span>
-                                        <span className="text-[10px] font-bold text-[var(--nexus-text-muted)] opacity-60">Instant deployment to your stream environment.</span>
-                                    </div>
-                                </div>
-                                <div className="flex items-start gap-4">
-                                    <div className="p-3 bg-[var(--nexus-accent)]/10 rounded-xl">
-                                        <ShieldCheck className="w-5 h-5 text-[var(--nexus-accent)]" />
-                                    </div>
-                                    <div className="flex flex-col">
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-[var(--nexus-text)]">Elite Authorization</span>
-                                        <span className="text-[10px] font-bold text-[var(--nexus-text-muted)] opacity-60">Verified high-performance broadcast module.</span>
-                                    </div>
-                                </div>
-                                <div className="flex items-start gap-4">
-                                    <div className="p-3 bg-[var(--nexus-accent)]/10 rounded-xl">
-                                        <Target className="w-5 h-5 text-[var(--nexus-accent)]" />
-                                    </div>
-                                    <div className="flex flex-col">
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-[var(--nexus-text)]">Dynamic Targeting</span>
-                                        <span className="text-[10px] font-bold text-[var(--nexus-text-muted)] opacity-60">Optimized for high-engagement viewer interactions.</span>
-                                    </div>
-                                </div>
-                                <div className="flex items-start gap-4">
-                                    <div className="p-3 bg-[var(--nexus-accent)]/10 rounded-xl">
-                                        <Lock className="w-5 h-5 text-[var(--nexus-accent)]" />
-                                    </div>
-                                    <div className="flex flex-col">
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-[var(--nexus-text)]">Secure Licensing</span>
-                                        <span className="text-[10px] font-bold text-[var(--nexus-text-muted)] opacity-60">Permanent unlock tied to your broadcast node.</span>
-                                    </div>
-                                </div>
+                                ))}
                             </div>
                         </div>
 

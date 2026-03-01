@@ -36,6 +36,8 @@ const PremiumStorefront = ({
     handleBuyWidget,
     handleEquipWidget,
     handleWalletPayment,
+    createStoreOrder,
+    verifyStorePayment,
     isProcessing,
     theme
 }) => {
@@ -152,24 +154,49 @@ const PremiumStorefront = ({
         }
     };
 
-    const handleRazorpayPayment = (item) => {
-        const priceNum = parseInt(item.price.replace(/[^0-9]/g, '')) || 0;
-        const options = {
-            key: "rzp_test_your_key", // Should come from config
-            amount: priceNum * 100,
-            currency: "INR",
-            name: "DropPay Marketplace",
-            description: `Unlock ${item.name}`,
-            handler: function (response) {
-                // Success!
-                setIsDeploying(true);
-                if (item.category === 'themes') handleBuyTheme(item.id);
-                else if (item.category === 'widgets') handleBuyWidget(item.id);
-                else handlePurchase(item.category, item.id);
+    const handleRazorpayPayment = async (item) => {
+        try {
+            // 1. Create order on backend
+            const orderData = await createStoreOrder(item.category, item.id);
+
+            if (!orderData || !orderData.orderId) {
+                console.error("Order creation failed");
+                return;
             }
-        };
-        const rzp = new window.Razorpay(options);
-        rzp.open();
+
+            // 2. Initialize Razorpay
+            const options = {
+                key: orderData.keyId,
+                amount: orderData.amount,
+                currency: orderData.currency,
+                name: "DropPay Marketplace",
+                description: `Unlock ${item.name}`,
+                order_id: orderData.orderId,
+                handler: async function (response) {
+                    // 3. Verify on backend
+                    const success = await verifyStorePayment({
+                        razorpay_order_id: response.razorpay_order_id,
+                        razorpay_payment_id: response.razorpay_payment_id,
+                        razorpay_signature: response.razorpay_signature
+                    }, item.category, item.id);
+
+                    if (success) {
+                        setIsDeploying(true);
+                    }
+                },
+                theme: {
+                    color: "#10B981"
+                }
+            };
+
+            const rzp = new window.Razorpay(options);
+            rzp.on('payment.failed', function (response) {
+                console.error("Razorpay Payment Failed:", response.error);
+            });
+            rzp.open();
+        } catch (error) {
+            console.error("Error launching Razorpay:", error);
+        }
     };
 
     return (
@@ -178,12 +205,15 @@ const PremiumStorefront = ({
             {/* --- STORE TABS --- */}
             <div className="mb-8">
                 {/* Sliding Tab Navigation */}
-                <div className="flex gap-2 border-b border-[var(--nexus-border)] overflow-x-auto scrollbar-hide">
+                <div className={`flex gap-2 border-b overflow-x-auto scrollbar-hide ${theme === 'light' ? 'border-emerald-100' : 'border-[var(--nexus-border)]'}`}>
                     {STORE_CATEGORIES.map((category) => (
                         <button
                             key={category.id}
                             onClick={() => setActiveTab(category.id)}
-                            className={`relative px-6 py-4 flex items-center gap-2 text-sm font-black uppercase tracking-widest transition-colors ${activeTab === category.id ? 'text-[var(--nexus-accent)]' : 'text-[var(--nexus-text-muted)] hover:text-[var(--nexus-text)]'}`}
+                            className={`relative px-6 py-4 flex items-center gap-2 text-sm font-black uppercase tracking-widest transition-colors ${activeTab === category.id
+                                ? (theme === 'light' ? 'text-emerald-700' : 'text-[var(--nexus-accent)]')
+                                : (theme === 'light' ? 'text-emerald-950/40 hover:text-emerald-950' : 'text-[var(--nexus-text-muted)] hover:text-[var(--nexus-text)]')
+                                }`}
                         >
                             {category.icon}
                             {category.label}
@@ -191,7 +221,7 @@ const PremiumStorefront = ({
                             {activeTab === category.id && (
                                 <motion.div
                                     layoutId="activeStoreTab"
-                                    className="absolute bottom-0 left-0 w-full h-1 bg-[var(--nexus-accent)] shadow-[0_0_10px_var(--nexus-accent)]"
+                                    className={`absolute bottom-0 left-0 w-full h-1 ${theme === 'light' ? 'bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'bg-[var(--nexus-accent)] shadow-[0_0_10px_var(--nexus-accent)]'}`}
                                 />
                             )}
                         </button>
@@ -218,15 +248,18 @@ const PremiumStorefront = ({
                             <div
                                 key={item.id}
                                 onClick={() => handlePreviewClick(item)}
-                                className={`group relative bg-[var(--nexus-panel)] border flex flex-col justify-between overflow-hidden transition-all duration-300 hover:shadow-[0_10px_40px_rgba(0,0,0,0.8)] cursor-pointer ${item.isActive ? 'border-[var(--nexus-accent)]' : 'border-[var(--nexus-border)] hover:border-[var(--nexus-accent)]'}`}
+                                className={`group relative bg-[var(--nexus-panel)] border flex flex-col justify-between overflow-hidden transition-all duration-300 hover:shadow-[0_10px_40px_rgba(0,0,0,0.1)] cursor-pointer ${item.isActive
+                                    ? (theme === 'light' ? 'border-emerald-500 ring-1 ring-emerald-500/20 shadow-lg shadow-emerald-500/5' : 'border-[var(--nexus-accent)]')
+                                    : (theme === 'light' ? 'border-emerald-100 hover:border-emerald-400' : 'border-[var(--nexus-border)] hover:border-[var(--nexus-accent)]')
+                                    }`}
                                 style={{ clipPath: 'polygon(0 0, 92% 0, 100% 8%, 100% 100%, 8% 100%, 0 92%)' }}
                             >
                                 {/* Diagonal Tech Texture */}
-                                <div className="absolute inset-0 opacity-5 bg-[repeating-linear-gradient(45deg,transparent,transparent_5px,#fff_5px,#fff_10px)] pointer-events-none" />
+                                <div className={`absolute inset-0 opacity-[0.03] ${theme === 'light' ? 'bg-emerald-900' : 'bg-white'} pointer-events-none`} style={{ backgroundImage: 'repeating-linear-gradient(45deg,transparent,transparent_5px,currentColor_5px,currentColor_10px)' }} />
 
                                 {/* Top Image/Preview Block */}
-                                <div className="w-full h-48 bg-black border-b border-[var(--nexus-border)] relative flex items-center justify-center overflow-hidden">
-                                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,#1e293b_0%,#000_100%)] opacity-50" />
+                                <div className={`w-full h-48 border-b relative flex items-center justify-center overflow-hidden ${theme === 'light' ? 'bg-emerald-50/50 border-emerald-100' : 'bg-black border-[var(--nexus-border)]'}`}>
+                                    <div className={`absolute inset-0 opacity-50 ${theme === 'light' ? 'bg-[radial-gradient(circle_at_center,#ECFDF5_0%,#F8FAFC_100%)]' : 'bg-[radial-gradient(circle_at_center,#1e293b_0%,#000_100%)]'}`} />
 
                                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none transform scale-[0.4] md:scale-[0.45]">
                                         {item.category === 'themes' && (
@@ -266,34 +299,41 @@ const PremiumStorefront = ({
                                     </div>
 
                                     {!item.videoPreviewUrl && item.category === 'themes' && (
-                                        <div className="w-20 h-20 border border-slate-700 transform rotate-45 flex items-center justify-center opacity-50 group-hover:scale-110 group-hover:border-[var(--nexus-accent)] transition-all duration-500 z-10">
+                                        <div className={`w-20 h-20 border transform rotate-45 flex items-center justify-center group-hover:scale-110 transition-all duration-500 z-10 ${theme === 'light' ? 'border-emerald-200/50 group-hover:border-emerald-500' : 'border-slate-700 group-hover:border-[var(--nexus-accent)]'}`}>
                                             <Sparkles className={`w-8 h-8 transform -rotate-45 ${item.color}`} />
                                         </div>
                                     )}
 
-                                    <span className={`absolute top-3 left-3 bg-black/80 backdrop-blur-sm border border-[var(--nexus-border)] text-white text-[9px] font-black uppercase tracking-widest px-2 py-1 z-10 ${item.isActive ? 'border-[var(--nexus-accent)] text-[var(--nexus-accent)]' : ''}`}>
+                                    <span className={`absolute top-3 left-3 backdrop-blur-sm border text-[9px] font-black uppercase tracking-widest px-2 py-1 z-10 
+                                        ${theme === 'light'
+                                            ? 'bg-emerald-50/90 text-emerald-700 border-emerald-200'
+                                            : 'bg-black/80 text-white border-[var(--nexus-border)]'}
+                                        ${item.isActive ? (theme === 'light' ? 'border-emerald-500 text-emerald-600 bg-emerald-100/90' : 'border-[var(--nexus-accent)] text-[var(--nexus-accent)]') : ''}`}>
                                         {item.isActive ? 'ACTIVE' : item.badge}
                                     </span>
 
                                 </div>
 
                                 {/* Details & Action */}
-                                <div className="p-5 flex flex-col flex-1 relative z-10 bg-gradient-to-t from-[var(--nexus-panel)] to-transparent">
-                                    <h3 className="text-[var(--nexus-text)] font-black text-xl uppercase tracking-tighter italic mb-2 group-hover:text-[var(--nexus-accent)] transition-colors">
+                                <div className={`p-5 flex flex-col flex-1 relative z-10 ${theme === 'light' ? 'bg-white' : 'bg-gradient-to-t from-[var(--nexus-panel)] to-transparent'}`}>
+                                    <h3 className={`font-black text-xl uppercase tracking-tighter italic mb-2 group-hover:text-emerald-500 transition-colors ${theme === 'light' ? 'text-slate-900' : 'text-[var(--nexus-text)]'}`}>
                                         {item.name}
                                     </h3>
-                                    <p className="text-[var(--nexus-text-muted)] text-xs mb-6 flex-1 line-clamp-2">
+                                    <p className={`text-xs mb-6 flex-1 line-clamp-2 ${theme === 'light' ? 'text-slate-500 font-medium' : 'text-[var(--nexus-text-muted)]'}`}>
                                         {item.desc}
                                     </p>
 
-                                    <div className="flex items-center justify-between mt-auto border-t border-[var(--nexus-border)] pt-4">
-                                        <span className="text-[var(--nexus-text)] font-mono font-black text-xl drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]">
+                                    <div className={`flex items-center justify-between mt-auto border-t pt-4 ${theme === 'light' ? 'border-emerald-50' : 'border-[var(--nexus-border)]'}`}>
+                                        <span className={`font-mono font-black text-xl ${theme === 'light' ? 'text-emerald-950/80' : 'text-[var(--nexus-text)] drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]'}`}>
                                             {item.isOwned ? 'SECURED' : item.price}
                                         </span>
                                         <button
                                             onClick={(e) => handleDirectBuy(e, item)}
                                             disabled={isProcessing}
-                                            className={`font-black text-xs uppercase tracking-widest px-5 py-3 transition-all shadow-[0_0_15px_var(--nexus-accent)] ${item.isOwned ? (item.isActive ? 'bg-slate-800 text-slate-500 cursor-not-allowed' : 'bg-emerald-600 text-white hover:bg-emerald-500') : 'bg-[var(--nexus-accent)] text-black hover:brightness-125'}`}
+                                            className={`font-black text-xs uppercase tracking-widest px-5 py-3 transition-all ${item.isOwned
+                                                ? (item.isActive ? (theme === 'light' ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-slate-800 text-slate-500 cursor-not-allowed') : 'bg-emerald-600 text-white hover:bg-emerald-500')
+                                                : (theme === 'light' ? 'bg-emerald-500 text-white hover:bg-emerald-600' : 'bg-[var(--nexus-accent)] text-black hover:brightness-125')
+                                                } ${theme === 'dark' ? 'shadow-[0_0_15px_var(--nexus-accent)]' : 'shadow-sm'}`}
                                             style={{ clipPath: 'polygon(15% 0, 100% 0, 100% 85%, 85% 100%, 0 100%, 0 15%)' }}
                                         >
                                             {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : (item.isOwned ? (item.isActive ? 'ACTIVE' : 'EQUIP') : 'UNLOCK')}

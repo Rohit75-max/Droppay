@@ -2,10 +2,10 @@ const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
 const User = require('../models/User');
-const { createOnboardingLink } = require('../controllers/onboardingController');
-const { requestWithdrawal, purchasePremiumStyle, purchasePremiumAlert, purchaseNexusTheme, purchaseWidget, equipWidget, equipAsset } = require('../controllers/userController');
-// @route   POST api/user/link-bank
-router.post('/link-bank', auth, createOnboardingLink);
+const { addBankAccount } = require('../controllers/onboardingController');
+const { requestWithdrawal, purchasePremiumStyle, purchasePremiumAlert, purchaseNexusTheme, purchaseWidget, equipWidget, equipAsset, createStoreOrder, verifyStorePayment } = require('../controllers/userController');
+// @route   POST api/user/add-bank-account
+router.post('/add-bank-account', auth, addBankAccount);
 
 // @route   POST api/user/withdraw
 // @desc    Process autonomous node payout requests
@@ -34,6 +34,14 @@ router.post('/equip-widget', auth, equipWidget);
 // @route   POST api/user/equip-asset
 // @desc    Universal equip handler for all asset categories
 router.post('/equip-asset', auth, equipAsset);
+
+// @route   POST api/user/create-store-order
+// @desc    Initialize a Razorpay order for store items
+router.post('/create-store-order', auth, createStoreOrder);
+
+// @route   POST api/user/verify-store-payment
+// @desc    Verify Razorpay secure checkout and grant asset
+router.post('/verify-store-payment', auth, verifyStorePayment);
 
 // @route   GET api/user/profile
 router.get('/profile', auth, async (req, res) => {

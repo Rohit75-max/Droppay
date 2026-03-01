@@ -27,7 +27,10 @@ const DigitalStore = ({
   message,
   setMessage,
   handlePayment,
-  isProcessing
+  isProcessing,
+  towEvent,
+  selectedSide,
+  setSelectedSide
 }) => {
   const [activeTab, setActiveTab] = useState('superchat');
 
@@ -138,6 +141,29 @@ const DigitalStore = ({
 
         {/* --- COMMON INPUT FIELDS (Fixed at bottom of store) --- */}
         <div className="mt-auto pt-6 space-y-4 border-t border-[var(--nexus-border)]">
+          {/* --- TUG-OF-WAR TEAM SELECTION UI --- */}
+          {towEvent && (
+            <div className="space-y-3">
+              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--nexus-text-muted)] ml-2">Choose Your Side</label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setSelectedSide('A')}
+                  className={`py-4 rounded-xl font-black uppercase tracking-widest text-[10px] italic border-2 transition-all ${selectedSide === 'A' ? 'bg-red-500/20 border-red-500 text-red-500 shadow-[0_0_15px_rgba(220,38,38,0.3)]' : 'bg-black/20 border-[var(--nexus-border)] text-[var(--nexus-text-muted)] hover:border-red-500/50'}`}
+                >
+                  {towEvent.teamAName}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedSide('B')}
+                  className={`py-4 rounded-xl font-black uppercase tracking-widest text-[10px] italic border-2 transition-all ${selectedSide === 'B' ? 'bg-blue-500/20 border-blue-500 text-blue-500 shadow-[0_0_15px_rgba(37,99,235,0.3)]' : 'bg-black/20 border-[var(--nexus-border)] text-[var(--nexus-text-muted)] hover:border-blue-500/50'}`}
+                >
+                  {towEvent.teamBName}
+                </button>
+              </div>
+            </div>
+          )}
+
           <div className="grid grid-cols-2 gap-4">
             <div className="relative">
               <UserCircle className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--nexus-text-muted)] w-5 h-5" />

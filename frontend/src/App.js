@@ -64,7 +64,7 @@ const MissionGate = ({ children }) => {
 
   if (status === 'loading') {
     return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center text-slate-500 font-black animate-pulse uppercase tracking-[0.3em]">
+      <div className="min-h-screen bg-[var(--nexus-bg)] flex items-center justify-center text-[var(--nexus-text-muted)] font-black animate-pulse uppercase tracking-[0.3em]">
         Syncing Uplink...
       </div>
     );
@@ -145,7 +145,10 @@ function AppContent() {
 
     // Apply classes to body for CSS-based themes
     const body = document.body;
-    body.className = body.className.replace(/theme-\S+/g, '').trim();
+    // Remove existing nexus themes but preserve light/dark
+    const classes = Array.from(body.classList).filter(c => c.startsWith('theme-'));
+    classes.forEach(c => body.classList.remove(c));
+
     if (nexusTheme !== 'void') {
       body.classList.add(`theme-${nexusTheme}`);
     }
@@ -154,7 +157,7 @@ function AppContent() {
   }, [nexusTheme]);
 
   return (
-    <div className={`min-h-screen relative overflow-hidden text-slate-100 selection:bg-emerald-500/30 ${isOverlay ? 'bg-transparent' : (nexusTheme === 'void' ? 'bg-[var(--nexus-bg)]' : 'bg-transparent')}`}>
+    <div className={`min-h-screen relative overflow-hidden text-[var(--nexus-text)] selection:bg-emerald-500/30 ${isOverlay ? 'bg-transparent' : (nexusTheme === 'void' ? 'bg-[var(--nexus-bg)]' : 'bg-transparent')}`}>
       {!isOverlay && (
         <Helmet>
           <title>DropPay | The Ultimate Streamer Protocol</title>

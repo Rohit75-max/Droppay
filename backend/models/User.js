@@ -116,7 +116,9 @@ const UserSchema = new mongoose.Schema({
   ownedWidgets: [{ type: String }], // ADDED: Tracks premium dashboard widgets purchased from Store
   activeRevenueWidget: { type: String, default: 'default' }, // ADDED: Currently equipped revenue chart widget
 
-  razorpayAccountId: { type: String, default: null, index: true }, // ADDED: Fast payout lookups
+  razorpayAccountId: { type: String, default: null, index: true }, // Legacy Route ID
+  razorpayContactId: { type: String, default: null }, // ADDED: Direct Payouts Contact ID
+  razorpayFundAccountId: { type: String, default: null }, // ADDED: Direct Payouts Fund Account ID
 
   // ... (payout/overlay/goal settings remain same) ...
   payoutSettings: {

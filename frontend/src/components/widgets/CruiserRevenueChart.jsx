@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { IndianRupee, Zap } from 'lucide-react';
+import { Player } from '@lottiefiles/react-lottie-player';
 
-const CruiserRevenueChart = ({ chartData, isDemo = false, recentDrops = [], theme = 'dark' }) => {
+const CruiserRevenueChart = ({ chartData, theme = 'dark' }) => {
     const data = chartData && chartData.length > 0
         ? chartData.map((val, i) => ({ label: ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'][i] || `D${i + 1}`, value: val }))
         : [
@@ -18,49 +19,7 @@ const CruiserRevenueChart = ({ chartData, isDemo = false, recentDrops = [], them
     const maxValue = Math.max(...data.map(d => d.value)) || 1;
     const initialTotalRevenue = data.reduce((sum, d) => sum + d.value, 0);
 
-    const [localRevenue, setLocalRevenue] = useState(initialTotalRevenue);
-    const [coins, setCoins] = useState([]);
-    const dropsProcessed = useRef(new Set());
-
-    // Generate coins logic
-    useEffect(() => {
-        if (isDemo) {
-            // Spawn initial burst of coins
-            const initialCoins = [
-                { id: Date.now() + 1, amount: 250 },
-            ];
-            setCoins(initialCoins);
-
-            const timeoutId = setTimeout(() => {
-                setCoins(prev => [...prev, { id: Date.now() + 2, amount: 450 }]);
-            }, 800);
-
-            // Demo mode: spawn random coins
-            const interval = setInterval(() => {
-                const amount = Math.floor(Math.random() * 500) + 100;
-                setCoins(prev => [...prev, { id: Date.now(), amount }]);
-            }, 1500);
-
-            return () => {
-                clearInterval(interval);
-                clearTimeout(timeoutId);
-            };
-        } else {
-            // Live mode: watch recentDrops
-            if (recentDrops && recentDrops.length > 0) {
-                const latestDrop = recentDrops[0];
-                if (!dropsProcessed.current.has(latestDrop.id)) {
-                    dropsProcessed.current.add(latestDrop.id);
-                    setCoins(prev => [...prev, { id: latestDrop.id, amount: latestDrop.amount }]);
-                }
-            }
-        }
-    }, [isDemo, recentDrops]);
-
-    const handleCoinCollected = (coinId, amount) => {
-        setLocalRevenue(prev => prev + amount);
-        setCoins(prev => prev.filter(c => c.id !== coinId));
-    };
+    const [localRevenue] = useState(initialTotalRevenue);
 
     return (
         <div className="relative w-full h-[400px] overflow-hidden font-mono flex flex-col group rounded-2xl transition-all duration-1000 border bg-[var(--nexus-panel)] border-[var(--nexus-border)] shadow-[var(--nexus-glow)]">
@@ -68,7 +27,7 @@ const CruiserRevenueChart = ({ chartData, isDemo = false, recentDrops = [], them
             {/* --- TOP: HOLOGRAPHIC REVENUE CHART --- */}
             <div className="relative z-20 h-[55%] w-full p-6 flex flex-col justify-between transition-all duration-1000 bg-[var(--nexus-panel)] overflow-hidden">
 
-                {/* Day/Night Celestial Bodies (Moved to Top Section) */}
+                {/* Day/Night Celestial Bodies (Lottie Stickers) */}
                 <AnimatePresence mode="wait">
                     {theme === 'light' && (
                         <motion.div
@@ -77,13 +36,16 @@ const CruiserRevenueChart = ({ chartData, isDemo = false, recentDrops = [], them
                             animate={{ y: 0, opacity: 1 }}
                             exit={{ y: 200, opacity: 0 }}
                             transition={{ duration: 1.5, type: 'spring' }}
-                            className="absolute right-12 top-9 w-16 h-16 rounded-full bg-gradient-to-tr from-yellow-200 to-amber-500 shadow-[0_0_60px_30px_rgba(251,191,36,0.3)] z-0 flex items-center justify-center opacity-70"
+                            className="absolute right-12 top-9 w-24 h-24 z-0 opacity-80 pointer-events-none"
                         >
-                            <motion.div
-                                animate={{ scale: [1, 1.05, 1], opacity: [0.8, 1, 0.8] }}
-                                transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
-                                className="w-full h-full rounded-full shadow-[0_0_100px_60px_rgba(251,191,36,0.15)]"
+                            <Player
+                                autoplay
+                                loop
+                                src="https://lottie.host/6770281b-85f0-4573-b09e-ed8f63548972/0A6m0R7O9W.json"
+                                style={{ height: '100%', width: '100%' }}
                             />
+                            {/* Subtle Glow Underlying */}
+                            <div className="absolute inset-0 bg-yellow-400/10 blur-[40px] rounded-full -z-10" />
                         </motion.div>
                     )}
                     {theme === 'dark' && (
@@ -93,17 +55,16 @@ const CruiserRevenueChart = ({ chartData, isDemo = false, recentDrops = [], them
                             animate={{ y: 0, opacity: 1 }}
                             exit={{ y: 200, opacity: 0 }}
                             transition={{ duration: 1.5, type: 'spring' }}
-                            className="absolute right-12 top-9 w-14 h-14 rounded-full bg-slate-200 shadow-[0_0_60px_20px_rgba(255,255,255,0.2)] z-0 flex items-center justify-center overflow-hidden opacity-40"
+                            className="absolute right-12 top-9 w-20 h-20 z-0 opacity-40 pointer-events-none"
                         >
-                            <motion.div
-                                animate={{ scale: [1, 1.03, 1] }}
-                                transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
-                                className="absolute inset-0 shadow-[inset_0_0_30px_rgba(0,0,0,0.5)] z-10"
+                            <Player
+                                autoplay
+                                loop
+                                src="https://lottie.host/21156821-654a-4e20-80a5-f09c7359bb08/CByV9jCqR4.json"
+                                style={{ height: '100%', width: '100%' }}
                             />
-                            <div className="absolute top-3 right-3 w-4 h-4 rounded-full bg-slate-300 opacity-60 shadow-inner" />
-                            <div className="absolute bottom-4 left-3 w-5 h-5 rounded-full bg-slate-300 opacity-50 shadow-inner" />
-                            <div className="absolute top-8 left-8 w-2 h-2 rounded-full bg-slate-300 opacity-40 shadow-inner" />
-                            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-transparent to-black/30" />
+                            {/* Celestial Glow */}
+                            <div className="absolute inset-0 bg-indigo-500/10 blur-[50px] rounded-full -z-10" />
                         </motion.div>
                     )}
                 </AnimatePresence>
@@ -196,39 +157,6 @@ const CruiserRevenueChart = ({ chartData, isDemo = false, recentDrops = [], them
                 />
 
                 <style>{`@keyframes scrollRoad { 0% { transform: translateX(0); } 100% { transform: translateX(-100px); } }`}</style>
-
-                {/* Spinning Coins Collection Physics */}
-                <AnimatePresence>
-                    {coins.map((coin) => (
-                        <motion.div
-                            key={coin.id}
-                            initial={{ x: 800, y: 0, opacity: 0, scale: 0 }}
-                            animate={{
-                                x: [8000, 500, 208], // Ultra-speed entry from far distance
-                                opacity: [0, 1, 0],
-                                scale: [0.5, 1.2, 0.5],
-                                y: [0, -50, 0] // Curved arc trajectory
-                            }}
-                            transition={{
-                                duration: 1.2, // Fast, aggressive zip
-                                ease: "anticipate",
-                                times: [0, 0.4, 1]
-                            }}
-                            onAnimationComplete={() => handleCoinCollected(coin.id, coin.amount)}
-                            className="absolute bottom-12 z-30 drop-shadow-[0_0_10px_rgba(251,191,36,0.8)]"
-                        >
-                            <motion.div
-                                animate={{ rotateY: 360 }}
-                                transition={{ repeat: Infinity, duration: 0.8, ease: "linear" }}
-                                className="w-7 h-7 rounded-full bg-gradient-to-br from-yellow-200 via-amber-400 to-amber-700 border border-yellow-100 flex items-center justify-center shadow-inner"
-                            >
-                                <IndianRupee className="w-3 h-3 text-amber-950/80 stroke-[3px]" />
-                            </motion.div>
-                        </motion.div>
-                    ))}
-                </AnimatePresence>
-
-                {/* THE CRUISER (High-End Cybertruck / Sci-Fi Car) */}
                 <motion.div
                     animate={{ y: [0, -3, 0, -1, 0] }}
                     transition={{ repeat: Infinity, duration: 0.5, ease: "easeInOut" }}

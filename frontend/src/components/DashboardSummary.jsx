@@ -266,7 +266,7 @@ const DashboardSummary = ({
         <div className="h-[340px] flex flex-col">
           <div className="flex items-center gap-2 mb-4 px-2">
             <Trophy className="w-4 h-4 text-amber-500" />
-            <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">Global Rankings <Crown className="w-3 h-3 text-amber-500 opacity-50" /> <Award className="w-3 h-3 text-amber-500 opacity-50" /></span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-[var(--nexus-text-muted)] flex items-center gap-2">Global Rankings <Crown className="w-3 h-3 text-amber-500 opacity-50" /> <Award className="w-3 h-3 text-amber-500 opacity-50" /></span>
           </div>
           <TopSupporterWidget
             topSupporters={topDonors.map(d => ({

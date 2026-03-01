@@ -3,7 +3,19 @@ const TugOfWarEvent = require('../models/TugOfWarEvent');
 exports.startEvent = async (req, res) => {
     try {
         const { title, teamAName, teamBName, durationMinutes } = req.body;
-        const streamerId = req.user.streamerId;
+
+        if (!req.user || !req.user.id) {
+            return res.status(401).json({ msg: 'Unauthenticated Request' });
+        }
+
+        const User = require('../models/User');
+        const user = await User.findById(req.user.id).select('obsKey streamerId');
+
+        if (!user || !user.streamerId) {
+            return res.status(404).json({ msg: 'Streamer Node Not Found or Incomplete' });
+        }
+
+        const streamerId = user.streamerId;
 
         // Deactivate any existing active events for this streamer
         await TugOfWarEvent.updateMany(
@@ -11,13 +23,13 @@ exports.startEvent = async (req, res) => {
             { $set: { isActive: false } }
         );
 
-        const expiresAt = new Date(Date.now() + durationMinutes * 60000);
+        const expiresAt = new Date(Date.now() + (durationMinutes || 5) * 60000);
 
         const newEvent = await TugOfWarEvent.create({
             streamerId,
-            title,
-            teamAName,
-            teamBName,
+            title: title || "New Battle",
+            teamAName: teamAName || "Team A",
+            teamBName: teamBName || "Team B",
             expiresAt,
             isActive: true,
             teamAAmount: 0,
@@ -25,8 +37,6 @@ exports.startEvent = async (req, res) => {
         });
 
         const io = req.app.get('io');
-        const User = require('../models/User');
-        const user = await User.findById(req.user.id).select('obsKey streamerId');
 
         if (io) {
             if (user.obsKey) io.to(user.obsKey).emit('tug-of-war-start', newEvent);
@@ -35,14 +45,18 @@ exports.startEvent = async (req, res) => {
 
         res.json(newEvent);
     } catch (err) {
-        console.error('Error starting Tug-of-War event:', err);
-        res.status(500).json({ msg: 'Server Error' });
+        console.error('Error starting Tug-of-War event:', err.message);
+        res.status(500).json({ msg: 'Server Error', details: err.message });
     }
 };
 
 exports.stopEvent = async (req, res) => {
     try {
-        const streamerId = req.user.streamerId;
+        const User = require('../models/User');
+        const user = await User.findById(req.user.id).select('obsKey streamerId');
+        if (!user) return res.status(404).json({ msg: 'User not found' });
+
+        const streamerId = user.streamerId;
         const activeEvent = await TugOfWarEvent.findOneAndUpdate(
             { streamerId, isActive: true },
             { $set: { isActive: false } },
@@ -51,8 +65,6 @@ exports.stopEvent = async (req, res) => {
 
         if (activeEvent) {
             const io = req.app.get('io');
-            const User = require('../models/User');
-            const user = await User.findById(req.user.id).select('obsKey streamerId');
 
             if (io) {
                 if (user.obsKey) io.to(user.obsKey).emit('tug-of-war-stop', { eventId: activeEvent._id });

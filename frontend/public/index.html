@@ -5,6 +5,19 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>DropPay</title>
+  <script>
+    (function() {
+      try {
+        var theme = localStorage.getItem('dropPayTheme');
+        var supportLight = true; // We default to light now
+        if (!theme || theme === 'dark') {
+          theme = 'light';
+          localStorage.setItem('dropPayTheme', 'light');
+        }
+        document.documentElement.classList.add(theme);
+      } catch (e) {}
+    })();
+  </script>
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
 

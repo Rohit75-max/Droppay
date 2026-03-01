@@ -17,10 +17,15 @@ module.exports = function (req, res, next) {
     // 4. Verify the token
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        
+
         // Attach the user object (id and plan) to the request
-        req.user = decoded.user;
-        
+        // Fortified: Supports both { user: { id } } and top-level { id } structures
+        req.user = decoded.user || { id: decoded.id };
+
+        if (!req.user || !req.user.id) {
+            return res.status(401).json({ msg: 'Token logic failure: Identity not found.' });
+        }
+
         next();
     } catch (err) {
         console.error("JWT Auth Error:", err.message);

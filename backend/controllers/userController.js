@@ -1,4 +1,12 @@
 const User = require('../models/User');
+const Drop = require('../models/Drop');
+const Razorpay = require('razorpay');
+const crypto = require('crypto');
+
+const razorpay = new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET,
+});
 
 exports.requestWithdrawal = async (req, res) => {
     try {
@@ -27,6 +35,17 @@ exports.requestWithdrawal = async (req, res) => {
         user.financialMetrics.pendingPayouts += amount;
 
         await user.save();
+
+        // Create a Pending Ledger Entry for the user to track
+        await Drop.create({
+            streamerId: user.streamerId,
+            donorName: "WITHDRAWAL",
+            amount: -amount,
+            message: "Payout Request Pending Approval",
+            sticker: 'zap',
+            status: 'pending'
+        });
+
         res.status(200).json({
             msg: `Withdrawal of ₹${amount} initiated successfully.`,
             walletBalance: user.walletBalance,
@@ -38,8 +57,6 @@ exports.requestWithdrawal = async (req, res) => {
         res.status(500).json({ msg: "Failed to Dispatch Payout Request" });
     }
 };
-
-const Drop = require('../models/Drop');
 
 exports.purchasePremiumStyle = async (req, res) => {
     try {
@@ -408,5 +425,148 @@ exports.equipAsset = async (req, res) => {
     } catch (err) {
         console.error("Universal Equip Error:", err);
         res.status(500).json({ msg: "Equip failed." });
+    }
+};
+
+// ==================== STORE RAZORPAY INTEGRATION ====================
+
+// Helper to get item price
+const getStoreItemPrice = (category, itemId) => {
+    switch (category) {
+        case 'themes':
+            return 10000;
+        case 'goals':
+            return 2000;
+        case 'alerts':
+            return PREMIUM_ALERT_PRICES[itemId] || 2000;
+        case 'widgets':
+            return WIDGET_CATALOG[itemId]?.price || 12000;
+        default:
+            return 0;
+    }
+};
+
+exports.createStoreOrder = async (req, res) => {
+    try {
+        const { category, itemId } = req.body;
+        if (!category || !itemId) return res.status(400).json({ msg: "Category and itemId required" });
+
+        const price = getStoreItemPrice(category, itemId);
+        if (price <= 0) return res.status(400).json({ msg: "Invalid item" });
+
+        const options = {
+            amount: price * 100, // Amount in paise
+            currency: "INR",
+            receipt: `rcpt_store_${Date.now()}_${itemId}`,
+        };
+
+        const order = await razorpay.orders.create(options);
+        res.status(200).json({
+            orderId: order.id,
+            amount: options.amount,
+            currency: options.currency,
+            keyId: process.env.RAZORPAY_KEY_ID
+        });
+    } catch (error) {
+        console.error("Create Store Order Error:", error);
+        res.status(500).json({ msg: "Order generation failed." });
+    }
+};
+
+exports.verifyStorePayment = async (req, res) => {
+    try {
+        const { razorpay_order_id, razorpay_payment_id, razorpay_signature, category, itemId } = req.body;
+
+        const body = razorpay_order_id + "|" + razorpay_payment_id;
+        const expectedSignature = crypto
+            .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+            .update(body.toString())
+            .digest("hex");
+
+        if (expectedSignature !== razorpay_signature) {
+            return res.status(400).json({ status: "failed", msg: "Invalid Security Token" });
+        }
+
+        const user = await User.findById(req.user.id);
+        if (!user) return res.status(404).json({ msg: "Node Not Found" });
+
+        const price = getStoreItemPrice(category, itemId);
+        let itemName = itemId.toUpperCase();
+
+        // 1. Grant the item based on category
+        switch (category) {
+            case 'themes':
+                if (!user.unlockedNexusThemes) user.unlockedNexusThemes = [];
+                if (!user.unlockedNexusThemes.includes(itemId)) {
+                    user.unlockedNexusThemes.push(itemId);
+                }
+                user.nexusTheme = itemId;
+                break;
+            case 'goals':
+                if (!user.goalSettings.unlockedPremiumStyles.includes(itemId)) {
+                    user.goalSettings.unlockedPremiumStyles.push(itemId);
+                }
+                user.goalSettings.stylePreference = itemId;
+                break;
+            case 'alerts':
+                if (!user.overlaySettings.unlockedPremiumAlerts) user.overlaySettings.unlockedPremiumAlerts = [];
+                if (!user.overlaySettings.unlockedPremiumAlerts.includes(itemId)) {
+                    user.overlaySettings.unlockedPremiumAlerts.push(itemId);
+                }
+                user.overlaySettings.stylePreference = itemId;
+                break;
+            case 'widgets':
+                if (!user.ownedWidgets) user.ownedWidgets = [];
+                if (!user.ownedWidgets.includes(itemId)) {
+                    user.ownedWidgets.push(itemId);
+                }
+                user.activeRevenueWidget = itemId;
+                itemName = WIDGET_CATALOG[itemId]?.name || itemName;
+                break;
+            default:
+                return res.status(400).json({ msg: "Unknown Category" });
+        }
+
+        await user.save();
+
+        // 2. Add Ledger Entry
+        await Drop.create({
+            streamerId: user.streamerId,
+            donorName: "SYSTEM_DEBIT",
+            amount: -price,
+            message: `Purchased [${category}] ${itemName} via Razorpay`,
+            sticker: 'zap',
+            status: 'completed',
+            razorpayPaymentId: razorpay_payment_id,
+            razorpayOrderId: razorpay_order_id
+        });
+
+        // 3. Emit sockets for live updates
+        const io = req.app.get('io');
+        if (io) {
+            if (category === 'goals') {
+                io.to(user.streamerId).emit('goal-update', user.goalSettings);
+                if (user.obsKey) io.to(user.obsKey).emit('goal-update', user.goalSettings);
+            } else if (category === 'alerts') {
+                if (user.streamerId) io.to(user.streamerId).emit('settings-update', user.overlaySettings);
+                if (user.obsKey) io.to(user.obsKey).emit('settings-update', user.overlaySettings);
+            }
+        }
+
+        // 4. Return the updated user structures needed by the frontend
+        res.status(200).json({
+            msg: "Asset Unlocked & Equipped!",
+            walletBalance: user.walletBalance,
+            nexusTheme: user.nexusTheme,
+            unlockedNexusThemes: user.unlockedNexusThemes,
+            goalSettings: user.goalSettings,
+            overlaySettings: user.overlaySettings,
+            ownedWidgets: user.ownedWidgets,
+            activeRevenueWidget: user.activeRevenueWidget
+        });
+
+    } catch (err) {
+        console.error("Verify Store Payment Error:", err);
+        res.status(500).json({ msg: "Payment Verification Failed." });
     }
 };

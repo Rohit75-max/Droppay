@@ -521,6 +521,9 @@ const DonationPage = () => {
                   setMessage={setMessage}
                   handlePayment={handlePayment}
                   isProcessing={isProcessing}
+                  towEvent={towEvent}
+                  selectedSide={selectedSide}
+                  setSelectedSide={setSelectedSide}
                 />
               </motion.div>
             )}

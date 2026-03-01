@@ -13,15 +13,14 @@ import AlertPreview from '../components/AlertPreview';
 import SocketModal from '../components/SocketModal';
 import { getOptimizedImage } from '../protocol/cdnHelper';
 import DonationTicker from '../components/widgets/DonationTicker';
-import CruiserRevenueChart from '../components/widgets/CruiserRevenueChart';
 
 const Home = () => {
   const navigate = useNavigate();
 
   // --- UNIFIED GLOBAL THEME PROTOCOL ---
-  const [theme] = useState(() => {
-    return localStorage.getItem('dropPayTheme') || 'dark';
-  });
+  const theme = useMemo(() => {
+    return localStorage.getItem('dropPayTheme') || 'light';
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('dropPayTheme', theme);
@@ -107,25 +106,61 @@ const Home = () => {
   return (
     <div
       onMouseMove={handleMouseMove}
-      className={`min-h-screen font-sans selection:bg-[#10B981]/30 transition-colors duration-700 overflow-x-hidden ${theme === 'dark' ? 'bg-[#050505] text-slate-100' : 'bg-slate-50 text-slate-900'
+      className={`min-h-screen font-sans selection:bg-[#10B981]/30 transition-colors duration-700 overflow-x-hidden ${theme} ${theme === 'dark' ? 'bg-[#050505] text-slate-100' : 'bg-slate-50 text-slate-900'
         }`}
     >
       <style dangerouslySetInnerHTML={{
         __html: `
         .nexus-feature-card {
-          background: rgba(10, 10, 11, 0.95);
-          border: 1px solid rgba(255, 255, 255, 0.05);
           transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        .legacy-tier-card:hover {
+        .nexus-feature-card-dark {
+          background: rgba(10, 10, 11, 0.95);
+          border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .nexus-feature-card-light {
+          background: rgba(255, 255, 255, 0.8);
+          border: 1px solid rgba(0, 0, 0, 0.05);
+          backdrop-filter: blur(12px);
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+        }
+
+        .nexus-amber-card:hover {
           border-color: #F59E0B;
           box-shadow: 0 0 30px rgba(245, 158, 11, 0.15);
+        }
+
+        .nexus-cyan-card:hover {
+          border-color: #22D3EE;
+          box-shadow: 0 0 30px rgba(34, 211, 238, 0.15);
+        }
+
+        .nexus-indigo-card:hover {
+          border-color: #818CF8;
+          box-shadow: 0 0 30px rgba(129, 140, 248, 0.15);
+        }
+
+        .nexus-rose-card:hover {
+          border-color: #FB7185;
+          box-shadow: 0 0 30px rgba(251, 113, 133, 0.15);
         }
 
         .supernova-glow {
           box-shadow: 0 0 60px rgba(16, 185, 129, 0.6), 0 0 100px rgba(245, 158, 11, 0.4);
           border-color: #F59E0B !important;
+        }
+
+        .simulator-card-dark {
+          background: linear-gradient(rgba(7, 13, 10, 0.95), rgba(7, 13, 10, 0.95)) padding-box,
+                      conic-gradient(from var(--angle), #10B981, #3b82f6, #8b5cf6, #f59e0b, #10B981) border-box !important;
+        }
+
+        .simulator-card-light {
+          background: linear-gradient(rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.95)) padding-box,
+                      conic-gradient(from var(--angle), #10B981, #3b82f6, #8b5cf6, #f59e0b, #10B981) border-box !important;
+          backdrop-filter: blur(20px);
         }
 
         .gold-spark {
@@ -137,9 +172,133 @@ const Home = () => {
           pointer-events: none;
         }
 
+        .premium-footer-link {
+          position: relative;
+          color: #94a3b8;
+          transition: color 0.3s ease;
+        }
+
+        .premium-footer-link:hover {
+          color: #10B981;
+        }
+
+        .premium-footer-link::after {
+          content: '';
+          position: absolute;
+          width: 0;
+          height: 1px;
+          bottom: -2px;
+          left: 0;
+          background: #10B981;
+          transition: width 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .premium-footer-link:hover::after {
+          width: 100%;
+        }
+
+        .social-btn-premium {
+          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .social-btn-premium:hover {
+          transform: translateY(-4px) scale(1.1);
+          box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
+          background: rgba(16, 185, 129, 0.1) !important;
+          color: #10B981 !important;
+        }
+
+        @keyframes aurora-shift {
+          0%   { background-position: 0% 50%; }
+          50%  { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+
+        @keyframes hero-glitch {
+          0%, 90%, 100% { clip-path: none; transform: none; }
+          91% { clip-path: inset(20% 0 60% 0); transform: translate(-3px, 0); }
+          92% { clip-path: inset(60% 0 20% 0); transform: translate(3px, 0); }
+          93% { clip-path: none; transform: none; }
+          96% { clip-path: inset(40% 0 40% 0); transform: translate(2px, 0); }
+          97% { clip-path: none; transform: none; }
+        }
+
+        .hero-title-main {
+          position: relative;
+          color: ${theme === 'dark' ? 'white' : '#0f172a'};
+          filter: drop-shadow(0 0 15px rgba(16, 185, 129, ${theme === 'dark' ? '0.1' : '0.05'}));
+        }
+
+        .hero-title-shine {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(
+            120deg,
+            transparent 30%,
+            rgba(255, 255, 255, ${theme === 'dark' ? '0.2' : '0.4'}) 45%,
+            rgba(255, 255, 255, ${theme === 'dark' ? '0.4' : '0.8'}) 50%,
+            rgba(255, 255, 255, ${theme === 'dark' ? '0.2' : '0.4'}) 55%,
+            transparent 70%
+          );
+          background-size: 200% 100%;
+          -webkit-background-clip: text;
+          background-clip: text;
+          -webkit-text-fill-color: transparent;
+          animation: title-shine 4s infinite linear;
+        }
+
+        .hero-shimmer-text {
+          background: linear-gradient(
+            to right,
+            #818cf8, 
+            #06b6d4, 
+            #10B981, 
+            #34d399,
+            #818cf8
+          );
+          background-size: 200% auto;
+          -webkit-background-clip: text;
+          background-clip: text;
+          -webkit-text-fill-color: transparent;
+          animation: liquid-flow 5s linear infinite;
+          filter: drop-shadow(0 0 12px rgba(16, 185, 129, 0.15));
+        }
+
+        @keyframes title-shine {
+          0% { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
+        }
+
+        @keyframes liquid-flow {
+          to { background-position: 200% center; }
+        }
+
+        /* Opposite phase — starts midway through the same gradient cycle */
+        .hero-shimmer-text-alt {
+          background: linear-gradient(
+            270deg,
+            #10B981,
+            #06b6d4,
+            #818cf8,
+            #f472b6,
+            #34d399,
+            #10B981
+          );
+          background-size: 400% 400%;
+          -webkit-background-clip: text;
+          background-clip: text;
+          -webkit-text-fill-color: transparent;
+          animation: aurora-shift 6s ease infinite, hero-glitch 9s steps(1) infinite;
+          animation-delay: -3s, -4.5s;
+        }
+
+        .hero-stroke-text {
+          -webkit-text-stroke: 2px #10B981;
+        }
+
         .hero-nexus-preview {
           display: grid;
-          grid-template-columns: 80px 1fr;
+          grid-template-columns: 70px 1fr;
           gap: 1rem;
           padding: 1.25rem;
           border-radius: 1.5rem;
@@ -147,6 +306,8 @@ const Home = () => {
           border: 1px solid rgba(255, 255, 255, 0.08);
           backdrop-filter: blur(24px);
           -webkit-backdrop-filter: blur(24px);
+          align-items: stretch;
+          min-height: 220px;
         }
 
         .mini-supporter-pill {
@@ -168,6 +329,62 @@ const Home = () => {
           background: rgba(0,0,0,0.3);
         }
 
+        .premium-nav-glass {
+          backdrop-filter: blur(28px) saturate(180%);
+          -webkit-backdrop-filter: blur(28px) saturate(180%);
+        }
+
+        .nav-link-liquid {
+          position: relative;
+          padding: 0.5rem 0;
+        }
+
+        .nav-link-liquid::after {
+          content: '';
+          position: absolute;
+          bottom: 0;
+          left: 50%;
+          width: 0;
+          height: 2px;
+          background: #10B981;
+          transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+          transform: translateX(-50%);
+          opacity: 0;
+        }
+
+        .nav-link-liquid:hover::after {
+          width: 100%;
+          opacity: 1;
+        }
+
+        .ticker-sheen {
+          position: relative;
+          overflow: hidden;
+        }
+
+        .ticker-sheen::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 50%;
+          height: 100%;
+          background: linear-gradient(
+            to right,
+            transparent,
+            rgba(255, 255, 255, 0.1),
+            transparent
+          );
+          transform: skewX(-25deg);
+          animation: sheen-swipe 8s infinite ease-in-out;
+        }
+
+        @keyframes sheen-swipe {
+          0% { left: -100%; }
+          20% { left: 200%; }
+          100% { left: 200%; }
+        }
+
         .nexus-vehicle {
           position: absolute;
           offset-path: path("M 0 60 L 200 60 C 250 60 280 110 350 110 S 450 10 550 10 S 700 60 750 60 L 1000 60");
@@ -181,33 +398,60 @@ const Home = () => {
 
 
       {/* 0. NAVIGATION / MOBILE MENU */}
-      <nav className="fixed top-0 left-0 right-0 z-[100] bg-black/50 backdrop-blur-xl border-b border-white/5">
-        <div className="max-w-[1440px] mx-auto px-6 py-4 flex justify-between items-center">
+      <nav className={`fixed top-0 left-0 right-0 z-[100] premium-nav-glass border-b transition-all duration-700 ${theme === 'dark'
+        ? 'bg-black/40 border-white/[0.03] shadow-[0_8px_32px_rgba(0,0,0,0.5)]'
+        : 'bg-white/60 border-black/[0.03] shadow-[0_8px_32px_rgba(0,0,0,0.05)]'
+        }`}>
+        <div className="max-w-[1280px] mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3 cursor-pointer group" onClick={() => navigate('/')}>
             <div className="relative">
               <Zap className="w-8 h-8 text-[#10B981] fill-[#10B981] group-hover:scale-110 transition-transform" />
               <Shield className="absolute -top-1 -right-1 w-4 h-4 text-emerald-500 opacity-50" />
             </div>
-            <span className="text-2xl font-black italic tracking-tighter">DropPay</span>
+            <span className={`text-2xl font-black italic tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+              Drop<span className="text-[#10B981]">Pay</span>
+            </span>
           </div>
 
           <div className="hidden md:flex items-center gap-10">
-            <a href="#features" className="text-[10px] font-black uppercase tracking-[0.3em] hover:text-[#10B981] transition-colors">Features</a>
-            <a href="#payouts" className="text-[10px] font-black uppercase tracking-[0.3em] hover:text-[#10B981] transition-colors">Economics</a>
-            <button onClick={() => navigate('/login')} className="text-[10px] font-black uppercase tracking-[0.3em] px-6 py-2 border border-white/10 rounded-full hover:bg-white/5 transition-all">Login</button>
-            <button onClick={() => navigate('/signup')} className="text-[10px] font-black uppercase tracking-[0.3em] bg-[#10B981] text-white px-8 py-3 rounded-full hover:shadow-[0_0_20px_rgba(16,185,129,0.5)] transition-all flex items-center gap-2">
-              Join <ArrowRight className="w-3 h-3" />
+            {['Features', 'Pricing'].map((item) => (
+              <a
+                key={item}
+                href={`#${item.toLowerCase()}`}
+                className={`nav-link-liquid text-[10px] font-black uppercase tracking-[0.3em] transition-colors duration-300 ${theme === 'dark' ? 'text-white/60 hover:text-white' : 'text-slate-500 hover:text-slate-900'
+                  }`}
+              >
+                {item}
+              </a>
+            ))}
+            <button
+              onClick={() => navigate('/login')}
+              className={`text-[10px] font-black uppercase tracking-[0.3em] px-7 py-2.5 border rounded-full transition-all duration-300 ${theme === 'dark'
+                ? 'border-white/10 text-white/80 hover:bg-white/5 hover:border-white/20'
+                : 'border-slate-200 text-slate-800 hover:bg-slate-50 hover:border-slate-300 shadow-sm'
+                }`}
+            >
+              Login
             </button>
+            <motion.button
+              whileHover={{ scale: 1.02, y: -1 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => navigate('/signup')}
+              className="text-[10px] font-black uppercase tracking-[0.3em] bg-[#10B981] text-white px-9 py-3.5 rounded-full shadow-[0_10px_20px_-10px_rgba(16,185,129,0.5)] hover:shadow-[0_15px_30px_-5px_rgba(16,185,129,0.6)] transition-all flex items-center gap-2 group"
+            >
+              Join <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+            </motion.button>
           </div>
 
-          <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="md:hidden text-white relative z-[110]">
+          <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className={`md:hidden relative z-[110] ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
             {isMobileMenuOpen ? <X className="w-8 h-8" /> : <Menu className="w-8 h-8" />}
           </button>
         </div>
       </nav>
 
       {/* TICKER BELOW NAV */}
-      <div className="relative pt-[72px] z-90 bg-black/20">
+      <div className={`relative pt-[64px] md:pt-[72px] z-90 border-b ticker-sheen transition-all duration-700 ${theme === 'dark' ? 'bg-black/10 border-white/[0.02]' : 'bg-slate-100/30 border-black/[0.02]'
+        }`}>
         <DonationTicker recentDrops={demoDrops} goalPercentage={(goalAmount / goalTarget) * 100} />
       </div>
 
@@ -230,23 +474,28 @@ const Home = () => {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="fixed top-0 right-0 h-full w-[85vw] max-w-[340px] z-[105] flex flex-col overflow-hidden"
-              style={{ background: 'linear-gradient(160deg, rgba(7,20,14,0.98) 0%, rgba(5,5,10,0.99) 100%)', borderLeft: '1px solid rgba(16,185,129,0.15)' }}
+              className={`fixed top-0 right-0 h-full w-[85vw] max-w-[340px] z-[105] flex flex-col overflow-hidden border-l transition-colors duration-500 ${theme === 'dark'
+                ? 'bg-gradient-to-br from-[#07140e]/98 to-[#05050a]/99 border-[#10B981]/15'
+                : 'bg-white border-slate-200'
+                }`}
             >
               {/* Inner glow */}
               <div className="absolute top-0 right-0 w-56 h-56 bg-[#10B981]/10 blur-[80px] rounded-full pointer-events-none" />
               <div className="absolute bottom-20 left-0 w-40 h-40 bg-blue-500/6 blur-[60px] rounded-full pointer-events-none" />
 
               {/* Header row */}
-              <div className="flex items-center justify-between px-7 pt-8 pb-6 border-b border-white/[0.06]">
+              <div className={`flex items-center justify-between px-7 pt-8 pb-6 border-b ${theme === 'dark' ? 'border-white/[0.06]' : 'border-slate-100'}`}>
                 <div className="flex items-center gap-2">
                   <Zap className="w-6 h-6 text-[#10B981] fill-[#10B981]" />
-                  <span className="text-white font-black italic tracking-tighter text-lg">DropPay</span>
+                  <span className={`font-black italic tracking-tighter text-lg ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+                    Drop<span className="text-[#10B981]">Pay</span>
+                  </span>
                 </div>
                 <motion.button
                   whileTap={{ scale: 0.88 }}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all"
+                  className={`w-9 h-9 rounded-xl border flex items-center justify-center transition-all ${theme === 'dark' ? 'bg-white/5 border-white/10 text-white/50 hover:text-white hover:bg-white/10' : 'bg-slate-50 border-slate-200 text-slate-400 hover:text-slate-900 hover:bg-slate-100'
+                    }`}
                 >
                   <X className="w-5 h-5" />
                 </motion.button>
@@ -256,7 +505,6 @@ const Home = () => {
               <div className="flex flex-col gap-1 px-4 pt-6 flex-1">
                 {[
                   { label: 'Features', href: '#features' },
-                  { label: 'Economics', href: '#payouts' },
                   { label: 'Pricing', href: '#pricing' },
                   { label: 'Community', href: '#features' },
                 ].map((item, i) => (
@@ -267,7 +515,8 @@ const Home = () => {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.05 * i + 0.1, type: 'spring', stiffness: 280, damping: 24 }}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex items-center justify-between px-4 py-3.5 rounded-xl text-white/80 hover:text-white hover:bg-white/[0.04] active:bg-white/[0.07] transition-all group"
+                    className={`flex items-center justify-between px-4 py-3.5 rounded-xl transition-all group ${theme === 'dark' ? 'text-white/80 hover:text-white hover:bg-white/[0.04]' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                      }`}
                   >
                     <span className="font-black italic uppercase tracking-tight text-xl">{item.label}</span>
                     <ChevronRight className="w-4 h-4 text-[#10B981] opacity-0 group-hover:opacity-100 transition-opacity -translate-x-1 group-hover:translate-x-0 duration-200" />
@@ -314,7 +563,8 @@ const Home = () => {
               >
                 <button
                   onClick={() => { navigate('/login'); setIsMobileMenuOpen(false); }}
-                  className="w-full py-4 rounded-2xl border border-white/10 bg-white/[0.04] font-black uppercase italic text-sm tracking-widest text-white hover:bg-white/[0.08] transition-all"
+                  className={`w-full py-4 rounded-2xl border font-black uppercase italic text-sm tracking-widest transition-all ${theme === 'dark' ? 'border-white/10 bg-white/[0.04] text-white hover:bg-white/[0.08]' : 'border-slate-200 bg-slate-50 text-slate-900 hover:bg-slate-100'
+                    }`}
                 >
                   Login
                 </button>
@@ -335,6 +585,16 @@ const Home = () => {
         <motion.div
           animate={{ x: mousePos.x * 60, y: mousePos.y * 60 }}
           className={`absolute top-[-10%] left-[-10%] w-[70%] h-[70%] rounded-full transition-all duration-700 ${theme === 'dark' ? 'bg-[#10B981]/10 blur-[120px]' : 'bg-[#10B981]/5 blur-[80px]'
+            }`}
+        />
+        <motion.div
+          animate={{ x: -mousePos.x * 40, y: -mousePos.y * 40 }}
+          className={`absolute top-[10%] right-[-5%] w-[40%] h-[40%] rounded-full transition-all duration-1000 delay-100 ${theme === 'dark' ? 'bg-indigo-500/10 blur-[140px]' : 'bg-indigo-500/5 blur-[100px]'
+            }`}
+        />
+        <motion.div
+          animate={{ x: mousePos.x * 30, y: -mousePos.y * 50 }}
+          className={`absolute bottom-[10%] left-[20%] w-[50%] h-[50%] rounded-full transition-all duration-1000 delay-200 ${theme === 'dark' ? 'bg-violet-500/10 blur-[160px]' : 'bg-violet-500/5 blur-[120px]'
             }`}
         />
       </div>
@@ -377,19 +637,51 @@ const Home = () => {
 
 
       {/* --- HERO SECTION --- */}
-      <section className="relative pt-10 pb-32 px-6">
-        <div className="max-w-[1440px] mx-auto grid lg:grid-cols-12 gap-16 items-center relative z-10">
-          <div className="lg:col-span-7">
+      <section className="relative pt-10 pb-32 px-6 overflow-hidden">
+        <div className="max-w-[1280px] mx-auto grid lg:grid-cols-12 gap-12 items-center relative z-10">
+          <div className="lg:col-span-6">
             <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.3em] mb-8 border ${theme === 'dark' ? 'bg-[#10B981]/10 text-[#10B981] border-[#10B981]/20' : 'bg-emerald-50 text-emerald-600'}`}>
               <Globe className={`w-3 h-3 ${isSynced ? 'opacity-100 scale-125' : 'opacity-30 scale-100'} transition-all duration-700`} /> Node Sync Active
             </div>
-            <h1 className="text-6xl md:text-8xl font-black italic uppercase tracking-tighter leading-[0.85] mb-8">
-              Monetize <br /> <span className="text-[#10B981]">Influence.</span>
-            </h1>
-            <p className="text-slate-500 text-lg font-medium max-w-xl mb-12 italic leading-relaxed">
-              Sub-ms transmission latency. Instant bank settlements. Built for professional creators.
-            </p>
-            <div className="flex flex-wrap gap-6 relative">
+            <motion.h1
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.4, ease: 'easeOut' }}
+              className="text-6xl md:text-8xl font-black italic uppercase tracking-tighter leading-[0.85] mb-8"
+            >
+              <motion.span
+                initial={{ opacity: 0, y: 40, skewY: 3 }}
+                animate={{ opacity: 1, y: 0, skewY: 0 }}
+                transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+                className="block text-4xl md:text-6xl leading-tight hero-title-main"
+                style={{ letterSpacing: '-0.02em' }}
+              >
+                Monetize
+                <span className="hero-title-shine">Monetize</span>
+              </motion.span>
+              <motion.span
+                initial={{ opacity: 0, y: 60, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+                className="block text-6xl md:text-8xl hero-shimmer-text leading-[0.9]"
+                style={{
+                  fontFamily: 'Outfit, sans-serif',
+                  fontWeight: 900,
+                  letterSpacing: '-0.04em'
+                }}
+              >
+                Influence.
+              </motion.span>
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4, ease: 'easeOut' }}
+              className="text-slate-500 text-lg font-medium max-w-xl mb-12 italic leading-relaxed"
+            >
+              Instant bank settlements. Built for professional creators.
+            </motion.p>
+            <div className="flex flex-wrap gap-6 relative mb-12">
               <button onClick={() => navigate('/signup')} className="bg-[#10B981] text-white px-10 py-5 rounded-2xl font-black uppercase italic text-sm shadow-2xl flex items-center gap-3 active:scale-95 transition-all">
                 <Play className="w-4 h-4 fill-white" /> Start Hub
               </button>
@@ -402,13 +694,35 @@ const Home = () => {
                     : 'bg-white border-slate-200 text-slate-900 hover:bg-slate-100 shadow-sm'
                     }`}
                 >
-                  <Sparkles className="w-4 h-4 text-[#10B981]" /> {getOptimizedImage('Inject Demo')}
+                  <Sparkles className="w-4 h-4 text-[#10B981]" /> Inject Demo
                 </button>
               </div>
             </div>
+
+            {/* VALUE PROPS - Fills empty space */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6, duration: 0.8 }}
+              className="grid grid-cols-2 md:grid-cols-3 gap-6 pt-8 border-t border-white/5"
+            >
+              {[
+                { icon: Zap, label: "Sub-ms Latency", desc: "Edge-node delivery" },
+                { icon: Shield, label: "0% Chargebacks", desc: "Razorpay Protected" },
+                { icon: Landmark, label: "T+2 Payouts", desc: "Automated settlements" }
+              ].map((prop, i) => (
+                <div key={i} className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <prop.icon className="w-3.5 h-3.5 text-[#10B981]" />
+                    <span className={`text-[11px] font-black uppercase tracking-widest ${theme === 'dark' ? 'text-white/80' : 'text-slate-900/80'}`}>{prop.label}</span>
+                  </div>
+                  <p className="text-[10px] text-slate-500 font-medium italic">{prop.desc}</p>
+                </div>
+              ))}
+            </motion.div>
           </div>
 
-          <div className="lg:col-span-5 relative">
+          <div className="lg:col-span-6 relative">
             {/* MINI-NEXUS PREVIEW — placed directly on the page */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -426,32 +740,46 @@ const Home = () => {
                     </div>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className={`text-[12px] font-black italic tracking-tighter leading-none truncate ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>@dev-gamer</p>
+                    <p className={`text-[12px] font-black italic tracking-tighter leading-none truncate ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}></p>
                     <p className="text-[8px] font-black uppercase tracking-widest text-[#10B981] mt-0.5">Verified Pro</p>
                   </div>
                   <div className="w-2 h-2 rounded-full bg-[#10B981] shrink-0 animate-pulse" />
                 </div>
 
                 {/* Mini-Nexus grid — sidebar + alert area */}
-                <div className="hero-nexus-preview flex-1">
+                <div
+                  className="flex-1 rounded-2xl"
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '70px 1fr',
+                    gap: '1rem',
+                    padding: '1.25rem',
+                    borderRadius: '1.5rem',
+                    background: 'rgba(255,255,255,0.03)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    backdropFilter: 'blur(24px)',
+                    WebkitBackdropFilter: 'blur(24px)',
+                    alignItems: 'stretch',
+                    minHeight: '220px',
+                  }}
+                >
 
                   {/* Left: Top Fans sidebar */}
-                  <div className="flex flex-col gap-2 pt-1">
-                    <p className="text-[7px] font-black uppercase tracking-[0.2em] text-slate-500 mb-1">Top Fans</p>
+                  <div className="flex flex-col gap-3 pt-1">
+                    <p className="text-[7px] font-black uppercase tracking-[0.2em] text-slate-500 mb-2">Top Fans</p>
                     {[
                       { rank: 1, color: '#F59E0B' },
                       { rank: 2, color: '#94A3B8' },
                       { rank: 3, color: '#CD7F32' },
                     ].map(({ rank, color }) => (
-                      <div key={rank} className="flex items-center gap-1.5">
-                        <span style={{ color, fontSize: '8px', fontWeight: 900 }}>#{rank}</span>
-                        <div className="mini-supporter-pill flex-1" />
+                      <div key={rank} className="flex items-center">
+                        <span style={{ color, fontSize: '9px', fontWeight: 900 }}>#{rank}</span>
                       </div>
                     ))}
                   </div>
 
                   {/* Right: Alert preview area */}
-                  <div className="flex flex-col gap-2 min-w-0">
+                  <div className="flex flex-col gap-2 min-w-0 h-full">
                     <AnimatePresence mode="wait">
                       {!showPreview && (
                         <motion.div
@@ -513,7 +841,7 @@ const Home = () => {
 
       {/* --- ELITE FOUR FEATURES GRID --- */}
       <section className="py-16 px-6 bg-gradient-to-b from-transparent via-[#10B981]/5 to-transparent">
-        <div className="max-w-[1440px] mx-auto w-full">
+        <div className="max-w-[1280px] mx-auto w-full">
           <div className="mb-10">
             <h2 className="text-3xl md:text-5xl font-black italic uppercase tracking-tighter mb-2">Elite <span className="text-[#10B981]">Nexus.</span></h2>
             <p className="text-slate-500 font-medium italic text-sm max-w-2xl">Refined architecture for high-concurrency streaming nodes.</p>
@@ -523,13 +851,14 @@ const Home = () => {
             {/* 1. STOREFRONT NEXUS */}
             <motion.div
               whileHover={{ y: -4 }}
-              className="nexus-feature-card rounded-2xl p-6 lg:p-8 relative overflow-hidden group cursor-default"
+              className={`nexus-feature-card rounded-2xl p-6 lg:p-8 relative overflow-hidden group cursor-default nexus-cyan-card ${theme === 'dark' ? 'nexus-feature-card-dark' : 'nexus-feature-card-light'
+                }`}
             >
               <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-                <Layout className="w-20 h-20 text-[#10B981]" />
+                <Layout className="w-20 h-20 text-cyan-400" />
               </div>
               <div className="relative z-10">
-                <div className="w-10 h-10 rounded-xl bg-[#10B981]/10 flex items-center justify-center mb-4 text-[#10B981] border border-[#10B981]/20">
+                <div className="w-10 h-10 rounded-xl bg-cyan-400/10 flex items-center justify-center mb-4 text-cyan-400 border border-cyan-400/20">
                   <Monitor className="w-5 h-5" />
                 </div>
                 <h3 className={`text-2xl font-black italic uppercase tracking-tighter mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Storefront Nexus.</h3>
@@ -537,7 +866,7 @@ const Home = () => {
                   Identity-first architecture with custom sidebars and sub-ms responsiveness across all device nodes.
                 </p>
                 <div className="flex gap-2 flex-wrap">
-                  <div className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest text-[#10B981]">Mobile Optimized</div>
+                  <div className="px-3 py-1 rounded-full bg-cyan-400/10 border border-cyan-400/20 text-[10px] font-black uppercase tracking-widest text-cyan-400">Mobile Optimized</div>
                   <div className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest text-slate-500">Identity-First</div>
                 </div>
               </div>
@@ -546,21 +875,22 @@ const Home = () => {
             {/* 2. THEME CONTROL HUB */}
             <motion.div
               whileHover={{ y: -4 }}
-              className="nexus-feature-card rounded-2xl p-6 lg:p-8 relative overflow-hidden group cursor-default legacy-tier-card"
+              className={`nexus-feature-card rounded-2xl p-6 lg:p-8 relative overflow-hidden group cursor-default nexus-indigo-card ${theme === 'dark' ? 'nexus-feature-card-dark' : 'nexus-feature-card-light'
+                }`}
             >
               <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-                <Wand2 className="w-20 h-20 text-amber-500" />
+                <Wand2 className="w-20 h-20 text-indigo-400" />
               </div>
               <div className="relative z-10">
-                <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center mb-4 text-amber-500 border border-amber-500/20">
+                <div className="w-10 h-10 rounded-xl bg-indigo-400/10 flex items-center justify-center mb-4 text-indigo-400 border border-indigo-400/20">
                   <Layers className="w-5 h-5" />
                 </div>
-                <h3 className="text-2xl font-black italic uppercase tracking-tighter mb-2 text-amber-500">Theme Control.</h3>
+                <h3 className={`text-2xl font-black italic uppercase tracking-tighter mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Theme Control.</h3>
                 <p className="text-slate-500 font-medium italic text-sm max-w-sm mb-4 lead-relaxed">
                   Deploy Nebula, Aero, and Midnight Obsidian styles with real-time hover-glow and glassmorphism.
                 </p>
                 <div className="flex gap-2 flex-wrap">
-                  <div className="px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-[10px] font-black uppercase tracking-widest text-amber-500">Super-High UHD</div>
+                  <div className="px-3 py-1 rounded-full bg-indigo-400/10 border border-indigo-400/20 text-[10px] font-black uppercase tracking-widest text-indigo-400">Super-High UHD</div>
                   <div className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest text-slate-500">Live Inject</div>
                 </div>
               </div>
@@ -569,13 +899,14 @@ const Home = () => {
             {/* 3. BROADCAST TICKER */}
             <motion.div
               whileHover={{ y: -4 }}
-              className="nexus-feature-card rounded-2xl p-6 lg:p-8 relative overflow-hidden group cursor-default"
+              className={`nexus-feature-card rounded-2xl p-6 lg:p-8 relative overflow-hidden group cursor-default nexus-rose-card ${theme === 'dark' ? 'nexus-feature-card-dark' : 'nexus-feature-card-light'
+                }`}
             >
               <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-                <Radio className="w-20 h-20 text-[#10B981]" />
+                <Radio className="w-20 h-20 text-rose-400" />
               </div>
               <div className="relative z-10">
-                <div className="w-10 h-10 rounded-xl bg-[#10B981]/10 flex items-center justify-center mb-4 text-[#10B981] border border-[#10B981]/20">
+                <div className="w-10 h-10 rounded-xl bg-rose-400/10 flex items-center justify-center mb-4 text-rose-400 border border-rose-400/20">
                   <Radio className="w-5 h-5" />
                 </div>
                 <h3 className={`text-2xl font-black italic uppercase tracking-tighter mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Broadcast Ticker.</h3>
@@ -583,7 +914,7 @@ const Home = () => {
                   Professional non-repeating Lottie sticker feed. Single-pass logic for zero-clutter transmission.
                 </p>
                 <div className="flex gap-2 flex-wrap">
-                  <div className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest text-[#10B981]">Lottie Native</div>
+                  <div className="px-3 py-1 rounded-full bg-rose-400/10 border border-rose-400/20 text-[10px] font-black uppercase tracking-widest text-rose-400">Lottie Native</div>
                   <div className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest text-slate-500">No Buffering</div>
                 </div>
               </div>
@@ -592,13 +923,14 @@ const Home = () => {
             {/* 4. MISSION DYNAMICS */}
             <motion.div
               whileHover={{ y: -4 }}
-              className="nexus-feature-card rounded-2xl p-6 lg:p-8 relative overflow-hidden group cursor-default"
+              className={`nexus-feature-card rounded-2xl p-6 lg:p-8 relative overflow-hidden group cursor-default nexus-amber-card ${theme === 'dark' ? 'nexus-feature-card-dark' : 'nexus-feature-card-light'
+                }`}
             >
               <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-                <Trophy className="w-20 h-20 text-[#10B981]" />
+                <Trophy className="w-20 h-20 text-amber-500" />
               </div>
               <div className="relative z-10">
-                <div className="w-10 h-10 rounded-xl bg-[#10B981]/10 flex items-center justify-center mb-4 text-[#10B981] border border-[#10B981]/20">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center mb-4 text-amber-500 border border-amber-500/20">
                   <Target className="w-5 h-5" />
                 </div>
                 <h3 className={`text-2xl font-black italic uppercase tracking-tighter mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Mission Dynamics.</h3>
@@ -606,7 +938,7 @@ const Home = () => {
                   Interactive goal bars with supernova celebration effects. Real-time funding updates.
                 </p>
                 <div className="flex gap-2 flex-wrap">
-                  <div className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest text-[#10B981]">Auto Celebration</div>
+                  <div className="px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-[10px] font-black uppercase tracking-widest text-amber-500">Auto Celebration</div>
                   <div className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest text-slate-500">Supernova Inject</div>
                 </div>
               </div>
@@ -615,24 +947,8 @@ const Home = () => {
         </div>
       </section>
 
-      {/* --- GHOST SHELL PREVIEW (REVENUE HUD PLACEHOLDER) --- */}
-      <section id="features" className="pt-20 pb-4 md:py-20 px-6 max-w-[1440px] mx-auto w-full">
-        <div
-          className="nexus-glass-preview-shell w-full rounded-[3.5rem] mb-20 p-6 md:p-10 flex flex-col justify-center items-center"
-          style={{
-            minHeight: '400px',
-            background: 'rgba(15, 23, 42, 0.2)',
-            backdropFilter: 'blur(35px)',
-            WebkitBackdropFilter: 'blur(35px)',
-            border: '0.5px solid rgba(255, 255, 255, 0.1)'
-          }}
-        >
-          <div className="w-full max-w-5xl">
-            <CruiserRevenueChart isDemo={true} theme={theme} />
-          </div>
-        </div>
-
-        {/* --- PROTOCOL NODES (TABBED SECTION) --- */}
+      {/* --- PROTOCOL NODES (TABBED SECTION) --- */}
+      <section id="features" className="pt-2 pb-4 md:pt-4 md:pb-20 px-6 max-w-[1280px] mx-auto w-full">
         <motion.div
           className="mb-20 md:mb-0"
           initial={{ opacity: 0, scale: 0.95 }}
@@ -640,8 +956,8 @@ const Home = () => {
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.7, ease: "easeOut" }}
         >
-          <div className="flex flex-col items-center mb-16 px-6">
-            <h2 className={`text-4xl md:text-5xl font-black italic uppercase tracking-tighter mb-8 text-center ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Protocol Architecture</h2>
+          <div className="flex flex-col items-center mb-10 px-6">
+            <h2 className={`text-4xl md:text-5xl font-black italic uppercase tracking-tighter mb-2 text-center ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Protocol Architecture</h2>
             <div className={`p-2 rounded-2xl flex border ${theme === 'dark' ? 'bg-black/40 border-white/5' : 'bg-white shadow-md border-slate-100'}`}>
               {[
                 { id: 'streamers', label: 'Engine', icon: <Cpu className="w-4 h-4" /> },
@@ -668,74 +984,330 @@ const Home = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className={`p-10 md:p-20 rounded-[4rem] border ${theme === 'dark' ? 'bg-[#0a0a0a] border-white/5' : 'bg-white shadow-2xl'}`}
+              className="py-0"
             >
               {activeTab === 'streamers' && (
-                <div className="grid md:grid-cols-2 gap-16 items-center">
-                  <div className="space-y-8">
-                    <div className="flex items-center gap-4 text-[#10B981] font-black uppercase text-xs tracking-widest">
-                      <BarChart3 className="w-6 h-6" /> Yield Optimization
-                    </div>
-                    <h3 className="text-4xl md:text-6xl font-black italic uppercase leading-none tracking-tighter">Maximize <br /> Every Drop</h3>
-                    <p className="text-slate-500 font-medium text-lg leading-relaxed">Our proprietary Razorpay Route integration ensures your revenue clears T+2 settlements with zero manual intervention.</p>
-                    <div className="flex gap-4">
-                      <Smartphone className="w-8 h-8 text-slate-700" />
-                      <Monitor className="w-8 h-8 text-[#10B981]" />
-                      <PlaySquare className="w-8 h-8 text-slate-700" />
-                    </div>
-                  </div>
-                  <div className="relative group overflow-hidden rounded-3xl border border-white/10 aspect-video bg-black flex items-center justify-center">
-                    <div className="absolute inset-0 bg-gradient-to-br from-[#10B981]/20 to-transparent" />
-                    <Play className="w-16 h-16 text-[#10B981] fill-[#10B981]" />
+                <div className="relative overflow-hidden rounded-[3rem] p-8 md:p-16 border transition-all duration-700 bg-opacity-20 backdrop-blur-3xl group">
+                  {/* Internal Glow Orbs */}
+                  <motion.div
+                    animate={{
+                      x: [0, 25, 0],
+                      y: [0, -25, 0],
+                    }}
+                    transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute -top-20 -right-20 w-64 h-64 bg-[#10B981]/10 blur-[80px] rounded-full pointer-events-none"
+                  />
+
+                  <div className="grid md:grid-cols-2 gap-16 items-center relative z-10">
+                    <motion.div
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      className="space-y-8"
+                    >
+                      <div className="inline-flex items-center gap-3 px-4 py-2 rounded-2xl bg-[#10B981]/10 border border-[#10B981]/20 text-[#10B981] font-black uppercase text-[10px] tracking-widest">
+                        <BarChart3 className="w-4 h-4" /> Yield Optimization
+                      </div>
+                      <h3 className={`text-4xl md:text-6xl font-black italic uppercase leading-[0.9] tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+                        Maximize <br /> <span className="text-[#10B981]">Every Drop</span>
+                      </h3>
+                      <p className="text-slate-500 font-medium text-lg leading-relaxed max-w-md">
+                        Our proprietary Razorpay Route integration ensures your revenue clears T+2 settlements with zero manual intervention.
+                      </p>
+                      <div className="flex gap-6 items-center pt-2">
+                        <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
+                          <Smartphone className="w-6 h-6 text-slate-400" />
+                        </div>
+                        <div className="p-3 rounded-2xl bg-[#10B981]/20 border border-[#10B981]/30">
+                          <Monitor className="w-6 h-6 text-[#10B981]" />
+                        </div>
+                        <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
+                          <PlaySquare className="w-6 h-6 text-slate-400" />
+                        </div>
+                      </div>
+                    </motion.div>
+
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className={`relative p-8 rounded-[2rem] border overflow-hidden transition-all duration-500 shadow-2xl ${theme === 'dark' ? 'border-white/10 bg-black/40 shadow-[0_0_50px_rgba(16,185,129,0.1)]' : 'border-slate-200 bg-white shadow-emerald-500/10'}`}
+                    >
+                      <div className="relative z-10 space-y-6">
+                        {/* Header & Status */}
+                        <div className="flex justify-between items-center">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-[#10B981]/10 rounded-xl text-[#10B981] border border-[#10B981]/20">
+                              <Landmark className="w-5 h-5" />
+                            </div>
+                            <span className={`text-sm font-black italic uppercase tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Payout Simulator</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <motion.span animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.5, repeat: Infinity }} className="w-1.5 h-1.5 rounded-full bg-[#10B981]" />
+                            <span className="text-[8px] font-black uppercase tracking-widest text-[#10B981]">Live Node</span>
+                          </div>
+                        </div>
+
+                        {/* Input Area */}
+                        <div className="space-y-3">
+                          <div className="flex justify-between items-end">
+                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
+                              <Banknote className="w-3.5 h-3.5 text-[#10B981]" /> Donation Amount (INR)
+                            </label>
+                            <div className="flex gap-1.5">
+                              {[1000, 10000, 50000].map(preset => (
+                                <button
+                                  key={preset}
+                                  onClick={() => setCalcAmount(preset)}
+                                  className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase transition-all border ${calcAmount === preset ? 'bg-[#10B981] text-white border-[#10B981]' : 'bg-white/5 border-white/10 text-slate-400'}`}
+                                >
+                                  ₹{preset / 1000}K
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="relative">
+                            <input
+                              type="number"
+                              value={calcAmount}
+                              onChange={e => setCalcAmount(Number(e.target.value))}
+                              className={`w-full border rounded-xl px-4 py-3 text-3xl font-black italic outline-none transition-all focus:border-[#10B981] ${theme === 'dark' ? 'bg-black/50 border-white/10 text-[#10B981]' : 'bg-slate-50 border-slate-200 text-[#10B981]'}`}
+                            />
+                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-black italic opacity-20">INR</span>
+                          </div>
+                        </div>
+
+                        {/* Results Grid */}
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className={`p-4 rounded-xl border ${theme === 'dark' ? 'bg-[#10B981]/5 border-[#10B981]/20' : 'bg-emerald-50 border-emerald-100'}`}>
+                            <p className="text-[8px] font-black uppercase tracking-widest text-[#10B981] mb-1">Your Split (95%)</p>
+                            <p className={`text-xl font-black italic ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>₹{streamerCut}</p>
+                          </div>
+                          <div className={`p-4 rounded-xl border ${theme === 'dark' ? 'bg-white/[0.02] border-white/5' : 'bg-slate-50 border-slate-100'}`}>
+                            <p className="text-[8px] font-black uppercase tracking-widest text-slate-500 mb-1">Node Fee (5%)</p>
+                            <p className="text-xl font-black italic text-slate-400">₹{platformFee}</p>
+                          </div>
+                        </div>
+
+                        {/* Split Bar */}
+                        <div className="space-y-1.5">
+                          <div className={`h-1.5 rounded-full overflow-hidden ${theme === 'dark' ? 'bg-white/5' : 'bg-slate-100'}`}>
+                            <motion.div
+                              initial={{ width: 0 }}
+                              animate={{ width: '95%' }}
+                              className="h-full bg-gradient-to-r from-emerald-500 to-[#10B981]"
+                            />
+                          </div>
+                          <p className="text-[8px] font-black uppercase tracking-widest text-slate-500 text-center">Settlement protocol: Razorpay Route T+2</p>
+                        </div>
+                      </div>
+                    </motion.div>
                   </div>
                 </div>
               )}
               {activeTab === 'developers' && (
-                <div className="grid md:grid-cols-2 gap-16 items-center">
-                  <div className="order-2 md:order-1 relative group overflow-hidden rounded-3xl border border-white/10 aspect-video bg-black flex items-center justify-center">
-                    <pre className="text-emerald-500 text-[10px] p-6 w-full font-mono italic">
-                      {`{
-  "node": "drop_nexus_04",
-  "status": "synchronized",
-  "latency": "0.4ms",
-  "protocol": "TCP/HYPER"
-}`}
-                    </pre>
-                  </div>
-                  <div className="order-1 md:order-2 space-y-8">
-                    <div className="flex items-center gap-4 text-[#10B981] font-black uppercase text-xs tracking-widest">
-                      <Shield className="w-6 h-6" /> Secure Architecture
-                    </div>
-                    <h3 className="text-4xl md:text-6xl font-black italic uppercase leading-none tracking-tighter">API First <br /> Mentality</h3>
-                    <p className="text-slate-500 font-medium text-lg leading-relaxed">Websocket clusters with automatic failover. Your alerts never go offline, even under extreme concurrent loads.</p>
-                    <div className="flex gap-6">
-                      <div className="flex flex-col items-center gap-1">
-                        <CheckCircle2 className="w-6 h-6 text-[#10B981]" />
-                        <span className="text-[8px] font-black uppercase text-slate-600">Verified</span>
+                <div className="relative overflow-hidden rounded-[3rem] p-8 md:p-16 border transition-all duration-700 bg-opacity-20 backdrop-blur-3xl group">
+                  {/* Internal Glow Orbs */}
+                  <motion.div
+                    animate={{
+                      x: [0, -25, 0],
+                      y: [0, 25, 0],
+                    }}
+                    transition={{ duration: 9, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                    className="absolute -bottom-20 -left-20 w-64 h-64 bg-blue-500/10 blur-[80px] rounded-full pointer-events-none"
+                  />
+
+                  <div className="grid md:grid-cols-2 gap-16 items-center relative z-10">
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className={`order-2 md:order-1 relative group aspect-video rounded-2xl border overflow-hidden flex flex-col shadow-2xl ${theme === 'dark' ? 'border-white/10 bg-[#0d0d0d]' : 'border-slate-200 bg-[#1e1e1e]'}`}
+                    >
+                      {/* IDE HEADER */}
+                      <div className="flex items-center justify-between px-4 py-3 border-b border-white/5 bg-white/5">
+                        <div className="flex gap-1.5">
+                          <div className="w-2.5 h-2.5 rounded-full bg-[#ff5f56]" />
+                          <div className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]" />
+                          <div className="w-2.5 h-2.5 rounded-full bg-[#27c93f]" />
+                        </div>
+                        <div className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">drop_nexus_protocol.json</div>
+                        <div className="w-10" />
                       </div>
-                      <div className="flex flex-col items-center gap-1">
-                        <CheckCircle2 className="w-6 h-6 text-[#10B981]" />
-                        <span className="text-[8px] font-black uppercase text-slate-600">Encrypted</span>
+
+                      <div className="flex-1 p-6 font-mono text-xs leading-relaxed">
+                        <div className="flex gap-4">
+                          <span className="text-slate-600 select-none">01</span>
+                          <span className="text-blue-400">{"{"}</span>
+                        </div>
+                        <div className="flex gap-4">
+                          <span className="text-slate-600 select-none">02</span>
+                          <span className="pl-4 text-slate-300">"node"</span>: <span className="text-emerald-400">"drop_nexus_04"</span>,
+                        </div>
+                        <div className="flex gap-4">
+                          <span className="text-slate-600 select-none">03</span>
+                          <span className="pl-4 text-slate-300">"status"</span>: <span className="text-emerald-400">"synchronized"</span>,
+                        </div>
+                        <div className="flex gap-4">
+                          <span className="text-slate-600 select-none">04</span>
+                          <span className="pl-4 text-slate-300">"latency"</span>: <span className="text-emerald-400">"0.4ms"</span>,
+                        </div>
+                        <div className="flex gap-4">
+                          <span className="text-slate-600 select-none">05</span>
+                          <span className="pl-4 text-slate-300">"protocol"</span>: <span className="text-emerald-400">"TCP/HYPER"</span>
+                        </div>
+                        <div className="flex gap-4">
+                          <span className="text-slate-600 select-none">06</span>
+                          <span className="text-blue-400">{"}"}</span>
+                        </div>
+                        <motion.div
+                          animate={{ opacity: [1, 0, 1] }}
+                          transition={{ duration: 1, repeat: Infinity }}
+                          className="w-2 h-4 bg-[#10B981] ml-8 mt-2"
+                        />
                       </div>
-                    </div>
+                    </motion.div>
+
+                    <motion.div
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      className="order-1 md:order-2 space-y-8"
+                    >
+                      <div className="inline-flex items-center gap-3 px-4 py-2 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 font-black uppercase text-[10px] tracking-widest">
+                        <Shield className="w-4 h-4" /> Secure Architecture
+                      </div>
+                      <h3 className={`text-4xl md:text-6xl font-black italic uppercase leading-[0.9] tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+                        API First <br /> <span className="text-blue-400">Mentality</span>
+                      </h3>
+                      <p className="text-slate-500 font-medium text-lg leading-relaxed max-w-md">
+                        Websocket clusters with automatic failover. Your alerts never go offline, even under extreme concurrent loads.
+                      </p>
+                      <div className="flex gap-8">
+                        <div className="flex flex-col gap-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
+                              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                            </div>
+                            <span className={`text-[10px] font-black uppercase tracking-widest ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Verified</span>
+                          </div>
+                          <div className="h-1 w-full bg-emerald-500/10 rounded-full overflow-hidden">
+                            <motion.div
+                              initial={{ width: 0 }}
+                              animate={{ width: "100%" }}
+                              transition={{ duration: 1.5, delay: 0.5 }}
+                              className="h-full bg-emerald-500"
+                            />
+                          </div>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
+                              <CheckCircle2 className="w-4 h-4 text-blue-400" />
+                            </div>
+                            <span className={`text-[10px] font-black uppercase tracking-widest ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Encrypted</span>
+                          </div>
+                          <div className="h-1 w-full bg-blue-500/10 rounded-full overflow-hidden">
+                            <motion.div
+                              initial={{ width: 0 }}
+                              animate={{ width: "100%" }}
+                              transition={{ duration: 1.5, delay: 0.7 }}
+                              className="h-full bg-blue-400"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
                   </div>
                 </div>
               )}
               {activeTab === 'community' && (
-                <div className="text-center max-w-2xl mx-auto space-y-8">
-                  <div className="flex justify-center">
-                    <div className="w-20 h-20 rounded-full bg-emerald-500/10 flex items-center justify-center">
-                      <Heart className="w-10 h-10 text-emerald-500 fill-emerald-500/20" />
+                <div className="relative overflow-hidden rounded-[2.5rem] p-8 md:p-12 text-center max-w-3xl mx-auto border transition-all duration-700 bg-opacity-20 backdrop-blur-3xl group">
+                  {/* Internal Glow Orbs */}
+                  <motion.div
+                    animate={{
+                      x: [0, 30, 0],
+                      y: [0, -30, 0],
+                      scale: [1, 1.2, 1]
+                    }}
+                    transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute -top-20 -right-20 w-48 h-48 bg-[#10B981]/10 blur-[60px] rounded-full pointer-events-none"
+                  />
+                  <motion.div
+                    animate={{
+                      x: [0, -40, 0],
+                      y: [0, 40, 0],
+                      scale: [1, 1.1, 1]
+                    }}
+                    transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                    className="absolute -bottom-20 -left-20 w-56 h-56 bg-indigo-500/10 blur-[70px] rounded-full pointer-events-none"
+                  />
+
+                  <div className="relative z-10 space-y-10">
+                    <div className="flex justify-center -space-x-3">
+                      {[
+                        getOptimizedImage('https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop'),
+                        getOptimizedImage('https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop'),
+                        getOptimizedImage('https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=100&h=100&fit=crop')
+                      ].map((src, i) => (
+                        <motion.div
+                          key={i}
+                          whileHover={{ scale: 1.1, zIndex: 20 }}
+                          className="w-12 h-12 rounded-full border-2 border-[#10B981]/30 overflow-hidden shadow-xl"
+                        >
+                          <img src={src} alt="Top Contributor" className="w-full h-full object-cover" />
+                        </motion.div>
+                      ))}
+                    </div>
+
+                    <div className="flex justify-center">
+                      <motion.div
+                        whileHover={{ scale: 1.1, rotate: 10 }}
+                        className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#10B981] to-emerald-400 p-0.5 shadow-xl shadow-emerald-500/20"
+                      >
+                        <div className={`w-full h-full rounded-[0.9rem] flex items-center justify-center ${theme === 'dark' ? 'bg-[#0a0a0a]' : 'bg-white'}`}>
+                          <Heart className="w-7 h-7 text-[#10B981] fill-[#10B981]/20" />
+                        </div>
+                      </motion.div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <h3 className={`text-3xl md:text-5xl font-black italic uppercase tracking-tighter leading-none ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+                        Join the <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#10B981] to-blue-500">Collective</span>
+                      </h3>
+                      <p className="text-slate-500 font-medium text-sm md:text-base max-w-xl mx-auto leading-relaxed">
+                        Connect with 5,000+ top-tier creators in our encrypted Discord node. Share premium assets and hyper-growth strategies.
+                      </p>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-5 pt-2">
+                      <motion.button
+                        whileHover={{ scale: 1.05, y: -2 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="px-8 py-4 bg-[#10B981] hover:bg-emerald-400 text-white rounded-xl font-black uppercase italic tracking-widest text-xs flex items-center gap-2.5 shadow-xl shadow-emerald-500/30 transition-all"
+                      >
+                        <Zap className="w-4 h-4 fill-white" /> Connect Node
+                      </motion.button>
+
+                      <div className="flex gap-5 items-center px-6 py-3.5 rounded-xl border border-white/5 bg-white/5 backdrop-blur-sm">
+                        {[
+                          { icon: <Twitter className="w-4 h-4" />, label: 'Twitter' },
+                          { icon: <Github className="w-4 h-4" />, label: 'Github' },
+                          { icon: <Linkedin className="w-4 h-4" />, label: 'Linkedin' }
+                        ].map(({ icon, label }) => (
+                          <motion.button
+                            key={label}
+                            whileHover={{ scale: 1.2, color: '#10B981' }}
+                            className="text-slate-400 transition-colors"
+                          >
+                            {icon}
+                          </motion.button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="pt-4 flex flex-wrap justify-center gap-x-10 gap-y-3 opacity-40 grayscale group-hover:grayscale-0 transition-all duration-700">
+                      <span className="text-[8px] font-black uppercase tracking-widest">Enterprise Encrypted</span>
+                      <span className="text-[8px] font-black uppercase tracking-widest">24/7 Node Support</span>
+                      <span className="text-[8px] font-black uppercase tracking-widest">Global Mesh Access</span>
                     </div>
                   </div>
-                  <h3 className="text-5xl font-black italic uppercase tracking-tighter">Join the Collective</h3>
-                  <p className="text-slate-500 font-medium text-lg">Connect with thousands of pro creators in our encrypted Discord node. Share overlays, scripts, and growth strategies.</p>
-                  <div className="flex justify-center gap-8 pt-6">
-                    <Github className="w-6 h-6 hover:text-[#10B981] transition-colors cursor-pointer" />
-                    <Linkedin className="w-6 h-6 hover:text-[#10B981] transition-colors cursor-pointer" />
-                    <Twitter className="w-6 h-6 hover:text-[#10B981] transition-colors cursor-pointer" />
-                  </div>
-
                 </div>
               )}
             </motion.div>
@@ -745,169 +1317,11 @@ const Home = () => {
         {/* Removed Generic Grid */}
       </section>
 
-      {/* --- ECONOMIC CALCULATOR (LIVE) --- */}
-      <section id="payouts" className="pt-0 pb-16 md:pt-12 md:pb-24 px-6">
-        <div className={`simulator-glow-card max-w-4xl mx-auto p-8 sm:p-12 rounded-[3rem] relative overflow-hidden transition-all ${theme === 'dark' ? '' : 'bg-white !border-slate-200 !shadow-2xl'}`}>
-
-          {/* Multi-color glow orbs */}
-          <motion.div animate={{ opacity: [0.06, 0.14, 0.06] }} transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-            className="absolute -top-24 -right-24 w-80 h-80 bg-[#10B981] blur-[100px] rounded-full pointer-events-none" />
-          <motion.div animate={{ opacity: [0.04, 0.09, 0.04] }} transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-            className="absolute -bottom-20 -left-20 w-72 h-72 bg-blue-500 blur-[100px] rounded-full pointer-events-none" />
-          <motion.div animate={{ opacity: [0.03, 0.07, 0.03] }} transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
-            className="absolute top-1/2 -right-10 w-48 h-48 bg-violet-500 blur-[80px] rounded-full pointer-events-none" />
-
-          <div className="relative z-10 space-y-8">
-
-            {/* Header */}
-            <div className="flex items-center gap-5">
-              <motion.div
-                animate={{ boxShadow: ['0 0 0px rgba(16,185,129,0)', '0 0 20px rgba(16,185,129,0.4)', '0 0 0px rgba(16,185,129,0)'] }}
-                transition={{ duration: 2.5, repeat: Infinity }}
-                className="p-3.5 bg-[#10B981]/10 rounded-2xl text-[#10B981] border border-[#10B981]/20"
-              >
-                <Landmark className="w-7 h-7" />
-              </motion.div>
-              <div>
-                <h2 className={`text-3xl font-black italic uppercase tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Payout Simulator</h2>
-                <div className="flex items-center gap-2 mt-0.5">
-                  <motion.span
-                    animate={{ opacity: [1, 0.3, 1] }}
-                    transition={{ duration: 1.5, repeat: Infinity }}
-                    className="w-1.5 h-1.5 rounded-full bg-[#10B981] shrink-0"
-                  />
-                  <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#10B981]">Live Economic Protocol</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Quick-pick presets */}
-            <div className="flex flex-wrap gap-2">
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 self-center mr-1">Quick Pick:</span>
-              {[100, 500, 1000, 5000, 10000, 50000].map(preset => (
-                <motion.button
-                  key={preset}
-                  whileTap={{ scale: 0.93 }}
-                  onClick={() => setCalcAmount(preset)}
-                  className={`px-3 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest transition-all border ${calcAmount === preset
-                    ? 'bg-[#10B981] text-white border-[#10B981] shadow-[0_0_12px_rgba(16,185,129,0.4)]'
-                    : theme === 'dark'
-                      ? 'bg-white/5 border-white/10 text-slate-400 hover:border-[#10B981]/40 hover:text-[#10B981]'
-                      : 'bg-slate-50 border-slate-200 text-slate-500 hover:border-[#10B981]/40 hover:text-[#10B981]'
-                    }`}
-                >
-                  ₹{preset >= 1000 ? `${preset / 1000}K` : preset}
-                </motion.button>
-              ))}
-            </div>
-
-            <div className="grid lg:grid-cols-12 gap-8 items-start">
-
-              {/* INPUT SIDE */}
-              <div className="lg:col-span-7 space-y-4">
-                <label className="text-[11px] font-black uppercase tracking-[0.3em] text-slate-500 flex items-center gap-2">
-                  <Banknote className="w-4 h-4 text-[#10B981]" /> Donation Amount (INR)
-                </label>
-                <div className="relative group">
-                  {/* Glow ring that pulses on focus */}
-                  <motion.div
-                    animate={{ opacity: [0, 0.6, 0] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-                    className="absolute -inset-1 bg-[#10B981]/20 rounded-[2.5rem] blur-md pointer-events-none"
-                  />
-                  <input
-                    type="number"
-                    value={calcAmount}
-                    onChange={e => setCalcAmount(Number(e.target.value))}
-                    className={`relative w-full border rounded-[2rem] px-8 py-6 text-5xl font-black italic outline-none transition-all focus:border-[#10B981] focus:shadow-[0_0_0_3px_rgba(16,185,129,0.15)] ${theme === 'dark'
-                      ? 'bg-black/50 border-white/10 text-[#10B981]'
-                      : 'bg-slate-50 border-slate-200 text-[#10B981]'}`}
-                  />
-                  <span className="absolute right-8 top-1/2 -translate-y-1/2 text-2xl font-black italic opacity-20">INR</span>
-                </div>
-
-                {/* Live split bar */}
-                <div className="space-y-2 pt-1">
-                  <div className="flex justify-between text-[9px] font-black uppercase tracking-widest text-slate-500">
-                    <span className="text-[#10B981]">Your Split 95%</span>
-                    <span>Node Fee 5%</span>
-                  </div>
-                  <div className={`h-2 rounded-full overflow-hidden ${theme === 'dark' ? 'bg-white/5' : 'bg-slate-100'}`}>
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: '95%' }}
-                      transition={{ duration: 1, ease: 'easeOut', delay: 0.2 }}
-                      className="h-full rounded-full bg-gradient-to-r from-emerald-600 via-emerald-400 to-[#10B981] shadow-[0_0_8px_rgba(16,185,129,0.6)]"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* RESULTS SIDE */}
-              <div className="lg:col-span-5 space-y-3">
-
-                {/* Streamer cut — animated */}
-                <motion.div
-                  key={streamerCut}
-                  initial={{ scale: 0.96, opacity: 0.7 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                  className={`p-6 rounded-2xl border relative overflow-hidden ${theme === 'dark' ? 'bg-[#10B981]/5 border-[#10B981]/25' : 'bg-emerald-50 border-emerald-200'}`}
-                >
-                  <motion.div
-                    animate={{ opacity: [0, 0.15, 0] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                    className="absolute inset-0 bg-[#10B981] pointer-events-none"
-                  />
-                  <p className="text-[10px] font-black uppercase tracking-widest text-[#10B981] mb-1">Your Split (95%)</p>
-                  <motion.p
-                    key={streamerCut}
-                    initial={{ y: 8, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-                    className={`text-4xl font-black italic drop-shadow-[0_0_20px_rgba(16,185,129,0.5)] ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}
-                  >
-                    ₹{streamerCut.toLocaleString('en-IN')}
-                  </motion.p>
-                  <div className="flex items-center gap-1.5 mt-2">
-                    <motion.span animate={{ opacity: [1, 0.2, 1] }} transition={{ duration: 1, repeat: Infinity }} className="w-1 h-1 rounded-full bg-[#10B981]" />
-                    <span className="text-[8px] font-black uppercase tracking-widest text-[#10B981]">Instant Settlement</span>
-                  </div>
-                </motion.div>
-
-                {/* Platform fee */}
-                <motion.div
-                  key={platformFee}
-                  initial={{ scale: 0.97, opacity: 0.6 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  className={`p-4 rounded-xl border ${theme === 'dark' ? 'bg-white/[0.02] border-white/5' : 'bg-slate-50 border-slate-100'}`}
-                >
-                  <p className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-0.5">Node Fee (5%)</p>
-                  <motion.p
-                    key={platformFee}
-                    initial={{ y: 6, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    className="text-xl font-black italic text-slate-500"
-                  >
-                    ₹{platformFee.toLocaleString('en-IN')}
-                  </motion.p>
-                </motion.div>
-
-                {/* Settlement info chip */}
-                <div className={`flex items-center gap-3 px-4 py-2.5 rounded-xl border text-[10px] font-black uppercase tracking-widest ${theme === 'dark' ? 'bg-white/[0.02] border-white/5 text-slate-500' : 'bg-slate-50 border-slate-100 text-slate-400'}`}>
-                  <Zap className="w-3 h-3 text-[#10B981] shrink-0" />
-                  T+2 Bank Settlement · Razorpay Route
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
 
       {/* --- PRICING SECTION --- */}
       <section id="pricing" className="py-16 md:py-20 px-6">
-        <div className="max-w-[1440px] mx-auto 2xl:max-w-[1600px]">
+        <div className="max-w-[1280px] mx-auto">
           {/* Header */}
           <div className="text-center mb-10 md:mb-12">
             <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.3em] mb-4 border ${theme === 'dark' ? 'bg-[#10B981]/10 text-[#10B981] border-[#10B981]/20' : 'bg-emerald-50 text-emerald-600 border-emerald-200'}`}>
@@ -1070,7 +1484,7 @@ const Home = () => {
                   <p className="text-xs font-medium text-slate-500 mt-1">Free forever. Great for beginners.</p>
                 </div>
 
-                <div className="flex-1 bg-black/10 rounded-xl p-3 mx-4 hidden lg:block">
+                <div className={`flex-1 rounded-xl p-3 mx-4 hidden lg:block ${theme === 'dark' ? 'bg-black/10' : 'bg-slate-50'}`}>
                   <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
                     <span className={`flex items-center gap-1.5 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}><CheckCircle2 className="w-3 h-3 text-[#10B981]" /> 85% Split (15% Fee)</span>
                     <span className={`flex items-center gap-1.5 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}><CheckCircle2 className="w-3 h-3 text-[#10B981]" /> T+2 Bank Settlement</span>
@@ -1113,7 +1527,7 @@ const Home = () => {
                   <p className="text-xs font-medium text-slate-500 mt-1">Volume creators & streamers.</p>
                 </div>
 
-                <div className="flex-1 bg-black/10 rounded-xl p-3 mx-4 hidden lg:block">
+                <div className={`flex-1 rounded-xl p-3 mx-4 hidden lg:block ${theme === 'dark' ? 'bg-black/10' : 'bg-[#10B981]/5'}`}>
                   <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
                     <span className={`flex items-center gap-1.5 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}><CheckCircle2 className="w-3 h-3 text-[#10B981]" /> 90% Split (10% Fee)</span>
                     <span className={`flex items-center gap-1.5 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}><CheckCircle2 className="w-3 h-3 text-[#10B981]" /> Priority Alert Delivery</span>
@@ -1155,7 +1569,7 @@ const Home = () => {
                   <p className="text-xs font-medium text-slate-500 mt-1">Professional bespoke node.</p>
                 </div>
 
-                <div className="flex-1 bg-black/10 rounded-xl p-3 mx-4 hidden lg:block">
+                <div className={`flex-1 rounded-xl p-3 mx-4 hidden lg:block ${theme === 'dark' ? 'bg-black/10' : 'bg-amber-500/5'}`}>
                   <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
                     <span className={`flex items-center gap-1.5 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}><CheckCircle2 className="w-3 h-3 text-amber-400" /> 95% Split (5% Fee)</span>
                     <span className={`flex items-center gap-1.5 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}><CheckCircle2 className="w-3 h-3 text-amber-400" /> Dedicated WebSocket</span>
@@ -1187,7 +1601,7 @@ const Home = () => {
       </section>
 
       <section className="py-20 px-6">
-        <div className="max-w-[1440px] mx-auto">
+        <div className="max-w-[1280px] mx-auto">
           <div className={`relative overflow-hidden p-10 sm:p-16 rounded-[4rem] border transition-all flex flex-col md:flex-row items-center justify-between gap-10 ${theme === 'dark' ? 'bg-[#0a0a0a] border-[#10B981]/20 shadow-[0_0_40px_rgba(16,185,129,0.1)]' : 'bg-emerald-50 border-emerald-200 shadow-xl'}`}>
             <div className="absolute -right-20 -bottom-20 w-64 h-64 bg-[#10B981]/10 blur-[80px] rounded-full pointer-events-none" />
             <div className="relative z-10 text-center md:text-left">
@@ -1215,94 +1629,144 @@ const Home = () => {
       </section>
 
 
-      {/* --- FOOTER --- */}
-      <footer className={`border-t transition-colors duration-500 ${theme === 'dark' ? 'border-white/[0.06] bg-[#050505]' : 'border-slate-100 bg-white'}`}>
+      {/* --- WORLD-CLASS PREMIUM FOOTER --- */}
+      <footer className={`relative border-t overflow-hidden transition-colors duration-500 ${theme === 'dark' ? 'border-white/[0.06] bg-[#050505]' : 'border-slate-100 bg-white'}`}>
 
-        {/* TOP FOOTER — 4 columns */}
-        <div className="max-w-[1440px] mx-auto px-6 pt-16 pb-12 grid grid-cols-3 md:grid-cols-5 gap-x-4 gap-y-10">
+        {/* Glow Orbs — Glassmorphism background */}
+        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-[#10B981]/[0.03] blur-[120px] rounded-full pointer-events-none" />
+        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-blue-500/[0.02] blur-[100px] rounded-full pointer-events-none" />
 
-          {/* BRAND COLUMN — full width on mobile, 2 cols on desktop */}
-          <div className="col-span-3 md:col-span-2 flex flex-col gap-5">
-            <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => {
-              if (localStorage.getItem('token')) navigate('/dashboard');
-              else window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}>
-              <Zap className="w-7 h-7 text-[#10B981] fill-[#10B981]" />
-              <span className={`text-xl font-black italic tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>DropPay</span>
+        <div className="max-w-[1280px] mx-auto px-6 pt-20 pb-12 relative z-10">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-12 lg:gap-16">
+
+            {/* BRAND & MISSION HUB */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+              className="md:col-span-4 space-y-8"
+            >
+              <div className="space-y-4">
+                <div className="flex items-center gap-2.5 cursor-pointer group" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+                  <div className="w-10 h-10 rounded-xl bg-[#10B981]/10 flex items-center justify-center border border-[#10B981]/20 group-hover:scale-110 transition-transform">
+                    <Zap className="w-6 h-6 text-[#10B981] fill-[#10B981]" />
+                  </div>
+                  <span className={`text-2xl font-black italic tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+                    Drop<span className="text-[#10B981]">Pay</span>
+                  </span>
+                </div>
+                <p className="text-slate-500 text-sm font-medium leading-relaxed max-w-sm">
+                  The professional-grade monetisation engine for creators, streamers, and live broadcasters. Built for high-frequency nodes and zero-latency transmission.
+                </p>
+              </div>
+
+              {/* Social Grid */}
+              <div className="flex gap-3">
+                {[
+                  { icon: <Twitter className="w-4 h-4" />, label: 'Twitter' },
+                  { icon: <Instagram className="w-4 h-4" />, label: 'Instagram' },
+                  { icon: <Github className="w-4 h-4" />, label: 'GitHub' },
+                  { icon: <Linkedin className="w-4 h-4" />, label: 'LinkedIn' },
+                  { icon: <Mail className="w-4 h-4" />, label: 'Email' }
+                ].map(({ icon, label }) => (
+                  <button key={label} aria-label={label}
+                    className={`w-10 h-10 rounded-xl flex items-center justify-center social-btn-premium border ${theme === 'dark' ? 'bg-white/5 border-white/5 text-slate-400' : 'bg-slate-50 border-slate-200 text-slate-500'}`}>
+                    {icon}
+                  </button>
+                ))}
+              </div>
+
+              {/* Status Indicator */}
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                className={`inline-flex items-center gap-2.5 px-4 py-2 rounded-2xl border text-[10px] font-black uppercase tracking-widest ${theme === 'dark' ? 'bg-[#10B981]/5 border-[#10B981]/20 text-[#10B981]' : 'bg-emerald-50 border-emerald-200 text-emerald-700'}`}
+              >
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#10B981] opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[#10B981]"></span>
+                </span>
+                All Systems Operational
+              </motion.div>
+            </motion.div>
+
+            {/* NAVIGATION LINKS GRID */}
+            <div className="md:col-span-5 grid grid-cols-3 gap-x-4 gap-y-10 sm:gap-8">
+              {/* Product */}
+              <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.1 }} className="space-y-6">
+                <p className={`text-[10px] font-black uppercase tracking-[0.25em] ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Product</p>
+                <div className="flex flex-col gap-4">
+                  {['Features', 'Pricing', 'Dashboard', 'Overlays', 'Alert Engine', 'Simulator'].map(item => (
+                    <button key={item} className="premium-footer-link text-sm font-medium text-left w-fit">{item}</button>
+                  ))}
+                </div>
+              </motion.div>
+
+              {/* Platform */}
+              <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.2 }} className="space-y-6">
+                <p className={`text-[10px] font-black uppercase tracking-[0.25em] ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Platform</p>
+                <div className="flex flex-col gap-4">
+                  {['Pricing', 'Changelog', 'Status', 'API Docs', 'Community', 'Open Source'].map(item => (
+                    <button key={item} className="premium-footer-link text-sm font-medium text-left w-fit">{item}</button>
+                  ))}
+                </div>
+              </motion.div>
+
+              {/* Company */}
+              <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.3 }} className="space-y-6">
+                <p className={`text-[10px] font-black uppercase tracking-[0.25em] ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Company</p>
+                <div className="flex flex-col gap-4">
+                  {['About', 'Blog', 'Careers', 'Press Kit', 'Contact', 'Security'].map(item => (
+                    <button key={item} className="premium-footer-link text-sm font-medium text-left w-fit">{item}</button>
+                  ))}
+                </div>
+              </motion.div>
             </div>
-            <p className="text-slate-500 text-sm font-medium leading-relaxed max-w-xs">
-              The professional-grade monetisation engine for creators, streamers, and live broadcasters. Instant settlements. Zero latency.
-            </p>
-            {/* Social links */}
-            <div className="flex gap-4 mt-1">
-              {[
-                { icon: <Twitter className="w-4 h-4" />, label: 'Twitter' },
-                { icon: <Instagram className="w-4 h-4" />, label: 'Instagram' },
-                { icon: <Github className="w-4 h-4" />, label: 'GitHub' },
-                { icon: <Linkedin className="w-4 h-4" />, label: 'LinkedIn' },
-                { icon: <Mail className="w-4 h-4" />, label: 'Email' },
-              ].map(({ icon, label }) => (
-                <button key={label} aria-label={label} className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:text-[#10B981] ${theme === 'dark' ? 'bg-white/5 text-slate-400 hover:bg-[#10B981]/10' : 'bg-slate-100 text-slate-500 hover:bg-emerald-50'}`}>
-                  {icon}
+
+            {/* NEWSLETTER HUB */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.4 }}
+              className="md:col-span-3 space-y-6"
+            >
+              <div className="space-y-2">
+                <p className={`text-[10px] font-black uppercase tracking-[0.25em] ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Stay Synced</p>
+                <p className="text-slate-500 text-xs font-medium leading-relaxed">
+                  Join 5,000+ creators getting weekly node updates.
+                </p>
+              </div>
+              <div className="relative group">
+                <input
+                  type="email"
+                  placeholder="Enter email node..."
+                  className={`w-full px-5 py-4 rounded-2xl text-xs font-bold outline-none border transition-all ${theme === 'dark' ? 'bg-white/5 border-white/5 focus:border-[#10B981]/50 text-white' : 'bg-slate-50 border-slate-200 focus:border-[#10B981]/50 text-slate-900'}`}
+                />
+                <button className="absolute right-2 top-2 bottom-2 px-4 bg-[#10B981] hover:bg-emerald-400 text-white rounded-xl transition-all group-hover:scale-105 active:scale-95 shadow-lg shadow-[#10B981]/20">
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+              <p className="text-[9px] text-slate-600 font-medium italic">
+                By syncing, you agree to our encrypted protocol terms.
+              </p>
+            </motion.div>
+          </div>
+
+          {/* GRADIENT DIVIDER */}
+          <div className={`h-px w-full my-12 bg-gradient-to-r from-transparent ${theme === 'dark' ? 'via-white/5' : 'via-slate-200'} to-transparent`} />
+
+          {/* BOTTOM BAR */}
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-6">
+            <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
+              <p className="text-slate-600 text-[11px] font-bold tracking-tight">
+                © 2026 DROPPAY TECHNOLOGIES. ALL RIGHTS RESERVED.
+              </p>
+              <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-white/5 border border-white/5 text-[9px] text-slate-600 font-black uppercase tracking-widest">
+                BUILT IN INDIA 🇮🇳
+              </div>
+            </div>
+            <div className="flex items-center gap-8">
+              {['Privacy', 'Terms', 'Refunds'].map(item => (
+                <button key={item} className="premium-footer-link text-[10px] font-black uppercase tracking-widest transition-colors whitespace-nowrap">
+                  {item}
                 </button>
               ))}
             </div>
-            {/* Status badge */}
-            <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full w-fit border text-[10px] font-black uppercase tracking-widest ${theme === 'dark' ? 'bg-[#10B981]/5 border-[#10B981]/20 text-[#10B981]' : 'bg-emerald-50 border-emerald-200 text-emerald-700'}`}>
-              <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse" />
-              All Systems Operational
-            </div>
-          </div>
-
-          {/* PRODUCT COLUMN */}
-          <div className="flex flex-col gap-4">
-            <p className={`text-[10px] font-black uppercase tracking-[0.2em] mb-1 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Product</p>
-            {['Features', 'Economics', 'Dashboard', 'Overlays', 'Alert Engine', 'Payout Simulator'].map(item => (
-              <button key={item} onClick={() => item === 'Dashboard' ? navigate('/dashboard') : null}
-                className="text-slate-500 hover:text-[#10B981] text-sm font-medium text-left transition-colors">
-                {item}
-              </button>
-            ))}
-          </div>
-
-          {/* PLATFORM COLUMN */}
-          <div className="flex flex-col gap-4">
-            <p className={`text-[10px] font-black uppercase tracking-[0.2em] mb-1 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Platform</p>
-            {['Pricing', 'Changelog', 'Status Page', 'API Docs', 'Community', 'Open Source'].map(item => (
-              <button key={item}
-                onClick={() => item === 'Pricing' ? document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' }) : null}
-                className="text-slate-500 hover:text-[#10B981] text-sm font-medium text-left transition-colors">
-                {item}
-              </button>
-            ))}
-          </div>
-
-          {/* COMPANY COLUMN */}
-          <div className="flex flex-col gap-4">
-            <p className={`text-[10px] font-black uppercase tracking-[0.2em] mb-1 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Company</p>
-            {['About', 'Blog', 'Careers', 'Press Kit', 'Contact', 'Security'].map(item => (
-              <button key={item} onClick={() => item === 'Contact' ? setIsSocketModalOpen(true) : null}
-                className="text-slate-500 hover:text-[#10B981] text-sm font-medium text-left transition-colors">
-                {item}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* DIVIDER */}
-        <div className={`max-w-[1440px] mx-auto px-6 ${theme === 'dark' ? 'border-t border-white/[0.05]' : 'border-t border-slate-100'}`} />
-
-        {/* BOTTOM BAR */}
-        <div className="max-w-[1440px] mx-auto px-6 py-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="text-slate-500 text-[11px] font-medium">
-            © 2026 DropPay Technologies. All rights reserved. Built in India 🇮🇳
-          </p>
-          <div className="flex items-center gap-6">
-            {['Privacy Policy', 'Terms of Service', 'Cookie Policy', 'Refund Policy'].map(item => (
-              <button key={item} className="text-slate-500 hover:text-[#10B981] text-[11px] font-medium transition-colors whitespace-nowrap">
-                {item}
-              </button>
-            ))}
           </div>
         </div>
       </footer>

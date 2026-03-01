@@ -11,6 +11,10 @@
     --nexus-border: rgba(255, 255, 255, 0.05);
     --nexus-radius: 1.5rem;
     --nexus-glow: 0 0 30px rgba(16, 185, 129, 0.1);
+    --nexus-sidebar-bg: #0a0a0a;
+    --nexus-sidebar-border: rgba(255, 255, 255, 0.05);
+    --simulator-bg: #070d0a;
+    --simulator-shadow: 0 0 50px rgba(16, 185, 129, 0.18), 0 0 120px rgba(16, 185, 129, 0.07), 0 0 200px rgba(59, 130, 246, 0.05), inset 0 0 80px rgba(16, 185, 129, 0.04);
 }
 
 /* Scrollbar Hide Utility */
@@ -40,6 +44,8 @@ body.theme-cyber {
     --nexus-border: #39ff14;
     --nexus-radius: 0;
     --nexus-glow: 0 0 20px rgba(57, 255, 20, 0.4);
+    --nexus-sidebar-bg: #000800;
+    --nexus-sidebar-border: rgba(57, 255, 20, 0.2);
     font-family: 'Courier New', Courier, monospace;
 }
 
@@ -58,6 +64,8 @@ body.theme-aero {
     --nexus-border: rgba(255, 255, 255, 0.1);
     --nexus-radius: 2.5rem;
     --nexus-glow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    --nexus-sidebar-bg: rgba(255, 255, 255, 0.03);
+    --nexus-sidebar-border: rgba(255, 255, 255, 0.08);
     background: radial-gradient(circle at top left, #1e293b, #0f172a, #020617);
 }
 
@@ -100,12 +108,18 @@ body.theme-arcade {
 
 /* Light Mode Overrides (Default) */
 .light:not([class*="theme-"]) {
-    --nexus-bg: #f8fafc;
+    --nexus-bg: #F8FAFC;
     --nexus-panel: #ffffff;
     --nexus-accent: #10B981;
-    --nexus-text: #0f172a;
-    --nexus-text-muted: #64748b;
-    --nexus-border: #e2e8f0;
+    --nexus-text: #0F172A;
+    --nexus-text-muted: #64748B;
+    --nexus-border: rgba(15, 23, 42, 0.06);
+    --nexus-sidebar-bg: #f0fdf4;
+    /* emerald-50 */
+    --nexus-sidebar-border: #dcfce7;
+    /* emerald-100 */
+    --simulator-bg: #ffffff;
+    --simulator-shadow: 0 10px 40px rgba(0, 0, 0, 0.03), 0 20px 80px rgba(16, 185, 129, 0.02);
 }
 
 /* Light Mode Overrides (Theme Specific) */
@@ -375,6 +389,8 @@ body.live_synthwave .nexus-card,
     --nexus-accent: #a855f7;
     /* Purple 500 */
     --nexus-glow: rgba(168, 85, 247, 0.15);
+    --nexus-sidebar-bg: #09090b;
+    --nexus-sidebar-border: rgba(168, 85, 247, 0.1);
 }
 
 /* --- NEW: AERO LIGHT --- */
@@ -388,6 +404,8 @@ body.live_synthwave .nexus-card,
     --nexus-accent: #ec4899;
     /* pink-500 */
     --nexus-glow: rgba(236, 72, 153, 0.1);
+    --nexus-sidebar-bg: #fff1f2;
+    --nexus-sidebar-border: #ffe4e6;
 }
 
 /* --- NEW: NEBULA VOID --- */
@@ -401,6 +419,8 @@ body.live_synthwave .nexus-card,
     --nexus-accent: #8B5CF6;
     /* violet-500 */
     --nexus-glow: rgba(139, 92, 246, 0.15);
+    --nexus-sidebar-bg: #0A0A0B;
+    --nexus-sidebar-border: rgba(139, 92, 246, 0.05);
 }
 
 /* --- NEW: ALABASTER PULSE --- */
@@ -414,6 +434,8 @@ body.live_synthwave .nexus-card,
     --nexus-accent: #3B82F6;
     /* blue-500 */
     --nexus-glow: rgba(59, 130, 246, 0.1);
+    --nexus-sidebar-bg: #ffffff;
+    --nexus-sidebar-border: #f1f5f9;
 }
 
 /* --- KINETIC OBSIDIAN (ELITE FX) --- */
@@ -425,6 +447,8 @@ body.live_synthwave .nexus-card,
     --nexus-text-muted: #a1a1aa;
     --nexus-accent: #F59E0B;
     --nexus-glow: rgba(245, 158, 11, 0.15);
+    --nexus-sidebar-bg: #020203;
+    --nexus-sidebar-border: rgba(245, 158, 11, 0.1);
 }
 
 /* 1. Liquid Gold Border Animation (Midnight Obsidian Exclusive) */
@@ -682,7 +706,7 @@ html:has(.overlay-content) {
 
 .simulator-glow-card {
     background:
-        linear-gradient(#070d0a, #070d0a) padding-box,
+        linear-gradient(var(--simulator-bg), var(--simulator-bg)) padding-box,
         conic-gradient(from var(--angle),
             #10B981 0deg,
             #3b82f6 90deg,
@@ -691,11 +715,7 @@ html:has(.overlay-content) {
             #10B981 360deg) border-box;
     border: 1.5px solid transparent !important;
     animation: border-spin 5s linear infinite;
-    box-shadow:
-        0 0 50px rgba(16, 185, 129, 0.18),
-        0 0 120px rgba(16, 185, 129, 0.07),
-        0 0 200px rgba(59, 130, 246, 0.05),
-        inset 0 0 80px rgba(16, 185, 129, 0.04);
+    box-shadow: var(--simulator-shadow);
 }
 
 /* ============================================== */
@@ -739,4 +759,66 @@ html:has(.overlay-content) {
     to {
         stroke-dashoffset: 0;
     }
+}
+/* ============================================== */
+/* HOLOGRAPHIC & SPOTLIGHT EFFECTS (LOGIN ONLY)   */
+/* ============================================== */
+.holographic-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.holographic-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(135deg, 
+        transparent 0%, 
+        rgba(255, 255, 255, 0.05) 45%, 
+        rgba(255, 255, 255, 0.2) 50%, 
+        rgba(255, 255, 255, 0.05) 55%, 
+        transparent 100%);
+    background-size: 200% 200%;
+    pointer-events: none;
+    mix-blend-mode: overlay;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.holographic-card:hover::before {
+    opacity: 1;
+    animation: holo-shine 3s infinite linear;
+}
+
+@keyframes holo-shine {
+    0% { background-position: 200% 200%; }
+    100% { background-position: -200% -200%; }
+}
+
+.spotlight-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    background: radial-gradient(
+        circle 400px at var(--x) var(--y),
+        rgba(16, 185, 129, 0.15),
+        transparent 80%
+    );
+}
+
+.prism-border {
+    position: absolute;
+    inset: 0;
+    border: 1px solid transparent;
+    border-radius: inherit;
+    background: linear-gradient(var(--nexus-bg), var(--nexus-bg)) padding-box,
+                linear-gradient(135deg, #10B981, #3b82f6, #f472b6, #10B981) border-box;
+    opacity: 0.3;
+    transition: opacity 0.3s ease;
+}
+
+.holographic-card:hover .prism-border {
+    opacity: 0.8;
 }

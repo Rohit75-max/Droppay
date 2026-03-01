@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const adminAuth = require('../middleware/adminAuth');
-const { getUsers, toggleBan, updateTier, getSystemMetrics, updateRole, getPayoutQueue, executeSettlement } = require('../controllers/adminController');
+const { getUsers, getUserDetails, toggleBan, updateTier, getSystemMetrics, updateRole, getPayoutQueue, executeSettlement } = require('../controllers/adminController');
 
 // All routes here are strictly shielded by `adminAuth`
 router.use(adminAuth);
@@ -9,6 +9,10 @@ router.use(adminAuth);
 // @route   GET api/admin/users
 // @desc    Fetch paginated node telemetry
 router.get('/users', getUsers);
+
+// @route   GET api/admin/users/:id
+// @desc    Fetch deep telemetry for a specific Node
+router.get('/users/:id', getUserDetails);
 
 // @route   PATCH api/admin/users/:id/ban
 // @desc    Suspend or Reinstate Identity Node

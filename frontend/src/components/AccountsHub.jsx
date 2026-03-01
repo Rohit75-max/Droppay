@@ -32,6 +32,14 @@ const AccountsHub = ({
   const [isRequestingOtp, setIsRequestingOtp] = React.useState(false);
   const [isVerifyingOtp, setIsVerifyingOtp] = React.useState(false);
 
+  // --- BANKING NODE STATES ---
+  const [showBankModal, setShowBankModal] = React.useState(false);
+  const [bankLinkType, setBankLinkType] = React.useState('bank_account'); // 'bank_account' | 'vpa'
+  const [bankForm, setBankForm] = React.useState({ name: '', account_number: '', ifsc: '', vpa: '' });
+  const [bankOtpMode, setBankOtpMode] = React.useState(false);
+  const [bankOtpInput, setBankOtpInput] = React.useState('');
+  const [isProcessingBank, setIsProcessingBank] = React.useState(false);
+
   const requestVerification = async (type) => {
     setIsRequestingOtp(true);
     try {
@@ -74,6 +82,55 @@ const AccountsHub = ({
 
   const getInputStyle = () => {
     return 'bg-[var(--nexus-bg)]/40 border-[var(--nexus-border)] text-[var(--nexus-text)] focus:border-[var(--nexus-accent)] transition-all outline-none';
+  };
+
+  const initiateBankLink = async () => {
+    if (!bankForm.name) return alert("Account Holder Name is required.");
+
+    if (bankLinkType === 'bank_account' && (!bankForm.account_number || !bankForm.ifsc)) {
+      return alert("Complete all banking fields.");
+    }
+
+    if (bankLinkType === 'vpa' && !bankForm.vpa) {
+      return alert("Enter your UPI ID.");
+    }
+
+    setIsProcessingBank(true);
+    try {
+      const token = localStorage.getItem('token');
+      // Request an OTP to the user's phone for high-security action
+      await axios.post('http://localhost:5001/api/user/request-verification', { type: 'phone' }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setBankOtpMode(true);
+      setBankOtpInput('');
+    } catch (err) {
+      alert(err.response?.data?.msg || "Failed to initiate banking security protocol.");
+    } finally {
+      setIsProcessingBank(false);
+    }
+  };
+
+  const confirmBankLink = async () => {
+    if (bankOtpInput.length !== 6) return alert("Enter valid 6-digit key.");
+    setIsProcessingBank(true);
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post('http://localhost:5001/api/user/add-bank-account', {
+        ...bankForm,
+        otp: bankOtpInput
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (typeof fetchProfileData === 'function') await fetchProfileData();
+      setShowBankModal(false);
+      setBankOtpMode(false);
+      alert("Banking details verified and securely linked.");
+    } catch (err) {
+      alert(err.response?.data?.msg || "Verification Failed. Try again.");
+    } finally {
+      setIsProcessingBank(false);
+    }
   };
 
   return (
@@ -365,13 +422,13 @@ const AccountsHub = ({
             </div>
 
             <div className="space-y-8 flex-1 z-10 w-full">
-              {user.razorpayAccountId && user.payoutSettings?.bankDetailsLinked ? (
+              {(user.razorpayFundAccountId || user.razorpayAccountId) && user.payoutSettings?.bankDetailsLinked ? (
                 <div className="space-y-6 w-full">
                   <div className={`p-6 rounded-[2rem] border flex items-center gap-5 bg-[var(--nexus-accent)]/10 border-[var(--nexus-accent)]/20 shadow-inner`}>
                     <ShieldCheckIcon className="w-7 h-7 text-[#10B981]" />
                     <div className="min-w-0">
                       <p className="text-[10px] font-black uppercase text-[#10B981] tracking-widest">Node Secured</p>
-                      <p className="text-xs font-mono font-bold text-[var(--nexus-text-muted)] mt-1 truncate">{user.razorpayAccountId}</p>
+                      <p className="text-xs font-mono font-bold text-[var(--nexus-text-muted)] mt-1 truncate">{user.razorpayFundAccountId || user.razorpayAccountId}</p>
                     </div>
                   </div>
                 </div>
@@ -390,11 +447,11 @@ const AccountsHub = ({
                   )}
 
                   <button
-                    onClick={handleBankLink}
-                    disabled={isLinkingBank || !user.isPhoneVerified}
-                    className={`w-full py-5 rounded-2xl font-black uppercase italic text-[11px] transition-all flex items-center justify-center gap-3 ${!(isLinkingBank || !user.isPhoneVerified) ? 'bg-[var(--nexus-text)] text-[var(--nexus-bg)] hover:bg-[var(--nexus-accent)]' : 'bg-slate-500/20 text-slate-500 cursor-not-allowed border border-white/5 shadow-inner'}`}
+                    onClick={() => { setBankOtpMode(false); setBankLinkType('bank_account'); setShowBankModal(true); setBankForm({ name: '', account_number: '', ifsc: '', vpa: '' }); }}
+                    disabled={!user.isPhoneVerified}
+                    className={`w-full py-5 rounded-2xl font-black uppercase italic text-[11px] transition-all flex items-center justify-center gap-3 ${user.isPhoneVerified ? 'bg-[var(--nexus-text)] text-[var(--nexus-bg)] hover:bg-[var(--nexus-accent)] hover:text-black' : 'bg-[var(--nexus-text-muted)]/10 text-[var(--nexus-text-muted)] cursor-not-allowed border border-[var(--nexus-border)] shadow-inner'}`}
                   >
-                    {isLinkingBank ? <Loader2 className="animate-spin w-5 h-5" /> : <>Onboard Node <ArrowRight className="w-4 h-4" /></>}
+                    Onboard Node <ArrowRight className="w-4 h-4" />
                   </button>
                 </div>
               )}
@@ -459,6 +516,94 @@ const AccountsHub = ({
                     </button>
                   </div>
                 </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* SECURE BANKING MODAL */}
+      <AnimatePresence>
+        {showBankModal && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+            <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} className={`w-full max-w-md p-8 rounded-[2.5rem] border shadow-2xl relative overflow-hidden bg-[var(--nexus-panel)] border-[var(--nexus-border)]`}>
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#10B981] to-transparent" />
+
+              <div className="flex flex-col items-center text-center space-y-6">
+                <div className="w-16 h-16 rounded-full bg-indigo-500/10 flex items-center justify-center border-2 border-indigo-500/20 shadow-inner">
+                  <Landmark className="w-8 h-8 text-indigo-500" />
+                </div>
+
+                <div>
+                  <h3 className={`text-2xl font-black uppercase italic tracking-tighter text-[var(--nexus-text)]`}>Secure Vault</h3>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-[#10B981] mt-1">{bankOtpMode ? 'OTP Authorization' : 'Link Payout Destination'}</p>
+                </div>
+
+                {!bankOtpMode ? (
+                  <div className="w-full space-y-4">
+                    <p className={`text-sm italic text-[var(--nexus-text-muted)] mb-4`}>Deploy your withdrawal coordinates securely.</p>
+
+                    {/* TYPE TOGGLE */}
+                    <div className="flex p-1 rounded-xl bg-[var(--nexus-bg)]/40 border border-[var(--nexus-border)] mb-4 shadow-inner">
+                      <button
+                        onClick={() => setBankLinkType('bank_account')}
+                        className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${bankLinkType === 'bank_account' ? 'bg-indigo-500 text-white shadow-md' : 'text-[var(--nexus-text-muted)] hover:text-[var(--nexus-text)]'}`}
+                      >
+                        Bank Account
+                      </button>
+                      <button
+                        onClick={() => setBankLinkType('vpa')}
+                        className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${bankLinkType === 'vpa' ? 'bg-indigo-500 text-white shadow-md' : 'text-[var(--nexus-text-muted)] hover:text-[var(--nexus-text)]'}`}
+                      >
+                        UPI ID (VPA)
+                      </button>
+                    </div>
+
+                    <div className="space-y-3 text-left">
+                      <div>
+                        <label className="text-[9px] font-black uppercase text-[var(--nexus-text-muted)] tracking-widest ml-1 mb-1 block">Account Holder Name</label>
+                        <input value={bankForm.name} onChange={(e) => setBankForm({ ...bankForm, name: e.target.value })} placeholder="John Doe" className={`w-full rounded-2xl p-4 text-sm font-bold border-2 transition-all ${getInputStyle()}`} />
+                      </div>
+
+                      {bankLinkType === 'bank_account' ? (
+                        <>
+                          <div>
+                            <label className="text-[9px] font-black uppercase text-[var(--nexus-text-muted)] tracking-widest ml-1 mb-1 block">Account Number</label>
+                            <input value={bankForm.account_number} onChange={(e) => setBankForm({ ...bankForm, account_number: e.target.value })} placeholder="000000000000" className={`w-full rounded-2xl p-4 text-sm font-bold font-mono tracking-widest border-2 transition-all ${getInputStyle()}`} />
+                          </div>
+                          <div>
+                            <label className="text-[9px] font-black uppercase text-[var(--nexus-text-muted)] tracking-widest ml-1 mb-1 block">IFSC Code</label>
+                            <input value={bankForm.ifsc} onChange={(e) => setBankForm({ ...bankForm, ifsc: e.target.value.toUpperCase() })} placeholder="HDFC0001234" className={`w-full rounded-2xl p-4 text-sm font-bold font-mono tracking-widest uppercase border-2 transition-all ${getInputStyle()}`} />
+                          </div>
+                        </>
+                      ) : (
+                        <div>
+                          <label className="text-[9px] font-black uppercase text-[var(--nexus-text-muted)] tracking-widest ml-1 mb-1 block">UPI ID (VPA)</label>
+                          <input value={bankForm.vpa} onChange={(e) => setBankForm({ ...bankForm, vpa: e.target.value.toLowerCase() })} placeholder="username@bank" className={`w-full rounded-2xl p-4 text-sm font-bold font-mono tracking-widest lowercase border-2 transition-all ${getInputStyle()}`} />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex gap-3 pt-4">
+                      <button onClick={() => setShowBankModal(false)} className={`flex-1 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest transition-colors border shadow-sm bg-[var(--nexus-accent)]/5 text-[var(--nexus-text-muted)] border-[var(--nexus-border)] hover:bg-[var(--nexus-accent)]/10`}>Abort</button>
+                      <button onClick={initiateBankLink} disabled={isProcessingBank} className="flex-[2] py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest bg-indigo-500 text-white hover:bg-indigo-400 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/20">
+                        {isProcessingBank ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Request Key'}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="w-full space-y-4">
+                    <p className={`text-sm italic text-[var(--nexus-text-muted)]`}>We've transmitted a 6-digit cryptographic key to your verified phone.</p>
+                    <input type="text" maxLength={6} value={bankOtpInput} onChange={(e) => setBankOtpInput(e.target.value.replace(/\D/g, ''))} placeholder="000000" className={`w-full text-center text-3xl tracking-[0.5em] font-black p-4 rounded-2xl outline-none border transition-all bg-[var(--nexus-bg)]/40 border-[var(--nexus-border)] text-[var(--nexus-text)] focus:border-[#10B981] shadow-inner mt-4`} />
+
+                    <div className="flex gap-3 pt-4">
+                      <button onClick={() => setBankOtpMode(false)} className={`flex-1 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest transition-colors border shadow-sm bg-[var(--nexus-accent)]/5 text-[var(--nexus-text-muted)] border-[var(--nexus-border)] hover:bg-[var(--nexus-accent)]/10`}>Back</button>
+                      <button onClick={confirmBankLink} disabled={isProcessingBank || bankOtpInput.length !== 6} className="flex-[2] py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest bg-[#10B981] text-black hover:bg-[#0fa672] transition-colors disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-[#10B981]/20">
+                        {isProcessingBank ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Authorize Link'}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </motion.div>
           </motion.div>

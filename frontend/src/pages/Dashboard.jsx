@@ -41,7 +41,7 @@ const Dashboard = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const [theme, setTheme] = useState(() => {
-    return localStorage.getItem('dropPayTheme') || 'dark';
+    return localStorage.getItem('dropPayTheme') || 'light';
   });
 
   const [nexusTheme, setNexusTheme] = useState(() => {
@@ -121,9 +121,20 @@ const Dashboard = () => {
         setNexusTheme(res.data.nexusTheme);
         localStorage.setItem('nexusTheme', res.data.nexusTheme);
       }
-      if (res.data.nexusThemeMode) {
-        setTheme(res.data.nexusThemeMode);
-        localStorage.setItem('dropPayTheme', res.data.nexusThemeMode);
+
+      // --- FORCE LIGHT THEME MIGRATION ---
+      const currentThemeMode = res.data.nexusThemeMode || 'dark';
+      if (currentThemeMode === 'dark') {
+        setTheme('light');
+        localStorage.setItem('dropPayTheme', 'light');
+        // Update profile on server to persist light mode
+        axios.post(`${API_BASE}/api/user/update-profile`,
+          { nexusThemeMode: 'light' },
+          { headers: { Authorization: `Bearer ${token}` } }
+        ).catch(e => console.error("Failed to persist light theme", e));
+      } else {
+        setTheme(currentThemeMode);
+        localStorage.setItem('dropPayTheme', currentThemeMode);
       }
       setGoalForm({
         title: res.data.goalSettings?.title || "New Mission",
@@ -142,14 +153,14 @@ const Dashboard = () => {
       if (res.data.partnerPack) setPartnerStickers(res.data.partnerPack);
 
       const [recent, top, stats] = await Promise.all([
-        axios.get(`http://localhost:5001/api/payment/recent/${res.data.streamerId}`),
-        axios.get(`http://localhost:5001/api/payment/top/${res.data.streamerId}`),
-        axios.get(`http://localhost:5001/api/payment/analytics/${res.data.streamerId}?range=${timeRange}`)
+        axios.get(`${API_BASE}/api/payment/recent/${res.data.streamerId}`),
+        axios.get(`${API_BASE}/api/payment/top/${res.data.streamerId}`),
+        axios.get(`${API_BASE}/api/payment/analytics/${res.data.streamerId}?range=${timeRange}`)
       ]);
 
       setRecentDrops(recent.data);
       setTopDonors(top.data);
-      setChartData(stats.data.points || [10, 20, 15, 30, 25, 40, 35]);
+      setChartData(stats.data.points);
       setError(null);
       setLoading(false);
     } catch (err) {
@@ -178,7 +189,7 @@ const Dashboard = () => {
   useEffect(() => {
     if (!user?.obsKey) return;
 
-    const socket = io('http://localhost:5001');
+    const socket = io(API_BASE);
 
     socket.on('connect', () => {
       socket.emit('join-overlay', user.obsKey);
@@ -271,15 +282,27 @@ const Dashboard = () => {
 
   const saveNexusTheme = async (newTheme) => {
     try {
+      // Logic to determine if the Nexus theme is Light-based or Dark-based
+      const lightThemes = ['aero-light', 'alabaster-pulse', 'kawaii', 'live_kawaii'];
+      const newMode = lightThemes.includes(newTheme) ? 'light' : 'dark';
+
       // Optimistic Update
       setNexusTheme(newTheme);
+      setTheme(newMode);
       localStorage.setItem('nexusTheme', newTheme);
-      setUser(prev => ({ ...prev, nexusTheme: newTheme }));
+      localStorage.setItem('dropPayTheme', newMode);
+
+      setUser(prev => ({ ...prev, nexusTheme: newTheme, nexusThemeMode: newMode }));
+
+      // Update DOM immediately
+      document.documentElement.classList.remove('dark', 'light');
+      document.documentElement.classList.add(newMode);
+
       window.dispatchEvent(new CustomEvent('nexus-theme-change', { detail: { theme: newTheme } }));
 
       const token = localStorage.getItem('token');
       await axios.post(`${API_BASE}/api/user/update-profile`,
-        { nexusTheme: newTheme },
+        { nexusTheme: newTheme, nexusThemeMode: newMode },
         { headers: { Authorization: `Bearer ${token}` } }
       );
     } catch (err) {
@@ -489,9 +512,9 @@ const Dashboard = () => {
   );
 
   if (error) return (
-    <div className="h-screen bg-[#050505] flex flex-col items-center justify-center p-6 text-center">
+    <div className="h-screen bg-[var(--nexus-bg)] flex flex-col items-center justify-center p-6 text-center">
       <ShieldAlert className="w-16 h-16 text-rose-500 mb-6 animate-bounce" />
-      <h2 className="text-xl font-black uppercase italic text-white mb-2">{error}</h2>
+      <h2 className="text-xl font-black uppercase italic text-[var(--nexus-text)] mb-2">{error}</h2>
       <button onClick={() => window.location.reload()} className="bg-[#10B981] text-black px-10 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:scale-105 transition-all">
         Restart Handshake
       </button>
@@ -503,18 +526,25 @@ const Dashboard = () => {
       {/* Background layer is now handled globally by LiveThemeEngine in App.js */}
 
       <div className="flex flex-col md:flex-row w-full h-full relative z-10 overflow-hidden">
-        {/* SIDEBAR */}
-        <aside className={`md:flex hidden w-20 hover:w-64 group transition-all duration-500 flex-col py-8 border-r basis-auto shrink-0 overflow-y-auto custom-scrollbar border-[var(--nexus-border)] bg-[var(--nexus-panel)] z-[120]`}>
+        {/* SIDEBAR — Theme-Aware Control Pillar */}
+        <aside className={`md:flex hidden w-20 hover:w-64 group transition-all duration-500 flex-col py-8 border-r basis-auto shrink-0 overflow-y-auto custom-scrollbar bg-[var(--nexus-sidebar-bg)] border-[var(--nexus-sidebar-border)] z-[120] ${theme === 'dark' ? 'shadow-2xl' : 'shadow-sm'}`}>
           <div
             className="flex items-center px-6 mb-12 gap-4 cursor-pointer"
             onClick={handleLogoClick}
           >
             <Zap className="w-8 h-8 text-[var(--nexus-accent)] flex-shrink-0" />
-            <span className="text-xl font-black italic tracking-tighter opacity-0 group-hover:opacity-100 transition-all whitespace-nowrap">DropPay</span>
+            <span className="text-xl font-black italic tracking-tighter opacity-0 group-hover:opacity-100 transition-all whitespace-nowrap text-[var(--nexus-text)]">DropPay</span>
           </div>
           <nav className="flex-1 space-y-2 px-4">
             {navItems.map((item) => (
-              <button key={item.id} onClick={() => setActiveSection(item.id)} className={`w-full flex items-center justify-between gap-4 p-3 rounded-[var(--nexus-radius)] transition-all theme-btn ${activeSection === item.id ? 'bg-[var(--nexus-accent)] text-black shadow-lg' : 'text-[var(--nexus-text-muted)] hover:bg-[var(--nexus-accent)]/10'}`}>
+              <button
+                key={item.id}
+                onClick={() => setActiveSection(item.id)}
+                className={`w-full flex items-center justify-between gap-4 p-3 rounded-[var(--nexus-radius)] transition-all theme-btn ${activeSection === item.id
+                  ? 'bg-[var(--nexus-accent)] text-[var(--nexus-bg)] shadow-lg'
+                  : 'text-[var(--nexus-text-muted)] hover:bg-[var(--nexus-accent)]/10'
+                  }`}
+              >
                 <div className="flex items-center gap-4">
                   <item.icon className="w-6 h-6 flex-shrink-0" />
                   <span className="font-black italic uppercase text-[10px] tracking-widest opacity-0 group-hover:opacity-100 transition-all whitespace-nowrap">{item.label}</span>
@@ -526,7 +556,7 @@ const Dashboard = () => {
 
           {/* SECURE ADMIN ENTRY */}
           {user?.role === 'admin' && (
-            <button onClick={() => navigate('/admin/secure-portal')} className="px-7 py-4 mt-auto mb-2 text-rose-500 flex items-center gap-4 hover:text-rose-400 hover:bg-rose-500/10 transition-colors border-t border-rose-500/20">
+            <button onClick={() => navigate('/admin/secure-portal')} className={`px-7 py-4 mt-auto mb-2 flex items-center gap-4 transition-colors border-t ${theme === 'light' ? 'text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-emerald-100' : 'text-rose-500 hover:text-rose-400 hover:bg-rose-500/10 border-rose-500/20'}`}>
               <ShieldAlert className="w-6 h-6 flex-shrink-0 animate-pulse" />
               <span className="font-black italic uppercase text-[10px] tracking-widest opacity-0 group-hover:opacity-100 transition-all whitespace-nowrap">Admin Portal</span>
             </button>
@@ -537,7 +567,7 @@ const Dashboard = () => {
             localStorage.removeItem('nexusTheme');
             localStorage.removeItem('dropPayTheme');
             navigate('/login');
-          }} className={`px-7 py-4 text-rose-500 flex items-center gap-4 hover:text-rose-400 transition-colors ${user?.role !== 'admin' ? 'mt-auto' : ''}`}>
+          }} className={`px-7 py-4 flex items-center gap-4 transition-colors ${user?.role !== 'admin' ? 'mt-auto' : ''} text-rose-500 hover:text-rose-400 hover:bg-rose-500/10`}>
             <LogOut className="w-6 h-6 flex-shrink-0" />
             <span className="font-black italic uppercase text-[10px] tracking-widest opacity-0 group-hover:opacity-100 transition-all whitespace-nowrap">Exit</span>
           </button>
@@ -570,10 +600,16 @@ const Dashboard = () => {
                   <button
                     key={item.id}
                     onClick={() => { setActiveSection(item.id); setIsMobileMenuOpen(false); }}
-                    className={`w-full flex items-center justify-between py-3 md:py-4 text-base md:text-lg font-black italic uppercase border-b border-[var(--nexus-border)] transition-all ${activeSection === item.id ? 'text-[var(--nexus-accent)]' : 'text-[var(--nexus-text-muted)]'}`}
+                    className={`w-full flex items-center justify-between py-3 md:py-4 text-base md:text-lg font-black italic uppercase border-b transition-all ${activeSection === item.id
+                      ? (theme === 'light' ? 'text-emerald-700 bg-emerald-50 px-3 rounded-xl border-b-transparent shadow-sm' : 'text-[var(--nexus-accent)] border-[var(--nexus-border)]')
+                      : (theme === 'light' ? 'text-emerald-950/60 border-emerald-100' : 'text-[var(--nexus-text-muted)] border-[var(--nexus-border)]')
+                      }`}
                   >
-                    <div className="flex items-center gap-4"><item.icon className="w-5 h-5 md:w-6 md:h-6" /> {item.label}</div>
-                    <ChevronRight className={`w-5 h-5 ${activeSection === item.id ? 'opacity-100 text-[var(--nexus-accent)]' : 'opacity-0'}`} />
+                    <div className="flex items-center gap-4">
+                      <item.icon className={`w-5 h-5 md:w-6 md:h-6 ${activeSection === item.id && theme === 'light' ? 'text-emerald-600' : ''}`} />
+                      {item.label}
+                    </div>
+                    <ChevronRight className={`w-5 h-5 ${activeSection === item.id ? 'opacity-100 text-current' : 'opacity-0'}`} />
                   </button>
                 ))}
               </div>
@@ -581,7 +617,7 @@ const Dashboard = () => {
               <div className="pt-2 shrink-0 border-t border-[var(--nexus-border)] mt-2">
                 {/* MOBILE SECURE ADMIN ENTRY */}
                 {user?.role === 'admin' && (
-                  <button onClick={() => { navigate('/admin/secure-portal'); setIsMobileMenuOpen(false); }} className={`w-full mb-2 py-3 md:py-4 text-rose-500 font-black italic uppercase text-base md:text-lg flex items-center gap-4 border-b border-rose-500/20`}>
+                  <button onClick={() => { navigate('/admin/secure-portal'); setIsMobileMenuOpen(false); }} className={`w-full mb-2 py-3 md:py-4 font-black italic uppercase text-base md:text-lg flex items-center gap-4 border-b ${theme === 'light' ? 'text-rose-600 border-emerald-100' : 'text-rose-500 border-rose-500/20'}`}>
                     <ShieldAlert className="w-5 h-5 md:w-6 md:h-6 animate-pulse" /> Admin Portal
                   </button>
                 )}
@@ -591,7 +627,7 @@ const Dashboard = () => {
                   localStorage.removeItem('nexusTheme');
                   localStorage.removeItem('dropPayTheme');
                   navigate('/login');
-                }} className={`w-full py-3 md:py-4 text-rose-500 font-black italic uppercase text-base md:text-lg flex items-center gap-4`}><LogOut className="w-5 h-5 md:w-6 md:h-6" /> Exit Protocol</button>
+                }} className={`w-full py-3 md:py-4 font-black italic uppercase text-base md:text-lg flex items-center gap-4 ${theme === 'light' ? 'text-rose-600' : 'text-rose-500'}`}><LogOut className="w-5 h-5 md:w-6 md:h-6" /> Exit Protocol</button>
               </div>
             </motion.div>
           )}
