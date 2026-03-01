@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import axios from '../api/axios';
 import { Hexagon, Sparkles, AlertTriangle, Loader2, IndianRupee, Store, Monitor, Play, Crown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import PremiumStorefront from '../components/store/PremiumStorefront';
@@ -123,7 +123,7 @@ const DashboardStore = ({ theme, user, setUser }) => {
         try {
             const token = localStorage.getItem('token');
             const res = await axios.post(
-                `http://localhost:5001/api/user/buy-nexus-theme`,
+                `/api/user/buy-nexus-theme`,
                 { themeId },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -143,7 +143,7 @@ const DashboardStore = ({ theme, user, setUser }) => {
         try {
             const token = localStorage.getItem('token');
             const res = await axios.post(
-                'http://localhost:5001/api/user/update-profile',
+                '/api/user/update-profile',
                 { nexusTheme: themeId },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -163,7 +163,7 @@ const DashboardStore = ({ theme, user, setUser }) => {
         try {
             const token = localStorage.getItem('token');
             const res = await axios.post(
-                'http://localhost:5001/api/user/buy-widget',
+                '/api/user/buy-widget',
                 { widgetId },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -180,7 +180,7 @@ const DashboardStore = ({ theme, user, setUser }) => {
         try {
             const token = localStorage.getItem('token');
             const res = await axios.post(
-                'http://localhost:5001/api/user/equip-widget',
+                '/api/user/equip-widget',
                 { widgetId },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -202,7 +202,7 @@ const DashboardStore = ({ theme, user, setUser }) => {
             const payload = { styleId };
 
             const res = await axios.post(
-                `http://localhost:5001/api/user${endpoint}`,
+                `/api/user${endpoint}`,
                 payload,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -225,7 +225,7 @@ const DashboardStore = ({ theme, user, setUser }) => {
     const createStoreOrder = async (category, itemId) => {
         const token = localStorage.getItem('token');
         const res = await axios.post(
-            'http://localhost:5001/api/user/create-store-order',
+            '/api/user/create-store-order',
             { category, itemId },
             { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -239,7 +239,7 @@ const DashboardStore = ({ theme, user, setUser }) => {
         try {
             const token = localStorage.getItem('token');
             const res = await axios.post(
-                'http://localhost:5001/api/user/verify-store-payment',
+                '/api/user/verify-store-payment',
                 { ...paymentData, category, itemId },
                 { headers: { Authorization: `Bearer ${token}` } }
             );

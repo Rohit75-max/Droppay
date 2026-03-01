@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import axios from 'axios';
+import axios from '../api/axios';
 import {
   Monitor, Star, Send, Loader2
 } from 'lucide-react';
@@ -24,7 +24,7 @@ const FeedbackStation = ({
     setIsSubmittingFeedback?.(true);
     try {
       const token = localStorage.getItem('token');
-      await axios.post('http://localhost:5001/api/user/feedback', {
+      await axios.post('/api/user/feedback', {
         streamerId: user?.streamerId,
         type: feedbackType,
         rating: rating,

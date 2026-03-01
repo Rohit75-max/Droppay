@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import axios from 'axios';
+import axios from '../api/axios';
 import {
     Users, Activity, ShieldAlert, ChevronLeft, ChevronRight,
     Search, ShieldOff, ArrowUpRight, Zap, Star,
@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-const API_BASE = `http://${window.location.hostname}:5001`;
+// API_BASE is now handled by the centralized axios configuration in src/api/axios.js
 
 // ─── Confirmation Modal ────────────────────────────────────────
 const ConfirmModal = ({ open, title, message, confirmLabel, confirmColor = 'bg-rose-500', onConfirm, onCancel }) => (
@@ -130,7 +130,7 @@ const UserDetailDrawer = ({ userId, isOpen, onClose, context = 'directory' }) =>
     useEffect(() => {
         if (!isOpen || !userId) return;
         setLoading(true);
-        axios.get(`${API_BASE}/api/admin/users/${userId}`, {
+        axios.get(`/api/admin/users/${userId}`, {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         })
             .then(res => setUser(res.data))
@@ -495,7 +495,7 @@ const AdminSecurePortal = () => {
     // — Fetch functions —
     const fetchMetrics = useCallback(async () => {
         try {
-            const res = await axios.get(`${API_BASE}/api/admin/metrics`, { headers: authHeader() });
+            const res = await axios.get('/api/admin/metrics', { headers: authHeader() });
             setMetrics(res.data);
         } catch (err) {
             if (err.response?.status === 403 || err.response?.status === 401) navigate('/dashboard');
@@ -507,7 +507,7 @@ const AdminSecurePortal = () => {
         setLoading(true);
         try {
             const res = await axios.get(
-                `${API_BASE}/api/admin/users?page=${page}&limit=20&search=${search}&role=${roleFilter}`,
+                `/api/admin/users?page=${page}&limit=20&search=${search}&role=${roleFilter}`,
                 { headers: authHeader() }
             );
             setNodes(res.data.nodes);
@@ -520,7 +520,7 @@ const AdminSecurePortal = () => {
 
     const fetchPayoutQueue = useCallback(async () => {
         try {
-            const res = await axios.get(`${API_BASE}/api/admin/payouts`, { headers: authHeader() });
+            const res = await axios.get('/api/admin/payouts', { headers: authHeader() });
             setPayoutQueue(res.data);
         } catch (err) { console.error(err); }
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -554,7 +554,7 @@ const AdminSecurePortal = () => {
             onConfirm: async () => {
                 closeModal();
                 try {
-                    await axios.patch(`${API_BASE}/api/admin/users/${id}/ban`, {}, { headers: authHeader() });
+                    await axios.patch(`/api/admin/users/${id}/ban`, {}, { headers: authHeader() });
                     fetchNodes();
                 } catch (err) { alert(err.response?.data?.msg || 'Moderation override failed.'); }
             }
@@ -570,7 +570,7 @@ const AdminSecurePortal = () => {
             onConfirm: async () => {
                 closeModal();
                 try {
-                    await axios.patch(`${API_BASE}/api/admin/users/${id}/tier`, { targetTier }, { headers: authHeader() });
+                    await axios.patch(`/api/admin/users/${id}/tier`, { targetTier }, { headers: authHeader() });
                     fetchNodes();
                 } catch (err) { alert('Tier Override Failed'); }
             }
@@ -586,7 +586,7 @@ const AdminSecurePortal = () => {
             onConfirm: async () => {
                 closeModal();
                 try {
-                    await axios.patch(`${API_BASE}/api/admin/users/${id}/role`, { targetRole }, { headers: authHeader() });
+                    await axios.patch(`/api/admin/users/${id}/role`, { targetRole }, { headers: authHeader() });
                     fetchNodes();
                 } catch (err) { alert(err.response?.data?.msg || 'Clearance Override Failed'); }
             }
@@ -602,7 +602,7 @@ const AdminSecurePortal = () => {
             onConfirm: async () => {
                 closeModal();
                 try {
-                    await axios.post(`${API_BASE}/api/admin/payouts/${id}/settle`, {}, { headers: authHeader() });
+                    await axios.post(`/api/admin/payouts/${id}/settle`, {}, { headers: authHeader() });
                     fetchPayoutQueue();
                     fetchMetrics();
                 } catch (err) { alert('Settlement execution failed.'); }

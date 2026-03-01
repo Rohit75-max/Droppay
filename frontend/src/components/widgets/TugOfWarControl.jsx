@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Swords, Timer, Save, Rocket, Zap, ShieldAlert, Flame } from 'lucide-react';
-import axios from 'axios';
+import axios from '../../api/axios';
 
 const TugOfWarControl = ({ user, nexusTheme, streamerId, theme }) => {
     const [event, setEvent] = useState(null);
@@ -16,7 +16,7 @@ const TugOfWarControl = ({ user, nexusTheme, streamerId, theme }) => {
 
     const fetchActiveEvent = useCallback(async () => {
         try {
-            const res = await axios.get(`http://localhost:5001/api/tug-of-war/active/${streamerId}`);
+            const res = await axios.get(`/api/tug-of-war/active/${streamerId}`);
             setEvent(res.data);
         } catch (err) {
             setEvent(null);
@@ -33,7 +33,7 @@ const TugOfWarControl = ({ user, nexusTheme, streamerId, theme }) => {
         setIsStarting(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.post('http://localhost:5001/api/tug-of-war/start', formData, {
+            const res = await axios.post('/api/tug-of-war/start', formData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setEvent(res.data);
@@ -47,7 +47,7 @@ const TugOfWarControl = ({ user, nexusTheme, streamerId, theme }) => {
     const handleStop = async () => {
         try {
             const token = localStorage.getItem('token');
-            await axios.post('http://localhost:5001/api/tug-of-war/stop', {}, {
+            await axios.post('/api/tug-of-war/stop', {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setEvent(null);

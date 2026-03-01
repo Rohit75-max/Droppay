@@ -6,9 +6,9 @@ import {
   ArrowRight, ShieldCheck, Cpu, Database, Activity, Target
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import axios from '../api/axios';
 
-const API_BASE = `http://${window.location.hostname}:5001`;
+// API_BASE is now handled by the centralized axios configuration in src/api/axios.js
 
 const SubscriptionPage = () => {
   const navigate = useNavigate();
@@ -26,7 +26,7 @@ const SubscriptionPage = () => {
 
     const fetchUserStatus = async () => {
       try {
-        const res = await axios.get(`${API_BASE}/api/user/profile`, {
+        const res = await axios.get('/api/user/profile', {
           headers: { Authorization: `Bearer ${token}` }
         });
         setUserProfile(res.data);
@@ -59,7 +59,7 @@ const SubscriptionPage = () => {
     setLoadingPlan(planId);
     const token = localStorage.getItem('token');
     try {
-      const subRes = await axios.post('http://localhost:5001/api/payment/create-subscription',
+      const subRes = await axios.post('/api/payment/create-subscription',
         { planId, billingCycle },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -71,7 +71,7 @@ const SubscriptionPage = () => {
         description: `Activating ${planId.toUpperCase()} Node`,
         handler: async (response) => {
           try {
-            const verifyRes = await axios.post('http://localhost:5001/api/payment/verify-subscription', {
+            const verifyRes = await axios.post('/api/payment/verify-subscription', {
               plan: planId,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_subscription_id: response.razorpay_subscription_id,

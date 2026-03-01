@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
+import axios from '../api/axios';
 import { io } from 'socket.io-client';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -23,11 +23,11 @@ const MasterOverlay = () => {
     const fetchInitialData = useCallback(async () => {
         try {
             // Fetch streamer public profile via obsKey
-            const res = await axios.get(`http://localhost:5001/api/payment/goal-by-key/${obsKey}`);
+            const res = await axios.get(`/api/payment/goal-by-key/${obsKey}`);
             setStreamer(res.data);
 
             // Fetch active Tug-of-War event
-            const towRes = await axios.get(`http://localhost:5001/api/tug-of-war/active/${res.data.streamerId}`).catch(() => ({ data: null }));
+            const towRes = await axios.get(`/api/tug-of-war/active/${res.data.streamerId}`).catch(() => ({ data: null }));
             if (towRes.data) setTowEvent(towRes.data);
 
         } catch (err) {
@@ -38,7 +38,7 @@ const MasterOverlay = () => {
     useEffect(() => {
         fetchInitialData();
 
-        const socket = io('http://localhost:5001');
+        const socket = io(import.meta.env.VITE_API_URL || 'http://localhost:5001');
         socket.emit('join-overlay', obsKey);
 
         // Listen for new donations

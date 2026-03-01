@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import axios from '../api/axios';
 import { io } from 'socket.io-client';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Player } from '@lottiefiles/react-lottie-player';
@@ -44,7 +44,7 @@ const runnerMap = {
   fire: 'https://lottie.host/c02f7415-3733-4f51-b8ef-f15599026402/1A5Xz2P99Q.json'
 };
 
-const API_BASE = `http://${window.location.hostname}:5001`;
+// API_BASE is now handled by the centralized axios configuration in src/api/axios.js
 
 const DonationPage = () => {
   const { streamerId } = useParams();
@@ -80,10 +80,10 @@ const DonationPage = () => {
     (async () => {
       try {
         const [s, t, g, r] = await Promise.all([
-          axios.get(`${API_BASE}/api/user/public/${streamerId}`),
-          axios.get(`${API_BASE}/api/payment/top/${streamerId}`),
-          axios.get(`${API_BASE}/api/payment/goal/${streamerId}`).catch(() => ({ data: null })),
-          axios.get(`${API_BASE}/api/payment/recent/${streamerId}`).catch(() => ({ data: [] }))
+          axios.get(`/api/user/public/${streamerId}`),
+          axios.get(`/api/payment/top/${streamerId}`),
+          axios.get(`/api/payment/goal/${streamerId}`).catch(() => ({ data: null })),
+          axios.get(`/api/payment/recent/${streamerId}`).catch(() => ({ data: [] }))
         ]);
         // FORCE LIGHT GLASSMORPHISM THEME FOR DONATION PAGE
         if (s.data) {
@@ -120,7 +120,7 @@ const DonationPage = () => {
         }
 
         // Fetch active Tug-of-War event
-        const towRes = await axios.get(`${API_BASE}/api/tug-of-war/active/${streamerId}`).catch(() => ({ data: null }));
+        const towRes = await axios.get(`/api/tug-of-war/active/${streamerId}`).catch(() => ({ data: null }));
         if (towRes.data) setTowEvent(towRes.data);
       } catch {
         setStreamer({ username: streamerId.toUpperCase(), streamerId, tier: 'none' });
@@ -135,7 +135,7 @@ const DonationPage = () => {
   }, [streamerId]);
 
   useEffect(() => {
-    const socket = io(API_BASE);
+    const socket = io(import.meta.env.VITE_API_URL || 'http://localhost:5001');
     socket.emit('join-room', streamerId);
     socket.on('goal-update', (updatedGoal) => {
       setGoal(prev => ({ ...prev, ...updatedGoal }));
@@ -214,7 +214,7 @@ const DonationPage = () => {
     }
     setIsProcessing(true);
     try {
-      const { data } = await axios.post(`${API_BASE}/api/payment/create-order`, {
+      const { data } = await axios.post('/api/payment/create-order', {
         streamerId, amount: Number(amount), donorName: donorName || 'Anonymous', message, sticker: selectedSticker
       });
       new window.Razorpay({
@@ -222,7 +222,7 @@ const DonationPage = () => {
         amount: data.amount, currency: "INR", name: "DropPay Protocol", order_id: data.id,
         handler: async (res) => {
           try {
-            await axios.post(`${API_BASE}/api/payment/verify`, {
+            await axios.post('/api/payment/verify', {
               ...res,
               streamerId,
               donorName: donorName || 'Anonymous',

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import axios from 'axios';
+import axios from '../api/axios';
 import {
   User, Mail, Phone, Lock, ArrowRight, ArrowLeft, CheckCircle,
   Eye, EyeOff, UserPlus, Zap, Shield, AlertCircle, Loader2, Hash,
@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 
-const API_BASE = `http://${window.location.hostname}:5001`;
+// API_BASE is now handled by the centralized axios configuration in src/api/axios.js
 
 // ─── Floating Orb ─────────────────────────────────────────────
 const Orb = ({ size, x, y, duration, color, delay }) => (
@@ -115,7 +115,7 @@ const Signup = () => {
     if (strength < 4) { setError('Security protocol rejected. Password too weak.'); return; }
     setLoading(true);
     try {
-      const res = await axios.post(`${API_BASE}/api/auth/signup`, { ...formData, email: formData.email.trim().toLowerCase() });
+      const res = await axios.post('/api/auth/signup', { ...formData, email: formData.email.trim().toLowerCase() });
       if (res.status === 201 || res.status === 206) setStep(2);
     } catch (err) { setError(err.response?.data?.msg || 'Identity node connection failed.'); }
     finally { setLoading(false); }
@@ -126,7 +126,7 @@ const Signup = () => {
     if (combined.length < 6) return;
     setLoading(true); setError('');
     try {
-      const res = await axios.post(`${API_BASE}/api/auth/verify-email`, { email: formData.email.trim().toLowerCase(), otp: combined });
+      const res = await axios.post('/api/auth/verify-email', { email: formData.email.trim().toLowerCase(), otp: combined });
       if (res.data.token) { localStorage.setItem('token', res.data.token); window.location.href = '/subscription'; }
     } catch (err) { setError(err.response?.data?.msg || 'Invalid Transmission Key.'); }
     finally { setLoading(false); }

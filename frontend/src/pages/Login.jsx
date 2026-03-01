@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import axios from 'axios';
+import axios from '../api/axios';
 import {
   Mail, Lock, Zap, Loader2, ArrowRight, ArrowLeft,
   Shield, AlertCircle, Eye, EyeOff, Users, Activity,
@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const API_BASE = `http://${window.location.hostname}:5001`;
+// API_BASE is now handled by the centralized axios configuration in src/api/axios.js
 
 // ─── Floating Orb ─────────────────────────────────────────────
 const Orb = ({ size, x, y, duration, color, delay }) => (
@@ -91,7 +91,7 @@ const Login = () => {
     e.preventDefault();
     setLoading(true); setError('');
     try {
-      const res = await axios.post(`${API_BASE}/api/auth/login`, {
+      const res = await axios.post('/api/auth/login', {
         email: formData.email.trim().toLowerCase(),
         password: formData.password
       });

@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import axios from 'axios';
+import axios from '../api/axios';
 import {
   Mail, Zap, Loader2, CheckCircle, AlertCircle,
   Send, ArrowLeft, Shield, Lock, Key, RefreshCw, Globe
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const API_BASE = `http://${window.location.hostname}:5001`;
+// API_BASE is now handled by the centralized axios configuration in src/api/axios.js
 
 // ─── Floating Orb ─────────────────────────────────────────────
 const Orb = ({ size, x, y, duration, color, delay }) => (
@@ -59,7 +59,7 @@ const ForgotPassword = () => {
     e.preventDefault();
     setLoading(true); setError('');
     try {
-      const res = await axios.post(`${API_BASE}/api/auth/forgot-password`, { email });
+      const res = await axios.post('/api/auth/forgot-password', { email });
       if (res.data) setSent(true);
     } catch (err) {
       setError(err.response?.data?.msg || 'Recovery transmission failed. Node rejected email.');

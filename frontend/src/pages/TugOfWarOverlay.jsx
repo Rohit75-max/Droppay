@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
+import axios from '../api/axios';
 import { io } from 'socket.io-client';
 import TugOfWarWidget from '../components/widgets/TugOfWarWidget';
 
@@ -12,7 +12,7 @@ const TugOfWarOverlay = () => {
 
     const fetchActiveEvent = useCallback(async () => {
         try {
-            const res = await axios.get(`http://localhost:5001/api/tug-of-war/overlay/${obsKey}`);
+            const res = await axios.get(`/api/tug-of-war/overlay/${obsKey}`);
             setEvent(res.data);
             setLoading(false);
         } catch (err) {
@@ -24,7 +24,7 @@ const TugOfWarOverlay = () => {
     useEffect(() => {
         fetchActiveEvent();
 
-        const socket = io('http://localhost:5001');
+        const socket = io(import.meta.env.VITE_API_URL || 'http://localhost:5001');
         socket.emit('join-overlay', obsKey);
 
         socket.on('tug-of-war-update', (updatedEvent) => {

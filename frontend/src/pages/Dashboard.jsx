@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import axios from 'axios';
+import axios from '../api/axios';
 import { io } from 'socket.io-client';
 import {
   LayoutDashboard, Settings, UserCircle, Trophy, HelpCircle,
@@ -30,7 +30,7 @@ const navItems = [
 ];
 
 // --- DYNAMIC INFRASTRUCTURE (Fixes Mobile Persistence) ---
-const API_BASE = `http://${window.location.hostname}:5001`;
+// API_BASE is now handled by the centralized axios configuration in src/api/axios.js
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -112,7 +112,7 @@ const Dashboard = () => {
       const token = localStorage.getItem('token');
       if (!token) { navigate('/login'); return; }
 
-      const res = await axios.get(`${API_BASE}/api/user/profile`, {
+      const res = await axios.get(`/api/user/profile`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -128,7 +128,7 @@ const Dashboard = () => {
         setTheme('light');
         localStorage.setItem('dropPayTheme', 'light');
         // Update profile on server to persist light mode
-        axios.post(`${API_BASE}/api/user/update-profile`,
+        axios.post(`/api/user/update-profile`,
           { nexusThemeMode: 'light' },
           { headers: { Authorization: `Bearer ${token}` } }
         ).catch(e => console.error("Failed to persist light theme", e));
@@ -153,9 +153,9 @@ const Dashboard = () => {
       if (res.data.partnerPack) setPartnerStickers(res.data.partnerPack);
 
       const [recent, top, stats] = await Promise.all([
-        axios.get(`${API_BASE}/api/payment/recent/${res.data.streamerId}`),
-        axios.get(`${API_BASE}/api/payment/top/${res.data.streamerId}`),
-        axios.get(`${API_BASE}/api/payment/analytics/${res.data.streamerId}?range=${timeRange}`)
+        axios.get(`/api/payment/recent/${res.data.streamerId}`),
+        axios.get(`/api/payment/top/${res.data.streamerId}`),
+        axios.get(`/api/payment/analytics/${res.data.streamerId}?range=${timeRange}`)
       ]);
 
       setRecentDrops(recent.data);
@@ -189,7 +189,7 @@ const Dashboard = () => {
   useEffect(() => {
     if (!user?.obsKey) return;
 
-    const socket = io(API_BASE);
+    const socket = io(import.meta.env.VITE_API_URL || 'http://localhost:5001');
 
     socket.on('connect', () => {
       socket.emit('join-overlay', user.obsKey);
@@ -253,7 +253,7 @@ const Dashboard = () => {
     setIsUpdatingGoal(true);
     try {
       const token = localStorage.getItem('token');
-      await axios.post('http://localhost:5001/api/user/update-goal', overrideData || goalForm, {
+      await axios.post('/api/user/update-goal', overrideData || goalForm, {
         headers: { Authorization: `Bearer ${token}` }
       });
       await fetchProfileData();
@@ -270,7 +270,7 @@ const Dashboard = () => {
   const saveAlertSettings = async (newConfig) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.post('http://localhost:5001/api/user/update-profile',
+      await axios.post('/api/user/update-profile',
         { overlaySettings: newConfig },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -301,7 +301,7 @@ const Dashboard = () => {
       window.dispatchEvent(new CustomEvent('nexus-theme-change', { detail: { theme: newTheme } }));
 
       const token = localStorage.getItem('token');
-      await axios.post(`${API_BASE}/api/user/update-profile`,
+      await axios.post(`/api/user/update-profile`,
         { nexusTheme: newTheme, nexusThemeMode: newMode },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -313,7 +313,7 @@ const Dashboard = () => {
   const equipAsset = async (category, assetId) => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.post('http://localhost:5001/api/user/equip-asset',
+      const res = await axios.post('/api/user/equip-asset',
         { category, assetId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -341,7 +341,7 @@ const Dashboard = () => {
   const triggerTestSignal = async (sticker = 'zap') => {
     try {
       if (!user?.streamerId) return;
-      await axios.post('http://localhost:5001/api/payment/test-drop', {
+      await axios.post('/api/payment/test-drop', {
         streamerId: user.streamerId,
         donorName: "Top_Supporter_77",
         amount: 500,
@@ -365,7 +365,7 @@ const Dashboard = () => {
     setIsSavingStickers(true);
     try {
       const token = localStorage.getItem('token');
-      await axios.post('http://localhost:5001/api/user/update-profile',
+      await axios.post('/api/user/update-profile',
         { partnerPack: partnerStickers },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -397,7 +397,7 @@ const Dashboard = () => {
       const payload = { ...editForm };
       if (avatarBase64) payload.avatar = avatarBase64;
 
-      const res = await axios.post('http://localhost:5001/api/user/update-profile', payload, {
+      const res = await axios.post('/api/user/update-profile', payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -419,7 +419,7 @@ const Dashboard = () => {
     try {
       const token = localStorage.getItem('token');
       const payload = { [type]: value };
-      const res = await axios.post('http://localhost:5001/api/user/update-profile', payload, {
+      const res = await axios.post('/api/user/update-profile', payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.status === 206) {
@@ -439,7 +439,7 @@ const Dashboard = () => {
     setIsVerifyingOtp(true);
     try {
       const token = localStorage.getItem('token');
-      await axios.post('http://localhost:5001/api/user/verify-profile-update', { otp: otpInput }, {
+      await axios.post('/api/user/verify-profile-update', { otp: otpInput }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       await fetchProfileData();
@@ -458,7 +458,7 @@ const Dashboard = () => {
     setIsLinkingBank(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.post('http://localhost:5001/api/user/link-bank', {}, {
+      const res = await axios.post('/api/user/link-bank', {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.data.url) {
@@ -477,7 +477,7 @@ const Dashboard = () => {
     setIsProcessingWithdraw(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.post('http://localhost:5001/api/user/withdraw', { amount }, {
+      const res = await axios.post('/api/user/withdraw', { amount }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       alert(res.data.msg || "Withdrawal sequence initiated.");

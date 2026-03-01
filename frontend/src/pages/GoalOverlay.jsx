@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
+import axios from '../api/axios';
 import io from 'socket.io-client';
 
 // --- MODULAR IMPORTS ---
@@ -31,7 +31,7 @@ const GoalOverlay = () => {
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        const res = await axios.get(`http://localhost:5001/api/payment/goal/${streamerId}`);
+        const res = await axios.get(`/api/payment/goal/${streamerId}`);
         const settings = res.data.goalSettings || res.data.goal || res.data;
 
         setGoal({
@@ -59,7 +59,7 @@ const GoalOverlay = () => {
   useEffect(() => {
     if (!trueStreamerId) return;
 
-    const socket = io('http://localhost:5001');
+    const socket = io(import.meta.env.VITE_API_URL || 'http://localhost:5001');
     socket.emit('join-room', trueStreamerId);
 
     socket.on('goal-update', (updatedGoal) => {

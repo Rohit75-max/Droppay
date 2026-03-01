@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
-import axios from 'axios';
+import axios from './api/axios';
 
 // --- PAGES ---
 import Home from './pages/Home';
@@ -22,9 +22,7 @@ import MasterOverlay from './pages/MasterOverlay';
 import LiveThemeEngine from './components/LiveThemeEngine';
 
 // --- DYNAMIC INFRASTRUCTURE (Fixes Mobile Persistence) ---
-const API_BASE = window.location.hostname === 'localhost' 
-  ? 'http://localhost:5001' 
-  : 'https://droppay.onrender.com';
+// API_BASE is now handled by the centralized axios configuration in src/api/axios.js
 
 // --- PROFESSIONAL GATE: SECURE UPLINK ---
 const MissionGate = ({ children }) => {
@@ -40,7 +38,7 @@ const MissionGate = ({ children }) => {
         return;
       }
       try {
-        const res = await axios.get(`${API_BASE}/api/user/profile`, {
+        const res = await axios.get('/api/user/profile', {
           headers: { Authorization: `Bearer ${token}` }
         });
 

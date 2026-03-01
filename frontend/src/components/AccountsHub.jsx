@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import axios from 'axios';
+import axios from '../api/axios';
 // --- Protocol Engine ---
 import { calculateTierStatus } from '../protocol/tierProtocol';
 
@@ -44,7 +44,7 @@ const AccountsHub = ({
     setIsRequestingOtp(true);
     try {
       const token = localStorage.getItem('token');
-      await axios.post('http://localhost:5001/api/user/request-verification', { type }, {
+      await axios.post('/api/user/request-verification', { type }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setVerifyType(type);
@@ -61,7 +61,7 @@ const AccountsHub = ({
     setIsVerifyingOtp(true);
     try {
       const token = localStorage.getItem('token');
-      await axios.post('http://localhost:5001/api/user/confirm-verification', { type: verifyType, otp: otpInput }, {
+      await axios.post('/api/user/confirm-verification', { type: verifyType, otp: otpInput }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (typeof fetchProfileData === 'function') await fetchProfileData();
@@ -99,7 +99,7 @@ const AccountsHub = ({
     try {
       const token = localStorage.getItem('token');
       // Request an OTP to the user's phone for high-security action
-      await axios.post('http://localhost:5001/api/user/request-verification', { type: 'phone' }, {
+      await axios.post('/api/user/request-verification', { type: 'phone' }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setBankOtpMode(true);
@@ -116,7 +116,7 @@ const AccountsHub = ({
     setIsProcessingBank(true);
     try {
       const token = localStorage.getItem('token');
-      await axios.post('http://localhost:5001/api/user/add-bank-account', {
+      await axios.post('/api/user/add-bank-account', {
         ...bankForm,
         otp: bankOtpInput
       }, {

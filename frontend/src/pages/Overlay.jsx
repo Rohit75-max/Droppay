@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import { AnimatePresence, motion } from 'framer-motion';
-import axios from 'axios';
+import axios from '../api/axios';
 
 // --- MODULAR IMPORT ---
 import AlertPreview from '../components/AlertPreview';
@@ -29,14 +29,14 @@ const Overlay = () => {
     // 1. Fetch Initial Settings
     const fetchSettings = async () => {
       try {
-        const res = await axios.get(`http://localhost:5001/api/payment/overlay-settings/${obsKey}`);
+        const res = await axios.get(`/api/payment/overlay-settings/${obsKey}`);
         if (res.data) setSettings(prev => ({ ...prev, ...res.data }));
       } catch (err) { console.error("Overlay sync offline"); }
     };
     fetchSettings();
 
     // 2. Connect to DropPay Engine
-    const socket = io('http://localhost:5001');
+    const socket = io(import.meta.env.VITE_API_URL || 'http://localhost:5001');
 
     socket.on('connect', () => {
       socket.emit('join-overlay', obsKey);

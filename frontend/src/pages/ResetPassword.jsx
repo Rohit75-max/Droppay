@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import axios from '../api/axios';
 import { Lock, Loader2, CheckCircle, ShieldCheck } from 'lucide-react';
 
 const ResetPassword = () => {
@@ -21,7 +21,7 @@ const ResetPassword = () => {
     setLoading(true);
     try {
       // Calling the reset-password endpoint we added to authRoutes
-      await axios.post('http://localhost:5001/api/auth/reset-password', {
+      await axios.post('/api/auth/reset-password', {
         token,
         newPassword
       });
@@ -36,9 +36,9 @@ const ResetPassword = () => {
 
   return (
     <div className="flex items-center justify-center min-h-screen p-4 bg-[#050505] text-white">
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }} 
-        animate={{ opacity: 1, y: 0 }} 
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md p-8 rounded-[2.5rem] bg-[#111] border border-white/5 shadow-2xl"
       >
         {!success ? (
@@ -52,31 +52,31 @@ const ResetPassword = () => {
             <form onSubmit={handleReset} className="space-y-4">
               <div className="relative group">
                 <Lock className="absolute left-4 top-4 text-slate-600 w-5 h-5 group-focus-within:text-indigo-500 transition-colors" />
-                <input 
-                  type="password" 
-                  value={newPassword} 
-                  onChange={(e) => setNewPassword(e.target.value)} 
-                  placeholder="New Password" 
-                  className="w-full bg-[#1a1a1a] border border-white/5 rounded-2xl py-4 pl-12 pr-4 focus:border-indigo-500 outline-none transition-all" 
-                  required 
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="New Password"
+                  className="w-full bg-[#1a1a1a] border border-white/5 rounded-2xl py-4 pl-12 pr-4 focus:border-indigo-500 outline-none transition-all"
+                  required
                 />
               </div>
 
               <div className="relative group">
                 <Lock className="absolute left-4 top-4 text-slate-600 w-5 h-5 group-focus-within:text-indigo-500 transition-colors" />
-                <input 
-                  type="password" 
-                  value={confirmPassword} 
-                  onChange={(e) => setConfirmPassword(e.target.value)} 
-                  placeholder="Confirm New Password" 
-                  className="w-full bg-[#1a1a1a] border border-white/5 rounded-2xl py-4 pl-12 pr-4 focus:border-indigo-500 outline-none transition-all" 
-                  required 
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Confirm New Password"
+                  className="w-full bg-[#1a1a1a] border border-white/5 rounded-2xl py-4 pl-12 pr-4 focus:border-indigo-500 outline-none transition-all"
+                  required
                 />
               </div>
 
-              <button 
-                type="submit" 
-                disabled={loading} 
+              <button
+                type="submit"
+                disabled={loading}
                 className="w-full bg-indigo-600 hover:bg-indigo-500 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50 mt-4"
               >
                 {loading ? <Loader2 className="animate-spin" /> : "Update Password"}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import axios from '../api/axios';
 import { useNavigate, Link } from 'react-router-dom';
 import {
     ShieldAlert, Lock, Eye, EyeOff, Loader2,
@@ -120,12 +120,8 @@ const AdminLogin = () => {
         setLoading(true); setErrorMsg(''); setAuthState('loading');
 
         try {
-            // ─── NEW DYNAMIC API URL ───────────────────────────────────────
-            const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
-
-            const res = await axios.post(`${API_BASE_URL}/api/auth/admin-login`,
-                { email, password },
-                { withCredentials: true } // ESSENTIAL: Allows the browser to store the secure cookie
+            const res = await axios.post('/api/auth/admin-login',
+                { email, password }
             );
             // ───────────────────────────────────────────────────────────────
 
