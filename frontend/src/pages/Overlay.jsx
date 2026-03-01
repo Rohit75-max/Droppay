@@ -36,7 +36,7 @@ const Overlay = () => {
     fetchSettings();
 
     // 2. Connect to DropPay Engine
-    const socket = io(import.meta.env.VITE_API_URL || 'http://localhost:5001');
+    const socket = io(process.env.REACT_APP_API_URL || 'http://localhost:5001');
 
     socket.on('connect', () => {
       socket.emit('join-overlay', obsKey);

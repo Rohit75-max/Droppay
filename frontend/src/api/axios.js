@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || "http://localhost:5001",
+    baseURL: process.env.REACT_APP_API_URL || "http://localhost:5001",
     withCredentials: true // Fixes the cookie issue for ALL pages at once
 });
 

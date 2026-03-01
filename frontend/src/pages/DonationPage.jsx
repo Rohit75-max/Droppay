@@ -135,7 +135,7 @@ const DonationPage = () => {
   }, [streamerId]);
 
   useEffect(() => {
-    const socket = io(import.meta.env.VITE_API_URL || 'http://localhost:5001');
+    const socket = io(process.env.REACT_APP_API_URL || 'http://localhost:5001');
     socket.emit('join-room', streamerId);
     socket.on('goal-update', (updatedGoal) => {
       setGoal(prev => ({ ...prev, ...updatedGoal }));

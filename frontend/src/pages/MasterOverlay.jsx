@@ -38,7 +38,7 @@ const MasterOverlay = () => {
     useEffect(() => {
         fetchInitialData();
 
-        const socket = io(import.meta.env.VITE_API_URL || 'http://localhost:5001');
+        const socket = io(process.env.REACT_APP_API_URL || 'http://localhost:5001');
         socket.emit('join-overlay', obsKey);
 
         // Listen for new donations
