@@ -118,8 +118,17 @@ const AdminLogin = () => {
         e.preventDefault();
         if (isLocked) return;
         setLoading(true); setErrorMsg(''); setAuthState('loading');
+
         try {
-            const res = await axios.post('http://localhost:5001/api/auth/admin-login', { email, password });
+            // ─── NEW DYNAMIC API URL ───────────────────────────────────────
+            const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
+
+            const res = await axios.post(`${API_BASE_URL}/api/auth/admin-login`,
+                { email, password },
+                { withCredentials: true } // ESSENTIAL: Allows the browser to store the secure cookie
+            );
+            // ───────────────────────────────────────────────────────────────
+
             setAuthState('success');
             localStorage.setItem('token', res.data.token);
             setTimeout(() => {
