@@ -157,7 +157,7 @@ function AppContent() {
   }, [nexusTheme]);
 
   return (
-    <div className={`min-h-screen relative overflow-hidden text-[var(--nexus-text)] selection:bg-emerald-500/30 ${isOverlay ? 'bg-transparent' : (nexusTheme === 'void' ? 'bg-[var(--nexus-bg)]' : 'bg-transparent')}`}>
+    <div className={`min-h-screen relative overflow-hidden text-[var(--nexus-text)] selection:bg-emerald-500/30 bg-transparent`}>
       {!isOverlay && (
         <Helmet>
           <title>DropPay | The Ultimate Streamer Protocol</title>

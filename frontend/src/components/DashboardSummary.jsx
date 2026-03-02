@@ -87,8 +87,8 @@ const DashboardSummary = ({
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2 mb-1">
                 <Wallet className="w-4 h-4 text-[var(--nexus-accent)]" />
-                <span className="text-[10px] uppercase font-black tracking-[0.3em] text-[var(--nexus-text-muted)]">Node Balance</span>
-                <ShieldCheck className="w-3 h-3 text-[var(--nexus-accent)] opacity-50" />
+                <span className="text-[10px] uppercase font-black tracking-[0.3em] text-[var(--nexus-accent)]">DropPay Wallet</span>
+                <ShieldCheck className="w-3 h-3 text-[var(--nexus-accent)]" />
               </div>
               <h2 className={`text-4xl sm:text-5xl md:text-6xl font-black italic tracking-tighter transition-colors duration-500 text-[var(--nexus-text)] group-hover:text-[var(--nexus-accent)] flex items-center gap-3 gold-text-shimmer flex-wrap`}>
                 <span className="text-xl sm:text-2xl md:text-3xl text-[var(--nexus-text-muted)] not-italic opacity-40"><IndianRupee /></span>
@@ -195,8 +195,8 @@ const DashboardSummary = ({
                     <Zap className={`w-5 h-5 text-[var(--nexus-accent)]`} />
                   </div>
                   <div className="flex flex-col">
-                    <h3 className="text-xs font-black uppercase tracking-widest text-[var(--nexus-text-muted)] italic flex items-center gap-2">Revenue Telemetry <Sparkles className="w-3 h-3 text-[var(--nexus-accent)]" /></h3>
-                    <span className="text-[7px] font-bold text-[var(--nexus-accent)] uppercase animate-pulse flex items-center gap-1"><CheckCircle className="w-2 h-2" /> Live Signal Processing</span>
+                    <h3 className="text-xs font-black uppercase tracking-widest text-[var(--nexus-text-muted)] italic flex items-center gap-2">DropPay Telemetry <Sparkles className="w-3 h-3 text-[var(--nexus-accent)]" /></h3>
+                    <span className="text-[7px] font-bold text-[var(--nexus-accent)] uppercase animate-pulse flex items-center gap-1"><CheckCircle className="w-2 h-2" /> Live Analytics Engine</span>
                   </div>
                 </div>
                 <div className={`w-full sm:w-auto flex p-1 rounded-[var(--nexus-radius)] border backdrop-blur-xl bg-[var(--nexus-panel)] border-[var(--nexus-border)] shadow-inner`}>
@@ -298,8 +298,8 @@ const DashboardSummary = ({
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <p className={`text-xs font-black uppercase tracking-widest text-[var(--nexus-text-muted)]`}>Listening</p>
-                  <p className={`text-[9px] font-bold italic tracking-tighter animate-pulse text-[var(--nexus-accent)]/70`}>Waiting for drops...</p>
+                  <p className={`text-xs font-black uppercase tracking-widest text-[var(--nexus-text-muted)]`}>Feed Offline</p>
+                  <p className={`text-[9px] font-bold italic tracking-tighter animate-pulse text-[var(--nexus-accent)]/70`}>Signal waiting for uplink...</p>
                 </div>
               </div>
             ) : (

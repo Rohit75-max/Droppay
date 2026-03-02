@@ -6,6 +6,8 @@ import {
 } from 'lucide-react';
 
 const HelpCenter = ({ theme }) => {
+  const [searchQuery, setSearchQuery] = React.useState("");
+
   const faqItems = [
     { q: "How do settlements work?", a: "Revenue is auto-settled via Razorpay Route protocols. Standard clearing time is T+2 business days. You can track individual drops in your Nexus Summary." },
     { q: "How do I unlock lower platform fees?", a: "The Protocol operates on a 15/10/5 system. You can lower your fee by hitting 5 successful referrals in the 'Growth Missions' section." },
@@ -13,25 +15,30 @@ const HelpCenter = ({ theme }) => {
     { q: "Can I use custom Lottie animations?", a: "Yes. Pro and Legend tier members can inject custom JSON URLs for alerts via the Partner Pack Studio in the Control Center." }
   ];
 
+  const filteredFaqs = faqItems.filter(item =>
+    item.q.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    item.a.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
-    <div className="max-w-[1500px] mx-auto space-y-16 font-sans pb-20 w-full animate-in fade-in slide-in-from-bottom-4 duration-700 px-4 md:px-8">
+    <div className="max-w-6xl mx-auto space-y-12 font-sans pb-20 w-full animate-in fade-in slide-in-from-bottom-4 duration-700 px-4 md:px-8 pt-4">
 
-      {/* --- HERO SECTION (CANVA INSPIRED) --- */}
-      <div className="relative w-full py-20 px-4 md:px-8 overflow-hidden rounded-[4rem]">
+      {/* --- HERO SECTION (REFINED) --- */}
+      <div className="relative w-full py-16 px-4 md:px-8 overflow-hidden rounded-[4rem]">
         {/* Large, Atmospheric Background Glows */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] bg-gradient-to-r from-[var(--nexus-accent)]/10 via-purple-500/5 to-emerald-500/10 blur-[150px] rounded-full opacity-60" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-gradient-to-r from-[var(--nexus-accent)]/10 via-purple-500/5 to-emerald-500/10 blur-[120px] rounded-full opacity-60" />
 
-        <div className="relative z-10 flex flex-col items-center text-center space-y-10">
+        <div className="relative z-10 flex flex-col items-center text-center space-y-8">
           <div className="space-y-4 text-pretty">
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-4xl md:text-6xl lg:text-7xl font-black uppercase italic tracking-tighter text-[var(--nexus-text)] leading-[1.1] md:leading-none"
+              className="text-4xl md:text-5xl lg:text-6xl font-black uppercase italic tracking-tighter text-[var(--nexus-text)] leading-[1.1] md:leading-none"
             >
-              How can we <span className="text-[var(--nexus-accent)]">Help?</span>
+              DropPay <span className="text-[var(--nexus-accent)]">Help.</span>
             </motion.h2>
-            <p className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] md:tracking-[0.5em] text-[var(--nexus-text-muted)] italic opacity-40">
-              Nexus Protocol Intelligence & Support Hub
+            <p className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-[var(--nexus-accent)] italic opacity-60">
+              Official Protocol Intelligence Hub
             </p>
           </div>
 
@@ -39,85 +46,122 @@ const HelpCenter = ({ theme }) => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="relative max-w-2xl mx-auto w-full group/search px-4"
+            className="relative max-w-xl mx-auto w-full group/search px-4"
           >
             <div className="absolute inset-y-0 left-10 flex items-center pointer-events-none text-[var(--nexus-accent)] z-20">
-              <Search className="w-5 h-5 group-focus-within/search:scale-110 transition-transform" />
+              <Search className="w-4 h-4 group-focus-within/search:scale-110 transition-transform" />
             </div>
             <input
               type="text"
-              placeholder="Search library, missions, or OBS diagnostics..."
-              className="w-full bg-[var(--nexus-panel)]/40 backdrop-blur-2xl border-2 border-[var(--nexus-border)] rounded-2xl py-4 md:py-5 pl-14 md:pl-16 pr-8 text-sm md:text-base text-[var(--nexus-text)] focus:border-[var(--nexus-accent)] focus:bg-[var(--nexus-bg)]/80 focus:shadow-[0_0_40px_rgba(var(--nexus-accent-rgb),0.15)] focus:scale-[1.01] outline-none transition-all font-bold placeholder:text-[var(--nexus-text-muted)] placeholder:font-medium shadow-xl hover:bg-[var(--nexus-panel)]/60"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search library or OBS diagnostics..."
+              className="w-full bg-[var(--nexus-panel)]/40 backdrop-blur-2xl border-2 border-[var(--nexus-border)] rounded-2xl py-3.5 md:py-4 pl-12 md:pl-14 pr-12 text-sm text-[var(--nexus-text)] focus:border-[var(--nexus-accent)] focus:bg-[var(--nexus-bg)]/80 focus:shadow-[0_10px_30px_rgba(var(--nexus-accent-rgb),0.1)] outline-none transition-all font-bold placeholder:text-[var(--nexus-text-muted)] placeholder:font-medium shadow-lg hover:bg-[var(--nexus-panel)]/60"
             />
-            {/* Subtle glow ring that only shows on focus */}
-            <div className="absolute inset-[-4px] rounded-[1.2rem] bg-[var(--nexus-accent)]/10 opacity-0 group-focus-within/search:opacity-100 blur-md transition-opacity pointer-events-none -z-10 mx-4" />
-          </motion.div>
-
-          {/* Quick Links / Badges below search */}
-          <div className="flex flex-wrap justify-center gap-2 md:gap-3 mt-6 px-4">
-            {['OBS Setup', 'Payouts', 'referrals', 'Alerts'].map(chip => (
-              <button key={chip} className="px-4 md:px-5 py-2 rounded-full bg-[var(--nexus-panel)] border border-[var(--nexus-border)] text-[8px] md:text-[9px] font-black uppercase tracking-widest text-[var(--nexus-text-muted)] hover:border-[var(--nexus-accent)] hover:text-[var(--nexus-accent)] transition-all">
-                #{chip}
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-8 top-1/2 -translate-y-1/2 text-[var(--nexus-text-muted)] hover:text-[var(--nexus-accent)] transition-colors"
+              >
+                <ShieldAlert className="w-4 h-4 rotate-45" />
               </button>
-            ))}
-          </div>
+            )}
+            {/* Subtle glow ring that only shows on focus */}
+            <div className="absolute inset-[-3px] rounded-[1.2rem] bg-[var(--nexus-accent)]/10 opacity-0 group-focus-within/search:opacity-100 blur-md transition-opacity pointer-events-none -z-10 mx-4" />
+          </motion.div>
         </div>
       </div>
 
-      {/* --- CONTENT GRID (DASHBOARD STYLE FOR WIDE SCREENS) --- */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-12">
+      {/* --- CONTENT GRID (DASHBOARD STYLE) --- */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
 
         {/* MAIN COLUMN (LEFT) - FAQ CONTENT */}
-        <div className="xl:col-span-8 space-y-12">
+        <div className="lg:col-span-8 space-y-10">
           {/* --- KNOWLEDGE HUB (FAQ) --- */}
-          <div className="space-y-8 w-full">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 px-4 border-l-4 border-[var(--nexus-accent)] pl-6">
-              <div className="space-y-2">
-                <h3 className="text-2xl md:text-3xl font-black uppercase italic tracking-tighter text-[var(--nexus-text)]">Knowledge Hub</h3>
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--nexus-accent)] opacity-60 italic">Platform protocols & architecture</p>
+          <div className="space-y-6 w-full">
+            <div className="flex flex-row items-center justify-between gap-4 px-2">
+              <div className="flex items-center gap-3">
+                <div className="w-1.5 h-6 bg-[var(--nexus-accent)] rounded-full" />
+                <h3 className="text-xl md:text-2xl font-black uppercase italic tracking-tighter text-[var(--nexus-text)]">Knowledge Hub</h3>
               </div>
-              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--nexus-panel)] border border-[var(--nexus-border)] text-[9px] font-black uppercase tracking-widest text-[var(--nexus-text-muted)]">
-                <MessageSquare className="w-3 h-3 text-[var(--nexus-accent)]" /> {faqItems.length} Core Modules
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[var(--nexus-panel)] border border-[var(--nexus-border)] text-[8px] font-black uppercase tracking-widest text-[var(--nexus-text-muted)]">
+                <MessageSquare className="w-2.5 h-2.5 text-[var(--nexus-accent)]" /> {filteredFaqs.length} Nodes Identified
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 w-full">
-              {faqItems.map((faq, idx) => (
-                <details key={idx} className="group outline-none border-none w-full appearance-none">
-                  <summary className="flex justify-between items-center p-6 md:p-8 cursor-pointer list-none rounded-3xl border border-[var(--nexus-border)] bg-[var(--nexus-panel)] hover:border-[var(--nexus-accent)]/40 transition-all outline-none group-open:rounded-b-none group-open:border-b-0 group-open:bg-[var(--nexus-bg)]/20 shadow-sm">
-                    <div className="flex items-center gap-4">
-                      <div className="w-8 h-8 rounded-full border border-[var(--nexus-border)] flex items-center justify-center text-[10px] font-black text-[var(--nexus-accent)] group-hover:scale-110 transition-transform">
-                        {idx + 1}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+              {filteredFaqs.length > 0 ? (
+                filteredFaqs.map((faq, idx) => (
+                  <details key={idx} className="group outline-none border-none w-full appearance-none">
+                    <summary className="flex justify-between items-center p-5 cursor-pointer list-none rounded-2xl border border-[var(--nexus-border)] bg-[var(--nexus-panel)] hover:border-[var(--nexus-accent)]/40 hover:scale-[1.01] transition-all outline-none group-open:rounded-b-none group-open:border-b-0 group-open:bg-[var(--nexus-bg)]/20 shadow-sm relative overflow-hidden">
+                      <div className="flex items-center gap-3">
+                        <div className="w-6 h-6 rounded-lg border border-[var(--nexus-border)] flex items-center justify-center text-[9px] font-black text-[var(--nexus-accent)] group-hover:bg-[var(--nexus-accent)] group-hover:text-black transition-all">
+                          {idx + 1}
+                        </div>
+                        <span className="text-[10px] font-black uppercase italic pr-2 text-[var(--nexus-text)] leading-tight">{faq.q}</span>
                       </div>
-                      <span className="text-xs font-black uppercase italic pr-4 text-[var(--nexus-text)] group-hover:text-[var(--nexus-accent)] transition-colors">{faq.q}</span>
-                    </div>
-                    <div className="w-8 h-8 rounded-full bg-[var(--nexus-bg)] border border-[var(--nexus-border)] flex items-center justify-center group-hover:bg-[var(--nexus-accent)] group-hover:text-black transition-all">
-                      <ChevronRight className="w-4 h-4 group-open:rotate-90 transition-transform" />
-                    </div>
-                  </summary>
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.99 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="px-8 md:px-12 pb-8 md:pb-10 pt-2 text-xs text-[var(--nexus-text-muted)] leading-relaxed font-medium bg-[var(--nexus-panel)] border-x border-b border-[var(--nexus-border)] rounded-b-3xl shadow-[inset_0_20px_40px_rgba(0,0,0,0.1)]"
-                  >
-                    <div className="max-w-4xl p-6 rounded-2xl bg-[var(--nexus-bg)]/30 border border-[var(--nexus-border)]/50 italic leading-loose">
-                      {faq.a}
-                    </div>
-                  </motion.div>
-                </details>
-              ))}
+                      <ChevronRight className="w-3 h-3 text-[var(--nexus-text-muted)] group-open:rotate-90 transition-transform shrink-0" />
+                    </summary>
+                    <motion.div
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="px-6 pb-6 pt-2 text-[10px] text-[var(--nexus-text-muted)] leading-relaxed font-medium bg-[var(--nexus-panel)] border-x border-b border-[var(--nexus-border)] rounded-b-2xl shadow-inner italic"
+                    >
+                      <div className="p-4 rounded-xl bg-[var(--nexus-bg)]/30 border border-[var(--nexus-border)]/50">
+                        {faq.a}
+                      </div>
+                    </motion.div>
+                  </details>
+                ))
+              ) : (
+                <div className="col-span-1 md:col-span-2 py-12 text-center space-y-4 bg-[var(--nexus-panel)]/50 rounded-[2rem] border border-dashed border-[var(--nexus-border)]">
+                  <div className="w-12 h-12 bg-rose-500/10 rounded-full flex items-center justify-center mx-auto">
+                    <ShieldAlert className="w-6 h-6 text-rose-500" />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-black uppercase italic text-[var(--nexus-text)]">No matching intel found</p>
+                    <p className="text-[8px] font-bold uppercase tracking-widest text-[var(--nexus-text-muted)] opacity-60">Refine your search parameters</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* --- GLOBAL ACCESS CTA (RELOCATED) --- */}
+          <div className="relative w-full p-[1px] rounded-[2.5rem] bg-gradient-to-br from-[var(--nexus-accent)]/40 to-emerald-400/20 shadow-xl mt-6">
+            <div className="w-full bg-[var(--nexus-bg)]/60 backdrop-blur-xl rounded-[2.4rem] p-8 md:p-10 flex flex-col md:flex-row items-center text-center md:text-left justify-between gap-8 overflow-hidden relative">
+              <div className="relative z-10 space-y-3">
+                <div className="flex items-center justify-center md:justify-start gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-[var(--nexus-accent)] animate-pulse" />
+                  <span className="text-[8px] font-black uppercase tracking-[0.2em] text-[var(--nexus-accent)]">Support Sync Active</span>
+                </div>
+                <h4 className="text-2xl font-black uppercase italic tracking-tighter text-[var(--nexus-text)] leading-tight">
+                  Need More <span className="text-[var(--nexus-accent)]">Help?</span>
+                </h4>
+                <p className="text-[10px] text-[var(--nexus-text-muted)] font-bold uppercase tracking-widest opacity-50 leading-relaxed max-w-sm">
+                  Priority uplink active for Pro & Legend tier protocols. Connect with our technical task force.
+                </p>
+              </div>
+
+              <button className="relative z-10 min-w-[200px] bg-[var(--nexus-accent)] text-black py-4 px-8 rounded-xl font-black uppercase italic text-[10px] shadow-lg hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-3 group">
+                <MailIcon className="w-4 h-4 group-hover:rotate-12 transition-transform" />
+                Connect Support Hub
+              </button>
             </div>
           </div>
         </div>
 
         {/* SIDEBAR (RIGHT) - SERVICE TILES & CTA */}
-        <div className="xl:col-span-4 space-y-12">
+        <div className="lg:col-span-4 space-y-10">
 
           {/* Section Header for Sidebar */}
-          <div className="space-y-4">
-            <h3 className="text-xl font-black uppercase italic tracking-tighter text-[var(--nexus-text)] px-4">Support Nodes</h3>
+          <div className="space-y-6">
+            <div className="flex items-center gap-3 px-2">
+              <div className="w-1 h-4 bg-[var(--nexus-accent)]/40 rounded-full" />
+              <h3 className="text-lg font-black uppercase italic tracking-tighter text-[var(--nexus-text)]">Support Nodes</h3>
+            </div>
 
-            <div className="grid grid-cols-1 gap-6 w-full px-2">
+            <div className="grid grid-cols-1 gap-4 w-full px-1">
               {[
                 { icon: Zap, title: "Engine Integration", subtitle: "OBS & Overlays", desc: "Sync browser sources and 3D alert nodes." },
                 { icon: Wallet, title: "Settlement Portal", subtitle: "Finance & Payouts", desc: "Manage treasury and settlement cycles." },
@@ -125,47 +169,24 @@ const HelpCenter = ({ theme }) => {
               ].map((item, i) => (
                 <motion.div
                   key={i}
-                  whileHover={{ x: 5, scale: 1.02 }}
-                  className="relative p-8 rounded-[2.5rem] border border-[var(--nexus-border)] bg-[var(--nexus-panel)] hover:border-[var(--nexus-accent)]/30 hover:shadow-2xl transition-all cursor-pointer group flex flex-col items-start text-left overflow-hidden shadow-sm"
+                  whileHover={{ x: 4, scale: 1.01 }}
+                  className="relative p-6 rounded-[2rem] border border-[var(--nexus-border)] bg-[var(--nexus-panel)] hover:border-[var(--nexus-accent)]/30 transition-all cursor-pointer group flex items-start text-left overflow-hidden shadow-sm"
                 >
-                  <div className="absolute top-0 right-0 p-6 opacity-[0.03] group-hover:opacity-[0.1] transition-opacity">
-                    <item.icon className="w-20 h-20" />
+                  <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity">
+                    <item.icon className="w-16 h-16" />
                   </div>
 
-                  <div className="w-12 h-12 bg-[var(--nexus-bg)] rounded-xl flex items-center justify-center mb-6 border border-[var(--nexus-border)] group-hover:border-[var(--nexus-accent)] shadow-inner transition-colors">
-                    <item.icon className="w-5 h-5 text-[var(--nexus-accent)] group-hover:scale-110 transition-transform" />
+                  <div className="w-10 h-10 bg-[var(--nexus-bg)] rounded-xl flex items-center justify-center mb-0 mr-4 border border-[var(--nexus-border)] group-hover:border-[var(--nexus-accent)] shadow-inner transition-colors shrink-0">
+                    <item.icon className="w-4 h-4 text-[var(--nexus-accent)] group-hover:scale-110 transition-transform" />
                   </div>
 
-                  <div className="space-y-2">
-                    <span className="text-[8px] font-black uppercase tracking-[0.2em] text-[var(--nexus-accent)] opacity-70 italic">{item.subtitle}</span>
-                    <h4 className="font-black text-base uppercase italic tracking-tight text-[var(--nexus-text)]">{item.title}</h4>
-                    <p className="text-[10px] text-[var(--nexus-text-muted)] leading-relaxed font-medium opacity-80">{item.desc}</p>
+                  <div className="space-y-1">
+                    <span className="text-[7px] font-black uppercase tracking-[0.2em] text-[var(--nexus-accent)] opacity-70 italic">{item.subtitle}</span>
+                    <h4 className="font-black text-sm uppercase italic tracking-tight text-[var(--nexus-text)] leading-none">{item.title}</h4>
+                    <p className="text-[9px] text-[var(--nexus-text-muted)] leading-relaxed font-medium opacity-70 line-clamp-2">{item.desc}</p>
                   </div>
                 </motion.div>
               ))}
-            </div>
-          </div>
-
-          {/* --- GLOBAL ACCESS CTA (SIDEBAR VERSION) --- */}
-          <div className="relative w-full p-1 rounded-[3rem] bg-gradient-to-br from-[var(--nexus-accent)] to-emerald-400 shadow-[0_20px_40px_rgba(var(--nexus-accent-rgb),0.2)]">
-            <div className="w-full bg-[var(--nexus-bg)] rounded-[2.8rem] p-8 md:p-10 flex flex-col items-center text-center gap-8 overflow-hidden relative">
-              <div className="relative z-10 space-y-4">
-                <div className="flex items-center justify-center gap-3">
-                  <div className="w-2 h-2 rounded-full bg-[var(--nexus-accent)] animate-pulse" />
-                  <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[var(--nexus-accent)]">Direct Access Active</span>
-                </div>
-                <h4 className="text-2xl font-black uppercase italic tracking-tighter text-[var(--nexus-text)] leading-tight">
-                  Need More <span className="text-[var(--nexus-accent)]">Help?</span>
-                </h4>
-                <p className="text-[10px] text-[var(--nexus-text-muted)] font-bold uppercase tracking-widest opacity-60 leading-relaxed max-w-[200px] mx-auto">
-                  Priority tokens active for Pro & Legend protocols.
-                </p>
-              </div>
-
-              <button className="relative z-10 w-full bg-[var(--nexus-accent)] text-black py-4 rounded-xl font-black uppercase italic text-[10px] shadow-2xl hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-3 group">
-                <MailIcon className="w-4 h-4 group-hover:rotate-12 transition-transform" />
-                ConnectSupport
-              </button>
             </div>
           </div>
         </div>

@@ -1,16 +1,31 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState } from 'react';
+import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 // --- Protocol Engine ---
 import { calculateTierStatus, MILESTONES } from '../protocol/tierProtocol';
 
 import {
   Award, TrendingUp, Zap, ShieldCheck, Users, Copy,
-  CheckCircle, Gift, Target, Crosshair, Sparkles, ArrowUpRight
+  CheckCircle, Gift, Target, Crosshair, Sparkles, ArrowUpRight,
+  Activity, ZapOff, Fingerprint, Cpu
 } from 'lucide-react';
 
 const GrowthMissions = ({
   theme, user, copyToClipboard, copiedType
 }) => {
+  // --- Elite Interaction Protocol ---
+  const [showTelemetry, setShowTelemetry] = useState(false);
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  const springConfig = { damping: 20, stiffness: 100 };
+  const sprX = useSpring(mouseX, springConfig);
+  const sprY = useSpring(mouseY, springConfig);
+
+  const handleMouseMove = ({ currentTarget, clientX, clientY }) => {
+    const { left, top } = currentTarget.getBoundingClientRect();
+    mouseX.set(clientX - left);
+    mouseY.set(clientY - top);
+  };
   // Activate the Engine
   const referralCount = user?.referralCount || 0;
   const status = calculateTierStatus(user?.tier || 'starter', referralCount);
@@ -42,136 +57,271 @@ const GrowthMissions = ({
   ];
 
   const getCardStyle = () => {
-    return 'bg-[var(--nexus-panel)] border-[var(--nexus-border)] shadow-[var(--nexus-glow)]';
+    return 'bg-[var(--nexus-panel)]/40 backdrop-blur-3xl border-[var(--nexus-border)]/60 shadow-[var(--nexus-glow)]';
+  };
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { y: 0, opacity: 1 }
   };
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="max-w-7xl mx-auto space-y-10 font-sans pb-20 pt-4 w-full"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="max-w-7xl mx-auto space-y-8 font-sans pb-20 pt-4 w-full"
     >
-
-      {/* --- HEADER & STATS --- */}
-      <div className="flex flex-col md:flex-row justify-between items-end gap-6 w-full">
-        <div className="space-y-1 w-full md:w-auto">
-          <h2 className={`text-3xl font-black uppercase italic tracking-tighter flex items-center gap-3 text-[var(--nexus-text)]`}>
-            <Award className="w-8 h-8 text-[var(--nexus-accent)]" /> Missions
-          </h2>
-          <p className="text-[var(--nexus-text-muted)] text-[10px] font-black uppercase tracking-[0.3em]">Recruit streamers to unlock elite protocols</p>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start w-full">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start w-full">
 
         {/* --- MILESTONE TRACKER --- */}
-        <div className={`w-full lg:col-span-8 border rounded-[2.5rem] p-8 lg:p-12 space-y-12 relative overflow-hidden transition-all nexus-card ${getCardStyle()}`}>
-          <div className={`absolute top-0 right-0 w-64 h-64 rounded-full blur-[100px] -mr-32 -mt-32 bg-[var(--nexus-accent)]/5`} />
+        <motion.div
+          variants={itemVariants}
+          className={`w-full lg:col-span-8 border rounded-[3rem] p-5 lg:p-10 lg:pt-3 space-y-7 relative overflow-hidden transition-all nexus-card ${getCardStyle()}`}
+        >
+          {/* Animated Background Pulse */}
+          <div className="absolute inset-0 bg-gradient-to-br from-[var(--nexus-accent)]/5 via-transparent to-transparent pointer-events-none" />
+          <div className={`absolute top-0 right-0 w-80 h-80 rounded-full blur-[120px] -mr-40 -mt-40 bg-[var(--nexus-accent)]/10 animate-pulse`} />
 
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10 w-full">
-            <div className="flex flex-col">
-              <div className="flex items-baseline gap-2 mb-1">
-                <span className="text-4xl font-black italic text-[var(--nexus-accent)] leading-none">{referralCount.toString().padStart(2, '0')}</span>
-                <span className="text-[8px] font-black uppercase tracking-widest text-[var(--nexus-text-muted)] opacity-50">Network Size</span>
+          {/* INTEGRATED HEADER - ELITE */}
+          <div className="relative z-10 flex items-center justify-between pb-3 border-b border-[var(--nexus-border)]/30">
+            <div className="flex items-center gap-4">
+              <div className="p-2.5 bg-gradient-to-br from-[var(--nexus-accent)]/20 to-transparent rounded-xl border border-[var(--nexus-accent)]/30 shadow-inner">
+                <Award className="w-4 h-4 text-[var(--nexus-accent)]" />
               </div>
-              <h3 className="text-xs font-black uppercase italic tracking-widest text-[var(--nexus-text-muted)] flex items-center gap-3">
-                <TrendingUp className="w-4 h-4 text-[var(--nexus-accent)]" /> Mission Progression
+              <div className="flex flex-col">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-xl font-black uppercase italic tracking-tighter text-[var(--nexus-text)] leading-none">Missions</h2>
+                  <span className="px-2 py-0.5 rounded-full bg-[var(--nexus-accent)]/10 border border-[var(--nexus-accent)]/20 text-[6px] font-black uppercase tracking-widest text-[var(--nexus-accent)]">v2.6 Protocol</span>
+                </div>
+                <p className="text-[var(--nexus-text-muted)] text-[7px] font-black uppercase tracking-[0.3em] mt-1 opacity-50">Recruit streamers to unlock elite protocols</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowTelemetry(!showTelemetry)}
+              className="hidden sm:flex items-center gap-3 px-3 py-1.5 rounded-xl bg-black/20 border border-white/5 backdrop-blur-md hover:border-[var(--nexus-accent)]/30 transition-all group"
+            >
+              <Activity className={`w-3 h-3 ${showTelemetry ? 'text-[var(--nexus-accent)] animate-pulse' : 'text-[var(--nexus-text-muted)] opacity-50'} transition-colors`} />
+              <span className="text-[7px] font-black uppercase tracking-widest text-[var(--nexus-text-muted)] group-hover:text-[var(--nexus-accent)]">
+                {showTelemetry ? 'Protocol: Live' : 'Link Hub'}
+              </span>
+            </button>
+          </div>
+
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10 w-full pt-2">
+            <div className="flex flex-col">
+              <div className="flex items-baseline gap-2 -mb-2">
+                <motion.span
+                  initial={{ scale: 0.5, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className="text-5xl font-black italic text-[var(--nexus-accent)] leading-none gold-text-shimmer"
+                >
+                  {referralCount.toString().padStart(2, '0')}
+                </motion.span>
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-1">
+                    <Users className="w-2.5 h-2.5 text-[var(--nexus-accent)]" />
+                    <span className="text-[8px] font-black uppercase tracking-widest text-[var(--nexus-accent)]">Network</span>
+                  </div>
+                  <span className="text-[8px] font-black uppercase tracking-widest text-[var(--nexus-text-muted)] opacity-30 mt-[-2px]">Intelligence</span>
+                </div>
+              </div>
+              <h3 className="text-[10px] font-black uppercase italic tracking-[0.2em] text-[var(--nexus-text-muted)] flex items-center gap-3 mt-3">
+                <TrendingUp className="w-4 h-4 text-[var(--nexus-accent)] opacity-50" /> Progression Matrix
               </h3>
             </div>
             {nextMilestone && (
-              <span className="text-[10px] font-black text-[var(--nexus-accent)] bg-[var(--nexus-accent)]/10 px-5 py-2 rounded-full border border-[var(--nexus-accent)]/20 uppercase italic">
-                {nextMilestone.threshold - referralCount} to unlock {nextMilestone.name}
-              </span>
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                className="flex flex-col items-end gap-1.5"
+              >
+                <span className="text-[9px] font-black text-[var(--nexus-accent)] bg-[var(--nexus-accent)]/10 px-4 py-2 rounded-full border border-[var(--nexus-accent)]/20 uppercase italic transition-all shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+                  {nextMilestone.threshold - referralCount} to unlock {nextMilestone.name}
+                </span>
+                <p className="text-[6px] font-black uppercase tracking-[0.3em] text-[var(--nexus-text-muted)] opacity-30 mr-2">Synchronizing with Hub...</p>
+              </motion.div>
             )}
           </div>
 
-          {/* Progress Bar Protocol */}
+          {/* Progress Bar Protocol - ELITE SCANNER */}
           <div className="relative z-10 w-full space-y-4">
-            <div className="h-4 bg-black/40 rounded-full p-1 border border-[var(--nexus-border)] overflow-hidden">
+            <div className="relative h-5 bg-black/60 rounded-full p-1 border border-white/5 shadow-inner overflow-hidden group/progress">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${progressToNext}%` }}
-                transition={{ duration: 1.5, ease: "easeOut" }}
-                className="h-full bg-gradient-to-r from-[var(--nexus-accent)] to-emerald-400 rounded-full shadow-[0_0_20px_rgba(16,185,129,0.3)]"
-              />
+                transition={{ duration: 2, ease: [0.16, 1, 0.3, 1] }}
+                className="h-full bg-gradient-to-r from-[var(--nexus-accent)]/60 via-[var(--nexus-accent)] to-emerald-400 rounded-full shadow-[0_0_30px_rgba(16,185,129,0.4)] relative"
+              >
+                {/* Scrolling Scanner Light */}
+                <motion.div
+                  animate={{ x: ['0%', '200%'] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                  className="absolute inset-y-0 w-20 bg-white/20 blur-md -skew-x-12 translate-x-[-100%]"
+                />
+              </motion.div>
+              {/* Grid Overlay for technical feel */}
+              <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 pointer-events-none" />
             </div>
-            <div className="flex justify-between px-1 text-[10px] font-black uppercase tracking-widest">
-              <p className="text-[var(--nexus-text-muted)]">Node Syncing</p>
-              <p className="text-[var(--nexus-accent)] italic">{Math.floor(progressToNext)}% Complete</p>
+            <div className="flex justify-between px-2 text-[9px] font-black uppercase tracking-[0.3em]">
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-[var(--nexus-accent)] animate-pulse" />
+                <p className="text-[var(--nexus-text-muted)]">Node Synchronization</p>
+              </div>
+              <p className="text-[var(--nexus-accent)] italic">{Math.floor(progressToNext)}% Intensity</p>
             </div>
           </div>
 
-          {/* Mission Path */}
-          <div className="space-y-10 relative z-10 w-full">
+          {/* Mission Path - ELITE LIST */}
+          <div className="space-y-6 relative z-10 w-full pt-4">
+            <div className="absolute left-[7px] top-6 bottom-6 w-[1px] bg-gradient-to-b from-[var(--nexus-accent)]/50 via-[var(--nexus-border)] to-transparent" />
+
             {missionPath.map((m, i) => (
-              <div key={i} className={`relative pl-12 border-l-2 py-2 group w-full transition-all ${m.unlocked ? 'border-[var(--nexus-accent)] opacity-100' : 'border-[var(--nexus-border)] opacity-30'}`}>
-                <div className={`absolute -left-[9px] top-0 w-4 h-4 rounded-full transition-all ${m.unlocked ? 'bg-[var(--nexus-accent)] shadow-[0_0_15px_rgba(16,185,129,0.5)]' : 'bg-black border-2 border-[var(--nexus-border)]'}`} />
-                <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-3">
-                  <div className="space-y-1">
-                    <h4 className={`text-sm font-black uppercase italic flex items-center gap-3 text-[var(--nexus-text)]`}>
-                      <m.icon className={`w-4 h-4 ${m.unlocked ? 'text-[var(--nexus-accent)]' : 'text-[var(--nexus-text-muted)]'}`} /> {m.reward}
-                    </h4>
-                    <p className="text-[11px] text-[var(--nexus-text-muted)] font-bold uppercase tracking-wider italic">{m.desc}</p>
+              <motion.div
+                key={i}
+                variants={itemVariants}
+                className={`relative pl-10 group w-full transition-all duration-500`}
+              >
+                <div className={`absolute left-0 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full transition-all duration-700 z-10 ${m.unlocked ? 'bg-[var(--nexus-accent)] shadow-[0_0_20px_rgba(16,185,129,0.8)] border border-white/20' : 'bg-black border-2 border-[var(--nexus-border)]'}`} />
+
+                <div className={`flex flex-col sm:flex-row justify-between sm:items-center gap-4 p-5 rounded-2xl border transition-all duration-500 hover:bg-white/[0.02] ${m.unlocked ? 'border-[var(--nexus-accent)]/30 bg-[var(--nexus-accent)]/[0.03]' : 'border-transparent opacity-40 hover:border-white/5'}`}>
+                  <div className="space-y-1.5">
+                    <div className="flex items-center gap-3">
+                      <div className="relative">
+                        <m.icon className={`w-4 h-4 ${m.unlocked ? 'text-[var(--nexus-accent)] animate-pulse' : 'text-[var(--nexus-text-muted)]'}`} />
+                        {!m.unlocked && <ZapOff className="absolute -top-1 -right-1 w-2 h-2 text-rose-500 opacity-50" />}
+                      </div>
+                      <h4 className={`text-sm font-black uppercase italic tracking-tighter text-[var(--nexus-text)] flex items-center gap-2`}>
+                        {m.reward} {m.unlocked && <Gift className="w-3.5 h-3.5 text-amber-500" />}
+                      </h4>
+                    </div>
+                    <p className="text-[9px] text-[var(--nexus-text-muted)] font-black uppercase tracking-wider italic opacity-60 ml-7">{m.desc}</p>
                   </div>
-                  <div className="flex items-center gap-2">
-                    {m.unlocked && <ShieldCheck className="w-3.5 h-3.5 text-[var(--nexus-accent)]" />}
-                    <p className={`text-[10px] font-black uppercase tracking-widest ${m.unlocked ? 'text-[var(--nexus-accent)]' : 'text-[var(--nexus-text-muted)]'}`}>THRESHOLD: {m.goal}</p>
+                  <div className="flex items-center gap-3 ml-7 sm:ml-0">
+                    {m.unlocked ? (
+                      <span className="text-[8px] font-black uppercase text-[var(--nexus-accent)] tracking-widest flex items-center gap-1.5">
+                        <ShieldCheck className="w-3 h-3" /> SECURE
+                      </span>
+                    ) : (
+                      <span className="text-[8px] font-black uppercase text-[var(--nexus-text-muted)] tracking-widest opacity-40">
+                        {m.goal} NODES REQ
+                      </span>
+                    )}
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
-        </div>
+        </motion.div>
 
-        {/* --- REFERRAL CARD --- */}
+        {/* --- REFERRAL CARD - ELITE SPOTLIGHT --- */}
         <div className="w-full lg:col-span-4 space-y-6">
-          <div className="w-full bg-gradient-to-br from-[var(--nexus-accent)] to-[#004d00]/80 border border-[var(--nexus-accent)]/30 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden group">
-            <div className="relative z-10 space-y-8 w-full text-black">
-              <div className="p-4 bg-white/20 w-fit rounded-2xl border border-white/30 shadow-xl"><Users className="w-7 h-7 text-black" /></div>
-              <div>
-                <h3 className="text-2xl font-black uppercase italic text-black leading-tight">Uplink Generator</h3>
-                <p className="text-black/70 text-[11px] font-bold leading-relaxed italic mt-3">When a streamer joins via your node, your commission protocol syncs to a lower percentage permanently.</p>
+          <motion.div
+            variants={itemVariants}
+            onMouseMove={handleMouseMove}
+            className="w-full bg-[#050505] border border-white/5 rounded-[3rem] p-8 shadow-2xl relative overflow-hidden group spotlight-card"
+          >
+            {/* Elite Spotlight Interaction */}
+            <motion.div
+              className="absolute -inset-[1px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-0"
+              style={{
+                background: useTransform(
+                  [sprX, sprY],
+                  ([x, y]) => `radial-gradient(600px circle at ${x}px ${y}px, rgba(16, 185, 129, 0.15), transparent 40%)`
+                )
+              }}
+            />
+
+            {/* Glossy Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent pointer-events-none" />
+
+            <div className="relative z-10 space-y-8 w-full">
+              <div className="flex items-center justify-between">
+                <div className="p-4 bg-emerald-500/10 rounded-2xl border border-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.1)]">
+                  <Fingerprint className="w-7 h-7 text-[var(--nexus-accent)]" />
+                </div>
+                <div className="flex flex-col items-end">
+                  <span className="text-[7px] font-black uppercase tracking-[0.4em] text-[var(--nexus-accent)] animate-pulse">Encryption: Active</span>
+                  <span className="text-[6px] font-black uppercase tracking-widest text-[var(--nexus-text-muted)] opacity-30 mt-1">Uplink Mode: v2.6.4</span>
+                </div>
               </div>
 
-              <div className="space-y-3 w-full">
-                <label className="text-[9px] font-black uppercase text-black/50 tracking-[0.2em] ml-1 flex justify-between h-3">
-                  Protocol Link
-                  {copiedType === 'referral' && <span className="text-white">✓ SYNCED</span>}
-                </label>
-                <div
+              <div>
+                <h3 className="text-2xl font-black uppercase italic text-white tracking-tighter leading-tight flex items-center gap-3">
+                  Uplink <span className="text-[var(--nexus-accent)]">Generator.</span>
+                </h3>
+                <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest leading-relaxed italic mt-4 opacity-70">
+                  Broadcast your node ID. Every recruit permanentlty recalibrates your commission protocol.
+                </p>
+              </div>
+
+              <div className="space-y-4 w-full pt-2">
+                <div className="flex items-center justify-between px-1">
+                  <label className="text-[9px] font-black uppercase text-[var(--nexus-accent)] tracking-[0.3em]">Protocol Link</label>
+                  {copiedType === 'referral' && (
+                    <motion.span
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      className="text-[8px] font-black text-white bg-emerald-500 px-2 py-0.5 rounded-full"
+                    >
+                      ✓ SYNCED
+                    </motion.span>
+                  )}
+                </div>
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={() => copyToClipboard(referralLink, 'referral')}
-                  className="w-full bg-black/10 backdrop-blur-xl rounded-2xl p-5 flex items-center justify-between border border-black/10 cursor-pointer group-hover:border-black/50 transition-all shadow-inner"
+                  className="w-full bg-white/[0.03] backdrop-blur-xl rounded-2xl p-5 flex items-center justify-between border border-white/5 cursor-pointer group-hover:border-[var(--nexus-accent)]/40 transition-all shadow-inner relative overflow-hidden"
                 >
-                  <code className="text-[11px] font-mono font-black text-black truncate pr-4 italic">
+                  <code className="text-[11px] font-mono font-black text-white truncate pr-4 italic relative z-10">
                     signup?ref={user?.username}
                   </code>
-                  <div className="p-2.5 bg-black/5 rounded-xl transition-all">
-                    {copiedType === 'referral' ? <CheckCircle className="w-4 h-4 text-black" /> : <Copy className="w-4 h-4 text-black" />}
+                  <div className="p-2.5 bg-white/5 rounded-xl transition-all relative z-10">
+                    {copiedType === 'referral' ? <CheckCircle className="w-4 h-4 text-[var(--nexus-accent)]" /> : <Copy className="w-4 h-4 text-white opacity-40 group-hover:opacity-100" />}
                   </div>
-                </div>
+                  {/* Subtle progress glow inside the link box */}
+                  <div className="absolute left-0 bottom-0 h-[1px] bg-[var(--nexus-accent)] opacity-30 w-full" />
+                </motion.div>
               </div>
 
               <div className="pt-2">
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.02, y: -2 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={() => copyToClipboard(referralLink, 'referral')}
-                  className="w-full py-5 bg-black text-[var(--nexus-accent)] rounded-2xl font-black uppercase italic text-[11px] flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-95 transition-all shadow-xl"
+                  className="w-full py-5 bg-[var(--nexus-accent)] text-black rounded-2xl font-black uppercase italic text-[11px] tracking-widest flex items-center justify-center gap-3 transition-all shadow-[0_20px_40px_rgba(16,185,129,0.2)] hover:shadow-[0_25px_50px_rgba(16,185,129,0.3)]"
                 >
-                  <ArrowUpRight className="w-4 h-4" /> Share Growth Node
-                </button>
+                  <ArrowUpRight className="w-4 h-4" /> Deploy Growth Node
+                </motion.button>
               </div>
             </div>
-            <Users className="absolute -bottom-10 -right-10 w-56 h-56 text-black/[0.1] -rotate-12 pointer-events-none" />
-          </div>
+          </motion.div>
 
-          <div className={`w-full border rounded-[2.5rem] p-7 flex items-start gap-5 transition-all ${getCardStyle()}`}>
-            <div className="w-12 h-12 rounded-2xl bg-[var(--nexus-accent)]/10 flex items-center justify-center shrink-0 border border-[var(--nexus-accent)]/20 shadow-inner">
-              <Gift className="w-6 h-6 text-[var(--nexus-accent)]" />
+          {/* Strategy Tip - ELITE SIDEBAR */}
+          <motion.div
+            variants={itemVariants}
+            whileHover={{ x: 5 }}
+            className={`w-full border rounded-[2.5rem] p-6 flex items-center gap-5 transition-all bg-white/[0.02] border-white/5 hover:border-[var(--nexus-accent)]/20 shadow-xl`}
+          >
+            <div className="w-12 h-12 rounded-2xl bg-[var(--nexus-accent)]/10 flex items-center justify-center shrink-0 border border-[var(--nexus-accent)]/20 shadow-inner group-hover:rotate-12 transition-transform">
+              <Cpu className="w-6 h-6 text-[var(--nexus-accent)]" />
             </div>
-            <div>
-              <p className={`text-[11px] font-black uppercase mb-1 tracking-widest italic text-[var(--nexus-text)]`}>Strategy Tip</p>
-              <p className="text-[11px] text-[var(--nexus-text-muted)] font-bold italic leading-relaxed uppercase tracking-tight">Drop your node in chat to recruit fellow creators and lower your fees.</p>
+            <div className="flex flex-col">
+              <p className={`text-[10px] font-black uppercase mb-0.5 tracking-[0.2em] italic text-[var(--nexus-accent)]`}>Strategy Tip</p>
+              <p className="text-[10px] text-[var(--nexus-text-muted)] font-black italic leading-tight uppercase tracking-tight opacity-50">Broadcast your node in high-traffic chat streams for maximum downlink intensity.</p>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </motion.div>

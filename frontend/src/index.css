@@ -9,10 +9,11 @@
     --nexus-text: #ffffff;
     --nexus-text-muted: #94a3b8;
     --nexus-border: rgba(255, 255, 255, 0.05);
-    --nexus-radius: 1.5rem;
-    --nexus-glow: 0 0 30px rgba(16, 185, 129, 0.1);
+    --nexus-radius: 2rem;
+    --nexus-glow: 0 12px 40px rgba(16, 185, 129, 0.12);
     --nexus-sidebar-bg: #0a0a0a;
     --nexus-sidebar-border: rgba(255, 255, 255, 0.05);
+    --card-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
     --simulator-bg: #070d0a;
     --simulator-shadow: 0 0 50px rgba(16, 185, 129, 0.18), 0 0 120px rgba(16, 185, 129, 0.07), 0 0 200px rgba(59, 130, 246, 0.05), inset 0 0 80px rgba(16, 185, 129, 0.04);
 }
@@ -31,6 +32,17 @@ body {
     background-color: var(--nexus-bg);
     margin: 0;
     transition: background-color 0.3s ease, background 0.3s ease;
+    min-height: 100vh;
+}
+
+body.light:not([class*="theme-"]) {
+    background:
+        radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.12) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(59, 130, 246, 0.08) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.08) 0px, transparent 50%),
+        radial-gradient(at 0% 100%, rgba(245, 158, 11, 0.08) 0px, transparent 50%),
+        #f8fafc;
+    background-attachment: fixed;
 }
 
 
@@ -106,20 +118,39 @@ body.theme-arcade {
     box-shadow: 8px 8px 0px #000;
 }
 
-/* Light Mode Overrides (Default) */
+/* Light Mode Overrides (Default - 2026 Premium Upgrade) */
 .light:not([class*="theme-"]) {
-    --nexus-bg: #F8FAFC;
+    --nexus-bg: #f0fdf4;
+    /* Premium Emerald-50 Base */
     --nexus-panel: #ffffff;
     --nexus-accent: #10B981;
     --nexus-text: #0F172A;
     --nexus-text-muted: #64748B;
-    --nexus-border: rgba(15, 23, 42, 0.06);
+    --nexus-border: rgba(16, 185, 129, 0.1);
     --nexus-sidebar-bg: #f0fdf4;
-    /* emerald-50 */
-    --nexus-sidebar-border: #dcfce7;
-    /* emerald-100 */
+    --nexus-sidebar-border: rgba(16, 185, 129, 0.15);
     --simulator-bg: #ffffff;
-    --simulator-shadow: 0 10px 40px rgba(0, 0, 0, 0.03), 0 20px 80px rgba(16, 185, 129, 0.02);
+    --simulator-shadow: 0 20px 50px rgba(16, 185, 129, 0.05), 0 4px 12px rgba(0, 0, 0, 0.03);
+    --card-shadow: 0 25px 50px -12px rgba(16, 185, 129, 0.1), 0 10px 20px -5px rgba(0, 0, 0, 0.03);
+}
+
+body.light:not([class*="theme-"]) {
+    background:
+        radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(59, 130, 246, 0.1) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.1) 0px, transparent 50%),
+        radial-gradient(at 0% 100%, rgba(245, 158, 11, 0.1) 0px, transparent 50%),
+        #f0fdf4;
+    background-attachment: fixed;
+}
+
+.light .theme-card,
+.light .nexus-card {
+    background: rgba(255, 255, 255, 0.8) !important;
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.5) !important;
+    box-shadow: var(--card-shadow) !important;
 }
 
 /* Light Mode Overrides (Theme Specific) */

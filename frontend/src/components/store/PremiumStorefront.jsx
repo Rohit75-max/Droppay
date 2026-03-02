@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Paintbrush, Target, BellRing, LayoutTemplate, Sparkles, Loader2 } from 'lucide-react';
+import React, { useState, useMemo, useRef } from 'react';
+import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'framer-motion';
+import {
+    Paintbrush, Target, BellRing, LayoutTemplate, Sparkles, Loader2,
+    ArrowUpRight, ShoppingCart, CheckCircle2, Zap, ShieldCheck
+} from 'lucide-react';
 import LiveThemeEngine from '../LiveThemeEngine';
 import CruiserRevenueChart from '../widgets/CruiserRevenueChart';
 import PremiumPreviewModal from './PremiumPreviewModal';
@@ -15,13 +18,195 @@ const PREMIUM_GOAL_STYLES = [
     'alchemist_flask', 'redline_dash', 'loot_dispenser', 'mecha_lens'
 ];
 
-// The 4 Elite Categories
+// The 4 Elite Categories with Kinetic Animation Hooks
 const STORE_CATEGORIES = [
-    { id: 'themes', label: 'Nexus', icon: <Paintbrush className="w-4 h-4" /> },
-    { id: 'goals', label: 'Goals', icon: <Target className="w-4 h-4" /> },
-    { id: 'alerts', label: 'Alerts', icon: <BellRing className="w-4 h-4" /> },
-    { id: 'widgets', label: 'Widgets', icon: <LayoutTemplate className="w-4 h-4" /> }
+    {
+        id: 'themes',
+        label: 'Nexus',
+        icon: (active) => <Paintbrush className={`w-4 h-4 transition-transform duration-500 ${active ? 'rotate-12 scale-125' : 'group-hover:rotate-[-12deg]'}`} />
+    },
+    {
+        id: 'goals',
+        label: 'Goals',
+        icon: (active) => <Target className={`w-4 h-4 transition-all duration-700 ${active ? 'rotate-180 scale-125' : 'group-hover:rotate-90'}`} />
+    },
+    {
+        id: 'alerts',
+        label: 'Alerts',
+        icon: (active) => <BellRing className={`w-4 h-4 transition-all duration-300 ${active ? 'scale-125 animate-bounce' : 'group-hover:skew-x-12'}`} />
+    },
+    {
+        id: 'widgets',
+        label: 'Widgets',
+        icon: (active) => <LayoutTemplate className={`w-4 h-4 transition-all duration-500 ${active ? 'scale-125 rotate-[360deg]' : 'group-hover:translate-y-[-2px]'}`} />
+    }
 ];
+
+// --- PREMIUM STORE CARD COMPONENT ---
+const PremiumStoreCard = ({ item, theme, activeTab, onClick, onPurchase, isProcessing }) => {
+    const cardRef = useRef(null);
+    const x = useMotionValue(0);
+    const y = useMotionValue(0);
+
+    const mouseXSpring = useSpring(x);
+    const mouseYSpring = useSpring(y);
+
+    const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["7deg", "-7deg"]);
+    const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-7deg", "7deg"]);
+
+    const handleMouseMove = (e) => {
+        if (!cardRef.current) return;
+        const rect = cardRef.current.getBoundingClientRect();
+        const width = rect.width;
+        const height = rect.height;
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+        const xPct = (mouseX / width) - 0.5;
+        const yPct = (mouseY / height) - 0.5;
+        x.set(xPct);
+        y.set(yPct);
+    };
+
+    const handleMouseLeave = () => {
+        x.set(0);
+        y.set(0);
+    };
+
+    const isLight = theme === 'light';
+
+    return (
+        <motion.div
+            ref={cardRef}
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
+            style={{
+                rotateX, rotateY, transformStyle: "preserve-3d",
+                perspective: 1000,
+                clipPath: 'polygon(0 0, 92% 0, 100% 8%, 100% 100%, 8% 100%, 0 92%)'
+            }}
+            onClick={onClick}
+            className={`group relative bg-[var(--nexus-panel)] border flex flex-col justify-between overflow-hidden transition-all duration-300 hover:shadow-[0_20px_50px_rgba(0,0,0,0.2)] cursor-pointer ${item.isActive
+                ? (isLight ? 'border-emerald-500 ring-1 ring-emerald-500/20 shadow-lg shadow-emerald-500/5' : 'border-[var(--nexus-accent)] shadow-[0_0_20px_rgba(57,255,20,0.1)]')
+                : (isLight ? 'border-emerald-100 hover:border-emerald-500/50' : 'border-[var(--nexus-border)] hover:border-[var(--nexus-accent)]/50')
+                }`}
+        >
+            {/* Holographic Glint Line */}
+            <motion.div
+                animate={{
+                    left: ["-100%", "200%"],
+                    top: ["-100%", "200%"]
+                }}
+                transition={{ repeat: Infinity, duration: 4, ease: "linear", delay: Math.random() * 5 }}
+                className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent w-[200%] h-[200%] pointer-events-none skew-x-12 z-10"
+            />
+
+            {/* Diagonal Tech Texture */}
+            <div className={`absolute inset-0 opacity-[0.03] ${isLight ? 'bg-emerald-900' : 'bg-white'} pointer-events-none`} style={{ backgroundImage: 'repeating-linear-gradient(45deg,transparent,transparent_5px,currentColor_5px,currentColor_10px)' }} />
+
+            {/* Premium Category Badge */}
+            <div className="absolute top-3 left-3 z-30 pointer-events-none flex gap-2">
+                <div className={`px-2 py-0.5 rounded-sm text-[8px] font-black uppercase tracking-widest border transition-colors duration-300 ${item.isActive ? (isLight ? 'bg-emerald-100 border-emerald-500 text-emerald-600' : 'bg-[var(--nexus-accent)]/10 border-[var(--nexus-accent)] text-[var(--nexus-accent)]') :
+                    (isLight ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-black/80 border-[var(--nexus-border)] text-white')
+                    }`}>
+                    {item.isActive ? 'ACTIVE' : item.badge}
+                </div>
+                {item.id.includes('h') && (
+                    <div className="px-2 py-0.5 rounded-sm text-[8px] font-black uppercase tracking-widest bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center gap-1">
+                        <Zap className="w-2 h-2" /> Elite
+                    </div>
+                )}
+            </div>
+
+            {/* Main Interactive Preview Container */}
+            <div className="w-full h-48 border-b relative flex items-center justify-center overflow-hidden bg-black border-[var(--nexus-border)] group-hover:border-[var(--nexus-accent)] transition-colors duration-500">
+                <div className="absolute inset-0 opacity-50 bg-[radial-gradient(circle_at_center,#1e293b_0%,#000_100%)]" />
+
+                <motion.div
+                    style={{ translateZ: 50 }}
+                    className="absolute inset-0 flex items-center justify-center pointer-events-none transform scale-[0.35] sm:scale-[0.4] md:scale-[0.45] transition-transform duration-500 group-hover:scale-[0.5]"
+                >
+                    {item.category === 'themes' && (
+                        <div className="absolute inset-0 w-[400%] h-[400%] -translate-x-[37.5%] -translate-y-[37.5%] scale-[0.2] sm:scale-[0.25] transition-transform duration-700 group-hover:scale-[0.3]">
+                            <LiveThemeEngine currentTheme={item.id} isPreview={true} />
+                        </div>
+                    )}
+
+                    {item.category === 'widgets' && (
+                        <div className="w-full h-full flex items-center justify-center transform scale-[1.1] sm:scale-[1.5]">
+                            {item.id === 'wd4' && <CruiserRevenueChart />}
+                        </div>
+                    )}
+
+                    {item.category === 'alerts' && (
+                        <PremiumAlertPreview
+                            donorName="PREVIEW"
+                            amount={parseInt(item.price.replace('₹', '')) || 2000}
+                            stylePreference={item.id}
+                        />
+                    )}
+
+                    {item.category === 'goals' && (
+                        PREMIUM_GOAL_STYLES.includes(item.id) ? (
+                            <PremiumGoalOverlays
+                                goal={{ targetAmount: 1000, currentProgress: 650, title: item.name, stylePreference: item.id }}
+                                percentage={65}
+                            />
+                        ) : (
+                            <CyberGoalBar
+                                goal={{ targetAmount: 1000, currentProgress: 650, title: item.name }}
+                                percentage={65}
+                                goalStylePreference={item.id}
+                            />
+                        )
+                    )}
+                </motion.div>
+
+                {/* Cyber Scanner Overlay on Hover */}
+                <div className="absolute inset-x-0 top-0 h-0.5 bg-[var(--nexus-accent)] opacity-0 group-hover:opacity-100 group-hover:animate-[scan_2s_linear_infinite] shadow-[0_0_15px_var(--nexus-accent)]" />
+            </div>
+
+            {/* Info Section */}
+            <div className={`p-5 flex flex-col flex-1 relative z-10 ${isLight ? 'bg-white' : 'bg-gradient-to-t from-[var(--nexus-panel)] to-transparent'}`} style={{ translateZ: 30 }}>
+                <div className="flex justify-between items-start mb-2">
+                    <h3 className={`font-black text-xl uppercase tracking-tighter italic transition-colors group-hover:text-emerald-500 ${isLight ? 'text-slate-900' : 'text-[var(--nexus-text)]'}`}>
+                        {item.name}
+                    </h3>
+                    <ArrowUpRight className={`w-5 h-5 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1 ${isLight ? 'text-emerald-500' : 'text-[var(--nexus-accent)]'}`} />
+                </div>
+
+                <p className={`text-xs mb-6 flex-1 line-clamp-2 ${isLight ? 'text-slate-500 font-medium' : 'text-[var(--nexus-text-muted)]'}`}>
+                    {item.desc}
+                </p>
+
+                <div className={`flex items-center justify-between mt-auto border-t pt-4 ${isLight ? 'border-emerald-50' : 'border-[var(--nexus-border)]'}`}>
+                    <div className="flex flex-col">
+                        <span className="text-[10px] uppercase tracking-widest text-[var(--nexus-text-muted)] font-bold">Standard Fee</span>
+                        <span className={`font-mono font-black text-xl ${isLight ? 'text-emerald-950/80' : 'text-[var(--nexus-text)] drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]'}`}>
+                            {item.isOwned ? 'SECURED' : item.price}
+                        </span>
+                    </div>
+
+                    <button
+                        onClick={(e) => onPurchase(e, item)}
+                        disabled={isProcessing}
+                        className={`font-black text-xs uppercase tracking-widest px-5 py-3 transition-all flex items-center gap-2 ${item.isOwned
+                            ? (item.isActive ? (isLight ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-slate-800 text-slate-500 cursor-not-allowed') : 'bg-emerald-600 text-white hover:bg-emerald-500 shadow-lg shadow-emerald-500/20')
+                            : (isLight ? 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-lg shadow-emerald-500/20' : 'bg-[var(--nexus-accent)] text-black hover:brightness-125 shadow-[0_0_15px_var(--nexus-accent)]')
+                            }`}
+                        style={{ clipPath: 'polygon(15% 0, 100% 0, 100% 85%, 85% 100%, 0 100%, 0 15%)' }}
+                    >
+                        {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : (
+                            <>
+                                {item.isOwned ? (item.isActive ? <ShieldCheck className="w-4 h-4" /> : 'EQUIP') : <ShoppingCart className="w-4 h-4" />}
+                                {item.isOwned ? (item.isActive ? 'ACTIVE' : '') : 'UNLOCK'}
+                            </>
+                        )}
+                    </button>
+                </div>
+            </div>
+        </motion.div>
+    );
+};
 
 const PremiumStorefront = ({
     user,
@@ -202,28 +387,58 @@ const PremiumStorefront = ({
     return (
         <div className="w-full flex flex-col h-full font-sans max-w-[1600px] mx-auto">
 
-            {/* --- STORE TABS --- */}
-            <div className="mb-8">
+            {/* --- STORE TABS (NEURAL UPLINK) --- */}
+            <div className="mb-8 relative">
+                {/* Holographic Scan Line (Animates on Switch) */}
+                <AnimatePresence mode="wait">
+                    <motion.div
+                        key={activeTab + "_scan"}
+                        initial={{ left: "-100%" }}
+                        animate={{ left: "100%" }}
+                        transition={{ duration: 1, ease: "easeInOut" }}
+                        className="absolute bottom-0 h-[2px] w-[200px] bg-gradient-to-r from-transparent via-[var(--nexus-accent)] to-transparent blur-sm z-20 pointer-events-none hidden md:block"
+                        style={{ boxShadow: '0 0 20px var(--nexus-accent)' }}
+                    />
+                </AnimatePresence>
+
                 {/* Sliding Tab Navigation */}
-                <div className={`flex gap-2 border-b overflow-x-auto scrollbar-hide ${theme === 'light' ? 'border-emerald-100' : 'border-[var(--nexus-border)]'}`}>
+                <div className={`flex gap-1 border-b overflow-x-auto scrollbar-hide perspective-1000 ${theme === 'light' ? 'border-emerald-100' : 'border-[var(--nexus-border)]'}`}>
                     {STORE_CATEGORIES.map((category) => (
                         <button
                             key={category.id}
                             onClick={() => setActiveTab(category.id)}
-                            className={`relative px-6 py-4 flex items-center gap-2 text-sm font-black uppercase tracking-widest transition-colors ${activeTab === category.id
+                            className={`group relative px-4 sm:px-8 py-4 sm:py-5 flex items-center gap-2 sm:gap-3 text-[10px] sm:text-sm font-black uppercase tracking-[0.1em] sm:tracking-[0.2em] transition-all duration-300 flex-shrink-0 ${activeTab === category.id
                                 ? (theme === 'light' ? 'text-emerald-700' : 'text-[var(--nexus-accent)]')
                                 : (theme === 'light' ? 'text-emerald-950/40 hover:text-emerald-950' : 'text-[var(--nexus-text-muted)] hover:text-[var(--nexus-text)]')
                                 }`}
                         >
-                            {category.icon}
-                            {category.label}
+                            {/* Kinetic Icon */}
+                            <div className="relative">
+                                {category.icon(activeTab === category.id)}
+                                {activeTab === category.id && (
+                                    <motion.div
+                                        layoutId="icon_ping"
+                                        className="absolute -inset-1 rounded-full border border-[var(--nexus-accent)] opacity-20"
+                                        animate={{ scale: [1, 1.5], opacity: [0.2, 0] }}
+                                        transition={{ repeat: Infinity, duration: 2 }}
+                                    />
+                                )}
+                            </div>
+
+                            <span className="relative z-10 transition-transform group-hover:translate-x-1">{category.label}</span>
+
                             {/* Active Tab Glowing Underline */}
                             {activeTab === category.id && (
                                 <motion.div
                                     layoutId="activeStoreTab"
-                                    className={`absolute bottom-0 left-0 w-full h-1 ${theme === 'light' ? 'bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'bg-[var(--nexus-accent)] shadow-[0_0_10px_var(--nexus-accent)]'}`}
-                                />
+                                    className={`absolute bottom-0 left-0 w-full h-[3px] z-10 ${theme === 'light' ? 'bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'bg-[var(--nexus-accent)] shadow-[0_0_20px_var(--nexus-accent)]'}`}
+                                >
+                                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2 h-2 bg-white rounded-full blur-[1px] -translate-y-1/2" />
+                                </motion.div>
                             )}
+
+                            {/* Hover Ghost Underline */}
+                            <div className={`absolute bottom-0 left-0 w-0 h-[1px] transition-all duration-300 group-hover:w-full ${theme === 'light' ? 'bg-emerald-200' : 'bg-white/10'}`} />
                         </button>
                     ))}
                 </div>
@@ -234,113 +449,25 @@ const PremiumStorefront = ({
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={activeTab}
-                        initial={{ opacity: 0, scale: 0.95, rotateY: 15, filter: 'blur(10px)' }}
-                        animate={{ opacity: 1, scale: 1, rotateY: 0, filter: 'blur(0px)' }}
-                        exit={{ opacity: 0, scale: 0.95, rotateY: -15, filter: 'blur(10px)' }}
+                        initial={{ opacity: 0, y: 20, skewX: -5 }}
+                        animate={{ opacity: 1, y: 0, skewX: 0 }}
+                        exit={{ opacity: 0, scale: 0.98, filter: 'blur(5px)' }}
                         transition={{
-                            duration: 0.5,
-                            ease: [0.16, 1, 0.3, 1],
-                            opacity: { duration: 0.3 }
+                            duration: 0.4,
+                            ease: [0.19, 1, 0.22, 1]
                         }}
                         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-20"
                     >
                         {items.length > 0 ? items.map((item) => (
-                            <div
+                            <PremiumStoreCard
                                 key={item.id}
+                                item={item}
+                                theme={theme}
+                                activeTab={activeTab}
                                 onClick={() => handlePreviewClick(item)}
-                                className={`group relative bg-[var(--nexus-panel)] border flex flex-col justify-between overflow-hidden transition-all duration-300 hover:shadow-[0_10px_40px_rgba(0,0,0,0.1)] cursor-pointer ${item.isActive
-                                    ? (theme === 'light' ? 'border-emerald-500 ring-1 ring-emerald-500/20 shadow-lg shadow-emerald-500/5' : 'border-[var(--nexus-accent)]')
-                                    : (theme === 'light' ? 'border-emerald-100 hover:border-emerald-400' : 'border-[var(--nexus-border)] hover:border-[var(--nexus-accent)]')
-                                    }`}
-                                style={{ clipPath: 'polygon(0 0, 92% 0, 100% 8%, 100% 100%, 8% 100%, 0 92%)' }}
-                            >
-                                {/* Diagonal Tech Texture */}
-                                <div className={`absolute inset-0 opacity-[0.03] ${theme === 'light' ? 'bg-emerald-900' : 'bg-white'} pointer-events-none`} style={{ backgroundImage: 'repeating-linear-gradient(45deg,transparent,transparent_5px,currentColor_5px,currentColor_10px)' }} />
-
-                                {/* Top Image/Preview Block */}
-                                <div className={`w-full h-48 border-b relative flex items-center justify-center overflow-hidden ${theme === 'light' ? 'bg-emerald-50/50 border-emerald-100' : 'bg-black border-[var(--nexus-border)]'}`}>
-                                    <div className={`absolute inset-0 opacity-50 ${theme === 'light' ? 'bg-[radial-gradient(circle_at_center,#ECFDF5_0%,#F8FAFC_100%)]' : 'bg-[radial-gradient(circle_at_center,#1e293b_0%,#000_100%)]'}`} />
-
-                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none transform scale-[0.4] md:scale-[0.45]">
-                                        {item.category === 'themes' && (
-                                            <div className="absolute inset-0 w-[400%] h-[400%] -translate-x-[37.5%] -translate-y-[37.5%] scale-[0.25]">
-                                                <LiveThemeEngine currentTheme={item.id} isPreview={true} />
-                                            </div>
-                                        )}
-
-                                        {item.category === 'widgets' && (
-                                            <div className="w-full h-full flex items-center justify-center transform scale-[1.5]">
-                                                {item.id === 'wd4' && <CruiserRevenueChart />}
-                                            </div>
-                                        )}
-
-                                        {item.category === 'alerts' && (
-                                            <PremiumAlertPreview
-                                                donorName="PREVIEW"
-                                                amount={parseInt(item.price.replace('₹', '')) || 2000}
-                                                stylePreference={item.id}
-                                            />
-                                        )}
-
-                                        {item.category === 'goals' && (
-                                            PREMIUM_GOAL_STYLES.includes(item.id) ? (
-                                                <PremiumGoalOverlays
-                                                    goal={{ targetAmount: 1000, currentProgress: 650, title: item.name, stylePreference: item.id }}
-                                                    percentage={65}
-                                                />
-                                            ) : (
-                                                <CyberGoalBar
-                                                    goal={{ targetAmount: 1000, currentProgress: 650, title: item.name }}
-                                                    percentage={65}
-                                                    goalStylePreference={item.id}
-                                                />
-                                            )
-                                        )}
-                                    </div>
-
-                                    {!item.videoPreviewUrl && item.category === 'themes' && (
-                                        <div className={`w-20 h-20 border transform rotate-45 flex items-center justify-center group-hover:scale-110 transition-all duration-500 z-10 ${theme === 'light' ? 'border-emerald-200/50 group-hover:border-emerald-500' : 'border-slate-700 group-hover:border-[var(--nexus-accent)]'}`}>
-                                            <Sparkles className={`w-8 h-8 transform -rotate-45 ${item.color}`} />
-                                        </div>
-                                    )}
-
-                                    <span className={`absolute top-3 left-3 backdrop-blur-sm border text-[9px] font-black uppercase tracking-widest px-2 py-1 z-10 
-                                        ${theme === 'light'
-                                            ? 'bg-emerald-50/90 text-emerald-700 border-emerald-200'
-                                            : 'bg-black/80 text-white border-[var(--nexus-border)]'}
-                                        ${item.isActive ? (theme === 'light' ? 'border-emerald-500 text-emerald-600 bg-emerald-100/90' : 'border-[var(--nexus-accent)] text-[var(--nexus-accent)]') : ''}`}>
-                                        {item.isActive ? 'ACTIVE' : item.badge}
-                                    </span>
-
-                                </div>
-
-                                {/* Details & Action */}
-                                <div className={`p-5 flex flex-col flex-1 relative z-10 ${theme === 'light' ? 'bg-white' : 'bg-gradient-to-t from-[var(--nexus-panel)] to-transparent'}`}>
-                                    <h3 className={`font-black text-xl uppercase tracking-tighter italic mb-2 group-hover:text-emerald-500 transition-colors ${theme === 'light' ? 'text-slate-900' : 'text-[var(--nexus-text)]'}`}>
-                                        {item.name}
-                                    </h3>
-                                    <p className={`text-xs mb-6 flex-1 line-clamp-2 ${theme === 'light' ? 'text-slate-500 font-medium' : 'text-[var(--nexus-text-muted)]'}`}>
-                                        {item.desc}
-                                    </p>
-
-                                    <div className={`flex items-center justify-between mt-auto border-t pt-4 ${theme === 'light' ? 'border-emerald-50' : 'border-[var(--nexus-border)]'}`}>
-                                        <span className={`font-mono font-black text-xl ${theme === 'light' ? 'text-emerald-950/80' : 'text-[var(--nexus-text)] drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]'}`}>
-                                            {item.isOwned ? 'SECURED' : item.price}
-                                        </span>
-                                        <button
-                                            onClick={(e) => handleDirectBuy(e, item)}
-                                            disabled={isProcessing}
-                                            className={`font-black text-xs uppercase tracking-widest px-5 py-3 transition-all ${item.isOwned
-                                                ? (item.isActive ? (theme === 'light' ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-slate-800 text-slate-500 cursor-not-allowed') : 'bg-emerald-600 text-white hover:bg-emerald-500')
-                                                : (theme === 'light' ? 'bg-emerald-500 text-white hover:bg-emerald-600' : 'bg-[var(--nexus-accent)] text-black hover:brightness-125')
-                                                } ${theme === 'dark' ? 'shadow-[0_0_15px_var(--nexus-accent)]' : 'shadow-sm'}`}
-                                            style={{ clipPath: 'polygon(15% 0, 100% 0, 100% 85%, 85% 100%, 0 100%, 0 15%)' }}
-                                        >
-                                            {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : (item.isOwned ? (item.isActive ? 'ACTIVE' : 'EQUIP') : 'UNLOCK')}
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
+                                onPurchase={handleDirectBuy}
+                                isProcessing={isProcessing}
+                            />
                         )) : (
                             <div className="col-span-full py-20 flex flex-col items-center justify-center text-center space-y-4">
                                 <LayoutTemplate className="w-12 h-12 text-[var(--nexus-text-muted)] opacity-20" />

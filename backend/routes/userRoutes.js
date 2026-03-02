@@ -151,8 +151,15 @@ router.post('/update-profile', auth, async (req, res) => {
             // Only update non-sensitive fields instantly
             if (fullName) user.fullName = fullName;
             if (username) {
-                user.username = username.trim().toLowerCase().replace(/\s+/g, '');
-                user.streamerId = user.username;
+                const oldStreamerId = user.streamerId;
+                const newStreamerId = username.trim().toLowerCase().replace(/\s+/g, '');
+                user.username = newStreamerId;
+                user.streamerId = newStreamerId;
+
+                // Sync all existing drop records to the new identity node
+                if (oldStreamerId && oldStreamerId !== newStreamerId) {
+                    await Drop.updateMany({ streamerId: oldStreamerId }, { $set: { streamerId: newStreamerId } });
+                }
             }
             if (bio) user.bio = bio;
             if (avatar) user.avatar = avatar;
@@ -183,8 +190,15 @@ router.post('/update-profile', auth, async (req, res) => {
         // 2. Direct Instant Update (No sensitive fields altered)
         if (fullName) user.fullName = fullName;
         if (username) {
-            user.username = username.trim().toLowerCase().replace(/\s+/g, '');
-            user.streamerId = user.username;
+            const oldStreamerId = user.streamerId;
+            const newStreamerId = username.trim().toLowerCase().replace(/\s+/g, '');
+            user.username = newStreamerId;
+            user.streamerId = newStreamerId;
+
+            // Sync all existing drop records to the new identity node
+            if (oldStreamerId && oldStreamerId !== newStreamerId) {
+                await Drop.updateMany({ streamerId: oldStreamerId }, { $set: { streamerId: newStreamerId } });
+            }
         }
         if (bio) user.bio = bio;
         if (avatar) user.avatar = avatar;

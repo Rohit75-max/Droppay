@@ -35,15 +35,20 @@ const DropSchema = new mongoose.Schema({
     index: true // Essential for filtering valid transactions
   },
   // Technical metadata for Split Payments / Razorpay Route
-  razorpayPaymentId: { 
-    type: String, 
-    sparse: true 
+  razorpayPaymentId: {
+    type: String,
+    sparse: true
   },
-  razorpayOrderId: { 
-    type: String, 
-    sparse: true 
+  razorpayOrderId: {
+    type: String,
+    sparse: true
+  },
+  isTest: {
+    type: Boolean,
+    default: false,
+    index: true // Useful for filtering out test data in analytics if needed
   }
-}, { 
+}, {
   timestamps: true // Automatically manages createdAt and updatedAt
 });
 

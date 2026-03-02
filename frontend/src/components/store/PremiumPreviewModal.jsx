@@ -38,75 +38,47 @@ const PremiumPreviewModal = ({ isOpen, onClose, item, onUnlock, theme }) => {
                         <X className="w-6 h-6" />
                     </button>
 
-                    <div className={`w-full md:w-2/3 h-1/2 md:h-full relative border-r flex items-center justify-center overflow-hidden ${isLight ? 'bg-white border-emerald-100' : 'bg-[#050505] border-[var(--nexus-border)]'
-                        }`}>
-                        {item.category === 'themes' && (
-                            <div className="absolute inset-0">
-                                <LiveThemeEngine currentTheme={item.id} isPreview={true} theme={theme} />
-                                <div className="relative z-10 w-full h-full p-8 flex flex-col gap-4">
-                                    <div className="flex gap-4">
-                                        <div className={`w-1/4 h-64 backdrop-blur-md border rounded-lg ${isLight ? 'bg-white/40 border-emerald-200/50' : 'bg-white/5 border-white/10'}`} />
-                                        <div className={`flex-1 h-[500px] backdrop-blur-lg border rounded-xl ${isLight ? 'bg-white/40 border-emerald-200/50' : 'bg-white/5 border-white/20'}`} />
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {item.category === 'alerts' && (
-                            <div className={`w-full h-full relative flex flex-col items-center justify-center ${isLight ? 'bg-white' : 'bg-[#050505]'}`}>
-                                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(57,255,20,0.05)_0%,transparent_70%)] pointer-events-none" />
-                                <div className="relative z-10 w-full transform scale-75 md:scale-90 lg:scale-100 flex items-center justify-center">
-                                    <PremiumAlertPreview
-                                        donorName="Elite Donor"
-                                        amount={parseInt(item.price.replace('₹', '')) || 2000}
-                                        message="This is a live preview of the asset in action!"
-                                        stylePreference={item.id}
-                                    />
-                                </div>
-                            </div>
-                        )}
-
-                        {item.category === 'goals' && (
-                            <div className={`w-full h-full relative flex flex-col items-center justify-center py-10 ${isLight ? 'bg-white' : 'bg-[#050505]'}`}>
-                                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.05)_0%,transparent_70%)] pointer-events-none" />
-                                <div className="relative z-10 w-full transform scale-90 md:scale-100">
-                                    {PREMIUM_GOAL_STYLES.includes(item.id) ? (
-                                        <PremiumGoalOverlays
-                                            goal={{
-                                                title: item.name,
-                                                targetAmount: parseInt(item.price.replace('₹', '')) || 5000,
-                                                currentProgress: (parseInt(item.price.replace('₹', '')) || 5000) * 0.75,
-                                                stylePreference: item.id
-                                            }}
-                                            percentage={75}
-                                            isComplete={false}
-                                        />
-                                    ) : (
-                                        <CyberGoalBar
-                                            goal={{
-                                                title: item.name,
-                                                targetAmount: parseInt(item.price.replace('₹', '')) || 5000,
-                                                currentProgress: (parseInt(item.price.replace('₹', '')) || 5000) * 0.75
-                                            }}
-                                            percentage={75}
-                                            isComplete={false}
-                                            goalStylePreference={item.id}
-                                        />
-                                    )}
-                                </div>
-                            </div>
-                        )}
-
-                        {item.category === 'widgets' && (
-                            <div className={`w-full h-full relative flex flex-col items-center justify-center overflow-hidden ${isLight ? 'bg-white' : 'bg-[#050505]'}`}>
-                                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.05)_0%,transparent_70%)] pointer-events-none" />
-                                <div className="relative z-10 w-full">
-                                    {item.id === 'wd4' ? (
-                                        <div className="transform scale-[0.65] origin-center">
-                                            <CruiserRevenueChart />
+                    <div className="w-full md:w-2/3 h-1/2 md:h-full relative border-r flex items-center justify-center overflow-hidden bg-[#050505] border-[var(--nexus-border)] p-4 sm:p-12">
+                        {/* Dynamic Scaling Wrapper: Ensures content always fits the available area */}
+                        <div className="w-full h-full flex items-center justify-center relative overflow-hidden" style={{ containerType: 'size' }}>
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="w-full h-full flex items-center justify-center"
+                                style={{
+                                    // Scale based on container size to ensure containment (Base size 450x600)
+                                    scale: 'min(1, min(calc(100cqw / 450), calc(100cqh / 600)))',
+                                    transformOrigin: 'center center'
+                                }}
+                            >
+                                {item.category === 'themes' && (
+                                    <div className="absolute inset-0">
+                                        <LiveThemeEngine currentTheme={item.id} isPreview={true} theme="dark" />
+                                        <div className="relative z-10 w-full h-full p-8 flex flex-col gap-4">
+                                            <div className="flex gap-4">
+                                                <div className={`w-1/4 h-64 backdrop-blur-md border rounded-lg ${isLight ? 'bg-white/40 border-emerald-200/50' : 'bg-white/5 border-white/10'}`} />
+                                                <div className={`flex-1 h-[500px] backdrop-blur-lg border rounded-xl ${isLight ? 'bg-white/40 border-emerald-200/50' : 'bg-white/5 border-white/20'}`} />
+                                            </div>
                                         </div>
-                                    ) : (
-                                        PREMIUM_GOAL_STYLES.includes(item.id) ? (
+                                    </div>
+                                )}
+
+                                {item.category === 'alerts' && (
+                                    <div className="w-full flex items-center justify-center">
+                                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(57,255,20,0.05)_0%,transparent_70%)] pointer-events-none" />
+                                        <PremiumAlertPreview
+                                            donorName="Elite Donor"
+                                            amount={parseInt(item.price.replace('₹', '')) || 2000}
+                                            message="This is a live preview of the asset in action!"
+                                            stylePreference={item.id}
+                                        />
+                                    </div>
+                                )}
+
+                                {item.category === 'goals' && (
+                                    <div className="w-full flex flex-col items-center justify-center py-10">
+                                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.05)_0%,transparent_70%)] pointer-events-none" />
+                                        {PREMIUM_GOAL_STYLES.includes(item.id) ? (
                                             <PremiumGoalOverlays
                                                 goal={{
                                                     title: item.name,
@@ -128,11 +100,46 @@ const PremiumPreviewModal = ({ isOpen, onClose, item, onUnlock, theme }) => {
                                                 isComplete={false}
                                                 goalStylePreference={item.id}
                                             />
-                                        )
-                                    )}
-                                </div>
-                            </div>
-                        )}
+                                        )}
+                                    </div>
+                                )}
+
+                                {item.category === 'widgets' && (
+                                    <div className="w-full flex flex-col items-center justify-center overflow-hidden">
+                                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.05)_0%,transparent_70%)] pointer-events-none" />
+                                        {item.id === 'wd4' ? (
+                                            <div className="transform scale-[1.2]">
+                                                <CruiserRevenueChart />
+                                            </div>
+                                        ) : (
+                                            PREMIUM_GOAL_STYLES.includes(item.id) ? (
+                                                <PremiumGoalOverlays
+                                                    goal={{
+                                                        title: item.name,
+                                                        targetAmount: parseInt(item.price.replace('₹', '')) || 5000,
+                                                        currentProgress: (parseInt(item.price.replace('₹', '')) || 5000) * 0.75,
+                                                        stylePreference: item.id
+                                                    }}
+                                                    percentage={75}
+                                                    isComplete={false}
+                                                />
+                                            ) : (
+                                                <CyberGoalBar
+                                                    goal={{
+                                                        title: item.name,
+                                                        targetAmount: parseInt(item.price.replace('₹', '')) || 5000,
+                                                        currentProgress: (parseInt(item.price.replace('₹', '')) || 5000) * 0.75
+                                                    }}
+                                                    percentage={75}
+                                                    isComplete={false}
+                                                    goalStylePreference={item.id}
+                                                />
+                                            )
+                                        )}
+                                    </div>
+                                )}
+                            </motion.div>
+                        </div>
                     </div>
 
                     <div className="w-full md:w-1/3 h-1/2 md:h-full p-5 sm:p-8 flex flex-col relative bg-[var(--nexus-panel)]">

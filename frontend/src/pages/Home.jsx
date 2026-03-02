@@ -35,7 +35,7 @@ const Home = () => {
   const [pricingDir, setPricingDir] = useState(0);  // slide direction
 
   // --- KINETIC FLIGHT STATES ---
-  const [showPreview, setShowPreview] = useState(false);
+  const [showPreview, setShowPreview] = useState(true);
   const [isFlying, setIsFlying] = useState(false);
 
   // --- SOCKET MODAL STATE ---
@@ -46,52 +46,44 @@ const Home = () => {
   const goalTarget = 100000;
 
   // --- STABLE DEFINITION ---
-  const alertVariants = useMemo(() => ['zap', 'cyber', 'royal'], []);
+  const alertVariants = useMemo(() => ['pixel', 'gta', 'bgmi'], []);
   const [calcAmount, setCalcAmount] = useState(10000);
 
   const INITIAL_DEMO_DROPS = [
-    { id: 1, donorName: "Mortal Streamer", amount: 5000, sticker: "hype_zap", message: "DropPay is a game changer! 🚀" },
-    { id: 2, donorName: "Cyber King", amount: 10000, sticker: "fire_rocket", message: "To the moon! 🚀🚀🚀" },
-    { id: 3, donorName: "Royal Supporter", amount: 25000, sticker: "diamond_gem", message: "Premium experience!" },
-    { id: 4, donorName: "Zap Node", amount: 2000, sticker: "hype_zap", message: "Smooth as butter." },
-    { id: 5, donorName: "Hype Beast", amount: 7500, sticker: "super_heart", message: "Love the UI!" },
+    { id: 1, donorName: "Pixel Miner", amount: 5000, sticker: "coins", message: "Pixel loot verified! 🪙" },
+    { id: 2, donorName: "Wasted Legend", amount: 10000, sticker: "diamond_gem", message: "Respect +100 earned! 💎" },
+    { id: 3, donorName: "Airdrop King", amount: 25000, sticker: "fire_rocket", message: "Supplies inbound! 🪂" },
+    { id: 4, donorName: "Retro Gamer", amount: 2000, sticker: "coins", message: "Level up!" },
+    { id: 5, donorName: "Street Champ", amount: 7500, sticker: "super_heart", message: "GG WP!" },
   ];
 
   const [demoDrops, setDemoDrops] = useState(INITIAL_DEMO_DROPS);
 
   // --- Kinetic Connection: Flight Path & Reset Logic ---
   const triggerDemo = useCallback(() => {
-    setShowPreview(false);
-    setIsFlying(false);
+    // Keep preview visible, but show flight animation
+    setIsFlying(true);
+
+    const stickerId = alertVariants[activeAlert] === 'pixel' ? 'coins' : alertVariants[activeAlert] === 'gta' ? 'diamond_gem' : 'fire_rocket';
 
     setTimeout(() => {
-      setIsFlying(true);
+      setIsFlying(false);
+      // SWITCH STYLE ON IMPACT
+      setActiveAlert(prev => (prev + 1) % alertVariants.length);
 
-      const stickerId = alertVariants[activeAlert] === 'zap' ? 'hype_zap' : alertVariants[activeAlert] === 'cyber' ? 'fire_rocket' : 'diamond_gem';
+      // Update Goal
+      setGoalAmount(prev => Math.min(prev + calcAmount, goalTarget));
 
-      setTimeout(() => {
-        setIsFlying(false);
-        setActiveAlert(prev => (prev + 1) % alertVariants.length);
-        setShowPreview(true);
-
-        // Update Goal
-        setGoalAmount(prev => Math.min(prev + calcAmount, goalTarget));
-
-        // Push to Ticker
-        const newDrop = {
-          id: Date.now(),
-          donorName: activeAlert === 2 ? "Royal Supporter" : activeAlert === 1 ? "Cyber Streamer" : "Zap Node",
-          amount: calcAmount,
-          sticker: stickerId,
-          timestamp: new Date().toISOString()
-        };
-        setDemoDrops(prev => [newDrop, ...prev].slice(0, 5));
-
-        setTimeout(() => {
-          setShowPreview(false);
-        }, 5000);
-      }, 800);
-    }, 50);
+      // Push to Ticker
+      const newDrop = {
+        id: Date.now(),
+        donorName: activeAlert === 2 ? "Airdrop King" : activeAlert === 1 ? "Wasted Legend" : "Pixel Miner",
+        amount: calcAmount,
+        sticker: stickerId,
+        timestamp: new Date().toISOString()
+      };
+      setDemoDrops(prev => [newDrop, ...prev].slice(0, 5));
+    }, 800);
   }, [alertVariants, activeAlert, calcAmount, goalTarget]);
 
 
@@ -821,12 +813,20 @@ const Home = () => {
                           className="w-full"
                         >
                           <AlertPreview
-                            variant={alertVariants[activeAlert]}
-                            tier={activeAlert === 2 ? 'legend' : activeAlert === 1 ? 'pro' : 'starter'}
-                            donorName={activeAlert === 2 ? 'Royal Supporter' : activeAlert === 1 ? 'Cyber Streamer' : 'Zap Node'}
+                            stylePreference={alertVariants[activeAlert]}
+                            donorName={activeAlert === 2 ? 'Apex Shooter' : activeAlert === 1 ? 'Street Legend' : 'Retro Gamer'}
                             amount={calcAmount}
-                            message="Atomic split verified! 🚀"
+                            message={
+                              activeAlert === 2 ? "Airdrop secured! 🪂" :
+                                activeAlert === 1 ? "Respect +100 verified!" :
+                                  "Pixel loot collected! 🪙"
+                            }
                             theme={theme}
+                            sticker={
+                              activeAlert === 2 ? 'fire_rocket' :
+                                activeAlert === 1 ? 'diamond_gem' :
+                                  'coins'
+                            }
                           />
                         </motion.div>
                       )}

@@ -322,7 +322,7 @@ const PremiumAlertPreview = React.memo(({
     if (stylePreference === 'holo_tcg') {
         const isUltraRare = amount >= 5000;
         return (
-            <div className="relative w-full max-w-sm mx-auto h-[450px] flex items-center justify-center perspective-1000">
+            <div className="relative w-full max-w-[320px] sm:max-w-sm mx-auto aspect-[3/4] max-h-[85vh] flex items-center justify-center perspective-1000">
                 <style>{`
           @keyframes holo-shimmer { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
           @keyframes card-tilt { 0% { transform: rotateY(-10deg) rotateX(5deg); } 50% { transform: rotateY(10deg) rotateX(-5deg); } 100% { transform: rotateY(-10deg) rotateX(5deg); } }

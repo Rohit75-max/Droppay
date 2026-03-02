@@ -102,6 +102,7 @@ const Dashboard = () => {
 
   // NEW: FEEDBACK PROTOCOL STATES
   const [feedbackType, setFeedbackType] = useState('general');
+  const [priority, setPriority] = useState('medium');
   const [rating, setRating] = useState(5);
   const [feedbackText, setFeedbackText] = useState("");
   const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
@@ -522,7 +523,7 @@ const Dashboard = () => {
   );
 
   return (
-    <div className={`h-screen flex flex-col md:flex-row overflow-hidden transition-all duration-500 bg-[var(--nexus-bg)]/40 text-[var(--nexus-text)] relative`}>
+    <div className={`h-screen flex flex-col md:flex-row overflow-hidden transition-all duration-500 bg-transparent text-[var(--nexus-text)] relative`}>
       {/* Background layer is now handled globally by LiveThemeEngine in App.js */}
 
       <div className="flex flex-col md:flex-row w-full h-full relative z-10 overflow-hidden">
@@ -633,10 +634,10 @@ const Dashboard = () => {
           )}
         </AnimatePresence>
 
-        <main className="flex-1 flex flex-col relative overflow-hidden pt-0">
-          <header className="px-6 py-3 md:px-12 md:py-4 flex justify-between items-center z-40">
+        <main className="flex-1 flex flex-col relative overflow-hidden pt-0 bg-transparent">
+          <header className="px-6 py-3 md:px-12 md:py-4 flex justify-between items-center z-40 bg-[var(--nexus-sidebar-bg)] border-b border-[var(--nexus-sidebar-border)]">
             <div className="flex flex-col">
-              <span className="text-[10px] font-black tracking-[0.3em] text-[var(--nexus-accent)] opacity-50 uppercase mb-1">Control Hub</span>
+              <span className="text-[9px] font-black tracking-[0.4em] text-[var(--nexus-accent)] uppercase mb-1">DropPay Protocol</span>
               <h1 className={`text-2xl md:text-3xl font-black uppercase tracking-tighter leading-none text-[var(--nexus-text)]`}>
                 {activeSection} <span className="text-[var(--nexus-accent)]">NEXUS.</span>
               </h1>
@@ -673,6 +674,7 @@ const Dashboard = () => {
                       removeStickerSlot={removeStickerSlot}
                       savePartnerPack={savePartnerPack}
                       isSavingStickers={isSavingStickers}
+                      updatePartnerPack={setPartnerStickers}
                       copyToClipboard={copyToClipboard}
                       copiedType={copiedType}
                       triggerTestSignal={triggerTestSignal}
@@ -687,6 +689,7 @@ const Dashboard = () => {
                     <FeedbackStation
                       theme={theme} user={user}
                       feedbackType={feedbackType} setFeedbackType={setFeedbackType}
+                      priority={priority} setPriority={setPriority}
                       rating={rating} setRating={setRating}
                       feedbackText={feedbackText} setFeedbackText={setFeedbackText}
                       isSubmittingFeedback={isSubmittingFeedback}

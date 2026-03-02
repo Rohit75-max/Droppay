@@ -182,7 +182,10 @@ exports.getRecentDrops = async (req, res) => {
         if (!user) return res.status(404).json({ msg: "Not found" });
         if (user.security?.accountStatus?.isBanned) return res.status(403).json({ msg: "Node Suspended" });
 
-        const history = await Drop.find({ streamerId: user.streamerId, status: 'completed' }).sort({ createdAt: -1 }).limit(50);
+        const history = await Drop.find({
+            streamerId: user.streamerId,
+            $or: [{ status: 'completed' }, { isTest: true }]
+        }).sort({ createdAt: -1 }).limit(50);
         res.json(history);
     } catch (error) { res.status(500).send(); }
 };
@@ -196,7 +199,7 @@ exports.getTopDonors = async (req, res) => {
         if (user.security?.accountStatus?.isBanned) return res.status(403).json({ msg: "Node Suspended" });
 
         const topDonors = await Drop.aggregate([
-            { $match: { streamerId: user.streamerId, status: 'completed' } },
+            { $match: { streamerId: user.streamerId, $or: [{ status: 'completed' }, { isTest: true }] } },
             { $group: { _id: "$donorName", totalAmount: { $sum: "$amount" } } },
             { $sort: { totalAmount: -1 } },
             { $limit: 10 }
@@ -312,13 +315,24 @@ exports.testDrop = async (req, res) => {
         }).select('streamerId obsKey goalSettings tier');
         const io = req.app.get('io');
         if (io && streamer) {
+            // New: Persist the test drop so the dashboard doesn't look empty on refresh
+            await Drop.create({
+                streamerId: streamer.streamerId,
+                donorName: "System Preview",
+                amount: amount || 500, // Use provided amount or default
+                message: message || "Testing Overlay Integrity!",
+                sticker: sticker || "zap",
+                status: 'completed',
+                isTest: true
+            });
+
             // Emits Test Alert to the 3D Overlay with "Preview" text instead of real money
             if (streamer.obsKey) {
-                io.to(streamer.obsKey).emit('new-drop', { donorName: "System Preview", amount: 0, message: "Testing Overlay Integrity!", sticker: sticker || "zap", tier: streamer.tier, isTest: true });
+                io.to(streamer.obsKey).emit('new-drop', { donorName: "System Preview", amount: 0, message: message || "Testing Overlay Integrity!", sticker: sticker || "zap", tier: streamer.tier, isTest: true });
             }
 
             // Emits Test Alert to the Dashboard Signal Feed
-            io.to(streamer.streamerId).emit('new-drop', { donorName: "System Preview", amount: 0, message: "Testing Overlay Integrity!", sticker: sticker || "zap", tier: streamer.tier, isTest: true });
+            io.to(streamer.streamerId).emit('new-drop', { donorName: "System Preview", amount: amount || 500, message: message || "Testing Overlay Integrity!", sticker: sticker || "zap", tier: streamer.tier, isTest: true });
 
             return res.status(200).json({ status: "success" });
         }

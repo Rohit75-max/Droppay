@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 const LiveThemeEngine = ({ currentTheme, isPreview = false, theme = 'dark' }) => {
     const [isVideoLoaded, setIsVideoLoaded] = useState(false);
     const [isNightTime, setIsNightTime] = useState(false);
-    const isLight = theme === 'light' || (typeof document !== 'undefined' && document.documentElement.classList.contains('light'));
+    const isLight = theme === 'light';
 
     // 1. THE ID TRANSLATOR (Fixes the blank screen issue in the store)
     const themeDictionary = {
