@@ -3,43 +3,59 @@ import { motion, AnimatePresence } from 'framer-motion';
 import axios from '../api/axios';
 import {
   Mail, Zap, Loader2, CheckCircle, AlertCircle,
-  Send, ArrowLeft, Shield, Lock, Key, RefreshCw, Globe
+  Send, ArrowLeft, Shield, Lock, Key, Globe, Sparkles
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-// API_BASE is now handled by the centralized axios configuration in src/api/axios.js
-
-// ─── Floating Orb ─────────────────────────────────────────────
-const Orb = ({ size, x, y, duration, color, delay }) => (
+// ─── Visual Component: Floating Shards ────────────────────────
+const FloatingShard = ({ delay = 0, size = "w-24 h-24", top = "10%", left = "10%", rotate = "0deg" }) => (
   <motion.div
-    className="absolute rounded-full pointer-events-none"
-    style={{ width: size, height: size, left: x, top: y, background: color, filter: 'blur(60px)' }}
-    animate={{ y: [0, -25, 0], x: [0, 12, 0], scale: [1, 1.07, 1], opacity: [0.3, 0.5, 0.3] }}
-    transition={{ duration, repeat: Infinity, ease: 'easeInOut', delay }}
+    initial={{ opacity: 0, scale: 0 }}
+    animate={{
+      opacity: [0.1, 0.2, 0.1],
+      y: [0, -40, 0],
+      rotate: [rotate, `${parseInt(rotate) + 15}deg`, rotate]
+    }}
+    transition={{ duration: 10 + Math.random() * 5, repeat: Infinity, ease: "easeInOut", delay }}
+    className={`absolute ${size} rounded-3xl bg-white/[0.03] border border-white/5 backdrop-blur-[2px] pointer-events-none z-0`}
+    style={{ top, left, rotate }}
   />
 );
 
+// ─── Visual Component: Scanline Effect ────────────────────────
+const GlobalScanline = () => (
+  <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
+    <motion.div
+      animate={{
+        top: ['-100%', '100%'],
+        opacity: [0.02, 0.05, 0.02]
+      }}
+      transition={{ duration: 12, repeat: Infinity, ease: 'linear' }}
+      className="absolute left-0 right-0 h-[40vh] bg-gradient-to-b from-transparent via-emerald-500/[0.05] to-transparent"
+    />
+    <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%),linear-gradient(90.1deg,rgba(255,0,0,0.02)_0%,rgba(0,255,0,0.01)_50.1%,rgba(0,0,255,0.02)_100%)] bg-[length:100%_4px,3px_100%] pointer-events-none opacity-20" />
+  </div>
+);
+
 // ─── Premium Input ────────────────────────────────────────────
-const PremiumInput = ({ icon: Icon, label, value, onChange, placeholder }) => {
+const PremiumInput = ({ icon: Icon, label, value, onChange, placeholder, type = "text" }) => {
   const [focused, setFocused] = useState(false);
   return (
-    <div className="space-y-2">
-      <label className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em] transition-colors ${focused ? 'text-emerald-600' : 'text-slate-400'}`}>
-        <Icon className="w-3 h-3" /> {label}
+    <div className="space-y-3">
+      <label className={`flex items-center gap-2.5 text-[10px] font-black uppercase tracking-[0.3em] transition-colors duration-500 ${focused ? 'text-emerald-400' : 'text-white/30'}`}>
+        <Icon className="w-3.5 h-3.5" /> {label}
       </label>
-      <div className="relative">
+      <div className="relative group">
         <motion.div
-          className="absolute -inset-px rounded-2xl bg-gradient-to-r from-emerald-400 via-cyan-400 to-emerald-400 pointer-events-none"
-          animate={{ opacity: focused ? 0.55 : 0 }}
-          transition={{ duration: 0.2 }}
+          className={`absolute -inset-[1px] rounded-2xl bg-gradient-to-r from-emerald-500/50 via-cyan-500/50 to-emerald-500/50 pointer-events-none transition-opacity duration-500 ${focused ? 'opacity-100' : 'opacity-0'}`}
         />
         <div className="relative">
-          <Icon className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors duration-200 ${focused ? 'text-emerald-500' : 'text-slate-300'}`} />
+          <Icon className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors duration-500 ${focused ? 'text-emerald-400' : 'text-white/20'}`} />
           <input
-            type="email" value={value} onChange={onChange} required
+            type={type} value={value} onChange={onChange} required
             onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
             placeholder={placeholder}
-            className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 pl-12 pr-4 text-sm text-slate-800 placeholder:text-slate-300 focus:outline-none focus:border-transparent transition-all"
+            className="w-full bg-black/40 border border-white/5 rounded-2xl py-4 pl-12 pr-4 text-sm text-white placeholder:text-white/10 focus:outline-none transition-all duration-500 backdrop-blur-md"
           />
         </div>
       </div>
@@ -54,7 +70,6 @@ const ForgotPassword = () => {
   const [sent, setSent] = useState(false);
   const [error, setError] = useState('');
 
-
   const handleReset = async (e) => {
     e.preventDefault();
     setLoading(true); setError('');
@@ -67,223 +82,216 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 sm:p-6 font-sans overflow-hidden">
-      {/* Background blobs */}
+    <div className="min-h-screen bg-[#030303] text-white flex items-center justify-center p-4 sm:p-6 font-sans overflow-hidden relative">
+      <GlobalScanline />
+
+      {/* Background Visuals */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[-20%] right-[-10%] w-[500px] h-[500px] rounded-full bg-emerald-100/60 blur-[120px]" />
-        <div className="absolute bottom-[-20%] left-[-10%] w-[400px] h-[400px] rounded-full bg-cyan-100/50 blur-[100px]" />
+        <motion.div
+          animate={{ opacity: [0.15, 0.25, 0.15] }}
+          transition={{ duration: 5, repeat: Infinity }}
+          className="absolute top-[-10%] right-[-5%] w-[60%] h-[70vh] bg-emerald-500/20 blur-[150px] rounded-full"
+        />
+        <div className="absolute bottom-[-10%] left-[-5%] w-[50%] h-[60vh] bg-cyan-500/10 blur-[120px] rounded-full" />
+
+        <FloatingShard size="w-32 h-32" top="15%" left="5%" rotate="12deg" delay={0.5} />
+        <FloatingShard size="w-48 h-48" top="65%" left="85%" rotate="-15deg" delay={2} />
+        <FloatingShard size="w-24 h-24" top="40%" left="75%" rotate="45deg" delay={1} />
+
+        {/* Grain Overlay */}
+        <div className="absolute inset-0 opacity-[0.05] mix-blend-overlay pointer-events-none" style={{ backgroundImage: 'url("https://grainy-gradients.vercel.app/noise.svg")' }} />
       </div>
 
       {/* Main card */}
       <motion.div
-        style={{ boxShadow: '0 30px 80px -20px rgba(0,0,0,0.10), 0 0 0 1px rgba(255,255,255,0.8)' }}
-        initial={{ opacity: 0, y: 32, scale: 0.96 }}
+        initial={{ opacity: 0, y: 40, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-        className="relative w-full max-w-[900px] rounded-[2.5rem] overflow-hidden flex flex-col lg:flex-row border border-white/80 bg-white"
+        transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+        className="relative w-full max-w-[1000px] rounded-[3.5rem] overflow-hidden flex flex-col lg:flex-row border border-white/5 bg-[#080808]/80 backdrop-blur-2xl shadow-[0_40px_100px_-20px_rgba(0,0,0,0.8)]"
       >
-        {/* ── LEFT — Dark branded panel ── */}
-        <div className="relative lg:w-[360px] shrink-0 bg-[#061a12] overflow-hidden flex flex-col justify-between p-6 lg:p-8 min-h-[220px] lg:min-h-0">
-          <Orb size={220} x="-50px" y="-50px" color="rgba(16,185,129,0.22)" duration={7} delay={0} />
-          <Orb size={150} x="50%" y="55%" color="rgba(6,182,212,0.18)" duration={9} delay={2} />
-          <Orb size={100} x="10%" y="65%" color="rgba(244,114,182,0.14)" duration={6} delay={1} />
-
+        {/* ── LEFT — Cyber Panel ── */}
+        <div className="relative lg:w-[400px] shrink-0 bg-[#050505] overflow-hidden flex flex-col justify-between p-8 lg:p-12 min-h-[300px] lg:min-h-0 border-r border-white/5">
           <div className="absolute inset-0 pointer-events-none opacity-20"
-            style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.35) 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
+            style={{ backgroundImage: 'radial-gradient(circle, rgba(16,185,129,0.1) 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
 
-          <motion.div className="absolute left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-emerald-400/50 to-transparent pointer-events-none"
-            animate={{ top: ['-2%', '102%'] }}
-            transition={{ duration: 5, repeat: Infinity, ease: 'linear', repeatDelay: 2.5 }} />
-
-          {/* Content */}
           <div className="relative z-10">
-            {/* Back to login */}
-            <motion.div initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}
-              className="mb-4">
-              <Link to="/login" className="group inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-white/10 bg-white/[0.06] hover:bg-white/10 text-white/50 hover:text-white transition-all text-[9px] font-black uppercase tracking-widest">
-                <ArrowLeft className="w-3 h-3 group-hover:-translate-x-0.5 transition-transform" /> Back to Login
-              </Link>
-            </motion.div>
+            <Link to="/login" className="group inline-flex items-center gap-3 px-5 py-2.5 rounded-2xl bg-white/[0.03] border border-white/5 hover:bg-white/5 hover:border-white/10 text-white/40 hover:text-white transition-all text-[11px] font-black uppercase tracking-[0.3em] mb-12">
+              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Access Portal
+            </Link>
 
-            <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
-              className="flex items-center gap-3 mb-5">
-              <div className="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center">
-                <Zap className="w-4 h-4 text-emerald-400 fill-emerald-400" />
+            <div className="flex items-center gap-4 mb-8">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center relative group">
+                <Zap className="w-6 h-6 text-emerald-400 fill-emerald-400" />
+                <motion.div
+                  animate={{ opacity: [0, 0.5, 0], scale: [1, 1.5, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="absolute inset-0 bg-emerald-400 blur-lg rounded-full"
+                />
               </div>
               <div>
-                <span className="text-white font-black text-lg italic tracking-tight">Drop<span className="text-emerald-400">Pay</span></span>
-                <p className="text-white/30 text-[9px] uppercase tracking-[0.25em] font-bold">Account Recovery</p>
+                <span className="text-2xl font-black italic uppercase tracking-tighter">Drop<span className="text-emerald-500">Pay</span></span>
+                <p className="text-white/20 text-[10px] uppercase tracking-[0.4em] font-black">Node Recovery</p>
               </div>
-            </motion.div>
+            </div>
 
-            <motion.h2 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
-              className="text-3xl lg:text-4xl font-black italic text-white leading-[1] tracking-tighter mb-2">
+            <h2 className="text-4xl lg:text-5xl font-black italic text-white leading-[0.9] tracking-tighter mb-6 uppercase flex items-center gap-4">
               Recover<br />
-              <span className="text-transparent bg-clip-text"
-                style={{ backgroundImage: 'linear-gradient(135deg, #10B981, #06b6d4, #f472b6)', WebkitBackgroundClip: 'text' }}>
-                Access.
+              <span className="text-transparent bg-clip-text bg-gradient-to-br from-emerald-200 via-emerald-400 to-cyan-600 drop-shadow-[0_0_20px_rgba(16,185,129,0.3)]">
+                Uplink.
               </span>
-            </motion.h2>
+              <motion.div
+                animate={{ rotate: [0, 360], scale: [1, 1.2, 1] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+              >
+                <Sparkles className="w-8 h-8 text-emerald-400/50" />
+              </motion.div>
+            </h2>
 
-            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.65 }}
-              className="text-white/40 text-xs font-medium leading-relaxed max-w-xs mb-6">
-              Enter the email linked to your account. We'll transmit a secure reset link directly to your inbox.
-            </motion.p>
+            <p className="text-white/40 text-sm font-bold leading-relaxed max-w-xs mb-10 italic">
+              Synchronize your master credentials. We'll transmit a secure reset vector to your registered node.
+            </p>
 
-            {/* How it works */}
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}
-              className="space-y-2.5">
+            <div className="space-y-3">
               {[
-                { icon: Mail, text: 'Enter your registered email', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' },
-                { icon: Send, text: 'Receive a secure reset link', color: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20' },
-                { icon: Lock, text: 'Set your new passphrase', color: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20' },
-                { icon: CheckCircle, text: 'Regain full node access', color: 'text-amber-400 bg-amber-500/10 border-amber-500/20' },
+                { icon: Mail, text: 'Identify Node Email', color: 'text-emerald-400 bg-emerald-500/5 border-emerald-500/10' },
+                { icon: Send, text: 'Await Transmission', color: 'text-cyan-400 bg-cyan-500/5 border-cyan-500/10' },
+                { icon: Lock, text: 'Re-calibrate Key', color: 'text-indigo-400 bg-indigo-500/5 border-indigo-500/10' },
               ].map(({ icon: Icon, text, color }, i) => (
-                <motion.div key={i} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.9 + i * 0.1 }}
-                  className={`flex items-center gap-2.5 px-3 py-2 rounded-xl border ${color}`}>
-                  <Icon className="w-3.5 h-3.5 shrink-0" />
-                  <span className="text-[9px] font-black uppercase tracking-wider">{text}</span>
-                </motion.div>
+                <div key={i} className={`flex items-center gap-4 px-4 py-3 rounded-2xl border ${color} opacity-60`}>
+                  <Icon className="w-4 h-4 shrink-0" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em]">{text}</span>
+                </div>
               ))}
-            </motion.div>
+            </div>
           </div>
 
-          {/* Bottom chips */}
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.3 }}
-            className="relative z-10 flex flex-wrap gap-1.5 mt-5">
-            {[
-              { icon: Shield, text: 'Encrypted Link', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' },
-              { icon: Key, text: '15-min Expiry', color: 'text-amber-400 bg-amber-500/10 border-amber-500/20' },
-              { icon: Globe, text: 'Geo-verified', color: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20' },
-            ].map(({ icon: Icon, text, color }) => (
-              <div key={text} className={`flex items-center gap-1.5 px-2 py-1 rounded-full border text-[9px] font-black uppercase tracking-widest ${color}`}>
-                <Icon className="w-3 h-3" /> {text}
-              </div>
-            ))}
-          </motion.div>
+          <div className="relative z-10 flex flex-wrap gap-2 mt-auto pt-8">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/10 text-[9px] font-black uppercase tracking-widest text-emerald-400/60">
+              <Shield className="w-3.5 h-3.5" /> 256-bit Encrypted
+            </div>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/10 text-[9px] font-black uppercase tracking-widest text-amber-400/60">
+              <Key className="w-3.5 h-3.5" /> 15m Protocol
+            </div>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/10 text-[9px] font-black uppercase tracking-widest text-cyan-400/60">
+              <Globe className="w-3.5 h-3.5" /> Global Uplink
+            </div>
+          </div>
         </div>
 
-        {/* ── RIGHT — Form ── */}
-        <div className="flex-1 flex flex-col justify-center p-6 lg:p-12 bg-white">
+        {/* ── RIGHT — Terminals ── */}
+        <div className="flex-1 flex flex-col justify-center p-8 lg:p-16 relative">
           <AnimatePresence mode="wait">
             {!sent ? (
-              <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, x: -20 }}>
-                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
-                  className="flex items-center justify-between mb-8">
+              <motion.div key="form" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.5 }}>
+                <header className="flex items-center justify-between mb-12">
                   <div>
-                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Password Recovery</p>
-                    <p className="text-[10px] text-slate-300 uppercase tracking-widest">Initialize reset protocol</p>
+                    <h3 className="text-3xl font-black italic tracking-tighter uppercase mb-1">Key Recovery</h3>
+                    <p className="text-white/20 text-[10px] font-black uppercase tracking-[0.3em]">Initialize Reset Sequence</p>
                   </div>
-                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-100 bg-slate-50">
-                    <motion.div className="w-1.5 h-1.5 rounded-full bg-emerald-400"
-                      animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.5, repeat: Infinity }} />
-                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Ready</span>
+                  <div className="flex items-center gap-3 px-4 py-2 rounded-2xl bg-white/[0.03] border border-white/10">
+                    <motion.div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]"
+                      animate={{ opacity: [1, 0.4, 1] }} transition={{ duration: 2, repeat: Infinity }} />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Ready</span>
                   </div>
-                </motion.div>
+                </header>
 
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.55 }}>
-                  <h3 className="text-3xl font-black italic tracking-tighter text-slate-900 mb-1">Forgot password?</h3>
-                  <p className="text-slate-400 text-sm font-medium mb-8">Enter your email and we'll send a secure reset link.</p>
-                </motion.div>
-
-                {/* Error */}
                 <AnimatePresence>
                   {error && (
                     <motion.div key="err"
-                      initial={{ opacity: 0, height: 0, marginBottom: 0 }}
-                      animate={{ opacity: 1, height: 'auto', marginBottom: 20 }}
-                      exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-                      className="bg-rose-50 border border-rose-200 rounded-2xl p-3 flex gap-2 overflow-hidden">
-                      <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
-                      <p className="text-[11px] text-rose-600 font-bold">{error}</p>
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="bg-rose-500/10 border border-rose-500/20 rounded-2xl p-4 flex gap-4 mb-8 overflow-hidden"
+                    >
+                      <AlertCircle className="w-5 h-5 text-rose-500 shrink-0" />
+                      <p className="text-xs text-rose-400 font-black uppercase tracking-widest">{error}</p>
                     </motion.div>
                   )}
                 </AnimatePresence>
 
-                <form onSubmit={handleReset} className="space-y-5">
-                  <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.65 }}>
-                    <PremiumInput icon={Mail} label="Registered Email Address"
-                      value={email}
-                      onChange={e => { setError(''); setEmail(e.target.value); }}
-                      placeholder="you@example.com"
-                    />
-                  </motion.div>
+                <form onSubmit={handleReset} className="space-y-8">
+                  <PremiumInput
+                    icon={Mail}
+                    label="Master Node Identity"
+                    value={email}
+                    onChange={e => { setError(''); setEmail(e.target.value); }}
+                    placeholder="Enter registered email..."
+                    type="email"
+                  />
 
-                  <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.75 }}>
-                    <motion.button type="submit" disabled={loading}
-                      whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.985 }}
-                      className="relative w-full overflow-hidden py-4 rounded-2xl font-black uppercase tracking-widest text-[13px] flex items-center justify-center gap-3 transition-all
-                                            bg-gradient-to-r from-emerald-600 to-emerald-500 text-white
-                                            disabled:from-slate-100 disabled:to-slate-100 disabled:text-slate-300 disabled:cursor-not-allowed">
-                      <motion.div className="absolute inset-0 -skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                        animate={{ x: ['-200%', '200%'] }}
-                        transition={{ duration: 2.5, repeat: Infinity, ease: 'linear', repeatDelay: 3 }} />
-                      {loading
-                        ? <><Loader2 className="w-5 h-5 animate-spin" /> Transmitting...</>
-                        : <><Send className="w-4 h-4" /> Send Recovery Link</>}
-                    </motion.button>
-                  </motion.div>
+                  <motion.button
+                    type="submit"
+                    disabled={loading}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="relative w-full overflow-hidden py-6 rounded-3xl font-black uppercase tracking-[0.4em] text-[13px] italic flex items-center justify-center gap-4 transition-all duration-500
+                    bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-[0_20px_40px_rgba(16,185,129,0.2)]
+                    disabled:from-white/5 disabled:to-white/5 disabled:text-white/20 disabled:cursor-not-allowed disabled:shadow-none border border-emerald-400/20"
+                  >
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -skew-x-12 translate-x-[-200%]"
+                      animate={{ x: loading ? ['-200%', '200%'] : '[-200%]' }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                    />
+                    {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : <><Send className="w-5 h-5" /> Transmit Recovery Vector</>}
+                  </motion.button>
                 </form>
 
-                <div className="flex items-center gap-3 my-6">
-                  <div className="flex-1 h-px bg-slate-100" />
-                  <span className="text-[9px] text-slate-300 uppercase tracking-widest">or</span>
-                  <div className="flex-1 h-px bg-slate-100" />
+                <div className="flex items-center gap-4 my-10">
+                  <div className="flex-1 h-[1px] bg-white/5" />
+                  <span className="text-[10px] text-white/10 font-black uppercase tracking-[0.5em]">OR</span>
+                  <div className="flex-1 h-[1px] bg-white/5" />
                 </div>
 
                 <div className="text-center">
-                  <Link to="/login" className="inline-flex items-center gap-2 text-[10px] font-black text-slate-400 hover:text-emerald-600 uppercase tracking-[0.2em] transition-colors group">
-                    <ArrowLeft className="w-3 h-3 group-hover:-translate-x-0.5 transition-transform" />
-                    Return to Login
+                  <Link to="/login" className="inline-flex items-center gap-3 text-[11px] font-black text-white/30 hover:text-emerald-400 uppercase tracking-[0.3em] transition-all group italic">
+                    <ArrowLeft className="w-4 h-4 group-hover:-translate-x-2 transition-transform duration-500" />
+                    Return to Login Console
                   </Link>
                 </div>
               </motion.div>
             ) : (
-              /* ── Success state ── */
-              <motion.div key="success" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-                className="flex flex-col items-center text-center">
-                <motion.div initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                  className="w-20 h-20 rounded-2xl bg-emerald-500/10 border border-emerald-400/20 flex items-center justify-center mb-6">
-                  <CheckCircle className="w-10 h-10 text-emerald-500" />
-                </motion.div>
-
-                {/* Animated pulse ring */}
-                <motion.div className="absolute w-20 h-20 rounded-2xl border border-emerald-400/20"
-                  animate={{ scale: [1, 1.5, 1.5], opacity: [0.5, 0, 0] }}
-                  transition={{ duration: 1.5, repeat: Infinity }} />
-
-                <h3 className="text-3xl font-black italic tracking-tighter text-slate-900 mb-2">Check Inbox.</h3>
-                <p className="text-slate-400 text-sm font-medium mb-2">Reset link transmitted to:</p>
-                <p className="text-emerald-600 font-black text-sm mb-8 px-4 py-2 rounded-xl bg-emerald-50 border border-emerald-200">{email}</p>
-
-                <div className="space-y-2 w-full max-w-xs mb-8">
-                  {['Check spam/junk folder', 'Link expires in 15 minutes', 'Request a new link if needed'].map((tip, i) => (
-                    <motion.div key={i} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.3 + i * 0.1 }}
-                      className="flex items-center gap-2 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
-                      {tip}
-                    </motion.div>
-                  ))}
+              <motion.div key="success" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center text-center">
+                <div className="relative mb-10">
+                  <motion.div
+                    initial={{ scale: 0 }} animate={{ scale: 1 }}
+                    className="w-24 h-24 rounded-[2.5rem] bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center relative z-10"
+                  >
+                    <CheckCircle className="w-12 h-12 text-emerald-500" />
+                  </motion.div>
+                  <motion.div
+                    animate={{ scale: [1, 1.5], opacity: [0.5, 0] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                    className="absolute inset-0 rounded-[2.5rem] border border-emerald-500/30"
+                  />
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-3 w-full">
-                  <Link to="/login"
-                    className="flex-1 py-3.5 rounded-2xl font-black uppercase tracking-widest text-[11px] flex items-center justify-center gap-2 transition-all
-                                        bg-gradient-to-r from-emerald-600 to-emerald-500 text-white">
-                    <ArrowLeft className="w-4 h-4" /> Return to Login
+                <h3 className="text-4xl font-black italic tracking-tighter uppercase mb-4">Transmission Sent.</h3>
+                <p className="text-white/40 text-sm font-bold mb-10 max-w-sm italic">
+                  Synchronization vector dispatched. Check your terminal at:<br />
+                  <span className="text-emerald-400 text-base mt-2 block not-italic font-black underline decoration-emerald-500/30 underline-offset-8">{email}</span>
+                </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-md">
+                  <Link to="/login" className="flex items-center justify-center gap-3 py-5 rounded-2xl bg-white/5 border border-white/10 font-black uppercase tracking-widest text-[11px] hover:bg-white/10 transition-all italic">
+                    <ArrowLeft className="w-4 h-4" /> Login Portal
                   </Link>
-                  <button onClick={() => { setSent(false); setEmail(''); }}
-                    className="flex-1 py-3.5 rounded-2xl font-black uppercase tracking-widest text-[11px] flex items-center justify-center gap-2 transition-all border border-slate-200 text-slate-500 hover:border-emerald-300 hover:text-emerald-600 hover:bg-emerald-50">
-                    <RefreshCw className="w-4 h-4" /> Try Another Email
+                  <button onClick={() => setSent(false)} className="flex items-center justify-center gap-3 py-5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-black uppercase tracking-widest text-[11px] hover:bg-emerald-500/20 transition-all italic">
+                    Transmit Again
                   </button>
                 </div>
+
+                <p className="mt-12 text-white/10 text-[9px] font-black uppercase tracking-[0.5em]">Expected latency: &lt; 2 minutes</p>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
       </motion.div>
+
+      <style jsx>{`
+        .animate-spin-slow { animation: spin 8s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+      `}</style>
     </div>
   );
 };

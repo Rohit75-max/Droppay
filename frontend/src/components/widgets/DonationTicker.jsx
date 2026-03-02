@@ -25,7 +25,7 @@ const LOTTIE_STICKER_MAP = {
     football_goal: 'https://fonts.gstatic.com/s/e/notoemoji/latest/26bd/lottie.json',
     flying_bird: 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f426/lottie.json',
     gold_trophy: 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f3c6/lottie.json',
-    diamond_gem: 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f48e/lottie.json',
+    diamond_gem: 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f48e/lottie.json'
 };
 
 const stickerFallback = {
@@ -33,7 +33,7 @@ const stickerFallback = {
     party_popper: '🎉', star: '⭐', diamond: '💎', gold_bar: '🪙',
     hype_zap: '⚡', fire_rocket: '🚀', super_heart: '💖', alien_visit: '👽',
     driving_car: '🚗', football_goal: '⚽', flying_bird: '🐦', gold_trophy: '🏆',
-    diamond_gem: '💎'
+    diamond_gem: '💎', coins: '🪙'
 };
 
 const TickerItem = ({ donation }) => {

@@ -1,11 +1,10 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'framer-motion';
 import {
-    Paintbrush, Target, BellRing, LayoutTemplate, Sparkles, Loader2,
-    ArrowUpRight, ShoppingCart, CheckCircle2, Zap, ShieldCheck
+    Paintbrush, Target, BellRing, LayoutTemplate, Loader2,
+    ArrowUpRight, ShoppingCart, Zap, ShieldCheck, Package
 } from 'lucide-react';
 import LiveThemeEngine from '../LiveThemeEngine';
-import CruiserRevenueChart from '../widgets/CruiserRevenueChart';
 import PremiumPreviewModal from './PremiumPreviewModal';
 import PremiumAlertPreview from '../PremiumAlertPreview';
 import PremiumGoalOverlays from '../PremiumGoalOverlays';
@@ -39,6 +38,11 @@ const STORE_CATEGORIES = [
         id: 'widgets',
         label: 'Widgets',
         icon: (active) => <LayoutTemplate className={`w-4 h-4 transition-all duration-500 ${active ? 'scale-125 rotate-[360deg]' : 'group-hover:translate-y-[-2px]'}`} />
+    },
+    {
+        id: 'owned',
+        label: 'Owned',
+        icon: (active) => <Package className={`w-4 h-4 transition-all duration-500 ${active ? 'scale-125 animate-pulse' : 'group-hover:rotate-12'}`} />
     }
 ];
 
@@ -86,8 +90,8 @@ const PremiumStoreCard = ({ item, theme, activeTab, onClick, onPurchase, isProce
             }}
             onClick={onClick}
             className={`group relative bg-[var(--nexus-panel)] border flex flex-col justify-between overflow-hidden transition-all duration-300 hover:shadow-[0_20px_50px_rgba(0,0,0,0.2)] cursor-pointer ${item.isActive
-                ? (isLight ? 'border-emerald-500 ring-1 ring-emerald-500/20 shadow-lg shadow-emerald-500/5' : 'border-[var(--nexus-accent)] shadow-[0_0_20px_rgba(57,255,20,0.1)]')
-                : (isLight ? 'border-emerald-100 hover:border-emerald-500/50' : 'border-[var(--nexus-border)] hover:border-[var(--nexus-accent)]/50')
+                ? 'border-[var(--nexus-accent)] shadow-[0_0_20px_var(--nexus-accent-glow)]'
+                : 'border-[var(--nexus-border)] hover:border-[var(--nexus-accent)]/50'
                 }`}
         >
             {/* Holographic Glint Line */}
@@ -101,17 +105,17 @@ const PremiumStoreCard = ({ item, theme, activeTab, onClick, onPurchase, isProce
             />
 
             {/* Diagonal Tech Texture */}
-            <div className={`absolute inset-0 opacity-[0.03] ${isLight ? 'bg-emerald-900' : 'bg-white'} pointer-events-none`} style={{ backgroundImage: 'repeating-linear-gradient(45deg,transparent,transparent_5px,currentColor_5px,currentColor_10px)' }} />
+            <div className={`absolute inset-0 opacity-[0.03] ${isLight ? 'bg-[var(--nexus-accent)]' : 'bg-white'} pointer-events-none`} style={{ backgroundImage: 'repeating-linear-gradient(45deg,transparent,transparent_5px,currentColor_5px,currentColor_10px)' }} />
 
             {/* Premium Category Badge */}
             <div className="absolute top-3 left-3 z-30 pointer-events-none flex gap-2">
-                <div className={`px-2 py-0.5 rounded-sm text-[8px] font-black uppercase tracking-widest border transition-colors duration-300 ${item.isActive ? (isLight ? 'bg-emerald-100 border-emerald-500 text-emerald-600' : 'bg-[var(--nexus-accent)]/10 border-[var(--nexus-accent)] text-[var(--nexus-accent)]') :
-                    (isLight ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-black/80 border-[var(--nexus-border)] text-white')
+                <div className={`px-2 py-0.5 rounded-sm text-[8px] font-black uppercase tracking-widest border transition-colors duration-300 ${item.isActive ? 'bg-[var(--nexus-accent)]/10 border-[var(--nexus-accent)] text-[var(--nexus-accent)]' :
+                    (isLight ? 'bg-white/80 border-[var(--nexus-border)] text-[var(--nexus-text)]' : 'bg-black/80 border-[var(--nexus-border)] text-white')
                     }`}>
-                    {item.isActive ? 'ACTIVE' : item.badge}
+                    {item.isActive ? 'ACTIVE' : (activeTab === 'owned' ? item.type : item.badge)}
                 </div>
-                {item.id.includes('h') && (
-                    <div className="px-2 py-0.5 rounded-sm text-[8px] font-black uppercase tracking-widest bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center gap-1">
+                {(item.id.includes('h') || item.price?.includes('10,000') || item.isElite) && (
+                    <div className="px-2 py-0.5 rounded-sm text-[8px] font-black uppercase tracking-widest bg-[var(--nexus-accent)]/10 border border-[var(--nexus-accent)]/30 text-[var(--nexus-accent)] flex items-center gap-1">
                         <Zap className="w-2 h-2" /> Elite
                     </div>
                 )}
@@ -133,14 +137,16 @@ const PremiumStoreCard = ({ item, theme, activeTab, onClick, onPurchase, isProce
 
                     {item.category === 'widgets' && (
                         <div className="w-full h-full flex items-center justify-center transform scale-[1.1] sm:scale-[1.5]">
-                            {item.id === 'wd4' && <CruiserRevenueChart />}
+                            <div className="text-[var(--nexus-accent)] opacity-20">
+                                <LayoutTemplate className="w-12 h-12" />
+                            </div>
                         </div>
                     )}
 
                     {item.category === 'alerts' && (
                         <PremiumAlertPreview
                             donorName="PREVIEW"
-                            amount={parseInt(item.price.replace('₹', '')) || 2000}
+                            amount={parseInt(item.price?.replace('₹', '')) || 2000}
                             stylePreference={item.id}
                         />
                     )}
@@ -168,20 +174,20 @@ const PremiumStoreCard = ({ item, theme, activeTab, onClick, onPurchase, isProce
             {/* Info Section */}
             <div className={`p-5 flex flex-col flex-1 relative z-10 ${isLight ? 'bg-white' : 'bg-gradient-to-t from-[var(--nexus-panel)] to-transparent'}`} style={{ translateZ: 30 }}>
                 <div className="flex justify-between items-start mb-2">
-                    <h3 className={`font-black text-xl uppercase tracking-tighter italic transition-colors group-hover:text-emerald-500 ${isLight ? 'text-slate-900' : 'text-[var(--nexus-text)]'}`}>
+                    <h3 className={`font-black text-xl uppercase tracking-tighter italic transition-colors group-hover:text-[var(--nexus-accent)] ${isLight ? 'text-slate-900' : 'text-[var(--nexus-text)]'}`}>
                         {item.name}
                     </h3>
-                    <ArrowUpRight className={`w-5 h-5 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1 ${isLight ? 'text-emerald-500' : 'text-[var(--nexus-accent)]'}`} />
+                    <ArrowUpRight className={`w-5 h-5 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1 text-[var(--nexus-accent)]`} />
                 </div>
 
                 <p className={`text-xs mb-6 flex-1 line-clamp-2 ${isLight ? 'text-slate-500 font-medium' : 'text-[var(--nexus-text-muted)]'}`}>
                     {item.desc}
                 </p>
 
-                <div className={`flex items-center justify-between mt-auto border-t pt-4 ${isLight ? 'border-emerald-50' : 'border-[var(--nexus-border)]'}`}>
+                <div className={`flex items-center justify-between mt-auto border-t pt-4 border-[var(--nexus-border)]`}>
                     <div className="flex flex-col">
                         <span className="text-[10px] uppercase tracking-widest text-[var(--nexus-text-muted)] font-bold">Standard Fee</span>
-                        <span className={`font-mono font-black text-xl ${isLight ? 'text-emerald-950/80' : 'text-[var(--nexus-text)] drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]'}`}>
+                        <span className={`font-mono font-black text-xl ${isLight ? 'text-slate-900' : 'text-[var(--nexus-text)] drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]'}`}>
                             {item.isOwned ? 'SECURED' : item.price}
                         </span>
                     </div>
@@ -190,8 +196,8 @@ const PremiumStoreCard = ({ item, theme, activeTab, onClick, onPurchase, isProce
                         onClick={(e) => onPurchase(e, item)}
                         disabled={isProcessing}
                         className={`font-black text-xs uppercase tracking-widest px-5 py-3 transition-all flex items-center gap-2 ${item.isOwned
-                            ? (item.isActive ? (isLight ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-slate-800 text-slate-500 cursor-not-allowed') : 'bg-emerald-600 text-white hover:bg-emerald-500 shadow-lg shadow-emerald-500/20')
-                            : (isLight ? 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-lg shadow-emerald-500/20' : 'bg-[var(--nexus-accent)] text-black hover:brightness-125 shadow-[0_0_15px_var(--nexus-accent)]')
+                            ? (item.isActive ? (isLight ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-slate-800 text-slate-500 cursor-not-allowed') : 'bg-[var(--nexus-accent)] text-black hover:brightness-110 shadow-lg shadow-[var(--nexus-accent)]/20')
+                            : 'bg-[var(--nexus-accent)] text-black hover:brightness-125 shadow-[0_0_15px_var(--nexus-accent)]'
                             }`}
                         style={{ clipPath: 'polygon(15% 0, 100% 0, 100% 85%, 85% 100%, 0 100%, 0 15%)' }}
                     >
@@ -231,63 +237,44 @@ const PremiumStorefront = ({
 
     // Data Mapping - Convert different formats into a unified Storefront Item format
     const getInventoryItems = () => {
-        if (activeTab === 'themes') {
-            return eliteThemes.map(t => ({
-                ...t,
-                id: t.id,
-                name: t.title,
-                desc: t.description,
-                price: t.price,
-                badge: user?.unlockedNexusThemes?.includes(t.id) ? 'SECURED' : 'THEME',
-                color: 'text-[var(--nexus-accent)]',
-                category: 'themes',
-                type: 'themes',
-                isOwned: user?.unlockedNexusThemes?.includes(t.id),
-                isActive: user?.nexusTheme === t.id
-            }));
-        }
-        if (activeTab === 'goals') {
-            return premiumGoals.map(g => ({
-                ...g,
-                id: g.id,
-                name: g.name,
-                desc: `${g.theme} Style Module.`,
-                price: `₹${g.basePrice}`,
-                badge: user?.goalSettings?.unlockedPremiumStyles?.includes(g.id) ? 'SECURED' : 'GOAL',
-                color: g.color || 'text-emerald-500',
-                category: 'goals',
-                type: 'goals',
-                isOwned: user?.goalSettings?.unlockedPremiumStyles?.includes(g.id)
-            }));
-        }
-        if (activeTab === 'alerts') {
-            return premiumAlerts.map(a => ({
-                ...a,
-                id: a.id,
-                name: a.name,
-                desc: `${a.theme} Style Module.`,
-                price: `₹${a.basePrice}`,
-                badge: user?.overlaySettings?.unlockedPremiumAlerts?.includes(a.id) ? 'SECURED' : 'ALERT',
-                color: a.color || 'text-rose-500',
-                category: 'alerts',
-                type: 'alerts',
-                isOwned: user?.overlaySettings?.unlockedPremiumAlerts?.includes(a.id)
-            }));
-        }
-        if (activeTab === 'widgets' && premiumWidgets) {
-            return premiumWidgets.map(w => ({
-                ...w,
-                id: w.id,
-                name: w.name,
-                desc: `${w.theme} Dashboard Widget.`,
-                price: `₹${w.basePrice}`,
-                badge: (user?.ownedWidgets || []).includes(w.id) ? 'SECURED' : 'WIDGET',
-                color: w.color || 'text-indigo-400',
-                category: 'widgets',
-                type: 'widgets',
-                isOwned: (user?.ownedWidgets || []).includes(w.id),
-                isActive: user?.activeRevenueWidget === w.id
-            }));
+        const themes = eliteThemes.map(t => ({
+            ...t, id: t.id, name: t.title, desc: t.description, price: t.price,
+            badge: user?.unlockedNexusThemes?.includes(t.id) ? 'SECURED' : 'THEME',
+            category: 'themes', type: 'Theme', isElite: true,
+            isOwned: user?.unlockedNexusThemes?.includes(t.id),
+            isActive: user?.nexusTheme === t.id
+        }));
+
+        const goals = premiumGoals.map(g => ({
+            ...g, id: g.id, name: g.name, desc: `${g.theme} Style Module.`, price: `₹${g.basePrice}`,
+            badge: user?.goalSettings?.unlockedPremiumStyles?.includes(g.id) ? 'SECURED' : 'GOAL',
+            category: 'goals', type: 'Goal',
+            isOwned: user?.goalSettings?.unlockedPremiumStyles?.includes(g.id),
+            isActive: user?.goalSettings?.stylePreference === g.id
+        }));
+
+        const alerts = premiumAlerts.map(a => ({
+            ...a, id: a.id, name: a.name, desc: `${a.theme} Style Module.`, price: `₹${a.basePrice}`,
+            badge: user?.overlaySettings?.unlockedPremiumAlerts?.includes(a.id) ? 'SECURED' : 'ALERT',
+            category: 'alerts', type: 'Alert',
+            isOwned: user?.overlaySettings?.unlockedPremiumAlerts?.includes(a.id),
+            isActive: user?.overlaySettings?.stylePreference === a.id
+        }));
+
+        const widgets = (premiumWidgets || []).map(w => ({
+            ...w, id: w.id, name: w.name, desc: `${w.theme} Dashboard Widget.`, price: `₹${w.basePrice}`,
+            badge: (user?.ownedWidgets || []).includes(w.id) ? 'SECURED' : 'WIDGET',
+            category: 'widgets', type: 'Widget',
+            isOwned: (user?.ownedWidgets || []).includes(w.id),
+            isActive: user?.activeRevenueWidget === w.id
+        }));
+
+        if (activeTab === 'themes') return themes;
+        if (activeTab === 'goals') return goals;
+        if (activeTab === 'alerts') return alerts;
+        if (activeTab === 'widgets') return widgets;
+        if (activeTab === 'owned') {
+            return [...themes, ...goals, ...alerts, ...widgets].filter(item => item.isOwned);
         }
         return [];
     };
@@ -402,14 +389,14 @@ const PremiumStorefront = ({
                 </AnimatePresence>
 
                 {/* Sliding Tab Navigation */}
-                <div className={`flex gap-1 border-b overflow-x-auto scrollbar-hide perspective-1000 ${theme === 'light' ? 'border-emerald-100' : 'border-[var(--nexus-border)]'}`}>
+                <div className={`flex gap-1 border-b overflow-x-auto scrollbar-hide perspective-1000 border-[var(--nexus-border)]`}>
                     {STORE_CATEGORIES.map((category) => (
                         <button
                             key={category.id}
                             onClick={() => setActiveTab(category.id)}
                             className={`group relative px-4 sm:px-8 py-4 sm:py-5 flex items-center gap-2 sm:gap-3 text-[10px] sm:text-sm font-black uppercase tracking-[0.1em] sm:tracking-[0.2em] transition-all duration-300 flex-shrink-0 ${activeTab === category.id
-                                ? (theme === 'light' ? 'text-emerald-700' : 'text-[var(--nexus-accent)]')
-                                : (theme === 'light' ? 'text-emerald-950/40 hover:text-emerald-950' : 'text-[var(--nexus-text-muted)] hover:text-[var(--nexus-text)]')
+                                ? 'text-[var(--nexus-accent)]'
+                                : (theme === 'light' ? 'text-slate-900/40 hover:text-slate-900' : 'text-[var(--nexus-text-muted)] hover:text-[var(--nexus-text)]')
                                 }`}
                         >
                             {/* Kinetic Icon */}
@@ -431,7 +418,7 @@ const PremiumStorefront = ({
                             {activeTab === category.id && (
                                 <motion.div
                                     layoutId="activeStoreTab"
-                                    className={`absolute bottom-0 left-0 w-full h-[3px] z-10 ${theme === 'light' ? 'bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'bg-[var(--nexus-accent)] shadow-[0_0_20px_var(--nexus-accent)]'}`}
+                                    className={`absolute bottom-0 left-0 w-full h-[3px] z-10 bg-[var(--nexus-accent)] shadow-[0_0_20px_var(--nexus-accent-glow)]`}
                                 >
                                     <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2 h-2 bg-white rounded-full blur-[1px] -translate-y-1/2" />
                                 </motion.div>

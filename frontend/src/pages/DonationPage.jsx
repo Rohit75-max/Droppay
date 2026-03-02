@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from '../api/axios';
 import { io } from 'socket.io-client';
@@ -209,7 +210,7 @@ const DonationPage = () => {
   const handlePayment = async (e) => {
     e.preventDefault();
     if (!window.Razorpay) {
-      alert("Error: Razorpay SDK failed to load. Please disable your adblocker or check your internet connection.");
+      toast.error("Error: Razorpay SDK failed to load. Please disable your adblocker or check your internet connection.");
       return;
     }
     setIsProcessing(true);
@@ -234,7 +235,7 @@ const DonationPage = () => {
             setIsSuccess(true);
           } catch (err) {
             console.error("Webhook Verification Error:", err);
-            alert(err.response?.data?.msg || "Payment was captured but verification failed. Streamer Not Found.");
+            toast.error(err.response?.data?.msg || "Payment was captured but verification failed. Streamer Not Found.");
           } finally {
             setIsProcessing(false);
           }
@@ -242,7 +243,7 @@ const DonationPage = () => {
       }).open();
     } catch (err) {
       console.error("Payment Error:", err);
-      alert(err.response?.data?.msg || "Payment encountered an unexpected failure.");
+      toast.error(err.response?.data?.msg || "Payment encountered an unexpected failure.");
       setIsProcessing(false);
     }
   };

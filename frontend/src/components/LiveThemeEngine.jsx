@@ -48,11 +48,45 @@ const LiveThemeEngine = ({ currentTheme, isPreview = false, theme = 'dark' }) =>
     }, [activeTheme]);
 
     // If it's a standard free theme (or undefined), don't render the engine at all
-    if (!activeTheme?.startsWith('live_')) return null;
+    if (!activeTheme?.startsWith('live_') && activeTheme !== 'uplink') return null;
 
     return (
         <div className={`${isPreview ? 'absolute' : 'fixed'} inset-0 z-0 pointer-events-none overflow-hidden ${isLight ? 'bg-white/50 backdrop-blur-sm' : 'bg-black'
             }`}>
+
+            {/* ========================================== */}
+            {/* 0. ELITE UPLINK (Premium 2026 Protocol)    */}
+            {/* ========================================== */}
+            {activeTheme === 'uplink' && (
+                <>
+                    {/* Deep Emerald Atmospheric Beams */}
+                    <div className="absolute inset-0 bg-[#030303]" />
+                    <motion.div
+                        animate={{
+                            opacity: [0.3, 0.5, 0.3],
+                            scale: [1, 1.1, 1],
+                            rotate: [0, 5, 0]
+                        }}
+                        transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+                        className="absolute -top-1/4 -left-1/4 w-full h-full bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.15),transparent_70%)] blur-[100px]"
+                    />
+                    <motion.div
+                        animate={{
+                            opacity: [0.2, 0.4, 0.2],
+                            scale: [1, 1.2, 1],
+                            rotate: [0, -5, 0]
+                        }}
+                        transition={{ duration: 20, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+                        className="absolute -bottom-1/4 -right-1/4 w-full h-full bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.1),transparent_70%)] blur-[100px]"
+                    />
+
+                    {/* Scanline CRT Overlay */}
+                    <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%)] bg-[size:100%_4px] opacity-20 pointer-events-none" />
+
+                    {/* Grain Texture */}
+                    <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] mix-blend-overlay" />
+                </>
+            )}
 
             {/* ========================================== */}
             {/* 1. ZERO-GRAVITY (Space/Sci-Fi)             */}
@@ -66,7 +100,7 @@ const LiveThemeEngine = ({ currentTheme, isPreview = false, theme = 'dark' }) =>
                         className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 mix-blend-screen ${isVideoLoaded ? 'opacity-60' : 'opacity-0'}`}
                     >
                         {/* Highly Stable Fallback Video URL */}
-                        <source src="http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4" type="video/mp4" />
+                        <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4" type="video/mp4" />
                     </video>
                     {/* Blue Atmospheric Glow */}
                     <div className={`absolute inset-0 opacity-80 ${isLight ? 'bg-[radial-gradient(circle_at_center,transparent_0%,rgba(16,185,129,0.1)_100%)]' : 'bg-[radial-gradient(circle_at_center,transparent_0%,#000_100%)]'}`} />
@@ -87,7 +121,7 @@ const LiveThemeEngine = ({ currentTheme, isPreview = false, theme = 'dark' }) =>
                         className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 mix-blend-luminosity ${isVideoLoaded ? 'opacity-40' : 'opacity-0'}`}
                     >
                         {/* Highly Stable Fallback Video URL */}
-                        <source src="http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4" type="video/mp4" />
+                        <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4" type="video/mp4" />
                     </video>
                     {/* The "Red Zone" Pulsing Vignette */}
                     <motion.div
@@ -115,7 +149,7 @@ const LiveThemeEngine = ({ currentTheme, isPreview = false, theme = 'dark' }) =>
                         className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 mix-blend-screen ${isVideoLoaded ? 'opacity-30' : 'opacity-0'}`}
                     >
                         {/* Highly Stable Fallback Video URL */}
-                        <source src="http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4" type="video/mp4" />
+                        <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4" type="video/mp4" />
                     </video>
                     {/* Scanline CRT Overlay */}
                     <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[size:100%_4px,3px_100%] pointer-events-none" />

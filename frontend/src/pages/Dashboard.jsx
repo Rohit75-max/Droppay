@@ -8,8 +8,10 @@ import {
   ShieldAlert, Activity, X, Play, Loader2, IndianRupee
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 // Component Imports
+import { syncTheme } from '../api/themeSync';
 import DashboardSummary from '../components/DashboardSummary';
 import ControlCenter from '../components/ControlCenter';
 import AccountsHub from '../components/AccountsHub';
@@ -39,6 +41,7 @@ const Dashboard = () => {
   });
   const [user, setUser] = useState(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isProtocolMenuOpen, setIsProtocolMenuOpen] = useState(false);
 
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('dropPayTheme') || 'light';
@@ -118,24 +121,29 @@ const Dashboard = () => {
       });
 
       setUser(res.data);
+
+      // --- SUBSCRIPTION GUARD: Must be ACTIVE to access Nexus ---
+      if (res.data.subscription?.status !== 'active') {
+        navigate('/subscription');
+        return;
+      }
+
       if (res.data.nexusTheme) {
-        setNexusTheme(res.data.nexusTheme);
-        localStorage.setItem('nexusTheme', res.data.nexusTheme);
+        syncTheme(res.data);
       }
 
       // --- FORCE LIGHT THEME MIGRATION ---
       const currentThemeMode = res.data.nexusThemeMode || 'dark';
       if (currentThemeMode === 'dark') {
-        setTheme('light');
-        localStorage.setItem('dropPayTheme', 'light');
+        syncTheme({ ...res.data, nexusThemeMode: 'light' });
         // Update profile on server to persist light mode
+        const token = localStorage.getItem('token');
         axios.post(`/api/user/update-profile`,
           { nexusThemeMode: 'light' },
           { headers: { Authorization: `Bearer ${token}` } }
         ).catch(e => console.error("Failed to persist light theme", e));
       } else {
-        setTheme(currentThemeMode);
-        localStorage.setItem('dropPayTheme', currentThemeMode);
+        syncTheme(res.data);
       }
       setGoalForm({
         title: res.data.goalSettings?.title || "New Mission",
@@ -259,7 +267,7 @@ const Dashboard = () => {
       });
       await fetchProfileData();
       if (!overrideData) {
-        alert("Mission Deployed Successfully");
+        toast.success("Mission Deployed Successfully");
       }
     } catch (err) {
       console.error("Goal update failed", err);
@@ -283,27 +291,16 @@ const Dashboard = () => {
 
   const saveNexusTheme = async (newTheme) => {
     try {
-      // Logic to determine if the Nexus theme is Light-based or Dark-based
-      const lightThemes = ['aero-light', 'alabaster-pulse', 'kawaii', 'live_kawaii'];
-      const newMode = lightThemes.includes(newTheme) ? 'light' : 'dark';
+      // Standardized Theme Sync
+      const { mode } = syncTheme({ nexusTheme: newTheme });
 
-      // Optimistic Update
       setNexusTheme(newTheme);
-      setTheme(newMode);
-      localStorage.setItem('nexusTheme', newTheme);
-      localStorage.setItem('dropPayTheme', newMode);
-
-      setUser(prev => ({ ...prev, nexusTheme: newTheme, nexusThemeMode: newMode }));
-
-      // Update DOM immediately
-      document.documentElement.classList.remove('dark', 'light');
-      document.documentElement.classList.add(newMode);
-
-      window.dispatchEvent(new CustomEvent('nexus-theme-change', { detail: { theme: newTheme } }));
+      setTheme(mode);
+      setUser(prev => ({ ...prev, nexusTheme: newTheme, nexusThemeMode: mode }));
 
       const token = localStorage.getItem('token');
       await axios.post(`/api/user/update-profile`,
-        { nexusTheme: newTheme, nexusThemeMode: newMode },
+        { nexusTheme: newTheme, nexusThemeMode: mode },
         { headers: { Authorization: `Bearer ${token}` } }
       );
     } catch (err) {
@@ -320,10 +317,9 @@ const Dashboard = () => {
       );
       // Update the right slice of user state based on category
       if (category === 'theme') {
+        syncTheme({ nexusTheme: assetId });
         setNexusTheme(assetId);
-        localStorage.setItem('nexusTheme', assetId);
         setUser(prev => ({ ...prev, nexusTheme: assetId }));
-        window.dispatchEvent(new CustomEvent('nexus-theme-change', { detail: { theme: assetId } }));
       } else if (category === 'alert') {
         setAlertConfig(res.data.overlaySettings);
         setUser(prev => ({ ...prev, overlaySettings: res.data.overlaySettings }));
@@ -371,7 +367,7 @@ const Dashboard = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       await fetchProfileData();
-      alert("Partner Pack Synchronized");
+      toast.success("Partner Pack Synchronized");
     } catch (err) {
       console.error("Failed to sync partner pack", err);
     } finally {
@@ -382,7 +378,7 @@ const Dashboard = () => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) return alert("Image exceeds 5MB limit.");
+      if (file.size > 5 * 1024 * 1024) return toast.error("Image exceeds 5MB limit.");
       const reader = new FileReader();
       reader.onloadend = () => {
         setProfilePreview(reader.result);
@@ -408,10 +404,10 @@ const Dashboard = () => {
         await fetchProfileData();
         setIsEditing(false);
         setAvatarBase64(null);
-        alert("Node Identity Synchronized");
+        toast.success("Node Identity Synchronized");
       }
     } catch (err) {
-      alert(err.response?.data?.msg || "Update Sequence Failed.");
+      toast.error(err.response?.data?.msg || "Update Sequence Failed.");
     }
   };
 
@@ -431,7 +427,7 @@ const Dashboard = () => {
         return true;
       }
     } catch (err) {
-      alert(err.response?.data?.msg || `Failed to verify ${type}.`);
+      toast.error(err.response?.data?.msg || `Failed to verify ${type}.`);
       return false;
     }
   };
@@ -447,9 +443,9 @@ const Dashboard = () => {
       setShowOtpModal(false);
       setIsEditing(false);
       setOtpInput('');
-      alert("Security Clear: Identity Synchronized");
+      toast.success("Security Clear: Identity Synchronized");
     } catch (err) {
-      alert(err.response?.data?.msg || "Invalid Authorization Key.");
+      toast.error(err.response?.data?.msg || "Invalid Authorization Key.");
     } finally {
       setIsVerifyingOtp(false);
     }
@@ -465,10 +461,10 @@ const Dashboard = () => {
       if (res.data.url) {
         window.location.href = res.data.url;
       } else {
-        alert("Bank linkage initialization failed.");
+        toast.error("Bank linkage initialization failed.");
       }
     } catch (err) {
-      alert("Failed to connect banking interface.");
+      toast.error("Failed to connect banking interface.");
     } finally {
       setIsLinkingBank(false);
     }
@@ -481,11 +477,11 @@ const Dashboard = () => {
       const res = await axios.post('/api/user/withdraw', { amount }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      alert(res.data.msg || "Withdrawal sequence initiated.");
+      toast.success(res.data.msg || "Withdrawal sequence initiated.");
       setShowWithdrawModal(false);
       await fetchProfileData(); // Refresh wallet UI instantly
     } catch (err) {
-      alert(err.response?.data?.msg || "Payout sequence failed.");
+      toast.error(err.response?.data?.msg || "Payout sequence failed.");
     } finally {
       setIsProcessingWithdraw(false);
     }
@@ -528,7 +524,7 @@ const Dashboard = () => {
 
       <div className="flex flex-col md:flex-row w-full h-full relative z-10 overflow-hidden">
         {/* SIDEBAR — Theme-Aware Control Pillar */}
-        <aside className={`md:flex hidden w-20 hover:w-64 group transition-all duration-500 flex-col py-8 border-r basis-auto shrink-0 overflow-y-auto custom-scrollbar bg-[var(--nexus-sidebar-bg)] border-[var(--nexus-sidebar-border)] z-[120] ${theme === 'dark' ? 'shadow-2xl' : 'shadow-sm'}`}>
+        <aside className={`md:flex hidden w-20 hover:w-64 group transition-all duration-500 flex-col py-8 border-r basis-auto shrink-0 overflow-y-auto custom-scrollbar bg-[var(--nexus-panel)]/40 backdrop-blur-3xl border-[var(--nexus-border)]/50 z-[120] ${theme === 'dark' ? 'shadow-2xl shadow-black/50' : 'shadow-none'}`}>
           <div
             className="flex items-center px-6 mb-12 gap-4 cursor-pointer"
             onClick={handleLogoClick}
@@ -572,8 +568,37 @@ const Dashboard = () => {
             <LogOut className="w-6 h-6 flex-shrink-0" />
             <span className="font-black italic uppercase text-[10px] tracking-widest opacity-0 group-hover:opacity-100 transition-all whitespace-nowrap">Exit</span>
           </button>
+
+          {/* PROTOCOL CONTROL TRIGGER (DESKTOP) */}
+          <div className="px-4 py-4 border-t border-[var(--nexus-border)]/50">
+            <button
+              onClick={() => setIsProtocolMenuOpen(!isProtocolMenuOpen)}
+              className={`w-full flex items-center justify-center h-12 rounded-xl border-2 transition-all overflow-hidden ${isProtocolMenuOpen
+                ? 'bg-white border-white text-black shadow-[0_10px_30px_rgba(255,255,255,0.2)]'
+                : 'bg-white/5 border-white/10 text-white hover:border-white/20'
+                }`}
+            >
+              <Zap className={`w-5 h-5 ${isProtocolMenuOpen ? 'fill-current' : 'text-[var(--nexus-accent)]'}`} />
+            </button>
+          </div>
         </aside>
 
+
+        {/* PROTOCOL CONTROLS OVERLAY (Shared Mobile/Desktop) */}
+        <MobileBottomNav
+          activeSection={activeSection}
+          setActiveSection={setActiveSection}
+          onLogout={() => {
+            localStorage.removeItem('token');
+            localStorage.removeItem('nexusTheme');
+            localStorage.removeItem('dropPayTheme');
+            navigate('/login');
+          }}
+          user={user}
+          theme={theme}
+          isMenuExpanded={isProtocolMenuOpen}
+          setIsMenuExpanded={setIsProtocolMenuOpen}
+        />
 
         <AnimatePresence>
           {isMobileMenuOpen && (
@@ -635,7 +660,7 @@ const Dashboard = () => {
         </AnimatePresence>
 
         <main className="flex-1 flex flex-col relative overflow-hidden pt-0 bg-transparent">
-          <header className="px-6 py-3 md:px-12 md:py-4 flex justify-between items-center z-40 bg-[var(--nexus-sidebar-bg)] border-b border-[var(--nexus-sidebar-border)]">
+          <header className="px-6 py-3 md:px-12 md:py-4 flex justify-between items-center z-40 bg-[var(--nexus-panel)]/40 backdrop-blur-3xl border-b border-[var(--nexus-border)]/50">
             <div className="flex flex-col">
               <span className="text-[9px] font-black tracking-[0.4em] text-[var(--nexus-accent)] uppercase mb-1">DropPay Protocol</span>
               <h1 className={`text-2xl md:text-3xl font-black uppercase tracking-tighter leading-none text-[var(--nexus-text)]`}>
@@ -825,22 +850,9 @@ const Dashboard = () => {
         )}
       </AnimatePresence>
 
-      <style dangerouslySetInnerHTML={{ __html: `.custom-scrollbar::-webkit-scrollbar { width: 4px; } .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(16, 185, 129, 0.2); border-radius: 10px; }` }} />
+      <style dangerouslySetInnerHTML={{ __html: `.custom-scrollbar::-webkit-scrollbar { display: none; } .custom-scrollbar { -ms-overflow-style: none; scrollbar-width: none; overscroll-behavior: none; }` }} />
 
-      {/* MOBILE BOTTOM NAV — hidden on lg+ */}
-      <MobileBottomNav
-        activeSection={activeSection}
-        setActiveSection={setActiveSection}
-        user={user}
-        theme={theme}
-        onLogout={() => {
-          localStorage.removeItem('token');
-          localStorage.removeItem('nexusTheme');
-          localStorage.removeItem('dropPayTheme');
-          navigate('/login');
-        }}
-      />
-    </div >
+    </div>
   );
 };
 

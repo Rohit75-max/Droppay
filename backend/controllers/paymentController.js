@@ -38,7 +38,7 @@ exports.createOrder = async (req, res) => {
         const order = await razorpay.orders.create(options);
         res.status(200).json(order);
     } catch (error) {
-        res.status(500).json({ msg: "Order generation failed." });
+        res.status(500).json({ msg: "System Error: Order generation failed. Secure uplink unstable." });
     }
 };
 
@@ -155,7 +155,7 @@ exports.verifyPayment = async (req, res) => {
         }
 
         res.status(200).json({ status: "success" });
-    } catch (error) { res.status(500).json({ msg: "Internal Payment Error" }); }
+    } catch (error) { res.status(500).json({ msg: "Internal Payment Error: Secure transaction handshake failed." }); }
 };
 
 /**
@@ -339,7 +339,7 @@ exports.testDrop = async (req, res) => {
         res.status(500).send({ msg: "Socket or Streamer Not Found" });
     } catch (error) {
         console.error("Test drop error:", error);
-        res.status(500).send({ msg: "Internal Server Error" });
+        res.status(500).send({ msg: "Internal Server Error: Simulation node connection failed." });
     }
 };
 
@@ -381,7 +381,7 @@ exports.verifySubscription = async (req, res) => {
         res.json({ status: "success" });
     } catch (err) {
         console.error("Subscription Verification Error:", err);
-        res.status(500).json({ msg: "Internal Verification Error" });
+        res.status(500).json({ msg: "Internal Verification Error: Subscription authentication protocol failure." });
     }
 };
 exports.handleWebhook = async (req, res) => res.status(200).send('ok');

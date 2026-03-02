@@ -8,7 +8,7 @@ import CyberGoalBar from './CyberGoalBar';
 import PremiumGoalOverlays from './PremiumGoalOverlays';
 import { Player } from '@lottiefiles/react-lottie-player';
 import TopSupporterWidget from './widgets/TopSupporterWidget';
-import CruiserRevenueChart from './widgets/CruiserRevenueChart';
+import EliteCard from './EliteCard';
 
 const PREMIUM_GOAL_STYLES = [
   'black_hole', 'hex_core', 'rune_monolith', 'hologram_glitch',
@@ -73,9 +73,8 @@ const DashboardSummary = ({
       {/* LEFT COLUMN: TELEMETRY & PROGRESS */}
       <div className="col-span-1 lg:col-span-8 space-y-6">
 
-        {/* REVENUE BALANCE NODE - HOVER FIXED */}
-        <motion.div
-          whileHover={{ y: -2, scale: 1.01 }} // REDUCED VERTICAL LIFT TO PREVENT CLIPPING
+        {/* REVENUE BALANCE NODE  */}
+        <EliteCard
           className={`group relative border rounded-[2.5rem] p-7 md:p-10 transition-all duration-500 ${getCardStyle()}`}
         >
           {/* BGMI Specific HUD Elements */}
@@ -95,7 +94,7 @@ const DashboardSummary = ({
                 {user.walletBalance?.toLocaleString('en-IN') || '0.00'}
               </h2>
 
-              {/* PHASE 7: NEW PAYOUT LIFECYCLE TELEMETRY */}
+              {/* PAYOUT LIFECYCLE TELEMETRY */}
               <div className="flex flex-wrap items-center gap-4 md:gap-6 mt-4">
                 <div className="flex flex-col">
                   <span className="text-[8px] uppercase font-black tracking-widest text-[var(--nexus-accent)] mb-1">Processing to Bank</span>
@@ -140,12 +139,11 @@ const DashboardSummary = ({
           )}
 
           <TrendingUp className={`absolute -bottom-10 -right-10 w-48 h-48 rotate-12 pointer-events-none transition-all duration-700 text-[var(--nexus-accent)] opacity-[0.05] group-hover:opacity-[0.08]`} />
-        </motion.div>
+        </EliteCard>
 
-        {/* MISSION STATUS - WITH VISIBILITY PROTOCOL */}
+        {/* MISSION STATUS */}
         {user.goalSettings?.isActive !== false && (
           <div className="flex justify-center w-full mt-2 mb-6">
-            {/* GOAL COMPONENT INJECTS ITS OWN THEME LOGIC */}
             {PREMIUM_GOAL_STYLES.includes(user.goalSettings?.stylePreference) ? (
               <PremiumGoalOverlays
                 goal={{
@@ -175,8 +173,7 @@ const DashboardSummary = ({
         )}
 
         {/* ANALYTICS DATA STREAM */}
-        <motion.div
-          whileHover={{ y: -2 }}
+        <EliteCard
           className={`group border rounded-[2.5rem] p-7 md:p-10 relative transition-all duration-500 overflow-hidden ${getCardStyle()}`}
         >
           {/* BGMI Specific HUD Elements */}
@@ -184,83 +181,77 @@ const DashboardSummary = ({
             <div className="absolute top-0 left-0 w-1/3 h-1 bg-[var(--nexus-accent)] z-30" />
           )}
 
-          {/* MIDNIGHT CRUISER MATRIX — premium widget override */}
-          {user?.activeRevenueWidget === 'wd4' ? (
-            <CruiserRevenueChart chartData={chartData} isDemo={false} recentDrops={recentDrops} theme={theme} />
-          ) : (
-            <>
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 md:mb-10 relative z-20">
-                <div className="flex items-center gap-4">
-                  <div className={`p-3 rounded-[var(--nexus-radius)] border transition-colors bg-[var(--nexus-accent)]/10 border-[var(--nexus-accent)]/20`}>
-                    <Zap className={`w-5 h-5 text-[var(--nexus-accent)]`} />
-                  </div>
-                  <div className="flex flex-col">
-                    <h3 className="text-xs font-black uppercase tracking-widest text-[var(--nexus-text-muted)] italic flex items-center gap-2">DropPay Telemetry <Sparkles className="w-3 h-3 text-[var(--nexus-accent)]" /></h3>
-                    <span className="text-[7px] font-bold text-[var(--nexus-accent)] uppercase animate-pulse flex items-center gap-1"><CheckCircle className="w-2 h-2" /> Live Analytics Engine</span>
-                  </div>
-                </div>
-                <div className={`w-full sm:w-auto flex p-1 rounded-[var(--nexus-radius)] border backdrop-blur-xl bg-[var(--nexus-panel)] border-[var(--nexus-border)] shadow-inner`}>
-                  {['7D', '1M', '1Y'].map((range) => (
-                    <button
-                      key={range}
-                      onClick={() => setTimeRange(range)}
-                      className={`flex-1 sm:flex-none px-4 md:px-6 py-2 rounded-[var(--nexus-radius)] text-[9px] md:text-[10px] font-black transition-all duration-300 nexus-btn ${timeRange === range ? 'bg-[var(--nexus-accent)] text-black shadow-lg' : 'text-[var(--nexus-text-muted)] hover:text-[var(--nexus-accent)]'}`}
-                    >
-                      {range}
-                    </button>
-                  ))}
-                </div>
+
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 md:mb-10 relative z-20">
+            <div className="flex items-center gap-4">
+              <div className={`p-3 rounded-[var(--nexus-radius)] border transition-colors bg-[var(--nexus-accent)]/10 border-[var(--nexus-accent)]/20`}>
+                <Zap className={`w-5 h-5 text-[var(--nexus-accent)]`} />
               </div>
-
-              <div className="h-64 w-full flex items-end justify-between gap-1 md:gap-2 px-1 md:px-6 mt-8 relative z-10 bottom-0">
-                {chartData.map((val, i) => {
-                  const maxVal = Math.max(...chartData) || 1;
-                  const percentage = Math.max((val / maxVal) * 100, 4);
-                  return (
-                    <div key={i} className="flex-1 flex flex-col items-center justify-end gap-3 group/bar h-full">
-                      <div className="opacity-0 group-hover/bar:opacity-100 transition-opacity absolute -top-10 bg-[var(--nexus-bg)] text-[var(--nexus-text)] text-[10px] font-black px-3 py-1.5 rounded-lg border border-[var(--nexus-border)] pointer-events-none z-50 shadow-2xl backdrop-blur-lg">
-                        ₹{val.toLocaleString('en-IN')}
-                      </div>
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: `${percentage}%`, opacity: 1 }}
-                        transition={{ type: "spring", stiffness: 40, damping: 15, delay: i * 0.05 }}
-                        className="w-full max-w-[32px] md:max-w-[40px] rounded-t-[0.75rem] md:rounded-t-[1rem] transition-all duration-300 relative overflow-hidden flex flex-col justify-end group-hover/bar:scale-x-110 cursor-pointer shadow-[0_0_15px_rgba(16,185,129,0.1)]"
-                        style={{
-                          background: `linear-gradient(to top, var(--nexus-accent), transparent)`,
-                          opacity: percentage > 80 ? 0.8 : 0.4,
-                          border: `1px solid var(--nexus-accent)`,
-                          borderBottom: 'none'
-                        }}
-                      >
-                        <div className="absolute top-0 w-full h-[2px] bg-white/40" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-transparent to-white/10 opacity-0 group-hover/bar:opacity-100 transition-opacity duration-300" />
-                      </motion.div>
-                      <span className={`text-[8px] md:text-[9px] font-black uppercase tracking-widest transition-colors text-[var(--nexus-text-muted)] group-hover/bar:text-[var(--nexus-accent)]`}>
-                        {timeRange === '7D' ? `D${i + 1}` : `P${i + 1}`}
-                      </span>
-                    </div>
-                  );
-                })}
+              <div className="flex flex-col">
+                <h3 className="text-xs font-black uppercase tracking-widest text-[var(--nexus-text-muted)] italic flex items-center gap-2">DropPay Telemetry <Sparkles className="w-3 h-3 text-[var(--nexus-accent)]" /></h3>
+                <span className="text-[7px] font-bold text-[var(--nexus-accent)] uppercase animate-pulse flex items-center gap-1"><CheckCircle className="w-2 h-2" /> Live Analytics Engine</span>
               </div>
+            </div>
+            <div className={`w-full sm:w-auto flex p-1 rounded-[var(--nexus-radius)] border backdrop-blur-xl bg-[var(--nexus-panel)] border-[var(--nexus-border)] shadow-inner`}>
+              {['7D', '1M', '1Y'].map((range) => (
+                <button
+                  key={range}
+                  onClick={() => setTimeRange(range)}
+                  className={`flex-1 sm:flex-none px-4 md:px-6 py-2 rounded-[var(--nexus-radius)] text-[9px] md:text-[10px] font-black transition-all duration-300 nexus-btn ${timeRange === range ? 'bg-[var(--nexus-accent)] text-black shadow-lg' : 'text-[var(--nexus-text-muted)] hover:text-[var(--nexus-accent)]'}`}
+                >
+                  {range}
+                </button>
+              ))}
+            </div>
+          </div>
 
-              {/* BGMI Bottom tech-HUD details */}
-              {nexusTheme === 'bgmi' && (
-                <div className="mt-8 pt-3 border-t border-[var(--nexus-border)] flex justify-between items-center relative z-20">
-                  <span className="bg-[var(--nexus-accent)] text-[var(--nexus-panel)] px-2 py-0.5 text-[8px] font-black uppercase tracking-widest">Analytics Node: Active</span>
-                  <span className="text-[var(--nexus-text-muted)] font-mono text-[10px]">SEC-77</span>
+          <div className="h-64 w-full flex items-end justify-between gap-1 md:gap-2 px-1 md:px-6 mt-8 relative z-10 bottom-0">
+            {chartData.map((val, i) => {
+              const maxVal = Math.max(...chartData) || 1;
+              const percentage = Math.max((val / maxVal) * 100, 4);
+              return (
+                <div key={i} className="flex-1 flex flex-col items-center justify-end gap-3 group/bar h-full">
+                  <div className="opacity-0 group-hover/bar:opacity-100 transition-opacity absolute -top-10 bg-[var(--nexus-bg)] text-[var(--nexus-text)] text-[10px] font-black px-3 py-1.5 rounded-lg border border-[var(--nexus-border)] pointer-events-none z-50 shadow-2xl backdrop-blur-lg">
+                    ₹{val.toLocaleString('en-IN')}
+                  </div>
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: `${percentage}%`, opacity: 1 }}
+                    transition={{ type: "spring", stiffness: 40, damping: 15, delay: i * 0.05 }}
+                    className="w-full max-w-[32px] md:max-w-[40px] rounded-t-[0.75rem] md:rounded-t-[1rem] transition-all duration-300 relative overflow-hidden flex flex-col justify-end group-hover/bar:scale-x-110 cursor-pointer shadow-[0_0_15px_rgba(16,185,129,0.1)]"
+                    style={{
+                      background: `linear-gradient(to top, var(--nexus-accent), transparent)`,
+                      opacity: percentage > 80 ? 0.8 : 0.4,
+                      border: `1px solid var(--nexus-accent)`,
+                      borderBottom: 'none'
+                    }}
+                  >
+                    <div className="absolute top-0 w-full h-[2px] bg-white/40" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-transparent to-white/10 opacity-0 group-hover/bar:opacity-100 transition-opacity duration-300" />
+                  </motion.div>
+                  <span className={`text-[8px] md:text-[9px] font-black uppercase tracking-widest transition-colors text-[var(--nexus-text-muted)] group-hover/bar:text-[var(--nexus-accent)]`}>
+                    {timeRange === '7D' ? `D${i + 1}` : `P${i + 1}`}
+                  </span>
                 </div>
-              )}
+              );
+            })}
+          </div>
 
-              <BarChart3 className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 opacity-[0.03] pointer-events-none transition-colors text-[var(--nexus-accent)]`} />
-            </>
+          {/* BGMI Bottom tech-HUD details */}
+          {nexusTheme === 'bgmi' && (
+            <div className="mt-8 pt-3 border-t border-[var(--nexus-border)] flex justify-between items-center relative z-20">
+              <span className="bg-[var(--nexus-accent)] text-[var(--nexus-panel)] px-2 py-0.5 text-[8px] font-black uppercase tracking-widest">Analytics Node: Active</span>
+              <span className="text-[var(--nexus-text-muted)] font-mono text-[10px]">SEC-77</span>
+            </div>
           )}
-        </motion.div>
 
-      </div >
+          <BarChart3 className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 opacity-[0.03] pointer-events-none transition-colors text-[var(--nexus-accent)]`} />
+        </EliteCard>
+
+      </div>
 
       {/* RIGHT COLUMN: RECENT SIGNAL & HALL OF FAME */}
-      < div className="col-span-1 lg:col-span-4 space-y-6" >
+      <div className="col-span-1 lg:col-span-4 space-y-6">
 
         {/* LEADERBOARD */}
         <div className="h-[340px] flex flex-col">
@@ -279,7 +270,9 @@ const DashboardSummary = ({
         </div>
 
         {/* ACTIVITY SIGNAL FEED */}
-        < div className={`group border rounded-[2.5rem] p-7 transition-all duration-500 h-[385px] flex flex-col ${getCardStyle()}`}>
+        <EliteCard
+          className={`group border rounded-[2.5rem] p-7 transition-all duration-500 h-[385px] flex flex-col ${getCardStyle()}`}
+        >
           {/* BGMI Specific HUD Elements */}
           {nexusTheme === 'bgmi' && (
             <div className="absolute top-0 left-0 w-1/3 h-1 bg-[var(--nexus-accent)] z-30" />
@@ -312,10 +305,8 @@ const DashboardSummary = ({
                   whileHover={{ x: 4, scale: 1.02 }}
                   className={`group/card relative overflow-hidden flex items-center justify-between p-4 rounded-[var(--nexus-radius)] border transition-all duration-300 bg-[var(--nexus-panel)] border-[var(--nexus-border)] hover:border-[var(--nexus-accent)]/60 nexus-card`}
                 >
-                  {/* Live Animated Shimmer Background */}
                   <div className={`absolute inset-0 opacity-0 group-hover/card:opacity-100 transition-opacity duration-500 bg-gradient-to-r from-[var(--nexus-accent)]/0 via-[var(--nexus-accent)]/10 to-[var(--nexus-accent)]/0 -translate-x-full group-hover/card:animate-[shimmer_2s_infinite]`} />
 
-                  {/* Left Accent Bar */}
                   <div className="absolute left-0 top-0 bottom-0 w-1 bg-[var(--nexus-accent)] opacity-0 group-hover/card:opacity-100 transition-opacity" />
 
                   <div className="flex items-center gap-4 relative z-10">
@@ -366,9 +357,9 @@ const DashboardSummary = ({
               </span>
             </div>
           )}
-        </div >
-      </div >
-    </div >
+        </EliteCard>
+      </div>
+    </div>
   );
 };
 

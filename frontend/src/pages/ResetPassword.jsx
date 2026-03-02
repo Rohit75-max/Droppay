@@ -2,7 +2,63 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from '../api/axios';
-import { Lock, Loader2, CheckCircle, ShieldCheck, ArrowLeft, Zap } from 'lucide-react';
+import { Lock, Loader2, CheckCircle, ShieldCheck, ArrowLeft, Zap, Sparkles } from 'lucide-react';
+
+// ─── Visual Component: Floating Shards ────────────────────────
+const FloatingShard = ({ delay = 0, size = "w-24 h-24", top = "10%", left = "10%", rotate = "0deg" }) => (
+  <motion.div
+    initial={{ opacity: 0, scale: 0 }}
+    animate={{
+      opacity: [0.1, 0.2, 0.1],
+      y: [0, -40, 0],
+      rotate: [rotate, `${parseInt(rotate) + 15}deg`, rotate]
+    }}
+    transition={{ duration: 10 + Math.random() * 5, repeat: Infinity, ease: "easeInOut", delay }}
+    className={`absolute ${size} rounded-3xl bg-white/[0.03] border border-white/5 backdrop-blur-[2px] pointer-events-none z-0`}
+    style={{ top, left, rotate }}
+  />
+);
+
+// ─── Visual Component: Scanline Effect ────────────────────────
+const GlobalScanline = () => (
+  <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
+    <motion.div
+      animate={{
+        top: ['-100%', '100%'],
+        opacity: [0.02, 0.05, 0.02]
+      }}
+      transition={{ duration: 12, repeat: Infinity, ease: 'linear' }}
+      className="absolute left-0 right-0 h-[40vh] bg-gradient-to-b from-transparent via-emerald-500/[0.05] to-transparent"
+    />
+    <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%),linear-gradient(90.1deg,rgba(255,0,0,0.02)_0%,rgba(0,255,0,0.01)_50.1%,rgba(0,0,255,0.02)_100%)] bg-[length:100%_4px,3px_100%] pointer-events-none opacity-20" />
+  </div>
+);
+
+// ─── Premium Input ────────────────────────────────────────────
+const PremiumInput = ({ icon: Icon, label, value, onChange, placeholder, type = "password" }) => {
+  const [focused, setFocused] = useState(false);
+  return (
+    <div className="space-y-3">
+      <label className={`flex items-center gap-2.5 text-[10px] font-black uppercase tracking-[0.3em] transition-colors duration-500 ${focused ? 'text-emerald-400' : 'text-white/30'}`}>
+        <Icon className="w-3.5 h-3.5" /> {label}
+      </label>
+      <div className="relative group">
+        <motion.div
+          className={`absolute -inset-[1px] rounded-2xl bg-gradient-to-r from-emerald-500/50 via-cyan-500/50 to-emerald-500/50 pointer-events-none transition-opacity duration-500 ${focused ? 'opacity-100' : 'opacity-0'}`}
+        />
+        <div className="relative">
+          <Icon className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors duration-500 ${focused ? 'text-emerald-400' : 'text-white/20'}`} />
+          <input
+            type={type} value={value} onChange={onChange} required
+            onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
+            placeholder={placeholder}
+            className="w-full bg-black/40 border border-white/5 rounded-2xl py-4 pl-12 pr-4 text-sm text-white placeholder:text-white/10 focus:outline-none transition-all duration-500 backdrop-blur-md"
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const ResetPassword = () => {
   const { token } = useParams();
@@ -36,97 +92,147 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 sm:p-6 font-sans overflow-hidden">
-      {/* Background blobs */}
+    <div className="min-h-screen bg-[#030303] text-white flex items-center justify-center p-4 sm:p-6 font-sans overflow-hidden relative">
+      <GlobalScanline />
+
+      {/* Background Visuals */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[-20%] left-[-10%] w-[550px] h-[550px] rounded-full bg-emerald-100/60 blur-[120px]" />
-        <div className="absolute bottom-[-20%] right-[-10%] w-[450px] h-[450px] rounded-full bg-cyan-100/50 blur-[100px]" />
+        <motion.div
+          animate={{ opacity: [0.15, 0.25, 0.15] }}
+          transition={{ duration: 5, repeat: Infinity }}
+          className="absolute top-[-10%] left-[-5%] w-[60%] h-[70vh] bg-emerald-500/20 blur-[150px] rounded-full"
+        />
+        <div className="absolute bottom-[-10%] right-[-5%] w-[50%] h-[60vh] bg-cyan-500/10 blur-[120px] rounded-full" />
+
+        <FloatingShard size="w-32 h-32" top="15%" left="5%" rotate="12deg" delay={0.5} />
+        <FloatingShard size="w-48 h-48" top="65%" left="85%" rotate="-15deg" delay={2} />
+        <FloatingShard size="w-24 h-24" top="40%" left="15%" rotate="45deg" delay={1} />
+
+        {/* Grain Overlay */}
+        <div className="absolute inset-0 opacity-[0.05] mix-blend-overlay pointer-events-none" style={{ backgroundImage: 'url("https://grainy-gradients.vercel.app/noise.svg")' }} />
       </div>
 
       <motion.div
-        initial={{ opacity: 0, y: 32, scale: 0.96 }}
+        initial={{ opacity: 0, y: 40, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-        className="relative w-full max-w-[500px] rounded-[2.5rem] overflow-hidden bg-white border border-white/80 shadow-2xl"
-        style={{ boxShadow: '0 30px 80px -20px rgba(0,0,0,0.12), 0 0 0 1px rgba(255,255,255,0.8)' }}
+        transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+        className="relative w-full max-w-[500px] rounded-[3.5rem] overflow-hidden bg-[#080808]/80 backdrop-blur-2xl border border-white/5 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.8)]"
       >
-        <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-emerald-500 via-cyan-500 to-indigo-500" />
+        <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-emerald-500 via-cyan-500 to-emerald-500 opacity-50" />
 
-        <div className="p-6 sm:p-10">
-          <div className="flex items-center justify-between mb-8">
-            <Link to="/login" className="p-2.5 rounded-xl border border-slate-100 bg-slate-50 text-slate-400 hover:text-emerald-500 transition-all">
-              <ArrowLeft className="w-5 h-5" />
+        <div className="p-8 sm:p-12">
+          <div className="flex items-center justify-between mb-12">
+            <Link to="/login" className="p-3 rounded-2xl bg-white/[0.03] border border-white/5 text-white/30 hover:text-white hover:bg-white/5 transition-all group">
+              <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
             </Link>
-            <div className="flex items-center gap-2 px-3 py-1 bg-emerald-50 border border-emerald-100 rounded-full">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-              <span className="text-[9px] font-black uppercase tracking-widest text-emerald-600">Secure Node</span>
+            <div className="flex items-center gap-3 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl">
+              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400/80">Secure Node</span>
             </div>
           </div>
 
           {!success ? (
             <>
-              <div className="space-y-2 mb-8">
-                <h1 className="text-3xl font-black italic tracking-tighter text-slate-900 leading-none">Reset Protocol.</h1>
-                <p className="text-slate-400 text-sm font-medium">Define a new master passphrase for your creator node.</p>
-              </div>
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="space-y-2 mb-10"
+              >
+                <div className="flex items-center gap-4">
+                  <h1 className="text-4xl font-black italic tracking-tighter text-white leading-none uppercase">Reset<br /><span className="text-transparent bg-clip-text bg-gradient-to-br from-emerald-400 to-cyan-600">Protocol.</span></h1>
+                  <motion.div
+                    animate={{ rotate: [0, 360], scale: [1, 1.2, 1] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                  >
+                    <Sparkles className="w-8 h-8 text-emerald-400/50" />
+                  </motion.div>
+                </div>
+                <p className="text-white/20 text-[11px] font-black uppercase tracking-[0.3em] pt-2">Initialize Key Re-calibration</p>
+              </motion.div>
 
               <AnimatePresence>
                 {error && (
-                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="mb-6 p-4 bg-rose-50 border border-rose-100 rounded-2xl flex items-center gap-3">
-                    <Zap className="w-4 h-4 text-rose-500 fill-rose-500" />
-                    <p className="text-xs font-bold text-rose-600">{error}</p>
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    className="mb-8 p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex items-center gap-4 overflow-hidden"
+                  >
+                    <Zap className="w-5 h-5 text-rose-500 fill-rose-500" />
+                    <p className="text-[10px] font-black uppercase tracking-widest text-rose-400">{error}</p>
                   </motion.div>
                 )}
               </AnimatePresence>
 
-              <form onSubmit={handleReset} className="space-y-5">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">New Passphrase</label>
-                  <div className="relative group">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-5 h-5 group-focus-within:text-emerald-500 transition-colors" />
-                    <input
-                      type="password"
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      placeholder="••••••••••••••••"
-                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 pl-12 pr-4 focus:border-emerald-500 outline-none transition-all text-sm font-bold"
-                      required
-                    />
-                  </div>
-                </div>
+              <form onSubmit={handleReset} className="space-y-8">
+                <PremiumInput
+                  icon={Lock}
+                  label="New Passphrase"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="••••••••••••••••"
+                />
 
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Confirm Passphrase</label>
-                  <div className="relative group">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-5 h-5 group-focus-within:text-emerald-500 transition-colors" />
-                    <input
-                      type="password"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      placeholder="••••••••••••••••"
-                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 pl-12 pr-4 focus:border-emerald-500 outline-none transition-all text-sm font-bold"
-                      required
-                    />
-                  </div>
-                </div>
+                <PremiumInput
+                  icon={Lock}
+                  label="Confirm Passphrase"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="••••••••••••••••"
+                />
 
-                <button
+                <motion.button
                   type="submit"
                   disabled={loading}
-                  className="w-full relative overflow-hidden bg-slate-900 hover:bg-black text-white py-5 rounded-2xl font-black uppercase tracking-widest text-xs italic flex items-center justify-center gap-3 transition-all active:scale-95 disabled:opacity-50 mt-4 shadow-xl shadow-slate-200"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="w-full relative overflow-hidden bg-white text-black py-6 rounded-3xl font-black uppercase tracking-[0.4em] text-[12px] italic flex items-center justify-center gap-4 transition-all duration-500 shadow-[0_20px_40px_rgba(255,255,255,0.1)] disabled:opacity-20 mt-4"
                 >
-                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Authorize New Key"}
-                </button>
+                  <motion.div
+                    animate={{ x: ['-250%', '250%'] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-black/10 to-transparent skew-x-[-20deg]"
+                  />
+                  {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : "Authorize New Key"}
+                </motion.button>
               </form>
             </>
           ) : (
-            <div className="text-center py-10">
-              <div className="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-emerald-500/20 shadow-[0_0_30px_rgba(16,185,129,0.2)]">
-                <CheckCircle className="w-10 h-10 text-emerald-500" />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="text-center py-12"
+            >
+              <div className="relative mb-10 w-24 h-24 mx-auto">
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="w-full h-full bg-emerald-500/10 rounded-[2.5rem] flex items-center justify-center border border-emerald-500/20 shadow-[0_0_40px_rgba(16,185,129,0.2)]"
+                >
+                  <CheckCircle className="w-12 h-12 text-emerald-500" />
+                </motion.div>
+                <motion.div
+                  animate={{ scale: [1, 1.5], opacity: [0.5, 0] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                  className="absolute inset-0 rounded-[2.5rem] border border-emerald-500/30"
+                />
               </div>
-              <h2 className="text-2xl font-black italic uppercase text-slate-900 mb-2">Key Synchronized</h2>
-              <p className="text-slate-400 text-sm font-medium">Your node security has been updated. Redirecting to auth portal...</p>
-            </div>
+              <h2 className="text-3xl font-black italic uppercase text-white mb-4 tracking-tighter">Key Synchronized</h2>
+              <p className="text-white/30 text-[11px] font-black uppercase tracking-[0.3em] italic">Your node security has been updated.<br />Redirecting to auth portal...</p>
+
+              <motion.div
+                className="mt-12 h-1 bg-white/10 rounded-full overflow-hidden w-48 mx-auto"
+                initial={{ width: 0 }}
+                animate={{ width: 192 }}
+                transition={{ duration: 3 }}
+              >
+                <motion.div
+                  className="h-full bg-emerald-500"
+                  initial={{ x: "-100%" }}
+                  animate={{ x: "0%" }}
+                  transition={{ duration: 3 }}
+                />
+              </motion.div>
+            </motion.div>
           )}
         </div>
       </motion.div>

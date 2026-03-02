@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { toast } from 'react-toastify';
 import { motion } from 'framer-motion';
 import { Swords, Timer, Save, Rocket, Zap, ShieldAlert, Flame } from 'lucide-react';
 import axios from '../../api/axios';
@@ -38,7 +39,7 @@ const TugOfWarControl = ({ user, nexusTheme, streamerId, theme }) => {
             });
             setEvent(res.data);
         } catch (err) {
-            alert("Uplink Failure: Failed to start event.");
+            toast.error("Uplink Failure: Failed to start event.");
         } finally {
             setIsStarting(false);
         }
@@ -52,7 +53,7 @@ const TugOfWarControl = ({ user, nexusTheme, streamerId, theme }) => {
             });
             setEvent(null);
         } catch (err) {
-            alert("Uplink Failure: Failed to stop event.");
+            toast.error("Uplink Failure: Failed to stop event.");
         }
     };
 

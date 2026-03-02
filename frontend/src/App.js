@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import axios from './api/axios';
 
 // --- PAGES ---
@@ -25,6 +27,8 @@ import LiveThemeEngine from './components/LiveThemeEngine';
 // API_BASE is now handled by the centralized axios configuration in src/api/axios.js
 
 // --- PROFESSIONAL GATE: SECURE UPLINK ---
+import { syncTheme } from './api/themeSync';
+
 const MissionGate = ({ children }) => {
   const [status, setStatus] = useState('loading');
   const [hasAccess, setHasAccess] = useState(false);
@@ -41,6 +45,10 @@ const MissionGate = ({ children }) => {
         const res = await axios.get('/api/user/profile', {
           headers: { Authorization: `Bearer ${token}` }
         });
+
+        // --- NEW: THEME SYNCHRONIZATION ---
+        // Ensure backend theme preference is reflected in the frontend state
+        syncTheme(res.data);
 
         // Checks both the new tier system and the legacy subscription status
         const isActiveTier = res.data.tier && res.data.tier !== 'none';
@@ -174,6 +182,20 @@ function AppContent() {
       <div className="relative z-10 min-h-screen">
         <AnimatedRoutes />
       </div>
+
+      {/* PROFESSIONAL NOTIFICATION LAYER */}
+      <ToastContainer
+        position="bottom-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
     </div>
   );
 }

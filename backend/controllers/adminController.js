@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const Drop = require('../models/Drop');
 const PlatformMetrics = require('../models/PlatformMetrics');
+const GlobalConfig = require('../models/GlobalConfig');
 
 // --- 1. ENTERPRISE NODE AGGREGATOR (With Cursor Pagination) ---
 exports.getUsers = async (req, res) => {
@@ -225,5 +226,62 @@ exports.executeSettlement = async (req, res) => {
         res.status(200).json({ msg: "Settlement Executed Successfully.", settledAmount: payoutAmount });
     } catch (err) {
         res.status(500).json({ msg: "Settlement Execution Failed." });
+    }
+};
+
+// --- 7. GLOBAL CONFIGURATION & BROADCAST ENGINE ---
+
+exports.getGlobalConfig = async (req, res) => {
+    try {
+        const config = await GlobalConfig.getOrCreate();
+        res.status(200).json(config.platformSettings);
+    } catch (err) {
+        res.status(500).json({ msg: "Failed to retrieve platform settings." });
+    }
+};
+
+exports.updateGlobalConfig = async (req, res) => {
+    try {
+        const { platformSettings } = req.body;
+        const config = await GlobalConfig.getOrCreate();
+
+        config.platformSettings = {
+            ...config.platformSettings,
+            ...platformSettings,
+            lastUpdatedBy: req.user._id || req.user.id
+        };
+
+        await config.save();
+        res.status(200).json({ msg: "Platform variables updated.", settings: config.platformSettings });
+    } catch (err) {
+        res.status(500).json({ msg: "Failed to update platform variables." });
+    }
+};
+
+exports.dispatchBroadcast = async (req, res) => {
+    try {
+        const { message, level = 'info' } = req.body;
+        if (!message) return res.status(400).json({ msg: "Broadcast packet empty." });
+
+        const io = req.app.get('io');
+        if (io) {
+            io.emit('system_broadcast', {
+                message,
+                level,
+                timestamp: new Date(),
+                sender: 'DropPay Command Center'
+            });
+
+            // Update the global config with the last broadcast
+            const config = await GlobalConfig.getOrCreate();
+            config.platformSettings.broadcastMessage = message;
+            await config.save();
+
+            res.status(200).json({ msg: "Broadcast dispatched to all active nodes." });
+        } else {
+            res.status(500).json({ msg: "Socket uplink offline." });
+        }
+    } catch (err) {
+        res.status(500).json({ msg: "Broadcast dispatch failed." });
     }
 };

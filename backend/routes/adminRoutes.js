@@ -1,7 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const adminAuth = require('../middleware/adminAuth');
-const { getUsers, getUserDetails, toggleBan, updateTier, getSystemMetrics, updateRole, getPayoutQueue, executeSettlement } = require('../controllers/adminController');
+const {
+    getUsers, getUserDetails, toggleBan, updateTier, getSystemMetrics,
+    updateRole, getPayoutQueue, executeSettlement,
+    getGlobalConfig, updateGlobalConfig, dispatchBroadcast
+} = require('../controllers/adminController');
 
 // All routes here are strictly shielded by `adminAuth`
 router.use(adminAuth);
@@ -37,5 +41,19 @@ router.get('/payouts', getPayoutQueue);
 // @route   POST api/admin/payouts/:id/settle
 // @desc    Execute node payout clearing active wallet debt
 router.post('/payouts/:id/settle', executeSettlement);
+
+// --- GLOBAL SYSTEMS ---
+
+// @route   GET api/admin/config
+// @desc    Retrieve platform-wide variables
+router.get('/config', getGlobalConfig);
+
+// @route   PATCH api/admin/config
+// @desc    Update platform-wide variables
+router.patch('/config', updateGlobalConfig);
+
+// @route   POST api/admin/broadcast
+// @desc    Dispatch system-wide alert packets
+router.post('/broadcast', dispatchBroadcast);
 
 module.exports = router;

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { motion } from 'framer-motion';
 // --- Protocol Engine ---
 import { calculateTierStatus, MILESTONES } from '../protocol/tierProtocol';
 
@@ -8,30 +8,20 @@ import {
   CheckCircle, Gift, Target, Crosshair, Sparkles, ArrowUpRight,
   Activity, ZapOff, Fingerprint, Cpu
 } from 'lucide-react';
+import EliteCard from './EliteCard';
 
 const GrowthMissions = ({
   theme, user, copyToClipboard, copiedType
 }) => {
   // --- Elite Interaction Protocol ---
   const [showTelemetry, setShowTelemetry] = useState(false);
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
 
-  const springConfig = { damping: 20, stiffness: 100 };
-  const sprX = useSpring(mouseX, springConfig);
-  const sprY = useSpring(mouseY, springConfig);
-
-  const handleMouseMove = ({ currentTarget, clientX, clientY }) => {
-    const { left, top } = currentTarget.getBoundingClientRect();
-    mouseX.set(clientX - left);
-    mouseY.set(clientY - top);
-  };
   // Activate the Engine
   const referralCount = user?.referralCount || 0;
   const status = calculateTierStatus(user?.tier || 'starter', referralCount);
 
   // Base URL for Local Node
-  const BASE_URL = "http://localhost:3000";
+  const BASE_URL = window.location.origin;
   const referralLink = `${BASE_URL}/signup?ref=${user?.username}`;
 
   // Find the next upcoming milestone
@@ -86,8 +76,7 @@ const GrowthMissions = ({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start w-full">
 
         {/* --- MILESTONE TRACKER --- */}
-        <motion.div
-          variants={itemVariants}
+        <EliteCard
           className={`w-full lg:col-span-8 border rounded-[3rem] p-5 lg:p-10 lg:pt-3 space-y-7 relative overflow-hidden transition-all nexus-card ${getCardStyle()}`}
         >
           {/* Animated Background Pulse */}
@@ -201,7 +190,7 @@ const GrowthMissions = ({
                         <m.icon className={`w-4 h-4 ${m.unlocked ? 'text-[var(--nexus-accent)] animate-pulse' : 'text-[var(--nexus-text-muted)]'}`} />
                         {!m.unlocked && <ZapOff className="absolute -top-1 -right-1 w-2 h-2 text-rose-500 opacity-50" />}
                       </div>
-                      <h4 className={`text-sm font-black uppercase italic tracking-tighter text-[var(--nexus-text)] flex items-center gap-2`}>
+                      <h4 className={`text-sm font-black uppercase italic tracking-tighter text-[var(--nexus-text)]`}>
                         {m.reward} {m.unlocked && <Gift className="w-3.5 h-3.5 text-amber-500" />}
                       </h4>
                     </div>
@@ -222,26 +211,13 @@ const GrowthMissions = ({
               </motion.div>
             ))}
           </div>
-        </motion.div>
+        </EliteCard>
 
         {/* --- REFERRAL CARD - ELITE SPOTLIGHT --- */}
         <div className="w-full lg:col-span-4 space-y-6">
-          <motion.div
-            variants={itemVariants}
-            onMouseMove={handleMouseMove}
+          <EliteCard
             className="w-full bg-[#050505] border border-white/5 rounded-[3rem] p-8 shadow-2xl relative overflow-hidden group spotlight-card"
           >
-            {/* Elite Spotlight Interaction */}
-            <motion.div
-              className="absolute -inset-[1px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-0"
-              style={{
-                background: useTransform(
-                  [sprX, sprY],
-                  ([x, y]) => `radial-gradient(600px circle at ${x}px ${y}px, rgba(16, 185, 129, 0.15), transparent 40%)`
-                )
-              }}
-            />
-
             {/* Glossy Overlay */}
             <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent pointer-events-none" />
 
@@ -306,7 +282,7 @@ const GrowthMissions = ({
                 </motion.button>
               </div>
             </div>
-          </motion.div>
+          </EliteCard>
 
           {/* Strategy Tip - ELITE SIDEBAR */}
           <motion.div

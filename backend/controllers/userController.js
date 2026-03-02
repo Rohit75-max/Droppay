@@ -14,7 +14,7 @@ exports.requestWithdrawal = async (req, res) => {
         const { amount } = req.body;
         const user = await User.findById(userId);
 
-        if (!user) return res.status(404).json({ msg: "Node Not Found" });
+        if (!user) return res.status(404).json({ msg: "Security Alert: Identity Node Not Found in the registry." });
 
         const MIN_WITHDRAWAL = 1000;
 
@@ -54,7 +54,7 @@ exports.requestWithdrawal = async (req, res) => {
 
     } catch (err) {
         console.error("Payout Request Error:", err);
-        res.status(500).json({ msg: "Failed to Dispatch Payout Request" });
+        res.status(500).json({ msg: "System Error: Failed to Dispatch Payout Request. Node connection unstable." });
     }
 };
 
@@ -124,7 +124,7 @@ exports.purchasePremiumStyle = async (req, res) => {
 
     } catch (err) {
         console.error("Purchase Style Error:", err);
-        res.status(500).json({ msg: "System override failed." });
+        res.status(500).json({ msg: "System Error: Style calibration failed. Database handshake incomplete." });
     }
 };
 
@@ -215,7 +215,7 @@ exports.purchasePremiumAlert = async (req, res) => {
 
     } catch (err) {
         console.error("Purchase Alert Error:", err);
-        res.status(500).json({ msg: "System override failed." });
+        res.status(500).json({ msg: "System Error: Alert calibration failed. Database handshake incomplete." });
     }
 };
 
@@ -274,7 +274,7 @@ exports.purchaseNexusTheme = async (req, res) => {
 
     } catch (err) {
         console.error("Purchase Theme Error:", err);
-        res.status(500).json({ msg: "Environment synthesis failed." });
+        res.status(500).json({ msg: "System Error: Environment synthesis failed. Node unresponsive." });
     }
 };
 
@@ -306,7 +306,7 @@ exports.purchaseWidget = async (req, res) => {
         }
 
         if (user.walletBalance < catalog.price) {
-            return res.status(400).json({ msg: `Insufficient balance. ₹${catalog.price} required.` });
+            return res.status(400).json({ msg: `Insufficient Liquidity. ₹${catalog.price} required to sequence this widget.` });
         }
 
         user.walletBalance -= catalog.price;

@@ -85,9 +85,7 @@ const PREMIUM_ALERTS = [
     { id: 'plinko_drop', name: 'Plinko Drop', theme: 'Arcade Physics', basePrice: 8999, color: 'text-indigo-400' },
 ];
 
-const PREMIUM_WIDGETS = [
-    { id: 'wd4', name: 'Midnight Cruiser Matrix', theme: 'Holographic Revenue Chart', basePrice: 12000, color: 'text-indigo-400' },
-];
+const PREMIUM_WIDGETS = [];
 
 const DashboardStore = ({ theme, user, setUser }) => {
     const [isProcessing, setIsProcessing] = useState(false);
@@ -281,28 +279,28 @@ const DashboardStore = ({ theme, user, setUser }) => {
 
 
                 <div className="relative z-10 flex items-center gap-4">
-                    <div className={`relative p-3 rounded-xl border group ${theme === 'light' ? 'bg-emerald-100/50 border-emerald-200' : 'bg-emerald-500/10 border-emerald-500/20'}`}>
-                        <Store className={`w-6 h-6 relative z-10 ${theme === 'light' ? 'text-emerald-700' : 'text-emerald-500'}`} />
-                        <Hexagon className={`absolute inset-0 w-full h-full opacity-20 scale-150 group-hover:rotate-90 transition-all duration-700 ${theme === 'light' ? 'text-emerald-400' : 'text-emerald-500'}`} />
-                        <Crown className={`absolute -top-2 -right-2 w-4 h-4 drop-shadow-[0_0_10px_rgba(16,185,129,0.5)] ${theme === 'light' ? 'text-emerald-600' : 'text-emerald-500'}`} />
+                    <div className={`relative p-3 rounded-xl border group bg-[var(--nexus-accent)]/10 border-[var(--nexus-accent)]/20`}>
+                        <Store className={`w-6 h-6 relative z-10 text-[var(--nexus-accent)]`} />
+                        <Hexagon className={`absolute inset-0 w-full h-full opacity-20 scale-150 group-hover:rotate-90 transition-all duration-700 text-[var(--nexus-accent)]`} />
+                        <Crown className={`absolute -top-2 -right-2 w-4 h-4 drop-shadow-[0_0_10px_var(--nexus-accent-glow)] text-[var(--nexus-accent)]`} />
                     </div>
                     <div>
-                        <h2 className={`text-xl font-black uppercase tracking-widest flex items-center gap-3 ${theme === 'light' ? 'text-emerald-950' : 'text-[var(--nexus-text)]'}`}>
-                            <Monitor className={`w-5 h-5 opacity-40 shrink-0 ${theme === 'light' ? 'text-emerald-600' : 'text-emerald-500'}`} />
+                        <h2 className={`text-xl font-black uppercase tracking-widest flex items-center gap-3 text-[var(--nexus-text)]`}>
+                            <Monitor className={`w-5 h-5 opacity-40 shrink-0 text-[var(--nexus-accent)]`} />
                             Marketplace Hub
                         </h2>
-                        <p className={`text-[10px] font-bold uppercase tracking-widest opacity-60 flex items-center gap-2 ${theme === 'light' ? 'text-emerald-800' : 'text-[var(--nexus-text-muted)]'}`}>
-                            <Play className="w-3 h-3 text-emerald-500" /> Authorize Node Upgrades
+                        <p className={`text-[10px] font-bold uppercase tracking-widest opacity-60 flex items-center gap-2 text-[var(--nexus-text-muted)]`}>
+                            <Play className="w-3 h-3 text-[var(--nexus-accent)]" /> Authorize Node Upgrades
                         </p>
                     </div>
                 </div>
 
-                <div className={`border px-6 py-4 rounded-2xl flex items-center gap-4 relative z-10 shrink-0 shadow-inner backdrop-blur-md group/balance ${theme === 'light' ? 'bg-white/80 border-emerald-100 shadow-emerald-900/5' : 'bg-[var(--nexus-bg)]/40 border-[var(--nexus-border)]'}`}>
-                    <Loader2 className={`absolute -left-3 top-1/2 -translate-y-1/2 w-8 h-8 opacity-20 animate-spin-slow pointer-events-none ${theme === 'light' ? 'text-emerald-600' : 'text-emerald-500'}`} />
+                <div className={`border px-6 py-4 rounded-2xl flex items-center gap-4 relative z-10 shrink-0 shadow-inner backdrop-blur-md group/balance bg-[var(--nexus-panel)]/40 border-[var(--nexus-border)]`}>
+                    <Loader2 className={`absolute -left-3 top-1/2 -translate-y-1/2 w-8 h-8 opacity-20 animate-spin-slow pointer-events-none text-[var(--nexus-accent)]`} />
                     <div className="flex flex-col">
-                        <span className={`text-[10px] uppercase font-bold tracking-[0.2em] opacity-70 ${theme === 'light' ? 'text-emerald-900/60' : 'text-[var(--nexus-text-muted)]'}`}>Node Balance</span>
-                        <span className={`text-2xl font-black flex items-center ${theme === 'light' ? 'text-emerald-600' : 'text-emerald-500'}`}>
-                            <IndianRupee className={`w-5 h-5 mr-1 ${theme === 'light' ? 'text-emerald-600/70' : ''}`} /> {user?.walletBalance || 0}
+                        <span className={`text-[10px] uppercase font-bold tracking-[0.2em] opacity-70 text-[var(--nexus-text-muted)]`}>Node Balance</span>
+                        <span className={`text-2xl font-black flex items-center text-[var(--nexus-accent)]`}>
+                            <IndianRupee className={`w-5 h-5 mr-1`} /> {user?.walletBalance || 0}
                         </span>
                     </div>
                 </div>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { toast } from 'react-toastify';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from '../api/axios';
 // --- Protocol Engine ---
@@ -11,6 +12,7 @@ import {
   Target, Crosshair, Sparkles, ArrowRight, ShieldAlert, CheckCircle2, AlertCircle,
   Globe, Copy, Check
 } from 'lucide-react';
+import EliteCard from './EliteCard';
 
 const AccountsHub = ({
   theme, user, isEditing, setIsEditing, editForm, setEditForm,
@@ -51,7 +53,7 @@ const AccountsHub = ({
       setOtpInput('');
       setShowVerifyModal(true);
     } catch (err) {
-      alert(err.response?.data?.msg || `Failed to transmit ${type} key.`);
+      toast.error(err.response?.data?.msg || `Failed to transmit ${type} key.`);
     } finally {
       setIsRequestingOtp(false);
     }
@@ -66,9 +68,9 @@ const AccountsHub = ({
       });
       if (typeof fetchProfileData === 'function') await fetchProfileData();
       setShowVerifyModal(false);
-      alert(`${verifyType === 'email' ? 'Email' : 'Phone'} Verified Successfully!`);
+      toast.success(`${verifyType === 'email' ? 'Email' : 'Phone'} Verified Successfully!`);
     } catch (err) {
-      alert(err.response?.data?.msg || "Invalid Authorization Key.");
+      toast.error(err.response?.data?.msg || "Invalid Authorization Key.");
     } finally {
       setIsVerifyingOtp(false);
     }
@@ -85,14 +87,14 @@ const AccountsHub = ({
   };
 
   const initiateBankLink = async () => {
-    if (!bankForm.name) return alert("Account Holder Name is required.");
+    if (!bankForm.name) return toast.error("Account Holder Name is required.");
 
     if (bankLinkType === 'bank_account' && (!bankForm.account_number || !bankForm.ifsc)) {
-      return alert("Complete all banking fields.");
+      return toast.error("Complete all banking fields.");
     }
 
     if (bankLinkType === 'vpa' && !bankForm.vpa) {
-      return alert("Enter your UPI ID.");
+      return toast.error("Enter your UPI ID.");
     }
 
     setIsProcessingBank(true);
@@ -105,14 +107,14 @@ const AccountsHub = ({
       setBankOtpMode(true);
       setBankOtpInput('');
     } catch (err) {
-      alert(err.response?.data?.msg || "Failed to initiate banking security protocol.");
+      toast.error(err.response?.data?.msg || "Failed to initiate banking security protocol.");
     } finally {
       setIsProcessingBank(false);
     }
   };
 
   const confirmBankLink = async () => {
-    if (bankOtpInput.length !== 6) return alert("Enter valid 6-digit key.");
+    if (bankOtpInput.length !== 6) return toast.error("Enter valid 6-digit key.");
     setIsProcessingBank(true);
     try {
       const token = localStorage.getItem('token');
@@ -125,9 +127,9 @@ const AccountsHub = ({
       if (typeof fetchProfileData === 'function') await fetchProfileData();
       setShowBankModal(false);
       setBankOtpMode(false);
-      alert("Banking details verified and securely linked.");
+      toast.success("Banking details verified and securely linked.");
     } catch (err) {
-      alert(err.response?.data?.msg || "Verification Failed. Try again.");
+      toast.error(err.response?.data?.msg || "Verification Failed. Try again.");
     } finally {
       setIsProcessingBank(false);
     }
@@ -143,8 +145,10 @@ const AccountsHub = ({
 
         {/* --- LEFT COLUMN (Hub & Handshake) --- */}
         <div className="w-full lg:col-span-8 flex flex-col gap-8">
-          {/* --- IDENTITY HUB (LEGEND STATUS REFACTOR) --- */}
-          <div className={`w-full flex flex-col border rounded-[2.5rem] p-6 lg:p-8 relative transition-all overflow-hidden ${getCardStyle()}`}>
+          {/* --- IDENTITY HUB  --- */}
+          <EliteCard
+            className={`w-full flex flex-col border rounded-[2.5rem] p-6 lg:p-8 relative transition-all overflow-hidden ${getCardStyle()}`}
+          >
 
             {/* Header Block */}
             <div className="flex flex-col sm:flex-row sm:justify-between items-start mb-10 w-full relative z-10 gap-6">
@@ -173,13 +177,13 @@ const AccountsHub = ({
               {/* Left Side: Avatar & Name */}
               <div className="flex flex-col items-center md:items-start shrink-0 space-y-6">
                 <div className="relative group/avatar shrink-0">
-                  <div className={`w-36 h-36 md:w-48 md:h-48 rounded-[var(--nexus-radius)] border-2 border-dashed flex items-center justify-center overflow-hidden transition-all group-hover/avatar:border-[var(--nexus-accent)] bg-[var(--nexus-bg)] border-[var(--nexus-border)]`}>
+                  <div className={`w-36 h-36 md:w-48 md:h-48 rounded-full border-2 border-dashed flex items-center justify-center overflow-hidden transition-all group-hover/avatar:border-[var(--nexus-accent)] bg-[var(--nexus-bg)] border-[var(--nexus-border)] shadow-inner relative`}>
                     {profilePreview ? (
                       <img src={profilePreview} alt="Profile" className="w-full h-full object-cover" />
                     ) : (
                       <User className={`w-14 h-14 md:w-20 md:h-20 text-[var(--nexus-text-muted)] opacity-30`} />
                     )}
-                    <button onClick={() => fileInputRef.current.click()} className="absolute inset-0 bg-black/70 opacity-0 group-hover/avatar:opacity-100 flex flex-col items-center justify-center transition-all duration-300">
+                    <button onClick={() => fileInputRef.current.click()} className="absolute inset-0 bg-black/70 opacity-0 group-hover/avatar:opacity-100 flex flex-col items-center justify-center transition-all duration-300 rounded-full">
                       <UploadCloud className="w-8 h-8 text-[var(--nexus-accent)] mb-2" />
                       <span className="text-[10px] font-black uppercase tracking-widest text-white">Upload</span>
                     </button>
@@ -324,9 +328,12 @@ const AccountsHub = ({
 
               </div>
             </div>
-          </div>
-          {/* --- IDENTITY HANDSHAKE (MODULAR CARD) --- */}
-          <div className={`w-full flex flex-col border rounded-[2.5rem] p-8 lg:p-10 relative transition-all ${getCardStyle()}`}>
+          </EliteCard>
+
+          {/* --- IDENTITY HANDSHAKE --- */}
+          <EliteCard
+            className={`w-full flex flex-col border rounded-[2.5rem] p-8 lg:p-10 relative transition-all ${getCardStyle()}`}
+          >
             <div className="flex items-center gap-4 mb-8">
               <div className={`p-3 rounded-[var(--nexus-radius)] bg-[var(--nexus-accent)]/10 text-[var(--nexus-accent)]`}>
                 <Globe className="w-5 h-5" />
@@ -411,12 +418,15 @@ const AccountsHub = ({
                 </div>
               </div>
             </div>
-          </div>
+          </EliteCard>
         </div>
 
         {/* --- BANKING NODE --- */}
         <div className="w-full lg:col-span-4 flex flex-col gap-8">
-          <div className={`w-full flex flex-col border rounded-[2.5rem] p-8 shadow-2xl relative transition-all ${getCardStyle()}`}>
+          <EliteCard
+            glowColor="rgba(99, 102, 241, 0.15)"
+            className={`w-full flex flex-col border rounded-[2.5rem] p-8 shadow-2xl relative transition-all ${getCardStyle()}`}
+          >
             <div className="flex items-center gap-4 mb-10">
               <div className="p-3.5 bg-indigo-500/10 rounded-2xl text-indigo-500 border border-indigo-500/20"><Landmark className="w-7 h-7" /></div>
               <div>
@@ -460,7 +470,7 @@ const AccountsHub = ({
                 </div>
               )}
             </div>
-          </div>
+          </EliteCard>
 
           <div onClick={() => setActiveSection('growth')} className={`w-full shrink-0 rounded-[2rem] p-6 flex items-center justify-between transition-all cursor-pointer group border bg-[var(--nexus-panel)] border-[var(--nexus-border)] hover:border-indigo-500/30 shadow-[var(--nexus-glow)]`}>
             <div className="flex items-center gap-5">

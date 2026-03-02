@@ -4,6 +4,7 @@ import {
   Search, Zap, Wallet, ShieldAlert,
   MessageSquare, ChevronRight, Mail as MailIcon
 } from 'lucide-react';
+import EliteCard from './EliteCard';
 
 const HelpCenter = ({ theme }) => {
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -78,22 +79,22 @@ const HelpCenter = ({ theme }) => {
         {/* MAIN COLUMN (LEFT) - FAQ CONTENT */}
         <div className="lg:col-span-8 space-y-10">
           {/* --- KNOWLEDGE HUB (FAQ) --- */}
-          <div className="space-y-6 w-full">
+          <EliteCard className="space-y-6 w-full p-8 rounded-[3rem] bg-[var(--nexus-panel)]/40 border-[var(--nexus-border)] shadow-xl">
             <div className="flex flex-row items-center justify-between gap-4 px-2">
               <div className="flex items-center gap-3">
                 <div className="w-1.5 h-6 bg-[var(--nexus-accent)] rounded-full" />
                 <h3 className="text-xl md:text-2xl font-black uppercase italic tracking-tighter text-[var(--nexus-text)]">Knowledge Hub</h3>
               </div>
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[var(--nexus-panel)] border border-[var(--nexus-border)] text-[8px] font-black uppercase tracking-widest text-[var(--nexus-text-muted)]">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[var(--nexus-bg)]/40 border border-[var(--nexus-border)] text-[8px] font-black uppercase tracking-widest text-[var(--nexus-text-muted)]">
                 <MessageSquare className="w-2.5 h-2.5 text-[var(--nexus-accent)]" /> {filteredFaqs.length} Nodes Identified
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+            <div className="grid grid-cols-1 md:grid-cols-1 gap-4 w-full">
               {filteredFaqs.length > 0 ? (
                 filteredFaqs.map((faq, idx) => (
                   <details key={idx} className="group outline-none border-none w-full appearance-none">
-                    <summary className="flex justify-between items-center p-5 cursor-pointer list-none rounded-2xl border border-[var(--nexus-border)] bg-[var(--nexus-panel)] hover:border-[var(--nexus-accent)]/40 hover:scale-[1.01] transition-all outline-none group-open:rounded-b-none group-open:border-b-0 group-open:bg-[var(--nexus-bg)]/20 shadow-sm relative overflow-hidden">
+                    <summary className="flex justify-between items-center p-5 cursor-pointer list-none rounded-2xl border border-[var(--nexus-border)] bg-[var(--nexus-bg)]/40 hover:border-[var(--nexus-accent)]/40 hover:scale-[1.01] transition-all outline-none group-open:rounded-b-none group-open:border-b-0 group-open:bg-[var(--nexus-accent)]/5 shadow-sm relative overflow-hidden">
                       <div className="flex items-center gap-3">
                         <div className="w-6 h-6 rounded-lg border border-[var(--nexus-border)] flex items-center justify-center text-[9px] font-black text-[var(--nexus-accent)] group-hover:bg-[var(--nexus-accent)] group-hover:text-black transition-all">
                           {idx + 1}
@@ -105,16 +106,16 @@ const HelpCenter = ({ theme }) => {
                     <motion.div
                       initial={{ opacity: 0, y: -5 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="px-6 pb-6 pt-2 text-[10px] text-[var(--nexus-text-muted)] leading-relaxed font-medium bg-[var(--nexus-panel)] border-x border-b border-[var(--nexus-border)] rounded-b-2xl shadow-inner italic"
+                      className="px-6 pb-6 pt-2 text-[10px] text-[var(--nexus-text-muted)] leading-relaxed font-medium bg-[var(--nexus-bg)]/40 border-x border-b border-[var(--nexus-border)] rounded-b-2xl shadow-inner italic"
                     >
-                      <div className="p-4 rounded-xl bg-[var(--nexus-bg)]/30 border border-[var(--nexus-border)]/50">
+                      <div className="p-4 rounded-xl bg-black/20 border border-[var(--nexus-border)]/50">
                         {faq.a}
                       </div>
                     </motion.div>
                   </details>
                 ))
               ) : (
-                <div className="col-span-1 md:col-span-2 py-12 text-center space-y-4 bg-[var(--nexus-panel)]/50 rounded-[2rem] border border-dashed border-[var(--nexus-border)]">
+                <div className="py-12 text-center space-y-4 bg-[var(--nexus-panel)]/50 rounded-[2rem] border border-dashed border-[var(--nexus-border)]">
                   <div className="w-12 h-12 bg-rose-500/10 rounded-full flex items-center justify-center mx-auto">
                     <ShieldAlert className="w-6 h-6 text-rose-500" />
                   </div>
@@ -125,30 +126,28 @@ const HelpCenter = ({ theme }) => {
                 </div>
               )}
             </div>
-          </div>
+          </EliteCard>
 
-          {/* --- GLOBAL ACCESS CTA (RELOCATED) --- */}
-          <div className="relative w-full p-[1px] rounded-[2.5rem] bg-gradient-to-br from-[var(--nexus-accent)]/40 to-emerald-400/20 shadow-xl mt-6">
-            <div className="w-full bg-[var(--nexus-bg)]/60 backdrop-blur-xl rounded-[2.4rem] p-8 md:p-10 flex flex-col md:flex-row items-center text-center md:text-left justify-between gap-8 overflow-hidden relative">
-              <div className="relative z-10 space-y-3">
-                <div className="flex items-center justify-center md:justify-start gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-[var(--nexus-accent)] animate-pulse" />
-                  <span className="text-[8px] font-black uppercase tracking-[0.2em] text-[var(--nexus-accent)]">Support Sync Active</span>
-                </div>
-                <h4 className="text-2xl font-black uppercase italic tracking-tighter text-[var(--nexus-text)] leading-tight">
-                  Need More <span className="text-[var(--nexus-accent)]">Help?</span>
-                </h4>
-                <p className="text-[10px] text-[var(--nexus-text-muted)] font-bold uppercase tracking-widest opacity-50 leading-relaxed max-w-sm">
-                  Priority uplink active for Pro & Legend tier protocols. Connect with our technical task force.
-                </p>
+          {/* --- GLOBAL ACCESS CTA --- */}
+          <EliteCard className="relative w-full p-8 md:p-10 flex flex-col md:flex-row items-center text-center md:text-left justify-between gap-8 overflow-hidden rounded-[2.5rem] bg-[var(--nexus-bg)]/60 backdrop-blur-xl border border-[var(--nexus-accent)]/30">
+            <div className="relative z-10 space-y-3">
+              <div className="flex items-center justify-center md:justify-start gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-[var(--nexus-accent)] animate-pulse" />
+                <span className="text-[8px] font-black uppercase tracking-[0.2em] text-[var(--nexus-accent)]">Support Sync Active</span>
               </div>
-
-              <button className="relative z-10 min-w-[200px] bg-[var(--nexus-accent)] text-black py-4 px-8 rounded-xl font-black uppercase italic text-[10px] shadow-lg hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-3 group">
-                <MailIcon className="w-4 h-4 group-hover:rotate-12 transition-transform" />
-                Connect Support Hub
-              </button>
+              <h4 className="text-2xl font-black uppercase italic tracking-tighter text-[var(--nexus-text)] leading-tight">
+                Need More <span className="text-[var(--nexus-accent)]">Help?</span>
+              </h4>
+              <p className="text-[10px] text-[var(--nexus-text-muted)] font-bold uppercase tracking-widest opacity-50 leading-relaxed max-w-sm">
+                Priority uplink active for Pro & Legend tier protocols. Connect with our technical task force.
+              </p>
             </div>
-          </div>
+
+            <button className="relative z-10 min-w-[200px] bg-[var(--nexus-accent)] text-black py-4 px-8 rounded-xl font-black uppercase italic text-[10px] shadow-lg hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-3 group">
+              <MailIcon className="w-4 h-4 group-hover:rotate-12 transition-transform" />
+              Connect Support Hub
+            </button>
+          </EliteCard>
         </div>
 
         {/* SIDEBAR (RIGHT) - SERVICE TILES & CTA */}
@@ -167,12 +166,11 @@ const HelpCenter = ({ theme }) => {
                 { icon: Wallet, title: "Settlement Portal", subtitle: "Finance & Payouts", desc: "Manage treasury and settlement cycles." },
                 { icon: ShieldAlert, title: "Security Core", subtitle: "Keys & Encryption", desc: "Audit keys and secure account metadata." }
               ].map((item, i) => (
-                <motion.div
+                <EliteCard
                   key={i}
-                  whileHover={{ x: 4, scale: 1.01 }}
-                  className="relative p-6 rounded-[2rem] border border-[var(--nexus-border)] bg-[var(--nexus-panel)] hover:border-[var(--nexus-accent)]/30 transition-all cursor-pointer group flex items-start text-left overflow-hidden shadow-sm"
+                  className="relative p-6 rounded-[2rem] border border-[var(--nexus-border)] bg-[var(--nexus-panel)]/40 hover:border-[var(--nexus-accent)]/30 transition-all cursor-pointer group flex items-start text-left overflow-hidden shadow-sm"
                 >
-                  <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity">
+                  <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity pointer-events-none">
                     <item.icon className="w-16 h-16" />
                   </div>
 
@@ -185,7 +183,7 @@ const HelpCenter = ({ theme }) => {
                     <h4 className="font-black text-sm uppercase italic tracking-tight text-[var(--nexus-text)] leading-none">{item.title}</h4>
                     <p className="text-[9px] text-[var(--nexus-text-muted)] leading-relaxed font-medium opacity-70 line-clamp-2">{item.desc}</p>
                   </div>
-                </motion.div>
+                </EliteCard>
               ))}
             </div>
           </div>

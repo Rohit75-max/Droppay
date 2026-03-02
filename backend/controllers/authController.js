@@ -53,19 +53,12 @@ exports.signup = async (req, res) => {
         const cleanHandle = username.trim().toLowerCase().replace(/\s+/g, '');
         const cleanStreamerId = cleanHandle; // Synced
 
-        // Check for Identity Conflicts across the dual-namespace
-        const identityConflict = await User.findOne({
-            $or: [
-                { username: cleanHandle },
-                { streamerId: cleanStreamerId },
-                { phone: phone.trim() }
-            ],
-            isEmailVerified: true
-        });
+        // Check for specific Identity Conflicts
+        const userByUsername = await User.findOne({ username: cleanHandle, isEmailVerified: true });
+        if (userByUsername) return res.status(400).json({ msg: `Identity Conflict: Username '${username}' is already claimed by another node.` });
 
-        if (identityConflict) {
-            return res.status(400).json({ msg: "Identity Conflict: Username or Phone Number already claimed." });
-        }
+        const userByPhone = await User.findOne({ phone: phone.trim(), isEmailVerified: true });
+        if (userByPhone) return res.status(400).json({ msg: "Identity Conflict: Phone Number already registered to an active profile." });
 
         if (!securityRegex.test(password)) {
             return res.status(400).json({ msg: "Security Protocol: Password too weak." });
@@ -163,10 +156,16 @@ exports.verifyEmail = async (req, res) => {
             maxAge: 24 * 60 * 60 * 1000
         });
 
-        res.status(200).json({ token, user: { username: user.username } });
+        res.status(200).json({
+            token,
+            user: {
+                username: user.username,
+                subscription: user.subscription
+            }
+        });
     } catch (err) {
         console.error("VERIFY OTP ERROR:", err);
-        res.status(500).json({ msg: "Activation Handshake Error." });
+        res.status(500).json({ msg: "Activation Handshake Error: Identity verification sequence failed." });
     }
 };
 
@@ -177,13 +176,26 @@ exports.login = async (req, res) => {
         const { password } = req.body;
         const user = await User.findOne({ email });
 
-        if (!user || !user.password) return res.status(400).json({ msg: "Authentication Failed." });
+        if (!user || !user.password) return res.status(400).json({ msg: "Authentication Failed: Identity Node not found." });
 
         const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) return res.status(400).json({ msg: "Authentication Failed." });
+        if (!isMatch) return res.status(400).json({ msg: "Authentication Failed: Password protocol mismatch." });
 
-        // Changed as requested: Show "Account not exist" instead of verification prompt
-        if (!user.isEmailVerified) return res.status(401).json({ msg: "Account not exist. Signup/Create account" });
+        // ENHANCED: If not verified, trigger OTP re-transmission and signal frontend (206)
+        if (!user.isEmailVerified) {
+            const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+            if (!user.otp) user.otp = {};
+            user.otp.code = otpCode;
+            user.otp.expiresAt = Date.now() + 600000;
+            user.markModified('otp');
+            await user.save();
+            await sendOTPEmail(email, otpCode);
+
+            return res.status(206).json({
+                msg: "Identity Node exists but unverified. Re-transmitting OTP.",
+                email: user.email
+            });
+        }
 
         // FORTIFIED: Restrict Admins from using the public login surface
         if (user.role === 'admin') {
@@ -206,7 +218,13 @@ exports.login = async (req, res) => {
             sameSite: 'none',  // Required for cross-site communication
             maxAge: 24 * 60 * 60 * 1000
         });
-        res.json({ token, user: { username: user.username } });
+        res.json({
+            token,
+            user: {
+                username: user.username,
+                subscription: user.subscription
+            }
+        });
     } catch (err) {
         console.error("LOGIN CRASH LOG:", err);
         res.status(500).json({ msg: "Login Node Error.", error: err.message });

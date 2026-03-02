@@ -5,7 +5,6 @@ import PremiumAlertPreview from '../PremiumAlertPreview';
 import PremiumGoalOverlays from '../PremiumGoalOverlays';
 import CyberGoalBar from '../CyberGoalBar';
 import LiveThemeEngine from '../LiveThemeEngine';
-import CruiserRevenueChart from '../widgets/CruiserRevenueChart';
 
 const PREMIUM_GOAL_STYLES = [
     'black_hole', 'hex_core', 'rune_monolith', 'hologram_glitch',
@@ -107,34 +106,28 @@ const PremiumPreviewModal = ({ isOpen, onClose, item, onUnlock, theme }) => {
                                 {item.category === 'widgets' && (
                                     <div className="w-full flex flex-col items-center justify-center overflow-hidden">
                                         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.05)_0%,transparent_70%)] pointer-events-none" />
-                                        {item.id === 'wd4' ? (
-                                            <div className="transform scale-[1.2]">
-                                                <CruiserRevenueChart />
-                                            </div>
+                                        {PREMIUM_GOAL_STYLES.includes(item.id) ? (
+                                            <PremiumGoalOverlays
+                                                goal={{
+                                                    title: item.name,
+                                                    targetAmount: parseInt(item.price.replace('₹', '')) || 5000,
+                                                    currentProgress: (parseInt(item.price.replace('₹', '')) || 5000) * 0.75,
+                                                    stylePreference: item.id
+                                                }}
+                                                percentage={75}
+                                                isComplete={false}
+                                            />
                                         ) : (
-                                            PREMIUM_GOAL_STYLES.includes(item.id) ? (
-                                                <PremiumGoalOverlays
-                                                    goal={{
-                                                        title: item.name,
-                                                        targetAmount: parseInt(item.price.replace('₹', '')) || 5000,
-                                                        currentProgress: (parseInt(item.price.replace('₹', '')) || 5000) * 0.75,
-                                                        stylePreference: item.id
-                                                    }}
-                                                    percentage={75}
-                                                    isComplete={false}
-                                                />
-                                            ) : (
-                                                <CyberGoalBar
-                                                    goal={{
-                                                        title: item.name,
-                                                        targetAmount: parseInt(item.price.replace('₹', '')) || 5000,
-                                                        currentProgress: (parseInt(item.price.replace('₹', '')) || 5000) * 0.75
-                                                    }}
-                                                    percentage={75}
-                                                    isComplete={false}
-                                                    goalStylePreference={item.id}
-                                                />
-                                            )
+                                            <CyberGoalBar
+                                                goal={{
+                                                    title: item.name,
+                                                    targetAmount: parseInt(item.price.replace('₹', '')) || 5000,
+                                                    currentProgress: (parseInt(item.price.replace('₹', '')) || 5000) * 0.75
+                                                }}
+                                                percentage={75}
+                                                isComplete={false}
+                                                goalStylePreference={item.id}
+                                            />
                                         )}
                                     </div>
                                 )}

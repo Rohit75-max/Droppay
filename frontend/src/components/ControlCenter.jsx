@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { toast } from 'react-toastify';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Zap, Globe, Target, Save,
@@ -34,7 +35,7 @@ const ControlCenter = ({
   const jsonInputRef = useRef(null);
 
   // BASE URL for local environment
-  const BASE_URL = "http://localhost:3000";
+  const BASE_URL = window.location.origin;
 
   const getStudioStyle = () => {
     return 'bg-[var(--nexus-panel)] border-[var(--nexus-border)] text-[var(--nexus-text)] shadow-[var(--nexus-glow)] theme-card';
@@ -351,10 +352,10 @@ const ControlCenter = ({
               className="w-full"
             >
               <div className="w-full">
-                {/* TOP ROW: Calibration (Left) + Preview (Right) */}
-                <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 mb-8">
+                {/* TOP ROW: Calibration + Preview (Stacked Vertical) */}
+                <div className="flex flex-col gap-8 mb-8">
                   {/* LEFT: MISSION CALIBRATION */}
-                  <div className={`xl:col-span-5 relative p-6 md:p-8 rounded-[2rem] border bg-[var(--nexus-panel)] overflow-hidden shadow-2xl transition-all ${getStudioStyle()}`}>
+                  <div className={`w-full relative p-6 md:p-8 rounded-[2rem] border bg-[var(--nexus-panel)] overflow-hidden shadow-2xl transition-all ${getStudioStyle()}`}>
                     <div className="absolute -top-32 -left-32 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
                     <div className="relative z-10">
                       <div className="flex items-center gap-3 mb-8">
@@ -420,8 +421,8 @@ const ControlCenter = ({
                     </div>
                   </div>
 
-                  {/* RIGHT: STUDIO PREVIEW (COMPRESSED) */}
-                  <div className={`xl:col-span-7 p-6 md:p-8 rounded-[2rem] border transition-all flex flex-col shadow-2xl justify-between ${getStudioStyle()}`}>
+                  {/* RIGHT: STUDIO PREVIEW (FULL WIDTH) */}
+                  <div className={`w-full p-6 md:p-8 rounded-[2rem] border transition-all flex flex-col shadow-2xl justify-between ${getStudioStyle()}`}>
                     <div>
                       <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-3">
@@ -580,6 +581,7 @@ const ControlCenter = ({
                     { id: 'live_kawaii', label: 'SKY SANCTUARY', desc: 'Day/Night (Parallax).', icon: <Cloud className="w-6 h-6" />, color: '#a1c4fd', premium: true },
                     { id: 'live_dragon', label: 'DRAGON HOARD', desc: 'Mystic Runes (Ember).', icon: <Gem className="w-6 h-6" />, color: '#fbbf24', premium: true },
                     { id: 'midnight-obsidian', label: 'KINETIC OBSIDIAN', desc: 'Liquid gold accents, dark drift.', icon: <Layout className="w-6 h-6" />, color: '#F59E0B', premium: false },
+                    { id: 'uplink', label: 'ELITE UPLINK', desc: '2026 Protocol. Multi-layer glass.', icon: <Zap className="w-6 h-6" />, color: '#10B981', premium: false },
                   ].filter(t => !t.premium || (user?.unlockedNexusThemes || []).includes(t.id)).map((t) => {
                     const isSelected = nexusTheme === t.id;
                     const isHovered = hoveredTheme === t.id;
@@ -722,12 +724,8 @@ const ControlCenter = ({
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => {
-                      const newSticker = { emoji: '✨', lottieUrl: '', minAmount: 100 };
-                      if (updatePartnerPack) {
-                        updatePartnerPack([...partnerStickers, newSticker]);
-                        setEditingStickerIdx(partnerStickers.length);
-                        setTempStickerData(newSticker);
-                      }
+                      setEditingStickerIdx(-1);
+                      setTempStickerData({ emoji: '✨', lottieUrl: '', minAmount: 100 });
                     }}
                     className="p-8 rounded-[2rem] border-2 border-dashed flex flex-col items-center justify-center gap-4 transition-all border-[var(--nexus-border)] text-[var(--nexus-text-muted)] hover:border-indigo-500 hover:text-indigo-400 hover:bg-indigo-500/5 min-h-[160px]"
                   >
@@ -824,9 +822,15 @@ const ControlCenter = ({
                                   if (file) {
                                     const reader = new FileReader();
                                     reader.onload = (event) => {
-                                      setTempStickerData({ ...tempStickerData, lottieUrl: event.target.result });
+                                      try {
+                                        // Verify if it's valid JSON
+                                        JSON.parse(event.target.result);
+                                        setTempStickerData({ ...tempStickerData, lottieUrl: event.target.result });
+                                      } catch (e) {
+                                        toast.error("Invalid Lottie JSON file");
+                                      }
                                     };
-                                    reader.readAsDataURL(file);
+                                    reader.readAsText(file);
                                   }
                                 }}
                               />
@@ -879,10 +883,14 @@ const ControlCenter = ({
                           </button>
                           <button
                             onClick={() => {
-                              const newStickers = [...partnerStickers];
-                              newStickers[editingStickerIdx] = tempStickerData;
                               if (updatePartnerPack) {
-                                updatePartnerPack(newStickers);
+                                if (editingStickerIdx === -1) {
+                                  updatePartnerPack([...partnerStickers, tempStickerData]);
+                                } else {
+                                  const newStickers = [...partnerStickers];
+                                  newStickers[editingStickerIdx] = tempStickerData;
+                                  updatePartnerPack(newStickers);
+                                }
                               }
                               setEditingStickerIdx(null);
                             }}

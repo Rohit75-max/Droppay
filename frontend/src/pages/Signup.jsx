@@ -139,10 +139,12 @@ const Signup = () => {
     try {
       const res = await axios.post('/api/auth/signup', { ...formData, email: formData.email.trim().toLowerCase() });
       if (res.status === 201 || res.status === 206) {
-        setStep(2);
-        setResendTimer(60);
+        setStep(3); // Success/Redirect Step
+        setTimeout(() => {
+          window.location.href = '/login?new=true';
+        }, 3000);
       }
-    } catch (err) { setError(err.response?.data?.msg || 'Identity node connection failed.'); }
+    } catch (err) { setError(err.response?.data?.msg || 'Identity node connection failed: Network protocol mismatch.'); }
     finally { setLoading(false); }
   };
 
@@ -154,19 +156,22 @@ const Signup = () => {
       setResendTimer(60);
       setError('');
     } catch (err) {
-      setError('Retry protocol failed. Try again later.');
+      setError(err.response?.data?.msg || 'Retry protocol failed: Uplink unstable.');
     } finally {
       setLoading(false);
     }
   };
 
   const handleVerify = async () => {
+    // This is now legacy as verification happens at login, keeping for compatibility if routes exist
     const combined = otp.join('');
     if (combined.length < 6) return;
     setLoading(true); setError('');
     try {
       const res = await axios.post('/api/auth/verify-email', { email: formData.email.trim().toLowerCase(), otp: combined });
-      if (res.data.token) { localStorage.setItem('token', res.data.token); window.location.href = '/subscription'; }
+      if (res.status === 200) {
+        window.location.href = '/login';
+      }
     } catch (err) { setError(err.response?.data?.msg || 'Invalid Transmission Key.'); }
     finally { setLoading(false); }
   };
@@ -382,7 +387,7 @@ const Signup = () => {
                   <motion.button
                     whileHover={{ scale: 1.01 }}
                     whileTap={{ scale: 0.98 }}
-                    onClick={() => window.location.href = 'http://localhost:5001/api/auth/google'}
+                    onClick={() => window.location.href = `${process.env.REACT_APP_API_URL || 'http://localhost:5001'}/api/auth/google`}
                     className="flex items-center justify-center gap-3 w-full py-3 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 transition-all shadow-sm group"
                   >
                     <div className="w-5 h-5 flex items-center justify-center">
@@ -399,7 +404,7 @@ const Signup = () => {
                   </Link>
                 </div>
               </motion.div>
-            ) : (
+            ) : step === 2 ? (
               /* ── STEP 2: OTP ── */
               <motion.div key="otp" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
                 className="flex flex-col items-center text-center">
@@ -459,6 +464,35 @@ const Signup = () => {
                   className="mt-6 text-[10px] font-black uppercase text-slate-400 hover:text-emerald-600 transition-colors tracking-widest">
                   Edit Identity Details
                 </button>
+              </motion.div>
+            ) : (
+              /* ── STEP 3: SUCCESS REDIRECT ── */
+              <motion.div key="success" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+                className="flex flex-col items-center text-center">
+                <div className="w-20 h-20 bg-emerald-500/10 rounded-[2rem] flex items-center justify-center mb-8 border border-emerald-400/20 relative">
+                  <motion.div
+                    className="absolute inset-0 rounded-[2rem] border-2 border-emerald-500"
+                    initial={{ pathLength: 0, opacity: 0 }}
+                    animate={{ pathLength: 1, opacity: 1 }}
+                    transition={{ duration: 1.5, ease: "easeInOut" }}
+                  />
+                  <CheckCircle className="w-10 h-10 text-emerald-500" />
+                </div>
+
+                <h3 className="text-3xl font-black italic tracking-tighter text-slate-900 mb-2 leading-none uppercase">Node Initialized!</h3>
+                <p className="text-slate-400 text-sm font-medium mb-10 max-w-[280px]">
+                  Identity recorded in the Creator Protocol. Redirecting to the Secure Authorization Portal...
+                </p>
+
+                <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden mb-2">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: '100%' }}
+                    transition={{ duration: 3, ease: "linear" }}
+                    className="h-full bg-emerald-500"
+                  />
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500 animate-pulse">Establishing Connection...</span>
               </motion.div>
             )}
           </AnimatePresence>

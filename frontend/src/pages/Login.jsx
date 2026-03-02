@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from '../api/axios';
+import { syncTheme } from '../api/themeSync';
 import {
   Mail, Lock, Zap, Loader2, ArrowRight, ArrowLeft,
   Shield, AlertCircle, Eye, EyeOff, Users, Activity,
@@ -78,6 +79,17 @@ const Login = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [loginSuccess, setLoginSuccess] = useState(false);
+  const [step, setStep] = useState(1); // 1: Login, 2: OTP
+  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [resendTimer, setResendTimer] = useState(0);
+
+  useEffect(() => {
+    let interval;
+    if (resendTimer > 0) {
+      interval = setInterval(() => setResendTimer(prev => prev - 1), 1000);
+    }
+    return () => clearInterval(interval);
+  }, [resendTimer]);
 
   // Pre-fill remembered email
   useEffect(() => {
@@ -97,12 +109,85 @@ const Login = () => {
       });
       if (rememberMe) localStorage.setItem('rememberedEmail', formData.email.trim().toLowerCase());
       else localStorage.removeItem('rememberedEmail');
+
       localStorage.setItem('token', res.data.token);
+
+      // Sync theme preference immediately after successful login
+      syncTheme(res.data.user);
+
       setLoginSuccess(true);
-      setTimeout(() => { window.location.href = '/dashboard'; }, 1000);
+
+      const { subscription } = res.data.user;
+      setTimeout(() => {
+        if (subscription && subscription.status === 'active') {
+          window.location.href = '/dashboard';
+        } else {
+          window.location.href = '/subscription';
+        }
+      }, 1000);
     } catch (err) {
-      setError(err.response?.data?.msg || 'Identity node connection failed.');
+      if (err.response?.status === 206) {
+        setStep(2);
+        setResendTimer(60);
+      } else {
+        setError(err.response?.data?.msg || 'Matrix Connection Timeout: Node Unreachable.');
+      }
     } finally { setLoading(false); }
+  };
+
+  const handleOtpChange = (value, index) => {
+    if (/^[0-9]$/.test(value) || value === '') {
+      const next = [...otp]; next[index] = value; setOtp(next);
+      if (value && index < 5) document.getElementById(`otp-${index + 1}`)?.focus();
+    }
+  };
+
+  const handleKeyDown = (e, index) => {
+    if (e.key === 'Backspace' && index > 0 && !otp[index])
+      document.getElementById(`otp-${index - 1}`)?.focus();
+  };
+
+  const resendOtp = async () => {
+    if (resendTimer > 0) return;
+    setLoading(true);
+    try {
+      await axios.post('/api/auth/login', {
+        email: formData.email.trim().toLowerCase(),
+        password: formData.password
+      });
+      setResendTimer(60);
+      setError('');
+    } catch (err) {
+      setError('Retry protocol failed. Try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerify = async () => {
+    const combined = otp.join('');
+    if (combined.length < 6) return;
+    setLoading(true); setError('');
+    try {
+      const res = await axios.post('/api/auth/verify-email', { email: formData.email.trim().toLowerCase(), otp: combined });
+      if (res.data.token) {
+        localStorage.setItem('token', res.data.token);
+
+        // Sync theme preference immediately after successful verification
+        syncTheme(res.data.user);
+
+        setLoginSuccess(true);
+        const { subscription } = res.data.user;
+        setTimeout(() => {
+          if (subscription && subscription.status === 'active') {
+            window.location.href = '/dashboard';
+          } else {
+            window.location.href = '/subscription';
+          }
+        }, 1000);
+      }
+    } catch (err) { setError(err.response?.data?.msg || 'Invalid Transmission Key.'); }
+    finally { setLoading(false); }
   };
 
   return (
@@ -208,121 +293,182 @@ const Login = () => {
         </motion.div>
 
         {/* ── RIGHT — Login form (Static / Focused) ── */}
-        <div className="flex-1 flex flex-col justify-center p-6 sm:p-8 lg:p-12 bg-white relative z-10">
+        <div className="flex-1 flex flex-col justify-center p-6 sm:p-8 lg:p-12 bg-white relative z-10 overflow-y-auto">
+          <AnimatePresence mode="wait">
+            {step === 1 ? (
+              <motion.div key="login" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, x: -20 }}>
 
-          {/* Status strip */}
-          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
-            className="flex items-center justify-between mb-10">
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Creator Login</p>
-              <p className="text-[10px] text-slate-300 uppercase tracking-widest">Authorize your streaming node</p>
-            </div>
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-100 bg-slate-50">
-              <motion.div className={`w-1.5 h-1.5 rounded-full ${loginSuccess ? 'bg-emerald-400' : 'bg-amber-400'}`}
-                animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.5, repeat: Infinity }} />
-              <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">
-                {loginSuccess ? 'Authorized' : loading ? 'Verifying' : 'Ready'}
-              </span>
-            </div>
-          </motion.div>
+                {/* Status strip */}
+                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
+                  className="flex items-center justify-between mb-10">
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Creator Login</p>
+                    <p className="text-[10px] text-slate-300 uppercase tracking-widest">Authorize your streaming node</p>
+                  </div>
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-100 bg-slate-50">
+                    <motion.div className={`w-1.5 h-1.5 rounded-full ${loginSuccess ? 'bg-emerald-400' : 'bg-amber-400'}`}
+                      animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.5, repeat: Infinity }} />
+                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">
+                      {loginSuccess ? 'Authorized' : loading ? 'Verifying' : 'Ready'}
+                    </span>
+                  </div>
+                </motion.div>
 
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.55 }}>
-            <h3 className="text-3xl font-black italic tracking-tighter text-slate-900 mb-1 leading-none">Welcome back.</h3>
-            <p className="text-slate-400 text-sm font-medium mb-8">Authorize your streaming node to access DropPay.</p>
-          </motion.div>
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.55 }}>
+                  <h3 className="text-3xl font-black italic tracking-tighter text-slate-900 mb-1 leading-none">Welcome back.</h3>
+                  <p className="text-slate-400 text-sm font-medium mb-8">Authorize your streaming node to access DropPay.</p>
+                </motion.div>
 
-          {/* Error banner */}
-          <AnimatePresence>
-            {error && (
-              <motion.div key="error"
-                initial={{ opacity: 0, height: 0, marginBottom: 0 }}
-                animate={{ opacity: 1, height: 'auto', marginBottom: 20 }}
-                exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-                className="bg-rose-50 border border-rose-200 rounded-2xl p-4 flex gap-3 overflow-hidden">
-                <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
-                <p className="text-[11px] text-rose-600 font-bold">{error}</p>
+                {/* Error banner */}
+                <AnimatePresence>
+                  {error && (
+                    <motion.div key="error"
+                      initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+                      animate={{ opacity: 1, height: 'auto', marginBottom: 20 }}
+                      exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                      className="bg-rose-50 border border-rose-200 rounded-2xl p-4 flex gap-3 overflow-hidden">
+                      <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+                      <p className="text-[11px] text-rose-600 font-bold">{error}</p>
+                    </motion.div>
+                  )}
+                  {loginSuccess && (
+                    <motion.div key="success"
+                      initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+                      animate={{ opacity: 1, height: 'auto', marginBottom: 20 }}
+                      className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex items-center gap-3">
+                      <CheckCircle className="w-4 h-4 text-emerald-500" />
+                      <p className="text-[11px] text-emerald-700 font-bold">Node authorized — Connecting to dashboard...</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Form */}
+                <form onSubmit={handleLogin} className="space-y-5">
+                  <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
+                    <PremiumInput icon={Mail} label="Email Address" type="email" name="email"
+                      value={formData.email} onChange={handleChange} placeholder="you@example.com" />
+                  </motion.div>
+
+                  <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}>
+                    <PremiumInput icon={Lock} label="Password" type={showPassword ? 'text' : 'password'} name="password"
+                      value={formData.password} onChange={handleChange} placeholder="••••••••••••••••"
+                      rightEl={
+                        <button type="button" onClick={() => setShowPassword(v => !v)} tabIndex={-1}
+                          className="text-slate-300 hover:text-emerald-500 transition-colors">
+                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      }
+                    />
+                  </motion.div>
+
+                  {/* Remember me + forgot */}
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.75 }}
+                    className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest">
+                    <label className="flex items-center gap-2 text-slate-400 cursor-pointer hover:text-emerald-600 transition-colors">
+                      <input type="checkbox" checked={rememberMe} onChange={() => setRememberMe(v => !v)}
+                        className="accent-emerald-500 w-3.5 h-3.5 rounded" />
+                      Remember Node
+                    </label>
+                    <Link to="/forgot-password" className="text-emerald-500 hover:text-emerald-600 transition-colors">
+                      Lost Access?
+                    </Link>
+                  </motion.div>
+
+                  {/* Submit */}
+                  <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }}>
+                    <motion.button type="submit" disabled={loading || loginSuccess}
+                      whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.985 }}
+                      className="relative w-full overflow-hidden py-4 rounded-2xl font-black uppercase tracking-widest text-[13px] flex items-center justify-center gap-3 transition-all
+                                bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-emerald-500/20 shadow-xl
+                                disabled:from-slate-100 disabled:to-slate-100 disabled:text-slate-300 disabled:cursor-not-allowed">
+                      <motion.div className="absolute inset-0 -skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                        animate={{ x: ['-200%', '200%'] }}
+                        transition={{ duration: 2.5, repeat: Infinity, ease: 'linear', repeatDelay: 3 }} />
+                      {loginSuccess ? <><CheckCircle className="w-5 h-5" /> Authorized</>
+                        : loading ? <><Loader2 className="w-5 h-5 animate-spin" /> Verifying...</>
+                          : <>Authorize <ArrowRight className="w-4 h-4" /></>}
+                    </motion.button>
+                  </motion.div>
+                </form>
+
+                {/* Divider */}
+                <div className="flex items-center gap-3 my-6">
+                  <div className="flex-1 h-px bg-slate-100" />
+                  <span className="text-[9px] text-slate-300 uppercase tracking-widest">or</span>
+                  <div className="flex-1 h-px bg-slate-100" />
+                </div>
+
+                {/* Init new account */}
+                <Link to="/signup"
+                  className="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-2xl border border-slate-200 bg-slate-50 hover:bg-emerald-50 hover:border-emerald-300 text-slate-500 hover:text-emerald-600 transition-all text-[10px] font-black uppercase tracking-widest">
+                  <Shield className="w-3.5 h-3.5" /> Initialize New Account
+                </Link>
+
+                {/* Admin portal link */}
+                <div className="mt-4 text-center">
+                  <Link to="/admin/login"
+                    className="text-[9px] font-black uppercase tracking-[0.35em] text-slate-300 hover:text-emerald-500 transition-colors">
+                    Secure Admin Portal →
+                  </Link>
+                </div>
               </motion.div>
-            )}
-            {loginSuccess && (
-              <motion.div key="success"
-                initial={{ opacity: 0, height: 0, marginBottom: 0 }}
-                animate={{ opacity: 1, height: 'auto', marginBottom: 20 }}
-                className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex items-center gap-3">
-                <CheckCircle className="w-4 h-4 text-emerald-500" />
-                <p className="text-[11px] text-emerald-700 font-bold">Node authorized — Connecting to dashboard...</p>
+            ) : (
+              /* ── STEP 2: OTP (Inline for unverified users) ── */
+              <motion.div key="otp" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                className="flex flex-col items-center text-center">
+
+                <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.4 }}
+                  className="w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center mb-5 border border-emerald-400/20">
+                  <Shield className="w-7 h-7 text-emerald-500 animate-pulse" />
+                </motion.div>
+
+                <h3 className="text-2xl font-black italic tracking-tighter text-slate-900 mb-1 leading-none">Confirm Identity.</h3>
+                <p className="text-slate-400 text-sm font-medium mb-1">Authorization code sent to your mail node:</p>
+                <p className="text-emerald-600 font-black text-sm mb-6">{formData.email}</p>
+
+                {error && (
+                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="w-full bg-rose-50 border border-rose-200 rounded-2xl p-3 mb-6 flex gap-2">
+                    <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+                    <p className="text-[11px] text-rose-600 font-bold">{error}</p>
+                  </motion.div>
+                )}
+
+                {/* OTP boxes */}
+                <div className="flex justify-center gap-2 mb-8">
+                  {otp.map((digit, index) => (
+                    <input key={index} id={`otp-${index}`}
+                      type="text" maxLength="1" value={digit}
+                      onChange={(e) => handleOtpChange(e.target.value, index)}
+                      onKeyDown={(e) => handleKeyDown(e, index)}
+                      className={`w-10 h-13 sm:w-12 sm:h-15 text-center text-xl font-black rounded-xl border-2 transition-all outline-none
+                                            bg-slate-50 text-slate-900
+                                            ${digit ? 'border-emerald-400 bg-emerald-50' : 'border-slate-200 focus:border-emerald-400'}`}
+                    />
+                  ))}
+                </div>
+
+                <motion.button onClick={handleVerify} disabled={loading || otp.join('').length < 6}
+                  whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.985 }}
+                  className={`relative w-full py-4 rounded-xl font-black uppercase tracking-widest text-[12px] flex items-center justify-center gap-3 transition-all
+                                    ${otp.join('').length === 6
+                      ? 'bg-gradient-to-r from-emerald-600 to-emerald-500 text-white'
+                      : 'bg-slate-50 text-slate-300 border border-slate-100 cursor-not-allowed'}`}>
+                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle className="w-5 h-5" />}
+                  Verify & Continue
+                </motion.button>
+
+                <button onClick={resendOtp} disabled={loading || resendTimer > 0}
+                  className={`mt-6 text-[9px] font-black uppercase transition-colors tracking-widest ${resendTimer > 0 ? 'text-slate-300' : 'text-emerald-600 hover:text-emerald-500'}`}>
+                  {resendTimer > 0 ? `Retry in ${resendTimer}s` : 'Resend Code'}
+                </button>
+
+                <button onClick={() => setStep(1)}
+                  className="mt-4 text-[9px] font-black uppercase text-slate-400 hover:text-slate-600 tracking-widest">
+                  Back to Login
+                </button>
               </motion.div>
             )}
           </AnimatePresence>
-
-          {/* Form */}
-          <form onSubmit={handleLogin} className="space-y-5">
-            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
-              <PremiumInput icon={Mail} label="Email Address" type="email" name="email"
-                value={formData.email} onChange={handleChange} placeholder="you@example.com" />
-            </motion.div>
-
-            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}>
-              <PremiumInput icon={Lock} label="Password" type={showPassword ? 'text' : 'password'} name="password"
-                value={formData.password} onChange={handleChange} placeholder="••••••••••••••••"
-                rightEl={
-                  <button type="button" onClick={() => setShowPassword(v => !v)} tabIndex={-1}
-                    className="text-slate-300 hover:text-emerald-500 transition-colors">
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                }
-              />
-            </motion.div>
-
-            {/* Remember me + forgot */}
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.75 }}
-              className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest">
-              <label className="flex items-center gap-2 text-slate-400 cursor-pointer hover:text-emerald-600 transition-colors">
-                <input type="checkbox" checked={rememberMe} onChange={() => setRememberMe(v => !v)}
-                  className="accent-emerald-500 w-3.5 h-3.5 rounded" />
-                Remember Node
-              </label>
-              <Link to="/forgot-password" className="text-emerald-500 hover:text-emerald-600 transition-colors">
-                Lost Access?
-              </Link>
-            </motion.div>
-
-            {/* Submit */}
-            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }}>
-              <motion.button type="submit" disabled={loading || loginSuccess}
-                whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.985 }}
-                className="relative w-full overflow-hidden py-4 rounded-2xl font-black uppercase tracking-widest text-[13px] flex items-center justify-center gap-3 transition-all
-                                bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-emerald-500/20 shadow-xl
-                                disabled:from-slate-100 disabled:to-slate-100 disabled:text-slate-300 disabled:cursor-not-allowed">
-                <motion.div className="absolute inset-0 -skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                  animate={{ x: ['-200%', '200%'] }}
-                  transition={{ duration: 2.5, repeat: Infinity, ease: 'linear', repeatDelay: 3 }} />
-                {loginSuccess ? <><CheckCircle className="w-5 h-5" /> Authorized</>
-                  : loading ? <><Loader2 className="w-5 h-5 animate-spin" /> Verifying...</>
-                    : <>Authorize <ArrowRight className="w-4 h-4" /></>}
-              </motion.button>
-            </motion.div>
-          </form>
-
-          {/* Divider */}
-          <div className="flex items-center gap-3 my-6">
-            <div className="flex-1 h-px bg-slate-100" />
-            <span className="text-[9px] text-slate-300 uppercase tracking-widest">or</span>
-            <div className="flex-1 h-px bg-slate-100" />
-          </div>
-
-          {/* Init new account */}
-          <Link to="/signup"
-            className="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-2xl border border-slate-200 bg-slate-50 hover:bg-emerald-50 hover:border-emerald-300 text-slate-500 hover:text-emerald-600 transition-all text-[10px] font-black uppercase tracking-widest">
-            <Shield className="w-3.5 h-3.5" /> Initialize New Account
-          </Link>
-
-          {/* Admin portal link */}
-          <div className="mt-4 text-center">
-            <Link to="/admin/login"
-              className="text-[9px] font-black uppercase tracking-[0.35em] text-slate-300 hover:text-emerald-500 transition-colors">
-              Secure Admin Portal →
-            </Link>
-          </div>
         </div>
       </motion.div>
     </div >
