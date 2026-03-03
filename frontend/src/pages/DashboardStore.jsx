@@ -85,7 +85,11 @@ const PREMIUM_ALERTS = [
     { id: 'plinko_drop', name: 'Plinko Drop', theme: 'Arcade Physics', basePrice: 8999, color: 'text-indigo-400' },
 ];
 
-const PREMIUM_WIDGETS = [];
+const PREMIUM_WIDGETS = [
+    { id: 'neural_profile', name: 'Neural Profile', description: 'Aero-Glass Identity Node widget with holographic avatar.', basePrice: 1500, color: 'text-blue-500' },
+    { id: 'atomic_balance', name: 'Atomic Balance', description: 'Liquid floating balance core with dynamic 3D physics.', basePrice: 2000, color: 'text-emerald-500' },
+    { id: 'elite_nexus', name: 'Elite Nexus', description: 'Interactive horizontal glass carousel for social rank.', basePrice: 2500, color: 'text-indigo-500' },
+];
 
 const DashboardStore = ({ theme, user, setUser }) => {
     const [isProcessing, setIsProcessing] = useState(false);

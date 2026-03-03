@@ -280,7 +280,10 @@ exports.purchaseNexusTheme = async (req, res) => {
 
 // ==================== WIDGET PURCHASE ====================
 const WIDGET_CATALOG = {
-    wd4: { name: 'Midnight Cruiser Matrix', price: 12000 }
+    wd4: { name: 'Midnight Cruiser Matrix', price: 12000 },
+    neural_profile: { name: 'Neural Profile (Identity Node)', price: 1500 },
+    atomic_balance: { name: 'Atomic Balance (Revenue Node)', price: 2000 },
+    elite_nexus: { name: 'Elite Nexus (Social Node)', price: 2500 }
 };
 
 exports.purchaseWidget = async (req, res) => {

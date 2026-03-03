@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const User = require('../models/User');
 const Drop = require('../models/Drop');
 const PlatformMetrics = require('../models/PlatformMetrics');
+const { invalidateProfileCache } = require('../middleware/profileCache');
 const TugOfWarEvent = require('../models/TugOfWarEvent');
 
 const razorpay = new Razorpay({
@@ -184,7 +185,8 @@ exports.getRecentDrops = async (req, res) => {
 
         const history = await Drop.find({
             streamerId: user.streamerId,
-            $or: [{ status: 'completed' }, { isTest: true }]
+            status: 'completed',
+            isTest: { $ne: true }
         }).sort({ createdAt: -1 }).limit(50);
         res.json(history);
     } catch (error) { res.status(500).send(); }
@@ -199,7 +201,7 @@ exports.getTopDonors = async (req, res) => {
         if (user.security?.accountStatus?.isBanned) return res.status(403).json({ msg: "Node Suspended" });
 
         const topDonors = await Drop.aggregate([
-            { $match: { streamerId: user.streamerId, $or: [{ status: 'completed' }, { isTest: true }] } },
+            { $match: { streamerId: user.streamerId, status: 'completed', isTest: { $ne: true } } },
             { $group: { _id: "$donorName", totalAmount: { $sum: "$amount" } } },
             { $sort: { totalAmount: -1 } },
             { $limit: 10 }
@@ -369,6 +371,9 @@ exports.verifySubscription = async (req, res) => {
                 "subscription.status": "active"
             }
         });
+
+        // CRITICAL: Invalidate profile cache so the dashboard sees the new tier instantly
+        await invalidateProfileCache(userId);
 
         // Enterprise Ledger Extraction (Subscription MRR)
         const priceMap = { starter: 699, pro: 1499, legend: 2499 };

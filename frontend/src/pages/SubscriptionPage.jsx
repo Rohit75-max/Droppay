@@ -65,7 +65,7 @@ const PlanCard = ({ plan, index, isActive, isThisLoading, discounted, onClick, o
       initial={{ opacity: 0, y: 32 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-      className={`relative group cursor-pointer rounded-[2.5rem] md:rounded-[3.5rem] p-6 sm:p-8 md:p-10 flex flex-col transition-all duration-700 overflow-hidden border
+      className={`relative group cursor-pointer rounded-[2.5rem] md:rounded-[3.5rem] p-5 sm:p-8 md:p-10 flex flex-col transition-all duration-700 overflow-hidden border
       ${plan.popular ? 'ring-2 ring-emerald-500/30' : ''}
       ${plan.id === 'legend' ? 'md:col-span-2 lg:col-span-1' : ''}
       ${isActive
@@ -109,16 +109,16 @@ const PlanCard = ({ plan, index, isActive, isThisLoading, discounted, onClick, o
       </div>
 
       <div className="relative z-10 pt-4">
-        <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-10 transition-all duration-700 ${isActive ? `bg-${accent === 'emerald' ? 'emerald-500' : accent === 'amber' ? 'amber-500' : 'slate-500'}/20 border border-${accent === 'emerald' ? 'emerald-500' : accent === 'amber' ? 'amber-500' : 'slate-500'}/30 shadow-2xl shadow-${accent === 'emerald' ? 'emerald-500' : accent === 'amber' ? 'amber-500' : 'slate-500'}/20 animate-pulse` : 'bg-white/5 border border-white/10'}`}>
-          <plan.icon className={`w-8 h-8 ${isActive ? `text-${accent === 'emerald' ? 'emerald-400' : accent === 'amber' ? 'amber-400' : 'slate-400'}` : 'text-white/20'}`} />
+        <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center mb-10 transition-all duration-700 ${isActive ? `bg-${accent === 'emerald' ? 'emerald-500' : accent === 'amber' ? 'amber-500' : 'slate-500'}/20 border border-${accent === 'emerald' ? 'emerald-500' : accent === 'amber' ? 'amber-500' : 'slate-500'}/30 shadow-2xl shadow-${accent === 'emerald' ? 'emerald-500' : accent === 'amber' ? 'amber-500' : 'slate-500'}/20 animate-pulse` : 'bg-white/5 border border-white/10'}`}>
+          <plan.icon className={`w-7 h-7 sm:w-8 sm:h-8 ${isActive ? `text-${accent === 'emerald' ? 'emerald-400' : accent === 'amber' ? 'amber-400' : 'slate-400'}` : 'text-white/20'}`} />
         </div>
 
-        <h3 className={`text-2xl md:text-3xl font-black italic uppercase tracking-tighter mb-1.5 transition-colors duration-500 ${isActive ? 'text-white' : 'text-white/40'}`}>
+        <h3 className={`text-xl sm:text-2xl md:text-3xl font-black italic uppercase tracking-tighter mb-1.5 transition-colors duration-500 ${isActive ? 'text-white' : 'text-white/40'}`}>
           {plan.name}
         </h3>
 
         <div className="flex items-baseline gap-2 mb-10">
-          <span className={`text-4xl sm:text-5xl md:text-6xl font-black italic tracking-tighter ${isActive ? 'text-white text-shadow-glow' : 'text-white/60'}`}>
+          <span className={`text-3xl sm:text-5xl md:text-6xl font-black italic tracking-tighter ${isActive ? 'text-white text-shadow-glow' : 'text-white/60'}`}>
             ₹{discounted.toLocaleString('en-IN')}
           </span>
           <span className="text-white/20 text-[9px] sm:text-[11px] font-black uppercase tracking-widest italic">/ lifecycle</span>
@@ -127,21 +127,21 @@ const PlanCard = ({ plan, index, isActive, isThisLoading, discounted, onClick, o
         <div className={`space-y-4 mb-8 transition-all duration-700 ${isActive ? 'opacity-100' : 'opacity-20'}`}>
           {plan.features.map((feature, i) => (
             <div key={i} className={`flex items-center gap-4 transition-all duration-700 ${isActive ? 'text-white/90 translate-x-1' : ''}`}>
-              <feature.icon className={`w-5 h-5 shrink-0 ${isActive ? `text-${accent === 'emerald' ? 'emerald-500' : accent === 'amber' ? 'amber-500' : 'slate-500'}` : 'text-white/10'}`} />
-              <span className="text-[11px] font-black uppercase tracking-[0.15em]">{feature.text}</span>
+              <feature.icon className={`w-4 h-4 sm:w-5 sm:h-5 shrink-0 ${isActive ? `text-${accent === 'emerald' ? 'emerald-500' : accent === 'amber' ? 'amber-500' : 'slate-500'}` : 'text-white/10'}`} />
+              <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-[0.15em]">{feature.text}</span>
             </div>
           ))}
         </div>
 
         {/* Technical Specifications Grid */}
-        <div className={`grid grid-cols-2 gap-3 mb-10 p-5 rounded-3xl border transition-all duration-700 ${isActive ? 'bg-white/[0.03] border-white/10 opacity-100' : 'bg-transparent border-transparent opacity-0 translate-y-4'}`}>
+        <div className={`grid grid-cols-2 gap-3 mb-10 p-4 sm:p-5 rounded-3xl border transition-all duration-700 ${isActive ? 'bg-white/[0.03] border-white/10 opacity-100' : 'bg-transparent border-transparent opacity-0 translate-y-4'}`}>
           {plan.specs.map((spec, i) => (
             <div key={i} className="flex flex-col gap-1">
               <div className="flex items-center gap-2 opacity-40">
-                <spec.icon className="w-3 h-3" />
+                <spec.icon className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                 <span className="text-[8px] font-black uppercase tracking-widest">{spec.label}</span>
               </div>
-              <span className="text-[10px] font-black text-white/80 tracking-tight italic">{spec.value}</span>
+              <span className="text-[9px] sm:text-[10px] font-black text-white/80 tracking-tight italic">{spec.value}</span>
             </div>
           ))}
         </div>
@@ -149,7 +149,7 @@ const PlanCard = ({ plan, index, isActive, isThisLoading, discounted, onClick, o
         <button
           onClick={(e) => { e.stopPropagation(); onSubscribe(plan.id); }}
           disabled={isThisLoading}
-          className={`group/btn relative w-full py-6 rounded-[2.5rem] font-black uppercase italic text-[13px] tracking-[0.4em] transition-all duration-500 flex justify-center items-center gap-4 overflow-hidden border-2
+          className={`group/btn relative w-full py-5 sm:py-6 rounded-[2.5rem] font-black uppercase italic text-[11px] sm:text-[13px] tracking-[0.3em] sm:tracking-[0.4em] transition-all duration-500 flex justify-center items-center gap-4 overflow-hidden border-2
             ${isActive
               ? `bg-${accent === 'emerald' ? 'emerald-500' : accent === 'amber' ? 'amber-500' : 'slate-500'} text-white border-transparent shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5),var(--tw-shadow-colored)] ${plan.glow}`
               : 'bg-white/5 text-white/40 border-white/5 hover:bg-white/10 hover:text-white hover:border-white/20 hover:shadow-2xl hover:shadow-white/5'}`}
@@ -158,7 +158,7 @@ const PlanCard = ({ plan, index, isActive, isThisLoading, discounted, onClick, o
             className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000 ease-in-out"
             style={{ skewX: '-20deg' }}
           />
-          {isThisLoading ? <Loader2 className="animate-spin w-6 h-6" /> : <>Initialize Uplink <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-2 transition-transform duration-500" /></>}
+          {isThisLoading ? <Loader2 className="animate-spin w-5 h-5 sm:w-6 sm:h-6" /> : <>Initialize Uplink <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover/btn:translate-x-2 transition-transform duration-500" /></>}
         </button>
       </div>
     </motion.div>
@@ -368,7 +368,7 @@ const SubscriptionPage = () => {
         <div className="absolute inset-0 opacity-[0.05] mix-blend-overlay pointer-events-none" style={{ backgroundImage: 'url("https://grainy-gradients.vercel.app/noise.svg")' }} />
       </div>
 
-      <main className="flex-1 w-full max-w-[1600px] mx-auto px-4 sm:px-8 md:px-20 overflow-y-auto no-scrollbar relative z-10 pb-24 pt-20 md:pt-12">
+      <main className="flex-1 w-full max-w-[1600px] mx-auto px-3 sm:px-8 md:px-20 overflow-y-auto no-scrollbar relative z-10 pb-24 pt-20 md:pt-12">
         <div className="absolute top-6 left-4 sm:top-12 sm:left-8 md:left-20">
           <button
             onClick={() => navigate('/')}
@@ -383,11 +383,11 @@ const SubscriptionPage = () => {
           <motion.div
             initial={{ opacity: 0, y: -30 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col items-center gap-3 sm:gap-5 mb-10 md:mb-12"
+            className="flex flex-col items-center gap-3 sm:gap-5 mb-10 md:mb-12 w-full"
           >
-            <div className={`transition-all duration-1000 ${accent === 'amber' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20 shadow-[0_0_40px_rgba(245,158,11,0.15)]' : accent === 'slate' ? 'bg-slate-500/10 text-slate-400 border-slate-500/20 shadow-[0_0_40px_rgba(100,116,139,0.15)]' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 shadow-[0_0_40px_rgba(16,185,129,0.15)]'} px-6 py-3 md:px-10 md:py-3.5 rounded-2xl text-[10px] sm:text-[12px] font-black uppercase tracking-[0.4em] sm:tracking-[0.6em] border flex items-center gap-4 backdrop-blur-xl group`}>
+            <div className={`transition-all duration-1000 ${accent === 'amber' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20 shadow-[0_0_40px_rgba(245,158,11,0.15)]' : accent === 'slate' ? 'bg-slate-500/10 text-slate-400 border-slate-500/20 shadow-[0_0_40px_rgba(100,116,139,0.15)]' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 shadow-[0_0_40px_rgba(16,185,129,0.15)]'} px-4 py-3 md:px-10 md:py-3.5 rounded-2xl text-[9px] sm:text-[12px] font-black uppercase tracking-[0.3em] sm:tracking-[0.6em] border flex items-center gap-3 sm:gap-4 backdrop-blur-xl group`}>
               <div className="relative">
-                <Zap className={`w-5 h-5 md:w-6 md:h-6 ${accent === 'amber' ? 'fill-amber-500' : accent === 'slate' ? 'fill-slate-500' : 'fill-emerald-500'}`} />
+                <Zap className={`w-4 h-4 sm:w-6 sm:h-6 ${accent === 'amber' ? 'fill-amber-500' : accent === 'slate' ? 'fill-slate-500' : 'fill-emerald-500'}`} />
                 <motion.div
                   animate={{ opacity: [0, 1, 0], scale: [0.8, 1.2, 0.8] }}
                   transition={{ duration: 2, repeat: Infinity }}
@@ -396,12 +396,12 @@ const SubscriptionPage = () => {
               </div>
               <span className="relative z-10">7-Day Trial Protocol Active</span>
               <div className="h-4 w-[1px] bg-white/10" />
-              <Sparkles className="w-5 h-5 md:w-6 md:h-6 animate-spin-slow text-white/40" />
+              <Sparkles className="w-4 h-4 sm:w-6 sm:h-6 animate-spin-slow text-white/40" />
             </div>
 
-            <div className="flex items-center gap-4 text-amber-500 font-mono text-[10px] md:text-[11px] font-black bg-black/40 border border-amber-500/30 px-6 py-3 md:px-8 md:py-3 rounded-2xl tracking-[0.3em] uppercase shadow-[0_10px_30px_rgba(0,0,0,0.5)] backdrop-blur-md relative overflow-hidden group">
+            <div className="flex items-center gap-3 sm:gap-4 text-amber-500 font-mono text-[9px] md:text-[11px] font-black bg-black/40 border border-amber-500/30 px-5 py-3 md:px-8 md:py-3 rounded-2xl tracking-[0.2em] sm:tracking-[0.3em] uppercase shadow-[0_10px_30px_rgba(0,0,0,0.5)] backdrop-blur-md relative overflow-hidden group">
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-500/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-              <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse mr-1" />
+              <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-amber-500 animate-pulse mr-1" />
               Node Activation Window: <span className="text-white ml-1">{String(timeLeft.hours).padStart(2, '0')}:{String(timeLeft.minutes).padStart(2, '0')}:{String(timeLeft.seconds).padStart(2, '0')}</span>
             </div>
           </motion.div>
@@ -409,7 +409,7 @@ const SubscriptionPage = () => {
           <motion.h1
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-black italic uppercase mb-8 md:mb-12 leading-[0.85] tracking-tighter"
+            className="text-3xl sm:text-6xl md:text-8xl lg:text-9xl font-black italic uppercase mb-8 md:mb-12 leading-[0.85] tracking-tighter"
           >
             Secure <span className={`text-transparent bg-clip-text bg-gradient-to-br transition-all duration-1000 drop-shadow-[0_0_30px_rgba(255,255,255,0.1)] ${selectedPlan === 'legend' ? 'from-amber-200 via-amber-400 to-amber-600' : selectedPlan === 'starter' ? 'from-slate-200 via-slate-400 to-slate-600' : 'from-emerald-200 via-emerald-400 to-emerald-600'}`}>
               Your Uplink.
@@ -430,8 +430,8 @@ const SubscriptionPage = () => {
             )}
           </AnimatePresence>
 
-          {/* Premium Physical Switcher */}
-          <div className="relative p-2 md:p-3 rounded-[3rem] md:rounded-[4rem] bg-black/60 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.8)] flex gap-2 overflow-hidden backdrop-blur-2xl max-w-full group">
+          {/* Premium Physical Switcher - Overhauled for Responsiveness */}
+          <div className="relative p-1.5 md:p-3 rounded-[3rem] md:rounded-[4rem] bg-black/60 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.8)] flex gap-1 sm:gap-2 overflow-hidden backdrop-blur-2xl w-full sm:w-auto group">
             <div className="absolute inset-0 bg-gradient-to-br from-white/[0.05] to-transparent pointer-events-none" />
             {[
               { m: 1, label: 'Monthly', color: 'bg-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.4)]' },
@@ -441,7 +441,7 @@ const SubscriptionPage = () => {
               <button
                 key={item.m}
                 onClick={() => setBillingCycle(item.m)}
-                className={`relative z-10 px-6 sm:px-12 py-4 sm:py-6 rounded-[2.5rem] md:rounded-[3.5rem] text-[9px] sm:text-[12px] font-black uppercase tracking-[0.25em] sm:tracking-[0.35em] transition-all duration-700 flex flex-col items-center min-w-[100px] sm:min-w-[160px] md:min-w-[240px]
+                className={`relative z-10 flex-1 sm:flex-none px-3 sm:px-12 py-3 sm:py-6 rounded-[2.5rem] md:rounded-[3.5rem] text-[8px] sm:text-[12px] font-black uppercase tracking-[0.2em] sm:tracking-[0.35em] transition-all duration-700 flex flex-col items-center sm:min-w-[160px] md:min-w-[240px]
                     ${billingCycle === item.m ? 'text-white' : 'text-white/20 hover:text-white/50'}`}
               >
                 {billingCycle === item.m && (
@@ -455,7 +455,7 @@ const SubscriptionPage = () => {
                   {item.label}
                 </span>
                 {item.disc && (
-                  <span className={`relative z-10 text-[7px] sm:text-[10px] mt-1 font-black italic tracking-widest ${billingCycle === item.m ? 'text-white/90' : 'text-emerald-500/60'}`}>
+                  <span className={`relative z-10 text-[6px] sm:text-[10px] mt-0.5 sm:mt-1 font-black italic tracking-widest ${billingCycle === item.m ? 'text-white/90' : 'text-emerald-500/60'}`}>
                     {item.disc}
                   </span>
                 )}
@@ -563,7 +563,7 @@ const SubscriptionPage = () => {
         </footer>
       </main>
 
-      <style jsx>{`
+      <style>{`
         .text-shadow-glow {
           text-shadow: 0 0 20px rgba(255,255,255,0.3);
         }

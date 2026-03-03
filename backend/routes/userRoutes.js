@@ -54,7 +54,7 @@ router.get('/profile', auth, cacheProfile, async (req, res) => {
     try {
         const user = await User.findById(req.user.id).select('-password');
         if (!user) return res.status(404).json({ msg: 'User not found' });
-        res.set('Cache-Control', 'private, max-age=30, stale-while-revalidate=60');
+        res.set('Cache-Control', 'private, no-cache, no-store, must-revalidate');
         res.json(user);
     } catch (err) {
         res.status(500).json({ msg: 'Server Error' });

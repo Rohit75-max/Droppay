@@ -1,23 +1,24 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Zap, ChevronRight,
   Play, Wand2, Sparkles, Trophy, Globe, Layers, Cpu, Radio,
   ArrowRight, Menu, X, Banknote, Landmark, Rocket,
-  Instagram, Twitter, Target, CheckCircle2, Monitor, Smartphone, PlaySquare, Heart, Github, Linkedin, Layout, User, Shield, BarChart3
+  Instagram, Twitter, Target, CheckCircle2, Monitor, Smartphone, PlaySquare, Heart, Github, Linkedin, Layout, User, Shield, BarChart3,
+  Lock, ShieldCheck
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-
-// --- Protocol Imports ---
-import AlertPreview from '../components/AlertPreview';
+// NOTE: react-toastify CSS is already imported in App.js — do NOT import again here
 import SocketModal from '../components/SocketModal';
 import { getOptimizedImage } from '../protocol/cdnHelper';
 import DonationTicker from '../components/widgets/DonationTicker';
 import ThemeToggle from '../components/ThemeToggle';
 import { useTheme } from '../context/ThemeContext';
 import { Player } from '@lottiefiles/react-lottie-player';
+
+// --- Lazy-loaded heavy components (deferred ~74KB from initial bundle) ---
+const AlertPreview = lazy(() => import('../components/AlertPreview'));
 
 const Home = () => {
   const navigate = useNavigate();
@@ -114,14 +115,14 @@ const Home = () => {
   }, [alertVariants, activeAlert, calcAmount, goalTarget]);
 
 
-  // --- Heartbeat Protocol ---
+  // --- Heartbeat Protocol (reduced from 2s to 3.5s to ease main thread) ---
   useEffect(() => {
-    const syncTimer = setInterval(() => setIsSynced(prev => !prev), 2000);
+    const syncTimer = setInterval(() => setIsSynced(prev => !prev), 3500);
 
     return () => {
       clearInterval(syncTimer);
     };
-  }, [triggerDemo]);
+  }, []);
 
   const streamerCut = useMemo(() => (calcAmount * 0.95).toLocaleString('en-IN'), [calcAmount]);
   const platformFee = useMemo(() => (calcAmount * 0.05).toLocaleString('en-IN'), [calcAmount]);
@@ -982,23 +983,25 @@ const Home = () => {
                           className="w-full flex items-center justify-center overflow-hidden h-[160px] sm:h-auto relative"
                         >
                           <div className="w-[320px] sm:w-full transform scale-[0.6] min-[400px]:scale-[0.7] sm:scale-100 origin-center absolute sm:relative">
-                            <AlertPreview
-                              stylePreference={alertVariants[activeAlert]}
-                              donorName={activeAlert === 2 ? 'Apex Shooter' : activeAlert === 1 ? 'Street Legend' : 'Retro Gamer'}
-                              amount={calcAmount}
-                              message={
-                                activeAlert === 2 ? "Airdrop secured! 🪂" :
-                                  activeAlert === 1 ? "Respect +100 verified!" :
-                                    "Pixel loot collected! 🪙"
-                              }
-                              theme={theme}
-                              sticker={
-                                activeAlert === 2 ? 'fire_rocket' :
-                                  activeAlert === 1 ? 'diamond_gem' :
-                                    'coins'
-                              }
-                              hideSticker={true}
-                            />
+                            <Suspense fallback={<div className="h-[150px] w-full rounded-3xl bg-white/5 animate-pulse" />}>
+                              <AlertPreview
+                                stylePreference={alertVariants[activeAlert]}
+                                donorName={activeAlert === 2 ? 'Apex Shooter' : activeAlert === 1 ? 'Street Legend' : 'Retro Gamer'}
+                                amount={calcAmount}
+                                message={
+                                  activeAlert === 2 ? "Airdrop secured! 🪂" :
+                                    activeAlert === 1 ? "Respect +100 verified!" :
+                                      "Pixel loot collected! 🪙"
+                                }
+                                theme={theme}
+                                sticker={
+                                  activeAlert === 2 ? 'fire_rocket' :
+                                    activeAlert === 1 ? 'diamond_gem' :
+                                      'coins'
+                                }
+                                hideSticker={true}
+                              />
+                            </Suspense>
                           </div>
                         </motion.div>
                       )}
@@ -1554,7 +1557,6 @@ const Home = () => {
           </AnimatePresence>
         </motion.div>
 
-        {/* Removed Generic Grid */}
       </section>
 
 
@@ -1869,133 +1871,164 @@ const Home = () => {
       </section>
 
 
-      {/* --- WORLD-CLASS PREMIUM FOOTER --- */}
-      <footer id="footer" className={`relative border-t overflow-hidden transition-colors duration-500 ${theme === 'dark' ? 'border-white/[0.06] bg-[#050505]' : 'border-slate-100 bg-white'}`}>
+      {/* --- WORLD-CLASS PREMIUM PROTOCOL FOOTER --- */}
+      <footer id="footer" className={`relative border-t overflow-hidden transition-colors duration-500 ${theme === 'dark' ? 'border-white/[0.08] bg-[#050505]/80 backdrop-blur-3xl' : 'border-slate-100 bg-white/80 backdrop-blur-3xl'}`}>
 
-        {/* Glow Orbs — Glassmorphism background */}
-        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-[#10B981]/[0.08] blur-[120px] rounded-full pointer-events-none md:opacity-50" />
-        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-blue-500/[0.08] blur-[100px] rounded-full pointer-events-none md:opacity-50" />
+        {/* Dynamic Glow Orbs - Aero-Glass Signature */}
+        <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-[#10B981]/[0.1] blur-[140px] rounded-full pointer-events-none animate-pulse" />
+        <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-blue-500/[0.1] blur-[120px] rounded-full pointer-events-none animate-pulse" style={{ animationDelay: '1s' }} />
 
-        <div className="max-w-[1280px] mx-auto px-6 pt-12 md:pt-20 pb-12 relative z-10">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-16 lg:gap-24">
+        <div className="max-w-[1440px] mx-auto px-6 pt-16 md:pt-24 pb-12 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24">
 
             {/* BRAND & MISSION HUB */}
-            <div className="md:col-span-4 space-y-10">
-              <div className="space-y-6">
-                <div className="flex items-center gap-3 cursor-pointer group" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#10B981] to-[#059669] p-[1.5px] transition-transform duration-500 group-hover:scale-110">
+            <div className="lg:col-span-4 space-y-12">
+              <div className="space-y-8">
+                <div className="flex items-center gap-4 cursor-pointer group" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#10B981] via-[#059669] to-[#047857] p-[2px] transition-all duration-700 group-hover:rotate-[15deg] group-hover:scale-110 shadow-[0_0_30px_rgba(16,185,129,0.3)]">
                     <div className={`w-full h-full rounded-[14px] flex items-center justify-center ${theme === 'dark' ? 'bg-[#0a0a0b]' : 'bg-white'}`}>
-                      <Zap className="w-6 h-6 text-[#10B981] fill-[#10B981]" />
+                      <Zap className="w-7 h-7 text-[#10B981] fill-[#10B981] group-hover:animate-pulse" />
                     </div>
                   </div>
-                  <span className={`text-2xl font-black italic tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-                    Drop<span className="text-[#10B981]">Pay</span>
+                  <span className={`text-3xl font-black italic tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'} group-hover:text-[#10B981] transition-colors`}>
+                    Drop<span className="text-[#10B981] drop-shadow-[0_0_10px_rgba(16,185,129,0.4)]">Pay</span>
                   </span>
                 </div>
-                <p className="text-slate-500 text-sm font-medium leading-[1.8] max-w-sm">
-                  The professional-grade monetisation engine for creators, streamers, and live broadcasters. Built for high-frequency nodes and zero-latency transmission.
+                <p className="text-slate-500 text-sm font-bold italic leading-[1.8] max-w-sm">
+                  The professional-grade monetisation engine for creators, streamers, and live broadcasters. Deployed for high-frequency nodes and zero-latency transmission.
                 </p>
               </div>
 
-              {/* Social Channels */}
+              {/* Enhanced Social Channels */}
               <div className="flex gap-4">
                 {[Twitter, Instagram, Github, Linkedin].map((Icon, i) => (
-                  <button key={i} className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all border ${theme === 'dark' ? 'bg-white/5 border-white/5 hover:border-[#10B981]/40 text-slate-400 hover:text-white' : 'bg-slate-50 border-slate-200 hover:border-[#10B981]/40 text-slate-600 hover:text-[#10B981]'
+                  <button key={i} className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 border relative group shadow-sm ${theme === 'dark'
+                    ? 'bg-white/5 border-white/5 hover:border-[#10B981]/60 text-slate-400 hover:text-white hover:bg-[#10B981]/5 hover:shadow-[0_0_20px_rgba(16,185,129,0.2)]'
+                    : 'bg-slate-50 border-slate-200 hover:border-[#10B981]/60 text-slate-600 hover:text-[#10B981] hover:bg-emerald-50 hover:shadow-[0_0_20px_rgba(16,185,129,0.1)]'
                     }`}>
-                    <Icon className="w-4.5 h-4.5" />
+                    <Icon className="w-5 h-5 group-hover:scale-110 transition-transform" />
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* NAV MATRIX */}
-            <div className="md:col-span-5 grid grid-cols-3 gap-x-4 gap-y-10 md:gap-8">
-              <div className="space-y-8">
-                <p className={`text-[10px] font-black uppercase tracking-[0.3em] ${theme === 'dark' ? 'text-white/40' : 'text-slate-400'}`}>System</p>
-                <div className="flex flex-col gap-5">
+            {/* NAV MATRIX - Responsive 3-col on all screens */}
+            <div className="lg:col-span-5 grid grid-cols-3 gap-x-4 gap-y-8 sm:gap-x-8 sm:gap-y-10 md:gap-10">
+              <div className="space-y-5 sm:space-y-8">
+                <p className={`text-sm sm:text-xl font-black italic uppercase tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'} flex items-center gap-1 sm:gap-2`}>
+                  System <div className="h-[2px] w-4 sm:w-8 bg-[#10B981]/40" />
+                </p>
+                <div className="flex flex-col gap-3 sm:gap-6">
                   {['Features', 'Pricing', 'Dashboard', 'Overlays'].map(item => (
-                    <button key={item} className="text-slate-500 hover:text-[#10B981] text-xs font-bold transition-all text-left w-fit hover:translate-x-1">{item}</button>
+                    <button key={item} className="group flex items-center gap-1 sm:gap-2 text-slate-500 hover:text-[#10B981] text-[10px] sm:text-[13px] font-black uppercase tracking-widest transition-all text-left">
+                      <span className="w-0 group-hover:w-2 h-[2px] bg-[#10B981] transition-all shrink-0" />
+                      {item}
+                    </button>
                   ))}
                 </div>
               </div>
-              <div className="space-y-8">
-                <p className={`text-[10px] font-black uppercase tracking-[0.3em] ${theme === 'dark' ? 'text-white/40' : 'text-slate-400'}`}>Protocol</p>
-                <div className="flex flex-col gap-5">
+              <div className="space-y-5 sm:space-y-8">
+                <p className={`text-sm sm:text-xl font-black italic uppercase tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'} flex items-center gap-1 sm:gap-2`}>
+                  Protocol <div className="h-[2px] w-4 sm:w-8 bg-[#10B981]/40" />
+                </p>
+                <div className="flex flex-col gap-3 sm:gap-6">
                   {['API Docs', 'Status', 'Security', 'Changelog'].map(item => (
-                    <button key={item} className="text-slate-500 hover:text-[#10B981] text-xs font-bold transition-all text-left w-fit hover:translate-x-1">{item}</button>
+                    <button key={item} className="group flex items-center gap-1 sm:gap-2 text-slate-500 hover:text-[#10B981] text-[10px] sm:text-[13px] font-black uppercase tracking-widest transition-all text-left">
+                      <span className="w-0 group-hover:w-2 h-[2px] bg-[#10B981] transition-all shrink-0" />
+                      {item}
+                    </button>
                   ))}
                 </div>
               </div>
-              <div className="space-y-8">
-                <p className={`text-[10px] font-black uppercase tracking-[0.3em] ${theme === 'dark' ? 'text-white/40' : 'text-slate-400'}`}>Legal</p>
-                <div className="flex flex-col gap-5">
+              <div className="space-y-5 sm:space-y-8">
+                <p className={`text-sm sm:text-xl font-black italic uppercase tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'} flex items-center gap-1 sm:gap-2`}>
+                  Legal <div className="h-[2px] w-4 sm:w-8 bg-[#10B981]/40" />
+                </p>
+                <div className="flex flex-col gap-3 sm:gap-6">
                   {['Privacy', 'Terms', 'Refunds', 'Contact'].map(item => (
-                    <button key={item} className="text-slate-500 hover:text-[#10B981] text-xs font-bold transition-all text-left w-fit hover:translate-x-1">{item}</button>
+                    <button key={item} className="group flex items-center gap-1 sm:gap-2 text-slate-500 hover:text-[#10B981] text-[10px] sm:text-[13px] font-black uppercase tracking-widest transition-all text-left">
+                      <span className="w-0 group-hover:w-2 h-[2px] bg-[#10B981] transition-all shrink-0" />
+                      {item}
+                    </button>
                   ))}
                 </div>
               </div>
             </div>
 
-            {/* NEWSLETTER NODE */}
-            <div className="md:col-span-3 space-y-8">
-              <div className="space-y-3">
-                <p className={`text-[10px] font-black uppercase tracking-[0.3em] ${theme === 'dark' ? 'text-white/40' : 'text-slate-400'}`}>Stay Synced</p>
-                <p className="text-slate-500 text-xs font-medium leading-relaxed">
+            {/* NEWSLETTER NODE - World-Class CTA */}
+            <div className="lg:col-span-3 space-y-10">
+              <div className="space-y-4 text-center lg:text-left">
+                <p className={`text-xl font-black italic uppercase tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Stay Synced</p>
+                <p className="text-slate-500 text-sm font-bold italic leading-relaxed">
                   Join 5,000+ creators getting weekly protocol updates.
                 </p>
               </div>
-              <form onSubmit={handleSubscribe} className="relative group">
+              <form onSubmit={handleSubscribe} className="relative group/form">
                 <input
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   type="email"
                   required
-                  placeholder="Enter email node..."
-                  className={`w-full px-6 py-5 rounded-2xl text-xs font-bold outline-none border transition-all ${theme === 'dark'
-                    ? 'bg-white/5 border-white/5 focus:border-[#10B981]/50 text-white'
-                    : 'bg-white border-slate-200 focus:border-[#10B981]/50 text-slate-900 shadow-sm'
+                  placeholder="SUBSCRIPTION_EMAIL_NODE..."
+                  className={`w-full px-7 py-6 rounded-[2rem] text-xs font-black uppercase tracking-widest italic outline-none border transition-all duration-500 ${theme === 'dark'
+                    ? 'bg-white/5 border-white/5 focus:border-[#10B981]/60 text-white shadow-inner focus:shadow-[0_0_30px_rgba(16,185,129,0.1)]'
+                    : 'bg-white border-slate-200 focus:border-[#10B981]/60 text-slate-900 shadow-sm'
                     }`}
                 />
                 <button
                   type="submit"
                   disabled={subscribing}
-                  className={`absolute right-2.5 top-2.5 bottom-2.5 px-5 rounded-xl transition-all flex items-center justify-center ${subscribing ? 'opacity-50 cursor-not-allowed' : 'bg-[#10B981] hover:bg-[#059669] text-white shadow-lg shadow-[#10B981]/20 hover:scale-105 active:scale-95'
+                  className={`absolute right-3 top-3 bottom-3 px-8 rounded-2xl transition-all duration-500 flex items-center justify-center font-black uppercase italic tracking-widest text-[10px] ${subscribing
+                    ? 'opacity-50 cursor-not-allowed'
+                    : 'bg-gradient-to-br from-[#10B981] to-[#059669] text-white shadow-xl shadow-[#10B981]/25 hover:shadow-[#10B981]/40 hover:scale-[1.05] active:scale-95'
                     }`}
                 >
-                  {subscribing ? <Cpu className="w-5 h-5 animate-spin" /> : <ArrowRight className="w-5 h-5" />}
+                  {subscribing ? <Cpu className="w-5 h-5 animate-spin" /> : <>Join Now <ArrowRight className="w-4 h-4 ml-2" /></>}
                 </button>
               </form>
-              <div className="flex items-center gap-2.5 p-4 rounded-2xl bg-white/[0.02] border border-white/5">
-                <Shield className="w-4 h-4 text-[#10B981]" />
-                <p className="text-[10px] text-slate-500 font-medium italic">
-                  End-to-end encrypted subscription protocol.
+              <div className={`flex items-center gap-4 p-5 rounded-[1.5rem] border transition-all duration-500 ${theme === 'dark' ? 'bg-white/[0.03] border-white/5 hover:border-[#10B981]/20' : 'bg-emerald-50 border-emerald-100'}`}>
+                <Shield className="w-5 h-5 text-[#10B981]" />
+                <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest italic">
+                  End-to-end encrypted protocol.
                 </p>
               </div>
             </div>
           </div>
 
-          {/* DIVIDER */}
-          <div className={`h-px w-full mt-12 md:mt-24 mb-12 ${theme === 'dark' ? 'bg-gradient-to-r from-transparent via-white/5 to-transparent' : 'bg-gradient-to-r from-transparent via-slate-200 to-transparent'}`} />
+          {/* DIVIDER - Cybernetic Line */}
+          <div className="relative mt-16 md:mt-24 mb-16">
+            <div className={`h-px w-full ${theme === 'dark' ? 'bg-gradient-to-r from-transparent via-white/10 to-transparent' : 'bg-gradient-to-r from-transparent via-slate-200 to-transparent'}`} />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-[#10B981] blur-md opacity-50" />
+          </div>
 
-          {/* SOCKET BAR */}
-          <div className="flex flex-col lg:flex-row justify-between items-center gap-10">
-            <div className="flex flex-col md:flex-row items-center gap-6 md:gap-10">
-              <p className="text-slate-600 text-[10px] font-black uppercase tracking-[0.25em] opacity-80">
-                © 2026 DROPPAY TECHNOLOGIES. DEPLOYED WITH SECURE NODES.
+          {/* SYSTEM STATUS BAR (SOCKET BAR) */}
+          <div className="flex flex-col lg:flex-row justify-between items-center gap-12">
+            <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
+              <p className="text-slate-600 text-[10px] font-black uppercase tracking-[0.3em] opacity-80 italic">
+                © 2026 DROPPAY ARCHITECTURE. ALL RIGHTS RESERVED.
               </p>
-              <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-[#10B981]/5 border border-[#10B981]/10 text-[10px] text-[#10B981] font-black uppercase tracking-widest whitespace-nowrap">
-                <div className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
-                BUILT IN INDIA 🇮🇳
+              <div className="flex items-center gap-4 px-6 py-3 rounded-2xl bg-white/5 border border-white/10 shadow-lg backdrop-blur-md group">
+                <div className="relative">
+                  <div className="w-2.5 h-2.5 rounded-full bg-[#10B981] animate-pulse" />
+                  <div className="absolute inset-0 w-2.5 h-2.5 rounded-full bg-[#10B981] animate-ping opacity-50" />
+                </div>
+                <span className="text-[11px] text-[#10B981] font-black uppercase tracking-[0.4em] italic group-hover:drop-shadow-[0_0_8px_#10B981] transition-all">BUILT IN INDIA 🇮🇳</span>
               </div>
             </div>
 
             {/* Regulatory Logos / Payment Sync Status */}
-            <div className="flex items-center gap-8 opacity-40">
-              <div className="h-5 w-px bg-slate-500 hidden lg:block" />
-              <div className="flex items-center gap-6">
-                <p className="text-[10px] text-slate-500 font-black tracking-widest uppercase">RAZORPAY SECURE</p>
-                <div className="w-1.5 h-1.5 rounded-full bg-slate-500" />
-                <p className="text-[10px] text-slate-500 font-black tracking-widest uppercase">256-BIT SSL</p>
+            <div className="flex items-center gap-10">
+              <div className="h-6 w-px bg-white/10 hidden lg:block" />
+              <div className="flex items-center gap-8 font-mono">
+                <div className="flex items-center gap-3">
+                  <Lock className="w-3.5 h-3.5 text-slate-500" />
+                  <p className="text-[10px] text-slate-500 font-black tracking-[0.2em] uppercase italic">RAZORPAY_SECURE</p>
+                </div>
+                <div className="w-1.5 h-1.5 rounded-full bg-[#10B981]/30" />
+                <div className="flex items-center gap-3">
+                  <ShieldCheck className="w-3.5 h-3.5 text-slate-500" />
+                  <p className="text-[10px] text-slate-500 font-black tracking-[0.2em] uppercase italic">256-BIT_ENCRYPTION</p>
+                </div>
               </div>
             </div>
           </div>

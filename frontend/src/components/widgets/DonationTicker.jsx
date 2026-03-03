@@ -39,17 +39,9 @@ const stickerFallback = {
 const TickerItem = ({ donation }) => {
     return (
         <div className="flex items-center gap-4 px-10 shrink-0 whitespace-nowrap">
+            {/* Use emoji fallback in ticker — saves 5+ Lottie network requests on page load */}
             <div className="w-9 h-9 shrink-0 flex items-center justify-center pointer-events-none drop-shadow-md">
-                {(LOTTIE_STICKER_MAP[donation.sticker] || (typeof donation.sticker === 'string' && donation.sticker.startsWith('http')) || donation.stickerUrl) ? (
-                    <Player
-                        autoplay
-                        loop
-                        src={LOTTIE_STICKER_MAP[donation.sticker] || donation.sticker || donation.stickerUrl}
-                        style={{ width: '36px', height: '36px' }}
-                    />
-                ) : (
-                    <span className="text-xl drop-shadow-sm">{stickerFallback[donation.sticker] || '💎'}</span>
-                )}
+                <span className="text-xl drop-shadow-sm">{stickerFallback[donation.sticker] || stickerFallback[donation.stickerUrl] || '💎'}</span>
             </div>
 
             <span className="text-[var(--nexus-accent)] font-black text-[10px] uppercase tracking-[0.2em] shrink-0">{donation.donorName}</span>

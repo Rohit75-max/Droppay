@@ -50,7 +50,7 @@ const cacheProfile = async (req, res, next) => {
         const cached = await client.get(cacheKey);
         if (cached) {
             // Cache HIT: respond immediately, skip MongoDB
-            res.set('Cache-Control', 'private, max-age=30, stale-while-revalidate=60');
+            res.set('Cache-Control', 'private, no-cache, no-store, must-revalidate');
             res.set('X-Cache', 'HIT');
             return res.json(JSON.parse(cached));
         }
