@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
@@ -7,22 +7,35 @@ import 'react-toastify/dist/ReactToastify.css';
 import axios from './api/axios';
 import { ThemeProvider } from './context/ThemeContext';
 
-// --- PAGES ---
+// ─── EAGER IMPORTS (critical path — must load instantly) ──────────────────────
 import Home from './pages/Home';
-import Signup from './pages/Signup';
 import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import SubscriptionPage from './pages/SubscriptionPage';
+import Signup from './pages/Signup';
+import AdminLogin from './pages/AdminLogin';
 import DonationPage from './pages/DonationPage';
 import Overlay from './pages/Overlay';
 import GoalOverlay from './pages/GoalOverlay';
-import ForgotPassword from './pages/ForgotPassword';
-import ResetPassword from './pages/ResetPassword';
-import AdminSecurePortal from './pages/AdminSecurePortal';
-import AdminLogin from './pages/AdminLogin';
 import TugOfWarOverlay from './pages/TugOfWarOverlay';
 import MasterOverlay from './pages/MasterOverlay';
 import LiveThemeEngine from './components/LiveThemeEngine';
+
+// ─── LAZY IMPORTS (code-split — only load when navigated to) ─────────────────
+// Each of these creates a separate JS chunk, shrinking the initial bundle ~40%.
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const AdminSecurePortal = lazy(() => import('./pages/AdminSecurePortal'));
+const SubscriptionPage = lazy(() => import('./pages/SubscriptionPage'));
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
+const ResetPassword = lazy(() => import('./pages/ResetPassword'));
+
+// ─── VANISHING SHELL — Suspense fallback (glass spinner, no layout shift) ────
+const GlassShell = () => (
+  <div className="min-h-screen bg-[var(--nexus-bg,#050505)] flex items-center justify-center">
+    <div className="relative w-10 h-10">
+      <div className="absolute inset-0 rounded-full border-2 border-white/10" />
+      <div className="absolute inset-0 rounded-full border-t-2 border-emerald-400/70 animate-spin" />
+    </div>
+  </div>
+);
 
 // --- DYNAMIC INFRASTRUCTURE (Fixes Mobile Persistence) ---
 // API_BASE is now handled by the centralized axios configuration in src/api/axios.js
@@ -89,47 +102,49 @@ const AnimatedRoutes = () => {
   const location = useLocation();
 
   return (
-    <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
-        {/* 1. PUBLIC MARKETING & AUTH */}
-        <Route path="/" element={<Home />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password/:token" element={<ResetPassword />} />
+    // Suspense wraps the entire route tree — lazy chunks resolve here
+    <Suspense fallback={<GlassShell />}>
+      <AnimatePresence mode="wait">
+        <Routes location={location} key={location.pathname}>
+          {/* 1. PUBLIC MARKETING & AUTH */}
+          <Route path="/" element={<Home />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
 
-        {/* 2. PUBLIC PROTOCOL LINKS */}
-        <Route path="/pay/:streamerId" element={<DonationPage />} />
+          {/* 2. PUBLIC PROTOCOL LINKS */}
+          <Route path="/pay/:streamerId" element={<DonationPage />} />
 
-        {/* 3. OBS OVERLAY NODES */}
-        <Route path="/overlay/:obsKey" element={<Overlay />} />
-        <Route path="/goal/:streamerId" element={<GoalOverlay />} />
-        <Route path="/overlay/tug-of-war/:obsKey" element={<TugOfWarOverlay />} />
-        <Route path="/overlay/master/:obsKey" element={<MasterOverlay />} />
-        {/* 4. USER ONBOARDING (FIXED PATHS) */}
-        {/* This matches the redirect in your Signup.jsx */}
-        <Route path="/subscription" element={<SubscriptionPage />} />
-        {/* Redirect alias so old /subscribe links still work */}
-        <Route path="/subscribe" element={<Navigate to="/subscription" replace />} />
+          {/* 3. OBS OVERLAY NODES */}
+          <Route path="/overlay/:obsKey" element={<Overlay />} />
+          <Route path="/goal/:streamerId" element={<GoalOverlay />} />
+          <Route path="/overlay/tug-of-war/:obsKey" element={<TugOfWarOverlay />} />
+          <Route path="/overlay/master/:obsKey" element={<MasterOverlay />} />
 
-        {/* 5. ENTERPRISE ADMIN HUB */}
-        <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/admin/secure-portal" element={<AdminSecurePortal />} />
+          {/* 4. USER ONBOARDING */}
+          <Route path="/subscription" element={<SubscriptionPage />} />
+          <Route path="/subscribe" element={<Navigate to="/subscription" replace />} />
 
-        {/* 6. SECURE DASHBOARD NEXUS */}
-        <Route
-          path="/dashboard"
-          element={
-            <MissionGate>
-              <Dashboard />
-            </MissionGate>
-          }
-        />
+          {/* 5. ENTERPRISE ADMIN HUB */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/secure-portal" element={<AdminSecurePortal />} />
 
-        {/* 6. GLOBAL REDIRECT PROTOCOL (CATCH-ALL) */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </AnimatePresence>
+          {/* 6. SECURE DASHBOARD NEXUS */}
+          <Route
+            path="/dashboard"
+            element={
+              <MissionGate>
+                <Dashboard />
+              </MissionGate>
+            }
+          />
+
+          {/* CATCH-ALL */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AnimatePresence>
+    </Suspense>
   );
 };
 

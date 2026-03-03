@@ -110,7 +110,7 @@ const UserSchema = new mongoose.Schema({
     expiryDate: { type: Date }
   },
 
-  nexusTheme: { type: String, enum: ['void', 'cyber', 'aero', 'kawaii', 'arcade', 'bgmi', 'live_space', 'live_erangel', 'live_cyber', 'live_synthwave', 'live_kawaii', 'live_dragon', 'aero-light', 'nebula-void', 'alabaster-pulse', 'midnight-obsidian', 'kawaii-desk', 'bgmi-tactical', 'uplink'], default: 'void' },
+  nexusTheme: { type: String, enum: ['void', 'cyber', 'aero', 'kawaii', 'arcade', 'bgmi', 'live_space', 'live_erangel', 'live_cyber', 'live_synthwave', 'live_kawaii', 'live_dragon', 'aero-light', 'nebula-void', 'alabaster-pulse', 'midnight-obsidian', 'kawaii-desk', 'bgmi-tactical', 'uplink'], default: 'void', index: true }, // ADDED: Fast bulk theme lookups at 50k+ scale
   nexusThemeMode: { type: String, enum: ['dark', 'light'], default: 'dark' },
   unlockedNexusThemes: [{ type: String }], // ADDED: Tracks Elite workspace themes purchased from Store
   ownedWidgets: [{ type: String }], // ADDED: Tracks premium dashboard widgets purchased from Store

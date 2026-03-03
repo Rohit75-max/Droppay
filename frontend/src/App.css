@@ -32,7 +32,34 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
+}
+
+/* ─── ANTIGRAVITY GPU ACCELERATION ─────────────────────────────────────────── */
+
+/**
+ * .racer-car / .racer-bike
+ * Promote overlay race elements to their own GPU compositor layers.
+ * will-change: transform tells the browser to pre-allocate GPU memory
+ * so animations run at 60fps without per-frame CPU compositing cost.
+ * offset-distance is included because these elements use CSS Motion Path.
+ */
+.racer-car,
+.racer-bike {
+  will-change: transform, offset-distance;
+}
+
+/**
+ * .nexus-glass-card
+ * Force hardware acceleration for all glassmorphism cards.
+ * translateZ(0) triggers GPU layer promotion on WebKit/Blink,
+ * eliminating the "Glass Tax" lag caused by backdrop-filter
+ * being recalculated on the CPU every frame.
+ */
+.nexus-glass-card {
+  transform: translateZ(0);
+  will-change: transform;
 }
