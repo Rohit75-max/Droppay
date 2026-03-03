@@ -259,7 +259,7 @@ const Dashboard = () => {
     return () => socket.disconnect();
   }, [user?.obsKey]);
 
-  const updateGoalSettings = async (overrideData) => {
+  const updateGoalSettings = useCallback(async (overrideData) => {
     setIsUpdatingGoal(true);
     try {
       const token = localStorage.getItem('token');
@@ -275,9 +275,9 @@ const Dashboard = () => {
     } finally {
       setIsUpdatingGoal(false);
     }
-  };
+  }, [fetchProfileData, goalForm]);
 
-  const saveAlertSettings = async (newConfig) => {
+  const saveAlertSettings = useCallback(async (newConfig) => {
     try {
       const token = localStorage.getItem('token');
       await axios.post('/api/user/update-profile',
@@ -288,17 +288,14 @@ const Dashboard = () => {
     } catch (err) {
       console.error("Failed to sync overlay settings", err);
     }
-  };
+  }, []);
 
-  const saveNexusTheme = async (newTheme) => {
+  const saveNexusTheme = useCallback(async (newTheme) => {
     try {
-      // Standardized Theme Sync
       const { mode } = syncTheme({ nexusTheme: newTheme });
-
       setNexusTheme(newTheme);
       setTheme(mode);
       setUser(prev => ({ ...prev, nexusTheme: newTheme, nexusThemeMode: mode }));
-
       const token = localStorage.getItem('token');
       await axios.post(`/api/user/update-profile`,
         { nexusTheme: newTheme, nexusThemeMode: mode },
@@ -307,7 +304,7 @@ const Dashboard = () => {
     } catch (err) {
       console.error("Failed to sync nexus theme", err);
     }
-  };
+  }, []);
 
   const equipAsset = async (category, assetId) => {
     try {

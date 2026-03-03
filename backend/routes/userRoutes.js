@@ -4,6 +4,7 @@ const auth = require('../middleware/auth');
 const User = require('../models/User');
 const { addBankAccount } = require('../controllers/onboardingController');
 const { requestWithdrawal, purchasePremiumStyle, purchasePremiumAlert, purchaseNexusTheme, purchaseWidget, equipWidget, equipAsset, createStoreOrder, verifyStorePayment } = require('../controllers/userController');
+const { cacheProfile, invalidateProfileCache } = require('../middleware/profileCache');
 // @route   POST api/user/add-bank-account
 router.post('/add-bank-account', auth, addBankAccount);
 
@@ -44,11 +45,12 @@ router.post('/create-store-order', auth, createStoreOrder);
 router.post('/verify-store-payment', auth, verifyStorePayment);
 
 // @route   GET api/user/profile
+// PERF: cacheProfile checks Redis first (30s TTL). Cache HIT = zero MongoDB queries.
 // PERF: Cache-Control prevents redundant DB hits when Dashboard mounts.
 // private: user-specific data (no CDN caching).
 // max-age=30: browser reuses this for 30s without a new request.
 // stale-while-revalidate=60: serve stale cache while fetching fresh in background.
-router.get('/profile', auth, async (req, res) => {
+router.get('/profile', auth, cacheProfile, async (req, res) => {
     try {
         const user = await User.findById(req.user.id).select('-password');
         if (!user) return res.status(404).json({ msg: 'User not found' });

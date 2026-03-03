@@ -188,12 +188,21 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 sm:p-6 font-sans overflow-hidden">
+    <div className={`min-h-screen flex items-center justify-center p-4 sm:p-6 font-sans overflow-hidden transition-colors duration-500 ${isDark ? 'bg-[#030a06]' : 'bg-slate-50'}`}>
 
-      {/* Soft background blobs */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden text-[#10B981]">
-        <div className="absolute top-[-20%] right-[-10%] w-[550px] h-[550px] rounded-full bg-emerald-100/60 blur-[120px]" />
-        <div className="absolute bottom-[-20%] left-[-10%] w-[450px] h-[450px] rounded-full bg-cyan-100/50 blur-[100px]" />
+      {/* Background blobs — dark or light */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        {isDark ? (
+          <>
+            <div className="absolute top-[-20%] right-[-10%] w-[550px] h-[550px] rounded-full bg-emerald-900/30 blur-[120px]" />
+            <div className="absolute bottom-[-20%] left-[-10%] w-[450px] h-[450px] rounded-full bg-cyan-900/20 blur-[100px]" />
+          </>
+        ) : (
+          <>
+            <div className="absolute top-[-20%] right-[-10%] w-[550px] h-[550px] rounded-full bg-emerald-100/60 blur-[120px]" />
+            <div className="absolute bottom-[-20%] left-[-10%] w-[450px] h-[450px] rounded-full bg-cyan-100/50 blur-[100px]" />
+          </>
+        )}
       </div>
 
       {/* ── MAIN SHELL ── */}
@@ -304,10 +313,10 @@ const Login = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     <ThemeToggle size="sm" />
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-100 bg-slate-50">
+                    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border transition-colors duration-500 ${isDark ? 'border-white/10 bg-white/5' : 'border-slate-100 bg-slate-50'}`}>
                       <motion.div className={`w-1.5 h-1.5 rounded-full ${loginSuccess ? 'bg-emerald-400' : 'bg-amber-400'}`}
                         animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.5, repeat: Infinity }} />
-                      <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">
+                      <span className={`text-[9px] font-black uppercase tracking-widest transition-colors ${isDark ? 'text-white/40' : 'text-slate-400'}`}>
                         {loginSuccess ? 'Authorized' : loading ? 'Verifying' : 'Ready'}
                       </span>
                     </div>
