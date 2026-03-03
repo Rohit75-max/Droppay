@@ -2,7 +2,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Wallet, BarChart3, Target, TrendingUp, Loader2, Zap, Activity, Send, ShieldCheck, IndianRupee, MessageSquare, Sparkles,
-  CheckCircle, Award, Trophy, User, Crown, Smile, Volume2, Lock, UserCircle, Gift
+  CheckCircle, Trophy, User, Crown, Smile, Volume2, Lock, UserCircle, Gift
 } from 'lucide-react';
 import CyberGoalBar from './CyberGoalBar';
 import PremiumGoalOverlays from './PremiumGoalOverlays';
