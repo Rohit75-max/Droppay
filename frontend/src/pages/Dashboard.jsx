@@ -182,6 +182,13 @@ const Dashboard = () => {
         return;
       }
 
+      if (err.response?.status === 401 || err.response?.status === 404) {
+        console.warn("Auth failure in profile fetch, navigating to login.");
+        localStorage.removeItem('token');
+        navigate('/login');
+        return;
+      }
+
       setError("Uplink Failure: Node connection lost.");
       setLoading(false);
     }

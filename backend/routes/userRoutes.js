@@ -53,7 +53,7 @@ router.post('/verify-store-payment', auth, verifyStorePayment);
 router.get('/profile', auth, cacheProfile, async (req, res) => {
     try {
         const user = await User.findById(req.user.id).select('-password');
-        if (!user) return res.status(404).json({ msg: 'User not found' });
+        if (!user) return res.status(401).json({ msg: 'Session invalid: user entry not found. Please log in again.' });
         res.set('Cache-Control', 'private, no-cache, no-store, must-revalidate');
         res.json(user);
     } catch (err) {
