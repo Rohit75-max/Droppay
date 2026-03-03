@@ -522,7 +522,7 @@ const Dashboard = () => {
 
       <div className="flex flex-col md:flex-row w-full h-full relative z-10 overflow-hidden">
         {/* SIDEBAR — Theme-Aware Control Pillar */}
-        <aside className={`md:flex hidden w-20 hover:w-64 group transition-all duration-500 flex-col py-8 border-r basis-auto shrink-0 overflow-y-auto custom-scrollbar bg-[var(--nexus-panel)]/40 backdrop-blur-3xl border-[var(--nexus-border)]/50 z-[120] ${theme === 'dark' ? 'shadow-2xl shadow-black/50' : 'shadow-none'}`}>
+        <aside className={`md:flex hidden w-20 hover:w-64 group transition-all duration-500 flex-col py-8 border-r basis-auto shrink-0 overflow-y-auto custom-scrollbar bg-[var(--nexus-panel)] backdrop-blur-3xl border-[var(--nexus-border)] z-[120] ${theme === 'dark' ? 'shadow-2xl shadow-black/50' : 'shadow-none'}`}>
           <div
             className="flex items-center px-6 mb-12 gap-4 cursor-pointer"
             onClick={handleLogoClick}
@@ -658,7 +658,7 @@ const Dashboard = () => {
         </AnimatePresence>
 
         <main className="flex-1 flex flex-col relative overflow-hidden pt-0 bg-transparent">
-          <header className="px-6 py-3 md:px-12 md:py-4 flex justify-between items-center z-40 bg-[var(--nexus-panel)]/40 backdrop-blur-3xl border-b border-[var(--nexus-border)]/50">
+          <header className="px-6 py-3 md:px-12 md:py-4 flex justify-between items-center z-40 bg-[var(--nexus-panel)] backdrop-blur-3xl border-b border-[var(--nexus-border)]">
             <div className="flex flex-col">
               <span className="text-[9px] font-black tracking-[0.4em] text-[var(--nexus-accent)] uppercase mb-1">DropPay Protocol</span>
               <h1 className={`text-2xl md:text-3xl font-black uppercase tracking-tighter leading-none text-[var(--nexus-text)]`}>
