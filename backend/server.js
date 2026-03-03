@@ -51,6 +51,14 @@ app.use(cors({
     credentials: true, // MUST BE TRUE to allow cookies
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
 }));
+
+// ─── ANTIGRAVITY: GZIP COMPRESSION ─────────────────────────────────────────
+// Compresses all API responses (JSON, static files) by 60-80%.
+// Threshold: only compress payloads > 1KB to avoid CPU overhead on tiny pings.
+const compression = require('compression');
+app.use(compression({ threshold: 1024 }));
+// ────────────────────────────────────────────────────────────────────────────
+
 app.use(express.json()); // CRITICAL: Enables parsing of JSON request bodies
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());

@@ -44,10 +44,15 @@ router.post('/create-store-order', auth, createStoreOrder);
 router.post('/verify-store-payment', auth, verifyStorePayment);
 
 // @route   GET api/user/profile
+// PERF: Cache-Control prevents redundant DB hits when Dashboard mounts.
+// private: user-specific data (no CDN caching).
+// max-age=30: browser reuses this for 30s without a new request.
+// stale-while-revalidate=60: serve stale cache while fetching fresh in background.
 router.get('/profile', auth, async (req, res) => {
     try {
         const user = await User.findById(req.user.id).select('-password');
         if (!user) return res.status(404).json({ msg: 'User not found' });
+        res.set('Cache-Control', 'private, max-age=30, stale-while-revalidate=60');
         res.json(user);
     } catch (err) {
         res.status(500).json({ msg: 'Server Error' });

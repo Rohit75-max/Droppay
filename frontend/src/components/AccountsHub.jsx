@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { toast } from 'react-toastify';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from '../api/axios';
@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import EliteCard from './EliteCard';
 
-const AccountsHub = ({
+const AccountsHub = React.memo(({
   theme, user, isEditing, setIsEditing, editForm, setEditForm,
   profilePreview, handleImageChange, saveProfileUpdates, saveContactUpdate, fileInputRef,
   handleBankLink, isLinkingBank, setActiveSection, fetchProfileData,
@@ -78,13 +78,15 @@ const AccountsHub = ({
 
   const status = calculateTierStatus(user?.tier || 'starter', user?.referralCount || 0);
 
-  const getCardStyle = () => {
-    return 'bg-[var(--nexus-panel)] border-[var(--nexus-border)] text-[var(--nexus-text)] shadow-[var(--nexus-glow)] nexus-card';
-  };
-
-  const getInputStyle = () => {
-    return 'bg-[var(--nexus-bg)]/40 border-[var(--nexus-border)] text-[var(--nexus-text)] focus:border-[var(--nexus-accent)] transition-all outline-none';
-  };
+  // ─── PERF: Memoize style strings — computed once, not on every JSX call ────
+  const cardStyle = useMemo(() =>
+    'bg-[var(--nexus-panel)] border-[var(--nexus-border)] text-[var(--nexus-text)] shadow-[var(--nexus-glow)] nexus-card',
+    []);
+  const inputStyle = useMemo(() =>
+    'bg-[var(--nexus-bg)]/40 border-[var(--nexus-border)] text-[var(--nexus-text)] focus:border-[var(--nexus-accent)] transition-all outline-none',
+    []);
+  const getCardStyle = () => cardStyle;
+  const getInputStyle = () => inputStyle;
 
   const initiateBankLink = async () => {
     if (!bankForm.name) return toast.error("Account Holder Name is required.");
@@ -625,6 +627,6 @@ const AccountsHub = ({
       </AnimatePresence>
     </motion.div>
   );
-};
+}); // React.memo
 
 export default AccountsHub;
