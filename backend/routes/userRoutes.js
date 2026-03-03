@@ -107,10 +107,11 @@ const nodemailer = require('nodemailer');
 // --- REUSABLE TRANSPORTER SOCKET (Profile Sec) ---
 const createTransporter = () => {
     return nodemailer.createTransport({
-        service: 'gmail',
+        // service: 'gmail', // Disable service shortcut
         host: 'smtp.gmail.com',
         port: 465,
         secure: true,
+        family: 4, // FORCE IPv4 to prevent ENETUNREACH IPv6 routing errors
         auth: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS

@@ -15,10 +15,11 @@ const escapeRegex = (string) => {
 // --- REUSABLE TRANSPORTER SOCKET ---
 const createTransporter = () => {
     return nodemailer.createTransport({
-        service: 'gmail',
+        // service: 'gmail', // Disable service shortcut to use custom host/port reliably
         host: 'smtp.gmail.com',
         port: 465,
         secure: true,
+        family: 4, // FORCE IPv4 to prevent ENETUNREACH 2607:f8b0... errors on hosting providers
         auth: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS
