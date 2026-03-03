@@ -36,12 +36,20 @@ const stickerFallback = {
     diamond_gem: '💎', coins: '🪙'
 };
 
-const TickerItem = ({ donation }) => {
+const TickerItem = ({ donation, isOriginal }) => {
+    const lottieUrl = LOTTIE_STICKER_MAP[donation.sticker]
+        || (typeof donation.sticker === 'string' && donation.sticker.startsWith('http') ? donation.sticker : null)
+        || donation.stickerUrl;
+
     return (
         <div className="flex items-center gap-4 px-10 shrink-0 whitespace-nowrap">
-            {/* Use emoji fallback in ticker — saves 5+ Lottie network requests on page load */}
             <div className="w-9 h-9 shrink-0 flex items-center justify-center pointer-events-none drop-shadow-md">
-                <span className="text-xl drop-shadow-sm">{stickerFallback[donation.sticker] || stickerFallback[donation.stickerUrl] || '💎'}</span>
+                {/* Lottie only for originals — emoji for the 3× scroll duplicates (perf) */}
+                {isOriginal && lottieUrl ? (
+                    <Player autoplay loop src={lottieUrl} style={{ width: '36px', height: '36px' }} />
+                ) : (
+                    <span className="text-xl drop-shadow-sm">{stickerFallback[donation.sticker] || stickerFallback[donation.stickerUrl] || '💎'}</span>
+                )}
             </div>
 
             <span className="text-[var(--nexus-accent)] font-black text-[10px] uppercase tracking-[0.2em] shrink-0">{donation.donorName}</span>
@@ -71,9 +79,9 @@ const DonationTicker = ({ recentDrops = [], goalPercentage = 0 }) => {
         prevPercentRef.current = goalPercentage;
     }, [goalPercentage]);
 
-    // To ensure a smooth infinite loop, we duplicate the inner array several times
-    // This makes sure there are enough items to fill ultra-wide displays during the loop
+    // Duplicate for smooth infinite scroll — Lottie only for originals (index < recentDrops.length)
     const displayDrops = [...recentDrops, ...recentDrops, ...recentDrops, ...recentDrops];
+    const originalCount = recentDrops.length;
 
     return (
         <div className={`ticker-shell h-12 w-full flex items-center overflow-hidden transition-all duration-500 border-b border-[var(--nexus-border)] relative ${supernova ? 'ticker-celebration-active celebration-ignite' : ''}`}>
@@ -101,6 +109,7 @@ const DonationTicker = ({ recentDrops = [], goalPercentage = 0 }) => {
                             <TickerItem
                                 key={`${drop.id || drop._id}-${i}`}
                                 donation={drop}
+                                isOriginal={i < originalCount}
                             />
                         ))}
                     </div>
