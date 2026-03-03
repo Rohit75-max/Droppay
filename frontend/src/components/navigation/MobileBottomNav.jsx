@@ -36,9 +36,9 @@ const MobileBottomNav = ({ activeSection, setActiveSection, onLogout, user, them
                                 animate={{ opacity: 1, y: 0, scale: 1 }}
                                 exit={{ opacity: 0, y: 40, scale: 0.9 }}
                                 transition={{ type: "spring", damping: 20, stiffness: 600 }}
-                                className="w-[94%] max-w-sm mb-8 p-1 rounded-[3rem] bg-gradient-to-b from-white/10 to-transparent shadow-[0_30px_60px_rgba(0,0,0,0.5)] relative z-10"
+                                className="w-[94%] max-w-sm mb-4 p-1 rounded-[2.5rem] bg-gradient-to-b from-white/10 to-transparent shadow-[0_30px_60px_rgba(0,0,0,0.5)] relative z-10"
                             >
-                                <div className="w-full h-full p-6 rounded-[2.9rem] bg-[var(--nexus-panel)]/80 backdrop-blur-3xl border border-white/5 flex flex-col gap-6 relative overflow-hidden">
+                                <div className="w-full h-full p-4 rounded-[2.4rem] bg-[var(--nexus-panel)]/80 backdrop-blur-3xl border border-white/5 flex flex-col gap-4 relative overflow-hidden">
                                     {/* Atmospheric background beam */}
                                     <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 bg-white/5 blur-[60px] rounded-full pointer-events-none" />
 
@@ -57,7 +57,7 @@ const MobileBottomNav = ({ activeSection, setActiveSection, onLogout, user, them
 
                                     <div className="flex flex-col gap-3 max-h-[60vh] overflow-y-auto custom-scrollbar pr-1 relative z-10">
                                         {/* Actions Grid */}
-                                        <div className="grid grid-cols-2 gap-4">
+                                        <div className="grid grid-cols-2 gap-2.5">
                                             {[
                                                 { id: 'growth', label: 'Growth', sub: 'Missions', icon: Target, color: '#10B981', bg: 'rgba(16, 185, 129, 0.1)', border: 'rgba(16, 185, 129, 0.2)' },
                                                 { id: 'feedback', label: 'Signal', sub: 'Feedback', icon: Mailbox, color: '#3B82F6', bg: 'rgba(59, 130, 246, 0.1)', border: 'rgba(59, 130, 246, 0.2)' },
@@ -81,7 +81,7 @@ const MobileBottomNav = ({ activeSection, setActiveSection, onLogout, user, them
                                                             borderColor: isActive ? node.border : 'rgba(255, 255, 255, 0.05)',
                                                             boxShadow: isActive ? `0 10px 40px ${node.color}15` : 'none'
                                                         }}
-                                                        className="flex flex-col items-center text-center gap-3 p-6 rounded-[2rem] transition-all border group relative overflow-hidden"
+                                                        className="flex flex-col items-center text-center gap-2 p-3.5 rounded-[1.5rem] transition-all border group relative overflow-hidden"
                                                     >
                                                         {/* Dynamic Hover Glow */}
                                                         <div
@@ -95,9 +95,9 @@ const MobileBottomNav = ({ activeSection, setActiveSection, onLogout, user, them
                                                                 color: isActive ? '#000' : node.color,
                                                                 boxShadow: isActive ? `0 0 20px ${node.color}66` : 'none'
                                                             }}
-                                                            className="h-14 w-14 flex items-center justify-center rounded-2xl transition-all duration-300 group-hover:scale-110 group-hover:rotate-6"
+                                                            className="h-10 w-10 flex items-center justify-center rounded-xl transition-all duration-300 group-hover:scale-110 group-hover:rotate-6"
                                                         >
-                                                            <node.icon className="w-6 h-6" />
+                                                            <node.icon className="w-5 h-5" />
                                                         </div>
                                                         <div className="flex flex-col relative z-10 transition-transform duration-300 group-hover:translate-y-[-1px]">
                                                             <span
@@ -118,15 +118,15 @@ const MobileBottomNav = ({ activeSection, setActiveSection, onLogout, user, them
                                             whileHover={{ scale: 1.01, x: 4 }}
                                             whileTap={{ scale: 0.98 }}
                                             onClick={() => { setIsMenuExpanded(false); onLogout(); }}
-                                            className="flex items-center gap-5 p-5 rounded-[2rem] border border-rose-500/10 bg-rose-500/5 hover:bg-rose-500/10 hover:border-rose-500/30 transition-all group mt-2 relative overflow-hidden"
+                                            className="flex items-center gap-3 p-3.5 rounded-[1.5rem] border border-rose-500/10 bg-rose-500/5 hover:bg-rose-500/10 hover:border-rose-500/30 transition-all group mt-1 relative overflow-hidden"
                                         >
                                             <div className="absolute inset-0 bg-gradient-to-r from-rose-500/0 via-rose-500/5 to-rose-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-                                            <div className="h-12 w-12 flex items-center justify-center rounded-2xl bg-rose-500/10 text-rose-500 group-hover:scale-110 transition-transform shadow-inner">
-                                                <LogOut className="w-5 h-5" />
+                                            <div className="h-9 w-9 flex items-center justify-center rounded-xl bg-rose-500/10 text-rose-500 group-hover:scale-110 transition-transform shadow-inner">
+                                                <LogOut className="w-4 h-4" />
                                             </div>
                                             <div className="flex flex-col text-left relative z-10">
-                                                <span className="text-sm font-black uppercase italic tracking-tight text-rose-400">Exit Protocol</span>
-                                                <span className="text-[9px] text-rose-500/40 uppercase font-black tracking-[0.2em]">Terminate Session</span>
+                                                <span className="text-xs font-black uppercase italic tracking-tight text-rose-400">Exit Protocol</span>
+                                                <span className="text-[8px] text-rose-500/40 uppercase font-black tracking-[0.2em]">Terminate Session</span>
                                             </div>
                                         </motion.button>
                                     </div>
@@ -137,7 +137,7 @@ const MobileBottomNav = ({ activeSection, setActiveSection, onLogout, user, them
                 </AnimatePresence>
 
                 {/* THE MAIN BOTTOM NAV BAR WITH BRAND BUTTON */}
-                <div className="w-full h-20 bg-[var(--nexus-panel)]/60 backdrop-blur-[24px] border-t border-[var(--nexus-border)]/50 px-4 flex items-center justify-between pb-safe shadow-[0_-20px_40px_rgba(0,0,0,0.4)] transition-all duration-700">
+                <div className="w-full bg-[var(--nexus-panel)]/60 backdrop-blur-[24px] border-t border-[var(--nexus-border)]/50 px-4 flex items-center justify-between shadow-[0_-20px_40px_rgba(0,0,0,0.4)] transition-all duration-700" style={{ height: '64px', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
 
                     {/* Left Nav Items */}
                     <div className="flex justify-around flex-1 items-center">
@@ -241,8 +241,7 @@ const MobileBottomNav = ({ activeSection, setActiveSection, onLogout, user, them
 
                 </div>
 
-                {/* Global mobile space below footer for notched devices */}
-                <div className="w-full h-[env(safe-area-inset-bottom,0px)] bg-white/[0.02]" />
+                {/* Global mobile space below footer — handled inline above via paddingBottom */}
             </div>
         </div>
     );
