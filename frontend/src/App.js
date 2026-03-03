@@ -6,6 +6,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from './api/axios';
 import { ThemeProvider } from './context/ThemeContext';
+import { syncTheme } from './api/themeSync';
 
 // ─── EAGER IMPORTS (critical path — must load instantly) ──────────────────────
 import Home from './pages/Home';
@@ -41,7 +42,6 @@ const GlassShell = () => (
 // API_BASE is now handled by the centralized axios configuration in src/api/axios.js
 
 // --- PROFESSIONAL GATE: SECURE UPLINK ---
-import { syncTheme } from './api/themeSync';
 
 const MissionGate = ({ children }) => {
   const [status, setStatus] = useState('loading');
