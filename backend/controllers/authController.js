@@ -2,6 +2,7 @@ const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
+const { invalidateProfileCache } = require('../middleware/profileCache');
 
 // --- VAULT-GRADE SECURITY REGEX (1 Upper, 1 Number, 1 Special, 8+ Total) ---
 const securityRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,}$/;
@@ -144,7 +145,28 @@ exports.verifyEmail = async (req, res) => {
 
         // Enterprise Feature: Credit the Recruiter upon successful activation!
         if (user.referredBy) {
-            await User.findByIdAndUpdate(user.referredBy, { $inc: { referralCount: 1 } });
+            // Increment referral count atomically
+            const updatedReferrer = await User.findByIdAndUpdate(
+                user.referredBy,
+                { $inc: { referralCount: 1 } },
+                { new: true }  // Return updated doc to check tier threshold
+            );
+
+            // Auto-upgrade tier based on referral milestones
+            if (updatedReferrer) {
+                let newTier = updatedReferrer.tier;
+                const count = updatedReferrer.referralCount;
+                if (count >= 50 && newTier !== 'legend') newTier = 'legend';
+                else if (count >= 10 && newTier !== 'legend' && newTier !== 'pro') newTier = 'pro';
+                else if (count >= 1 && newTier === 'none') newTier = 'starter';
+
+                if (newTier !== updatedReferrer.tier) {
+                    await User.findByIdAndUpdate(user.referredBy, { tier: newTier });
+                }
+
+                // Bust Redis cache so referrer sees updated count immediately
+                await invalidateProfileCache(user.referredBy.toString());
+            }
         }
 
         const token = jwt.sign({ user: { id: user._id } }, process.env.JWT_SECRET, { expiresIn: '24h' });

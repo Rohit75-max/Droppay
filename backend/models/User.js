@@ -36,6 +36,11 @@ const UserSchema = new mongoose.Schema({
     index: true // ADDED: Critical for the /pay/:streamerId page
   },
   referredBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Tracks who invited them
+  referralCount: {
+    type: Number,
+    default: 0,
+    index: true // ADDED: Fast lookup for tier upgrades and leaderboard queries
+  },
 
   bio: {
     type: String,
