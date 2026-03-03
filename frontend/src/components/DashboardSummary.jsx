@@ -26,7 +26,7 @@ const LOTTIE_STICKER_MAP = {
   star: 'https://fonts.gstatic.com/s/e/notoemoji/latest/2b50/lottie.json',
   diamond: 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f48e/lottie.json',
   gold_bar: 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f237/lottie.json',
-  coins: 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f4b0/lottie.json',
+  coins: 'https://fonts.gstatic.com/s/e/notoemoji/latest/1fa99/lottie.json',
   trophy: 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f3c6/lottie.json',
 
   // New Synchronized IDs

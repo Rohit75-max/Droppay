@@ -13,7 +13,7 @@ const globalLottieMap = {
   hype_zap: 'https://fonts.gstatic.com/s/e/notoemoji/latest/26a1/lottie.json',
   fire_rocket: 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f680/lottie.json',
   diamond_gem: 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f48e/lottie.json',
-  coins: 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f4b0/lottie.json',
+  coins: 'https://fonts.gstatic.com/s/e/notoemoji/latest/1fa99/lottie.json',
   super_heart: 'https://fonts.gstatic.com/s/e/notoemoji/latest/2764_fe0f/lottie.json'
 };
 

@@ -17,6 +17,7 @@ import { getOptimizedImage } from '../protocol/cdnHelper';
 import DonationTicker from '../components/widgets/DonationTicker';
 import ThemeToggle from '../components/ThemeToggle';
 import { useTheme } from '../context/ThemeContext';
+import { Player } from '@lottiefiles/react-lottie-player';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -109,7 +110,7 @@ const Home = () => {
         timestamp: new Date().toISOString()
       };
       setDemoDrops(prev => [newDrop, ...prev].slice(0, 5));
-    }, 800);
+    }, 600); // Reduced delay since animation string is shorter
   }, [alertVariants, activeAlert, calcAmount, goalTarget]);
 
 
@@ -714,29 +715,79 @@ const Home = () => {
             <motion.div
               initial={{ scale: 0, top: "45%", left: "50%", x: "-50%", y: "-50%", rotate: -45 }}
               animate={{
-                scale: [0, 1.5, 1.5, 0],
+                scale: [0, 1.2, 1.2, 0], // Reduced max scale from 1.8 to 1.2
                 top: ["45%", "25%", "80%"],
                 rotate: [-45, 90, 180]
               }}
-              transition={{ duration: 0.8, times: [0, 0.4, 1], ease: "easeInOut" }}
-              className="fixed z-[300] pointer-events-none text-[#10B981] md:hidden"
+              transition={{ duration: 0.6, times: [0, 0.4, 1], ease: "easeInOut" }} // Reduced duration 0.8 -> 0.6
+              className="fixed z-[300] pointer-events-none md:hidden flex flex-col items-center justify-center transform-gpu"
             >
-              <Rocket className="w-12 h-12 fill-current shadow-[0_0_30px_#10B981]" />
+              <div className="relative">
+                {/* Smaller container */}
+                <div className="w-12 h-12 drop-shadow-[0_10px_20px_rgba(16,185,129,0.5)] relative z-10">
+                  <Player autoplay loop src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f680/lottie.json" style={{ height: '100%', width: '100%', transform: 'scale(1.1)' }} />
+                </div>
+                {/* Engine Thrust - scaled down */}
+                <motion.div
+                  animate={{ height: ["0px", "60px", "0px"], opacity: [0, 1, 0] }}
+                  transition={{ duration: 0.6, times: [0, 0.4, 1] }}
+                  className="absolute top-[80%] left-1/2 -translate-x-1/2 w-6 bg-gradient-to-b from-orange-400 via-red-500 to-transparent blur-md rounded-full origin-top z-0"
+                />
+                <motion.div
+                  animate={{ height: ["0px", "35px", "0px"], opacity: [0, 1, 0] }}
+                  transition={{ duration: 0.6, times: [0, 0.4, 1] }}
+                  className="absolute top-[80%] left-1/2 -translate-x-1/2 w-2 bg-gradient-to-b from-yellow-100 via-yellow-300 to-transparent blur-[2px] rounded-full origin-top z-10"
+                />
+              </div>
             </motion.div>
 
             {/* DESKTOP ARC */}
             <motion.div
               initial={{ scale: 0, top: "60%", left: "25%", x: "-50%", y: "-50%", rotate: 0 }}
               animate={{
-                scale: [0, 1.5, 1.5, 0],
+                scale: [0, 1.3, 1.3, 0], // Reduced from 2.0 to 1.3
                 top: ["60%", "30%", "50%"],
                 left: ["25%", "50%", "75%"],
                 rotate: [0, 45, 90]
               }}
-              transition={{ duration: 0.8, times: [0, 0.4, 1], ease: "easeInOut" }}
-              className="fixed z-[300] pointer-events-none text-[#10B981] hidden md:block"
+              transition={{ duration: 0.6, times: [0, 0.4, 1], ease: "easeInOut" }} // Reduced duration
+              className="fixed z-[300] pointer-events-none hidden md:flex flex-col items-center justify-center transform-gpu"
             >
-              <Rocket className="w-12 h-12 fill-current shadow-[0_0_30px_#10B981]" />
+              <div className="relative">
+                {/* Speed rings / Shockwaves - scaled and sped up */}
+                <motion.div
+                  animate={{ scale: [0.5, 1.2], opacity: [0.3, 0] }}
+                  transition={{ duration: 0.3, repeat: 2, ease: "easeOut" }}
+                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 border-2 border-cyan-400 rounded-full z-0"
+                />
+                <motion.div
+                  animate={{ scale: [0.2, 1.5], opacity: [0.5, 0] }}
+                  transition={{ duration: 0.3, repeat: 2, delay: 0.15, ease: "easeOut" }}
+                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 border border-white rounded-full z-0"
+                />
+
+                {/* The 3D Rocket - smaller container */}
+                <div className="w-16 h-16 drop-shadow-[0_15px_30px_rgba(34,211,238,0.5)] relative z-20">
+                  <Player autoplay loop src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f680/lottie.json" style={{ height: '100%', width: '100%', transform: 'scale(1.15)' }} />
+                </div>
+
+                {/* Hyperdrive Plasma Thrust Trail - shortened */}
+                <motion.div
+                  animate={{ height: ["0px", "120px", "0px"], opacity: [0, 1, 0] }}
+                  transition={{ duration: 0.6, times: [0, 0.4, 1] }}
+                  className="absolute top-[75%] left-1/2 -translate-x-1/2 w-8 bg-gradient-to-b from-cyan-400 via-blue-600 to-transparent blur-lg rounded-full origin-top z-10"
+                />
+                <motion.div
+                  animate={{ height: ["0px", "80px", "0px"], opacity: [0, 1, 0] }}
+                  transition={{ duration: 0.6, times: [0, 0.4, 1] }}
+                  className="absolute top-[75%] left-1/2 -translate-x-1/2 w-3 bg-gradient-to-b from-white via-cyan-200 to-transparent blur-md rounded-full origin-top z-10"
+                />
+                <motion.div
+                  animate={{ height: ["0px", "50px", "0px"], opacity: [0, 1, 0] }}
+                  transition={{ duration: 0.6, times: [0, 0.4, 1] }}
+                  className="absolute top-[75%] left-1/2 -translate-x-1/2 w-1 bg-gradient-to-b from-white to-transparent blur-[1px] rounded-full origin-top z-10"
+                />
+              </div>
             </motion.div>
           </>
         )}
@@ -928,25 +979,27 @@ const Home = () => {
                           initial={{ opacity: 0, scale: 0.92, y: 10 }}
                           animate={{ opacity: 1, scale: 1, y: 0 }}
                           exit={{ opacity: 0, scale: 0.92, y: -10 }}
-                          className="w-full"
+                          className="w-full flex items-center justify-center overflow-hidden h-[160px] sm:h-auto relative"
                         >
-                          <AlertPreview
-                            stylePreference={alertVariants[activeAlert]}
-                            donorName={activeAlert === 2 ? 'Apex Shooter' : activeAlert === 1 ? 'Street Legend' : 'Retro Gamer'}
-                            amount={calcAmount}
-                            message={
-                              activeAlert === 2 ? "Airdrop secured! 🪂" :
-                                activeAlert === 1 ? "Respect +100 verified!" :
-                                  "Pixel loot collected! 🪙"
-                            }
-                            theme={theme}
-                            sticker={
-                              activeAlert === 2 ? 'fire_rocket' :
-                                activeAlert === 1 ? 'diamond_gem' :
-                                  'coins'
-                            }
-                            hideSticker={true}
-                          />
+                          <div className="w-[320px] sm:w-full transform scale-[0.6] min-[400px]:scale-[0.7] sm:scale-100 origin-center absolute sm:relative">
+                            <AlertPreview
+                              stylePreference={alertVariants[activeAlert]}
+                              donorName={activeAlert === 2 ? 'Apex Shooter' : activeAlert === 1 ? 'Street Legend' : 'Retro Gamer'}
+                              amount={calcAmount}
+                              message={
+                                activeAlert === 2 ? "Airdrop secured! 🪂" :
+                                  activeAlert === 1 ? "Respect +100 verified!" :
+                                    "Pixel loot collected! 🪙"
+                              }
+                              theme={theme}
+                              sticker={
+                                activeAlert === 2 ? 'fire_rocket' :
+                                  activeAlert === 1 ? 'diamond_gem' :
+                                    'coins'
+                              }
+                              hideSticker={true}
+                            />
+                          </div>
                         </motion.div>
                       )}
                     </AnimatePresence>

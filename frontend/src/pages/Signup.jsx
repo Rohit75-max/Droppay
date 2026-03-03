@@ -6,7 +6,7 @@ import {
   Eye, EyeOff, UserPlus, Zap, Shield, AlertCircle, Loader2, Hash,
   Star, TrendingUp, Globe, Activity
 } from 'lucide-react';
-import { useSearchParams, Link, useNavigate } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import ThemeToggle from '../components/ThemeToggle';
 import { useTheme } from '../context/ThemeContext';
 import { toast } from 'react-toastify';
@@ -42,11 +42,12 @@ const StatCard = ({ icon: Icon, label, value, color, delay }) => (
 );
 
 // ─── Premium Input ────────────────────────────────────────────
-const PremiumInput = ({ icon: Icon, label, type, name, value, onChange, placeholder, required = true, rightEl, isDark }) => {
+const PremiumInput = ({ icon: Icon, label, type, name, value, onChange, placeholder, required = true, rightEl, isDark, autoComplete }) => {
   const [focused, setFocused] = useState(false);
+  const inputId = `signup-${name}`;
   return (
     <div className="space-y-1.5">
-      <label className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em] transition-colors ${focused ? 'text-emerald-500' : isDark ? 'text-white/40' : 'text-slate-400'}`}>
+      <label htmlFor={inputId} className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em] transition-colors ${focused ? 'text-emerald-500' : isDark ? 'text-white/40' : 'text-slate-400'}`}>
         <Icon className="w-3 h-3" /> {label}
       </label>
       <div className="relative group">
@@ -58,15 +59,17 @@ const PremiumInput = ({ icon: Icon, label, type, name, value, onChange, placehol
         <div className="relative">
           <Icon className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors duration-200 ${focused ? 'text-emerald-500' : isDark ? 'text-white/30' : 'text-slate-300'}`} />
           <input
+            id={inputId}
             type={type} name={name} value={value} onChange={onChange} required={required}
             onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
             placeholder={placeholder}
+            autoComplete={autoComplete}
             className={`w-full rounded-2xl py-3 pl-11 pr-11 text-sm focus:outline-none focus:border-transparent transition-all ${isDark
               ? 'bg-white/[0.05] border border-white/10 text-white placeholder:text-white/20'
               : 'bg-slate-50 border border-slate-200 text-slate-800 placeholder:text-slate-300'
               }`}
           />
-          {rightEl && <div className="absolute right-4 top-1/2 -translate-y-1/2">{rightEl}</div>}
+          {rightEl && <div className="absolute right-3 top-1/2 -translate-y-1/2">{rightEl}</div>}
         </div>
       </div>
     </div>
@@ -318,23 +321,23 @@ const Signup = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
                       <PremiumInput icon={User} label="Full Name" type="text" name="fullName"
-                        value={formData.fullName} onChange={handleChange} placeholder="Your full name" isDark={isDark} />
+                        value={formData.fullName} onChange={handleChange} placeholder="Your full name" isDark={isDark} autoComplete="name" />
                     </motion.div>
                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.65 }}>
                       <PremiumInput icon={Hash} label="Streamer ID" type="text" name="username"
                         value={formData.username}
                         onChange={e => setFormData({ ...formData, username: e.target.value.toLowerCase().replace(/\s+/g, '') })}
-                        placeholder="unique_handle" isDark={isDark}
+                        placeholder="unique_handle" isDark={isDark} autoComplete="username"
                         rightEl={<span className="text-[9px] font-black text-emerald-500 uppercase tracking-tight opacity-60 group-focus-within:opacity-100">Handle</span>}
                       />
                     </motion.div>
                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}>
                       <PremiumInput icon={Mail} label="Email" type="email" name="email"
-                        value={formData.email} onChange={handleChange} placeholder="you@example.com" isDark={isDark} />
+                        value={formData.email} onChange={handleChange} placeholder="you@example.com" isDark={isDark} autoComplete="email" />
                     </motion.div>
                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.75 }}>
                       <PremiumInput icon={Phone} label="Phone" type="text" name="phone"
-                        value={formData.phone} onChange={handleChange} placeholder="+91 00000 00000" isDark={isDark} />
+                        value={formData.phone} onChange={handleChange} placeholder="+91 00000 00000" isDark={isDark} autoComplete="tel" />
                     </motion.div>
                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.78 }}>
                       <PremiumInput icon={UserPlus} label="Referral Code" type="text" name="referralCode"
@@ -342,7 +345,7 @@ const Signup = () => {
                     </motion.div>
                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.82 }}>
                       <PremiumInput icon={Lock} label="Password" type={showPassword ? 'text' : 'password'} name="password"
-                        value={formData.password} onChange={handleChange} placeholder="Min 8 chars" isDark={isDark}
+                        value={formData.password} onChange={handleChange} placeholder="Min 8 chars" isDark={isDark} autoComplete="new-password"
                         rightEl={
                           <button type="button" onClick={() => setShowPassword(v => !v)} tabIndex={-1}
                             className={`transition-colors ${isDark ? 'text-white/30 hover:text-emerald-400' : 'text-slate-300 hover:text-emerald-500'}`}>
@@ -461,8 +464,9 @@ const Signup = () => {
                 {/* OTP boxes */}
                 <div className="flex justify-center gap-2 mb-8">
                   {otp.map((digit, index) => (
-                    <input key={index} id={`otp-${index}`}
+                    <input key={index} id={`otp-${index}`} name={`otp-${index}`}
                       type="text" maxLength="1" value={digit}
+                      autoComplete="one-time-code"
                       onChange={(e) => handleOtpChange(e.target.value, index)}
                       onKeyDown={(e) => handleKeyDown(e, index)}
                       className={`w-11 h-14 sm:w-13 sm:h-16 text-center text-2xl font-black rounded-2xl border-2 transition-all outline-none

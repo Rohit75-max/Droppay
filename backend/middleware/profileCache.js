@@ -18,7 +18,10 @@ let redisReady = false;
 const getClient = async () => {
     if (redisClient && redisReady) return redisClient;
     try {
-        redisClient = createClient({ url: process.env.REDIS_URL || 'redis://127.0.0.1:6379' });
+        redisClient = createClient({
+            url: process.env.REDIS_URL || 'redis://127.0.0.1:6379',
+            socket: { reconnectStrategy: false, connectTimeout: 1000 }
+        });
         redisClient.on('error', () => { redisReady = false; });
         redisClient.on('ready', () => { redisReady = true; });
         await redisClient.connect();

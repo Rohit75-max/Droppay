@@ -43,11 +43,12 @@ const StatCard = ({ icon: Icon, label, value, color, delay }) => (
 );
 
 // ─── Premium Input ────────────────────────────────────────────
-const PremiumInput = ({ icon: Icon, label, type, name, value, onChange, placeholder, rightEl, isDark }) => {
+const PremiumInput = ({ icon: Icon, label, type, name, value, onChange, placeholder, rightEl, isDark, autoComplete }) => {
   const [focused, setFocused] = useState(false);
+  const inputId = `login-${name}`;
   return (
     <div className="space-y-2">
-      <label className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em] transition-colors ${focused ? 'text-emerald-500' : isDark ? 'text-white/40' : 'text-slate-400'}`}>
+      <label htmlFor={inputId} className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em] transition-colors ${focused ? 'text-emerald-500' : isDark ? 'text-white/40' : 'text-slate-400'}`}>
         <Icon className="w-3 h-3" /> {label}
       </label>
       <div className="relative group">
@@ -60,9 +61,11 @@ const PremiumInput = ({ icon: Icon, label, type, name, value, onChange, placehol
         <div className="relative">
           <Icon className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors duration-200 ${focused ? 'text-emerald-500' : isDark ? 'text-white/30' : 'text-slate-300'}`} />
           <input
+            id={inputId}
             type={type} name={name} value={value} onChange={onChange}
             onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
             placeholder={placeholder} required
+            autoComplete={autoComplete}
             className={`w-full rounded-2xl py-3.5 pl-12 pr-12 text-sm focus:outline-none focus:border-transparent transition-all ${isDark
               ? 'bg-white/[0.05] border border-white/10 text-white placeholder:text-white/20'
               : 'bg-slate-50 border border-slate-200 text-slate-800 placeholder:text-slate-300'
@@ -356,12 +359,12 @@ const Login = () => {
                 <form onSubmit={handleLogin} className="space-y-5">
                   <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
                     <PremiumInput icon={Mail} label="Email Address" type="email" name="email"
-                      value={formData.email} onChange={handleChange} placeholder="you@example.com" isDark={isDark} />
+                      value={formData.email} onChange={handleChange} placeholder="you@example.com" isDark={isDark} autoComplete="email" />
                   </motion.div>
 
                   <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}>
                     <PremiumInput icon={Lock} label="Password" type={showPassword ? 'text' : 'password'} name="password"
-                      value={formData.password} onChange={handleChange} placeholder="••••••••••••••••" isDark={isDark}
+                      value={formData.password} onChange={handleChange} placeholder="••••••••••••••••" isDark={isDark} autoComplete="current-password"
                       rightEl={
                         <button type="button" onClick={() => setShowPassword(v => !v)} tabIndex={-1}
                           className={`transition-colors ${isDark ? 'text-white/30 hover:text-emerald-400' : 'text-slate-300 hover:text-emerald-500'}`}>
@@ -475,8 +478,9 @@ const Login = () => {
                 {/* OTP boxes */}
                 <div className="flex justify-center gap-2 mb-8">
                   {otp.map((digit, index) => (
-                    <input key={index} id={`otp-${index}`}
+                    <input key={index} id={`otp-${index}`} name={`otp-${index}`}
                       type="text" maxLength="1" value={digit}
+                      autoComplete="one-time-code"
                       onChange={(e) => handleOtpChange(e.target.value, index)}
                       onKeyDown={(e) => handleKeyDown(e, index)}
                       className={`w-10 h-13 sm:w-12 sm:h-15 text-center text-xl font-black rounded-xl border-2 transition-all outline-none

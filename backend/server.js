@@ -27,7 +27,10 @@ const setupSockets = async () => {
     };
     let io;
     try {
-        const pubClient = createClient({ url: process.env.REDIS_URL || 'redis://127.0.0.1:6379' });
+        const pubClient = createClient({
+            url: process.env.REDIS_URL || 'redis://127.0.0.1:6379',
+            socket: { reconnectStrategy: false, connectTimeout: 1000 }
+        });
         const subClient = pubClient.duplicate();
         await Promise.all([pubClient.connect(), subClient.connect()]);
         io = new Server(server, ioOptions);
