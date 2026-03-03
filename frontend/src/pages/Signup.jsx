@@ -7,6 +7,8 @@ import {
   Star, TrendingUp, Globe, Activity
 } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
+import ThemeToggle from '../components/ThemeToggle';
+import { useTheme } from '../context/ThemeContext';
 
 // API_BASE is now handled by the centralized axios configuration in src/api/axios.js
 
@@ -39,11 +41,11 @@ const StatCard = ({ icon: Icon, label, value, color, delay }) => (
 );
 
 // ─── Premium Input ────────────────────────────────────────────
-const PremiumInput = ({ icon: Icon, label, type, name, value, onChange, placeholder, required = true, rightEl }) => {
+const PremiumInput = ({ icon: Icon, label, type, name, value, onChange, placeholder, required = true, rightEl, isDark }) => {
   const [focused, setFocused] = useState(false);
   return (
     <div className="space-y-1.5">
-      <label className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em] transition-colors ${focused ? 'text-emerald-600' : 'text-slate-400'}`}>
+      <label className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em] transition-colors ${focused ? 'text-emerald-500' : isDark ? 'text-white/40' : 'text-slate-400'}`}>
         <Icon className="w-3 h-3" /> {label}
       </label>
       <div className="relative group">
@@ -53,12 +55,15 @@ const PremiumInput = ({ icon: Icon, label, type, name, value, onChange, placehol
           transition={{ duration: 0.2 }}
         />
         <div className="relative">
-          <Icon className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors duration-200 ${focused ? 'text-emerald-500' : 'text-slate-300'}`} />
+          <Icon className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors duration-200 ${focused ? 'text-emerald-500' : isDark ? 'text-white/30' : 'text-slate-300'}`} />
           <input
             type={type} name={name} value={value} onChange={onChange} required={required}
             onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
             placeholder={placeholder}
-            className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3 pl-11 pr-11 text-sm text-slate-800 placeholder:text-slate-300 focus:outline-none focus:border-transparent transition-all"
+            className={`w-full rounded-2xl py-3 pl-11 pr-11 text-sm focus:outline-none focus:border-transparent transition-all ${isDark
+              ? 'bg-white/[0.05] border border-white/10 text-white placeholder:text-white/20'
+              : 'bg-slate-50 border border-slate-200 text-slate-800 placeholder:text-slate-300'
+              }`}
           />
           {rightEl && <div className="absolute right-4 top-1/2 -translate-y-1/2">{rightEl}</div>}
         </div>
@@ -77,6 +82,8 @@ const strengthText = ['', 'text-rose-400', 'text-amber-400', 'text-blue-400', 't
 // ─────────────────────────────────────────────────────────────
 const Signup = () => {
   const [searchParams] = useSearchParams();
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -177,11 +184,11 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 sm:p-6 font-sans overflow-hidden">
+    <div className={`min-h-screen flex items-center justify-center p-4 sm:p-6 font-sans overflow-hidden transition-colors duration-500 ${isDark ? 'bg-[#030a06]' : 'bg-slate-50'}`}>
       {/* Background blobs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[-20%] left-[-10%] w-[550px] h-[550px] rounded-full bg-emerald-100/60 blur-[120px]" />
-        <div className="absolute bottom-[-20%] right-[-10%] w-[450px] h-[450px] rounded-full bg-cyan-100/50 blur-[100px]" />
+        <div className={`absolute top-[-20%] left-[-10%] w-[550px] h-[550px] rounded-full blur-[120px] ${isDark ? 'bg-emerald-900/30' : 'bg-emerald-100/60'}`} />
+        <div className={`absolute bottom-[-20%] right-[-10%] w-[450px] h-[450px] rounded-full blur-[100px] ${isDark ? 'bg-cyan-900/20' : 'bg-cyan-100/50'}`} />
       </div>
 
       {/* Main card */}
@@ -189,8 +196,8 @@ const Signup = () => {
         initial={{ opacity: 0, y: 32, scale: 0.96 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-        style={{ boxShadow: '0 30px 80px -20px rgba(0,0,0,0.10), 0 0 0 1px rgba(255,255,255,0.8)' }}
-        className="relative w-full max-w-[1000px] rounded-[2.5rem] overflow-hidden flex flex-col lg:flex-row border border-white/80 bg-white"
+        style={{ boxShadow: isDark ? '0 30px 80px -20px rgba(0,0,0,0.6)' : '0 30px 80px -20px rgba(0,0,0,0.10), 0 0 0 1px rgba(255,255,255,0.8)' }}
+        className={`relative w-full max-w-[1000px] rounded-[2.5rem] overflow-hidden flex flex-col lg:flex-row border ${isDark ? 'border-white/10 bg-[#08100c]' : 'border-white/80 bg-white'}`}
       >
         {/* ── LEFT — Dark branded panel ── */}
         <div className="relative lg:w-[360px] shrink-0 bg-[#061a12] overflow-hidden flex flex-col justify-between p-5 sm:p-6 lg:p-8 min-h-[220px] lg:min-h-0">
@@ -264,7 +271,8 @@ const Signup = () => {
         </div>
 
         {/* ── RIGHT — Form ── */}
-        <div className="flex-1 flex flex-col justify-center p-6 lg:p-10 bg-white overflow-y-auto">
+        {/* ── RIGHT — Signup form ── */}
+        <div className={`flex-1 flex flex-col justify-center p-6 lg:p-10 overflow-y-auto transition-colors duration-500 ${isDark ? 'bg-[#0a1410]' : 'bg-white'}`}>
           <AnimatePresence mode="wait">
             {step === 1 ? (
               <motion.div key="signup" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, x: -20 }}>
@@ -272,19 +280,22 @@ const Signup = () => {
                 <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
                   className="flex items-center justify-between mb-5">
                   <div>
-                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">New Account</p>
-                    <p className="text-[10px] text-slate-300 uppercase tracking-widest">Deploy your streaming node</p>
+                    <p className={`text-[10px] font-black uppercase tracking-[0.3em] ${isDark ? 'text-white/40' : 'text-slate-400'}`}>New Account</p>
+                    <p className={`text-[10px] uppercase tracking-widest ${isDark ? 'text-white/20' : 'text-slate-300'}`}>Deploy your streaming node</p>
                   </div>
-                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-100 bg-slate-50">
-                    <motion.div className="w-1.5 h-1.5 rounded-full bg-emerald-400"
-                      animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.5, repeat: Infinity }} />
-                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Step 1 of 2</span>
+                  <div className="flex items-center gap-2">
+                    <ThemeToggle size="sm" />
+                    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${isDark ? 'border-white/10 bg-white/[0.04]' : 'border-slate-100 bg-slate-50'}`}>
+                      <motion.div className="w-1.5 h-1.5 rounded-full bg-emerald-400"
+                        animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.5, repeat: Infinity }} />
+                      <span className={`text-[9px] font-black uppercase tracking-widest ${isDark ? 'text-white/40' : 'text-slate-400'}`}>Step 1 of 2</span>
+                    </div>
                   </div>
                 </motion.div>
 
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.55 }}>
-                  <h3 className="text-2xl font-black italic tracking-tighter text-slate-900 mb-1">Create account.</h3>
-                  <p className="text-slate-400 text-sm font-medium mb-5">Fill in your details to initialize your node.</p>
+                  <h3 className={`text-2xl font-black italic tracking-tighter mb-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>Create account.</h3>
+                  <p className={`text-sm font-medium mb-5 ${isDark ? 'text-white/30' : 'text-slate-400'}`}>Fill in your details to initialize your node.</p>
                 </motion.div>
 
                 {/* Error */}
@@ -306,34 +317,34 @@ const Signup = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
                       <PremiumInput icon={User} label="Full Name" type="text" name="fullName"
-                        value={formData.fullName} onChange={handleChange} placeholder="Your full name" />
+                        value={formData.fullName} onChange={handleChange} placeholder="Your full name" isDark={isDark} />
                     </motion.div>
                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.65 }}>
                       <PremiumInput icon={Hash} label="Streamer ID" type="text" name="username"
                         value={formData.username}
                         onChange={e => setFormData({ ...formData, username: e.target.value.toLowerCase().replace(/\s+/g, '') })}
-                        placeholder="unique_handle"
+                        placeholder="unique_handle" isDark={isDark}
                         rightEl={<span className="text-[9px] font-black text-emerald-500 uppercase tracking-tight opacity-60 group-focus-within:opacity-100">Handle</span>}
                       />
                     </motion.div>
                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}>
                       <PremiumInput icon={Mail} label="Email" type="email" name="email"
-                        value={formData.email} onChange={handleChange} placeholder="you@example.com" />
+                        value={formData.email} onChange={handleChange} placeholder="you@example.com" isDark={isDark} />
                     </motion.div>
                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.75 }}>
                       <PremiumInput icon={Phone} label="Phone" type="text" name="phone"
-                        value={formData.phone} onChange={handleChange} placeholder="+91 00000 00000" />
+                        value={formData.phone} onChange={handleChange} placeholder="+91 00000 00000" isDark={isDark} />
                     </motion.div>
                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.78 }}>
                       <PremiumInput icon={UserPlus} label="Referral Code" type="text" name="referralCode"
-                        value={formData.referralCode} onChange={handleChange} placeholder="Optional" required={false} />
+                        value={formData.referralCode} onChange={handleChange} placeholder="Optional" required={false} isDark={isDark} />
                     </motion.div>
                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.82 }}>
                       <PremiumInput icon={Lock} label="Password" type={showPassword ? 'text' : 'password'} name="password"
-                        value={formData.password} onChange={handleChange} placeholder="Min 8 chars"
+                        value={formData.password} onChange={handleChange} placeholder="Min 8 chars" isDark={isDark}
                         rightEl={
                           <button type="button" onClick={() => setShowPassword(v => !v)} tabIndex={-1}
-                            className="text-slate-300 hover:text-emerald-500 transition-colors">
+                            className={`transition-colors ${isDark ? 'text-white/30 hover:text-emerald-400' : 'text-slate-300 hover:text-emerald-500'}`}>
                             {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                           </button>
                         }
@@ -342,7 +353,7 @@ const Signup = () => {
                         <div className="mt-1.5">
                           <div className="flex gap-1 mb-1">
                             {[1, 2, 3, 4].map(i => (
-                              <div key={i} className={`h-0.5 flex-1 rounded-full transition-all duration-300 ${i <= strength ? strengthColor[strength] : 'bg-slate-200'}`} />
+                              <div key={i} className={`h-0.5 flex-1 rounded-full transition-all duration-300 ${i <= strength ? strengthColor[strength] : isDark ? 'bg-white/10' : 'bg-slate-200'}`} />
                             ))}
                           </div>
                           <p className={`text-[9px] font-bold uppercase tracking-widest ${strengthText[strength]}`}>{strengthLabel[strength]} passphrase</p>
@@ -352,12 +363,12 @@ const Signup = () => {
                   </div>
 
                   <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.85 }}>
-                    <div className="flex items-start gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-100 hover:border-emerald-200 transition-all cursor-pointer group mb-1" onClick={() => setAcceptedTerms(!acceptedTerms)}>
-                      <div className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center shrink-0 transition-all ${acceptedTerms ? 'bg-emerald-500 border-emerald-500 shadow-lg shadow-emerald-500/20' : 'border-slate-200 group-hover:border-emerald-400'}`}>
+                    <div className={`flex items-start gap-3 p-3 rounded-2xl border transition-all cursor-pointer group mb-1 ${isDark ? 'bg-white/[0.03] border-white/10 hover:border-emerald-500/30' : 'bg-slate-50 border-slate-100 hover:border-emerald-200'}`} onClick={() => setAcceptedTerms(!acceptedTerms)}>
+                      <div className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center shrink-0 transition-all ${acceptedTerms ? 'bg-emerald-500 border-emerald-500 shadow-lg shadow-emerald-500/20' : isDark ? 'border-white/20 group-hover:border-emerald-400' : 'border-slate-200 group-hover:border-emerald-400'}`}>
                         {acceptedTerms && <CheckCircle className="w-3.5 h-3.5 text-white" />}
                       </div>
-                      <p className="text-[10px] text-slate-500 font-medium leading-relaxed">
-                        I acknowledge the <span className="text-emerald-600 font-black cursor-help underline underline-offset-2">Creator Protocol Terms</span> and grant authorization for secure node deployment.
+                      <p className={`text-[10px] font-medium leading-relaxed ${isDark ? 'text-white/50' : 'text-slate-500'}`}>
+                        I acknowledge the <span className="text-emerald-500 font-black cursor-help underline underline-offset-2">Creator Protocol Terms</span> and grant authorization for secure node deployment.
                       </p>
                     </div>
                   </motion.div>
@@ -378,9 +389,9 @@ const Signup = () => {
                 </form>
 
                 <div className="flex items-center gap-3 my-4">
-                  <div className="flex-1 h-px bg-slate-100" />
-                  <span className="text-[9px] text-slate-300 uppercase tracking-widest">or</span>
-                  <div className="flex-1 h-px bg-slate-100" />
+                  <div className={`flex-1 h-px ${isDark ? 'bg-white/10' : 'bg-slate-100'}`} />
+                  <span className={`text-[9px] uppercase tracking-widest ${isDark ? 'text-white/20' : 'text-slate-300'}`}>or</span>
+                  <div className={`flex-1 h-px ${isDark ? 'bg-white/10' : 'bg-slate-100'}`} />
                 </div>
 
                 <div className="grid grid-cols-1 gap-3">
@@ -388,16 +399,16 @@ const Signup = () => {
                     whileHover={{ scale: 1.01 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => window.location.href = `${process.env.REACT_APP_API_URL || 'http://localhost:5001'}/api/auth/google`}
-                    className="flex items-center justify-center gap-3 w-full py-3 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 transition-all shadow-sm group"
+                    className={`flex items-center justify-center gap-3 w-full py-3 rounded-2xl border transition-all shadow-sm group ${isDark ? 'border-white/10 bg-white/[0.03] hover:bg-white/[0.06]' : 'border-slate-200 bg-white hover:bg-slate-50'}`}
                   >
                     <div className="w-5 h-5 flex items-center justify-center">
                       <svg viewBox="0 0 24 24" className="w-full h-full"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" /><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" /><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05" /><path d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" /></svg>
                     </div>
-                    <span className="text-[11px] font-black uppercase tracking-widest text-slate-600 group-hover:text-slate-900">Establish Google Identity Bridge</span>
+                    <span className={`text-[11px] font-black uppercase tracking-widest ${isDark ? 'text-white/50 group-hover:text-white/80' : 'text-slate-600 group-hover:text-slate-900'}`}>Establish Google Identity Bridge</span>
                   </motion.button>
                 </div>
                 <div className="text-center">
-                  <Link to="/login" className="inline-flex items-center gap-2 text-[10px] font-black text-slate-400 hover:text-emerald-600 uppercase tracking-[0.2em] transition-colors group">
+                  <Link to="/login" className={`inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] transition-colors group hover:text-emerald-500 ${isDark ? 'text-white/30' : 'text-slate-400 hover:text-emerald-600'}`}>
                     <span className="opacity-0 group-hover:opacity-100 transition-opacity text-emerald-500 font-mono">&gt;</span>
                     Already Authorized? Sign In
                     <span className="opacity-0 group-hover:opacity-100 transition-opacity text-emerald-500 font-mono">&lt;</span>

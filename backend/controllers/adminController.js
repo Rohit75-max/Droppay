@@ -1,7 +1,11 @@
+const mongoose = require('mongoose');
+const os = require('os');
 const User = require('../models/User');
 const Drop = require('../models/Drop');
 const PlatformMetrics = require('../models/PlatformMetrics');
 const GlobalConfig = require('../models/GlobalConfig');
+const { logAudit } = require('../utils/auditLogger');
+const Audit = require('../models/Audit');
 
 // --- 1. ENTERPRISE NODE AGGREGATOR (With Cursor Pagination) ---
 exports.getUsers = async (req, res) => {
@@ -28,7 +32,7 @@ exports.getUsers = async (req, res) => {
 
         const totalNodes = await User.countDocuments(query);
         const users = await User.find(query)
-            .select('username email streamerId tier role referralCount walletBalance security.lastLogin security.accountStatus.isBanned financialMetrics.totalLifetimeEarnings')
+            .select('username email streamerId tier role referralCount walletBalance security.lastLogin security.accountStatus.isBanned financialMetrics.totalLifetimeEarnings trustScore nodeStatus lastKnownIp')
             .sort({ createdAt: -1 })
             .skip((page - 1) * limit)
             .limit(limit);
@@ -98,6 +102,19 @@ exports.toggleBan = async (req, res) => {
         }
 
         await user.save();
+
+        // V5 Logging
+        await logAudit({
+            adminId: req.user.id,
+            adminUsername: req.user.username,
+            action: user.security.accountStatus.isBanned ? 'BAN_NODE' : 'UNBAN_NODE',
+            targetId: user._id,
+            targetName: user.username,
+            details: user.security.accountStatus.isBanned ? 'Node access suspended' : 'Node access reinstated',
+            level: user.security.accountStatus.isBanned ? 'warning' : 'info',
+            ipAddress: req.ip
+        });
+
         res.status(200).json({ msg: `Node ${user.security.accountStatus.isBanned ? 'Suspended' : 'Reinstated'}.`, status: user.security.accountStatus.isBanned });
     } catch (err) {
         res.status(500).json({ msg: "Moderation Override Failed." });
@@ -114,6 +131,18 @@ exports.updateTier = async (req, res) => {
         if (!validTiers.includes(targetTier)) return res.status(400).json({ msg: "Invalid Tier Classification." });
 
         const user = await User.findByIdAndUpdate(id, { tier: targetTier }, { returnDocument: 'after' });
+
+        // V5 Logging
+        await logAudit({
+            adminId: req.user.id,
+            adminUsername: req.user.username,
+            action: 'TIER_OVERRIDE',
+            targetId: user._id,
+            targetName: user.username,
+            details: `Escalated node to ${targetTier.toUpperCase()}`,
+            ipAddress: req.ip
+        });
+
         res.status(200).json({ msg: "Tier Override Successful", tier: user.tier });
     } catch (err) {
         res.status(500).json({ msg: "Override Failed." });
@@ -133,6 +162,19 @@ exports.updateRole = async (req, res) => {
         }
 
         const user = await User.findByIdAndUpdate(id, { role: targetRole }, { returnDocument: 'after' });
+
+        // V5 Logging
+        await logAudit({
+            adminId: req.user.id,
+            adminUsername: req.user.username,
+            action: 'ROLE_OVERRIDE',
+            targetId: user._id,
+            targetName: user.username,
+            details: `Clearance level shifted to ${targetRole.toUpperCase()}`,
+            level: targetRole === 'admin' ? 'critical' : 'info',
+            ipAddress: req.ip
+        });
+
         res.status(200).json({ msg: `Node Clearance Updated to ${targetRole.toUpperCase()}`, role: user.role });
     } catch (err) {
         res.status(500).json({ msg: "Clearance Override Failed." });
@@ -213,6 +255,18 @@ exports.executeSettlement = async (req, res) => {
         user.financialMetrics.pendingPayouts = 0;
         await user.save();
 
+        // V5 Logging
+        await logAudit({
+            adminId: req.user.id,
+            adminUsername: req.user.username,
+            action: 'SETTLEMENT_EXECUTION',
+            targetId: user._id,
+            targetName: user.username,
+            details: `Settled wallet liability of ₹${payoutAmount.toLocaleString()}`,
+            level: 'info',
+            ipAddress: req.ip
+        });
+
         const ledger = await PlatformMetrics.getLedger();
         ledger.totalPayoutsSettled += payoutAmount;
         await ledger.save();
@@ -252,6 +306,17 @@ exports.updateGlobalConfig = async (req, res) => {
         };
 
         await config.save();
+
+        // V5 Logging
+        await logAudit({
+            adminId: req.user.id,
+            adminUsername: req.user.username,
+            action: 'GLOBAL_CONFIG_UPDATE',
+            details: `Platform parameters synchronized: ${Object.keys(platformSettings).join(', ')}`,
+            level: 'warning',
+            ipAddress: req.ip
+        });
+
         res.status(200).json({ msg: "Platform variables updated.", settings: config.platformSettings });
     } catch (err) {
         res.status(500).json({ msg: "Failed to update platform variables." });
@@ -283,5 +348,110 @@ exports.dispatchBroadcast = async (req, res) => {
         }
     } catch (err) {
         res.status(500).json({ msg: "Broadcast dispatch failed." });
+    }
+};
+
+// --- 8. ADMIN SELF-PROFILE MANAGEMENT ---
+
+exports.getAdminProfile = async (req, res) => {
+    try {
+        const admin = await User.findById(req.user.id).select('username email fullName adminProfile role streamerId');
+        if (!admin) return res.status(404).json({ msg: "Admin Node Not Found." });
+        res.status(200).json(admin);
+    } catch (err) {
+        res.status(500).json({ msg: "Failed to fetch admin profile." });
+    }
+};
+
+exports.updateAdminProfile = async (req, res) => {
+    try {
+        const { fullName, adminProfile } = req.body;
+        const admin = await User.findById(req.user.id);
+
+        if (!admin) return res.status(404).json({ msg: "Admin Node Not Found." });
+
+        if (fullName) admin.fullName = fullName;
+        if (adminProfile) {
+            admin.adminProfile = {
+                ...admin.adminProfile,
+                ...adminProfile
+            };
+        }
+
+        await admin.save();
+        res.status(200).json({ msg: "Admin Profile Synchronized.", admin });
+    } catch (err) {
+        console.error("Profile Update Error:", err);
+        res.status(500).json({ msg: "Profile Update Failed." });
+    }
+};
+
+exports.uploadAdminAvatar = async (req, res) => {
+    try {
+        if (!req.file) return res.status(400).json({ msg: "No identity packet found." });
+
+        const admin = await User.findById(req.user.id);
+        if (!admin) return res.status(404).json({ msg: "Admin Node Not Found." });
+
+        // Generate the URL for the avatar
+        const avatarUrl = `/uploads/avatars/${req.file.filename}`;
+
+        // Update the adminProfile.avatar field
+        admin.adminProfile = {
+            ...admin.adminProfile,
+            avatar: avatarUrl
+        };
+
+        await admin.save();
+        res.status(200).json({ msg: "Identity Matrix Avatar Updated.", avatarUrl });
+    } catch (err) {
+        console.error("Avatar Upload Error:", err);
+        res.status(500).json({ msg: "Identity Matrix Synchronization Failed." });
+    }
+};
+
+// --- 9. SECURITY NEXUS & SYSTEM HEALTH (Scaling Upgrade) ---
+
+exports.getAuditLogs = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 20;
+
+        const totalLogs = await Audit.countDocuments();
+        const logs = await Audit.find()
+            .sort({ timestamp: -1 })
+            .skip((page - 1) * limit)
+            .limit(limit);
+
+        res.status(200).json({
+            logs: logs || [],
+            totalPages: Math.ceil(totalLogs / limit) || 1,
+            currentPage: page
+        });
+    } catch (err) {
+        console.error("Audit Logs Retrieval Error:", err);
+        res.status(500).json({ msg: "Failed to retrieve security logs." });
+    }
+};
+
+exports.getSystemHealth = async (req, res) => {
+    try {
+        const cpuCores = os.cpus().length;
+        const loadAvg1m = os.loadavg()[0];
+        const cpuLoadPercent = ((loadAvg1m / cpuCores) * 100).toFixed(2);
+
+        const health = {
+            uptime: Math.floor(process.uptime()),
+            memoryUsage: process.memoryUsage(),
+            nodeVersion: process.version,
+            platform: process.platform,
+            cpuLoad: parseFloat(cpuLoadPercent),
+            dbConnection: mongoose.connection.readyState === 1 ? 'Operational' : 'Degraded',
+            payoutEngine: 'Online',
+            broadcastRelay: 'Sync'
+        };
+        res.status(200).json(health);
+    } catch (err) {
+        res.status(500).json({ msg: "Infrastructure telemetry offline." });
     }
 };

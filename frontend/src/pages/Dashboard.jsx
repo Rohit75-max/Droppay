@@ -12,6 +12,7 @@ import { toast } from 'react-toastify';
 
 // Component Imports
 import { syncTheme } from '../api/themeSync';
+import ThemeToggle from '../components/ThemeToggle';
 import DashboardSummary from '../components/DashboardSummary';
 import ControlCenter from '../components/ControlCenter';
 import AccountsHub from '../components/AccountsHub';
@@ -667,7 +668,7 @@ const Dashboard = () => {
                 {activeSection} <span className="text-[var(--nexus-accent)]">NEXUS.</span>
               </h1>
             </div>
-            {/* Dark mode toggle removed per user request */}
+            <ThemeToggle size="md" />
           </header>
 
           <div className="flex-1 overflow-y-auto custom-scrollbar px-4 md:px-8 pb-24 md:pb-12">

@@ -110,7 +110,7 @@ const UserSchema = new mongoose.Schema({
     expiryDate: { type: Date }
   },
 
-  nexusTheme: { type: String, enum: ['void', 'cyber', 'aero', 'kawaii', 'arcade', 'bgmi', 'live_space', 'live_erangel', 'live_cyber', 'live_synthwave', 'live_kawaii', 'live_dragon', 'aero-light', 'nebula-void', 'alabaster-pulse', 'midnight-obsidian', 'kawaii-desk', 'bgmi-tactical'], default: 'void' },
+  nexusTheme: { type: String, enum: ['void', 'cyber', 'aero', 'kawaii', 'arcade', 'bgmi', 'live_space', 'live_erangel', 'live_cyber', 'live_synthwave', 'live_kawaii', 'live_dragon', 'aero-light', 'nebula-void', 'alabaster-pulse', 'midnight-obsidian', 'kawaii-desk', 'bgmi-tactical', 'uplink'], default: 'void' },
   nexusThemeMode: { type: String, enum: ['dark', 'light'], default: 'dark' },
   unlockedNexusThemes: [{ type: String }], // ADDED: Tracks Elite workspace themes purchased from Store
   ownedWidgets: [{ type: String }], // ADDED: Tracks premium dashboard widgets purchased from Store
@@ -173,6 +173,27 @@ const UserSchema = new mongoose.Schema({
       isActive: { type: Boolean, default: true }
     }
   ],
+
+  adminProfile: {
+    title: { type: String, default: 'Protocol Administrator' },
+    bio: { type: String, default: 'Secure Authority over the DropPay Nexus.' },
+    department: { type: String, default: 'Security Operations' },
+    accessLevel: { type: Number, default: 1 }, // 1: Standard Admin, 2: Super Admin
+    avatar: { type: String, default: null }
+  },
+
+  // --- V5 SCALING UPGRADE ---
+  trustScore: { type: Number, default: 100, min: 0, max: 100 },
+  nodeStatus: {
+    type: String,
+    enum: ['standard', 'verified', 'under_review', 'flagged'],
+    default: 'standard'
+  },
+  lastKnownIp: { type: String },
+  performanceMetrics: {
+    totalLogins: { type: Number, default: 0 },
+    lastActive: { type: Date, default: Date.now }
+  },
 
   googleId: { type: String, unique: true, sparse: true }
 

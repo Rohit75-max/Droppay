@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Player } from '@lottiefiles/react-lottie-player';
 import {
   Send, ShieldCheck, Zap, IndianRupee, MessageSquare, Loader2, Sparkles,
-  CheckCircle, Crown, Smile, Volume2, Lock, Target, UserCircle, Gift
+  CheckCircle, Crown, Smile, Volume2, Lock, Target, UserCircle, Gift, Trophy, Award
 } from 'lucide-react';
 
 // --- MODULAR IMPORT ---
@@ -207,8 +207,7 @@ const DonationPage = () => {
     setTimeout(() => setPlayingSound(null), 2000);
   };
 
-  const handlePayment = async (e) => {
-    e.preventDefault();
+  const handlePayment = async (metadata = {}) => {
     if (!window.Razorpay) {
       toast.error("Error: Razorpay SDK failed to load. Please disable your adblocker or check your internet connection.");
       return;
@@ -216,7 +215,12 @@ const DonationPage = () => {
     setIsProcessing(true);
     try {
       const { data } = await axios.post('/api/payment/create-order', {
-        streamerId, amount: Number(amount), donorName: donorName || 'Anonymous', message, sticker: selectedSticker
+        streamerId,
+        amount: Number(amount),
+        donorName: donorName || 'Anonymous',
+        message,
+        sticker: selectedSticker,
+        ...metadata
       });
       new window.Razorpay({
         key: process.env.REACT_APP_RAZORPAY_KEY_ID || "rzp_test_SHrX3upgmJ6sGL",
@@ -230,7 +234,8 @@ const DonationPage = () => {
               message: message || `Dropped INR ${amount}`,
               sticker: selectedSticker,
               amount: Number(amount),
-              tugOfWarSide: selectedSide
+              tugOfWarSide: selectedSide,
+              ...metadata
             });
             setIsSuccess(true);
           } catch (err) {
@@ -311,14 +316,18 @@ const DonationPage = () => {
             </div>
 
             {/* TOP SUPPORTERS LIST */}
-            <div className="shrink-0 relative z-20">
+            <div className="shrink-0 relative z-20 flex flex-col">
+              <div className="flex items-center gap-2 mb-4 px-2">
+                <Trophy className="w-4 h-4 text-amber-500" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-[var(--nexus-text-muted)] flex items-center gap-2">Global Rankings <Crown className="w-3 h-3 text-amber-500 opacity-50" /> <Award className="w-3 h-3 text-amber-500 opacity-50" /></span>
+              </div>
               <TopSupporterWidget
                 topSupporters={topDonors.map(d => ({
                   name: d._id,
                   amount: d.totalAmount || d.total || 0,
                   avatar: d.avatar || null
                 })).sort((a, b) => b.amount - a.amount)}
-                stylePreference="classic_chart" // Forced to vertical list mode
+                stylePreference={streamer?.overlaySettings?.leaderboardStyle || 'royal_throne'}
               />
             </div>
 
@@ -395,7 +404,7 @@ const DonationPage = () => {
               <motion.div layout className="flex-1 bg-[var(--nexus-panel)] border border-[var(--nexus-border)] rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-7 shadow-2xl relative lg:overflow-y-auto lg:scrollbar-hide flex flex-col nexus-card">
                 <AnimatePresence mode="wait">
                   {!isSuccess ? (
-                    <form key="form" onSubmit={handlePayment} className="space-y-6">
+                    <form key="form" onSubmit={(e) => { e.preventDefault(); handlePayment(); }} className="space-y-6">
                       <div className="flex gap-4 border-b border-[var(--nexus-border)] pb-2">
                         <button type="button" onClick={() => setActiveTab('global')} className={`pb-2 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'global' ? 'border-b-2 border-[var(--nexus-accent)] text-[var(--nexus-accent)]' : 'text-[var(--nexus-text-muted)]'}`}>Global Pack</button>
 

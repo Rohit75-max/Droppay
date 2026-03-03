@@ -5,6 +5,7 @@ import { Helmet } from 'react-helmet-async';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from './api/axios';
+import { ThemeProvider } from './context/ThemeContext';
 
 // --- PAGES ---
 import Home from './pages/Home';
@@ -105,8 +106,6 @@ const AnimatedRoutes = () => {
         <Route path="/goal/:streamerId" element={<GoalOverlay />} />
         <Route path="/overlay/tug-of-war/:obsKey" element={<TugOfWarOverlay />} />
         <Route path="/overlay/master/:obsKey" element={<MasterOverlay />} />
-        bench
-
         {/* 4. USER ONBOARDING (FIXED PATHS) */}
         {/* This matches the redirect in your Signup.jsx */}
         <Route path="/subscription" element={<SubscriptionPage />} />
@@ -202,9 +201,11 @@ function AppContent() {
 
 function App() {
   return (
-    <Router>
-      <AppContent />
-    </Router>
+    <ThemeProvider>
+      <Router>
+        <AppContent />
+      </Router>
+    </ThemeProvider>
   );
 }
 

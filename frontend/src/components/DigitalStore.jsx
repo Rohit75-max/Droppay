@@ -18,6 +18,14 @@ const TTS_VOICES = [
   { id: 'demon', label: 'Demon', icon: '😈' },
 ];
 
+const INTERACTION_CARDS = [
+  { id: 'emp_blast', label: 'EMP Blast', price: 250, icon: '⚡', description: 'Trigger a holographic glitch effect.', color: 'from-cyan-400 to-blue-500', glow: 'shadow-cyan-500/50' },
+  { id: 'tactical_nuke', label: 'Tactical Nuke', price: 1000, icon: '☢️', description: 'Massive screen-filling animation.', color: 'from-orange-500 to-red-600', glow: 'shadow-orange-500/50' },
+  { id: 'hydration_check', label: 'Hydration', price: 100, icon: '💧', description: 'Drink water reminder on screen.', color: 'from-blue-400 to-cyan-400', glow: 'shadow-blue-400/50' },
+  { id: 'sound_meme', label: 'Meme Sound', price: 50, icon: '🔊', description: 'Plays a random funny sound.', color: 'from-green-400 to-emerald-500', glow: 'shadow-green-500/50' },
+  { id: 'tow_sabotage', label: 'Sabotage', price: 500, icon: '🧨', description: 'Subtract points from opponents.', color: 'from-red-500 to-rose-700', glow: 'shadow-red-500/50', requiresTow: true },
+];
+
 const DigitalStore = ({
   streamer,
   amount,
@@ -36,6 +44,7 @@ const DigitalStore = ({
 
   // Tab-specific overrides
   const [ttsVoice, setTtsVoice] = useState('female');
+  const [selectedCard, setSelectedCard] = useState(null);
 
   // Helper to determine current Super Message tier based on input amount
   const currentTier = SUPER_TIERS.slice().reverse().find(t => Number(amount) >= t.minAmount) || SUPER_TIERS[0];
@@ -61,6 +70,12 @@ const DigitalStore = ({
           className={`px-4 py-3 text-xs font-black uppercase tracking-widest transition-all rounded-t-xl flex items-center gap-2 ${activeTab === 'tts' ? 'bg-emerald-500/10 text-emerald-400 border-b-2 border-emerald-500' : 'text-slate-500 hover:text-slate-700'}`}
         >
           <Mic className="w-4 h-4" /> Premium TTS
+        </button>
+        <button
+          onClick={() => handleTabSwitch('cards')}
+          className={`px-4 py-3 text-xs font-black uppercase tracking-widest transition-all rounded-t-xl flex items-center gap-2 ${activeTab === 'cards' ? 'bg-amber-500/10 text-amber-500 border-b-2 border-amber-500' : 'text-slate-500 hover:text-slate-700'}`}
+        >
+          <Sparkles className="w-4 h-4" /> Card Store
         </button>
       </div>
 
@@ -137,6 +152,52 @@ const DigitalStore = ({
             </motion.div>
           )}
 
+          {/* =========================================
+              TAB: INTERACTION CARDS
+             ========================================= */}
+          {activeTab === 'cards' && (
+            <motion.div key="cards" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="flex flex-col space-y-4 flex-1">
+              <div className="grid grid-cols-2 gap-3 pb-4">
+                {INTERACTION_CARDS.map(card => {
+                  const isDisabled = card.requiresTow && !towEvent;
+                  const isSelected = selectedCard?.id === card.id;
+
+                  return (
+                    <button
+                      key={card.id}
+                      type="button"
+                      disabled={isDisabled}
+                      onClick={() => {
+                        setSelectedCard(card);
+                        setAmount(card.price);
+                      }}
+                      className={`relative group p-4 rounded-2xl border-2 text-left transition-all overflow-hidden ${isDisabled ? 'opacity-40 grayscale cursor-not-allowed' :
+                        isSelected ? `bg-gradient-to-br ${card.color} border-white shadow-xl ${card.glow} scale-[1.02]` :
+                          'bg-[var(--nexus-bg)] border-[var(--nexus-border)] hover:border-[var(--nexus-accent)]/30'
+                        }`}
+                    >
+                      <div className="relative z-10 flex flex-col h-full">
+                        <div className="flex justify-between items-start mb-2">
+                          <span className={`text-2xl ${isSelected ? 'text-white' : ''}`}>{card.icon}</span>
+                          <span className={`text-[10px] font-black italic ${isSelected ? 'text-white/80' : 'text-[var(--nexus-accent)]'}`}>₹{card.price}</span>
+                        </div>
+                        <h4 className={`text-xs font-black uppercase tracking-tighter mb-1 ${isSelected ? 'text-white' : 'text-[var(--nexus-text)]'}`}>{card.label}</h4>
+                        <p className={`text-[8px] font-bold leading-tight ${isSelected ? 'text-white/70' : 'text-[var(--nexus-text-muted)]'}`}>{card.description}</p>
+                      </div>
+
+                      {isSelected && (
+                        <motion.div
+                          layoutId="card-glow"
+                          className="absolute inset-0 bg-white/10 backdrop-blur-sm pointer-events-none"
+                        />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </motion.div>
+          )}
+
         </AnimatePresence>
 
         {/* --- COMMON INPUT FIELDS (Fixed at bottom of store) --- */}
@@ -197,14 +258,22 @@ const DigitalStore = ({
           </div>
 
           <button
-            onClick={handlePayment}
+            onClick={() => handlePayment({
+              ttsVoice: activeTab === 'tts' ? ttsVoice : null,
+              cardId: activeTab === 'cards' ? selectedCard?.id : null
+            })}
             disabled={isProcessing}
             className={`w-full py-5 rounded-xl text-lg text-black font-black flex items-center justify-center gap-3 uppercase italic transition shadow-lg ${activeTab === 'superchat' ? 'bg-indigo-400 hover:bg-indigo-300 shadow-indigo-500/20' :
-              'bg-emerald-400 hover:bg-emerald-300 shadow-emerald-500/20'
+              activeTab === 'tts' ? 'bg-emerald-400 hover:bg-emerald-300 shadow-emerald-500/20' :
+                'bg-amber-400 hover:bg-amber-300 shadow-amber-500/20'
               }`}
           >
             {isProcessing ? <Loader2 className="animate-spin w-5 h-5" /> : (
-              <>Deploy {activeTab === 'superchat' ? 'Super Msg' : 'Premium TTS'} <Sparkles className="w-5 h-5" /></>
+              <>Deploy {
+                activeTab === 'superchat' ? 'Super Msg' :
+                  activeTab === 'tts' ? 'Premium TTS' :
+                    'Power-up Card'
+              } <Sparkles className="w-5 h-5" /></>
             )}
           </button>
         </div>

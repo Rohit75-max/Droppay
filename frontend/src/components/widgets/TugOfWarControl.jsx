@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import { motion } from 'framer-motion';
 import { Swords, Timer, Save, Rocket, Zap, ShieldAlert, Flame } from 'lucide-react';
+import { io } from 'socket.io-client';
 import axios from '../../api/axios';
 
 const TugOfWarControl = ({ user, nexusTheme, streamerId, theme }) => {
@@ -27,7 +28,29 @@ const TugOfWarControl = ({ user, nexusTheme, streamerId, theme }) => {
     }, [streamerId]);
 
     useEffect(() => {
-        if (streamerId) fetchActiveEvent();
+        if (!streamerId) return;
+        fetchActiveEvent();
+
+        const socket = io(process.env.REACT_APP_API_URL || 'http://localhost:5001');
+
+        // Join the streamer room for real-time updates
+        socket.emit('join-room', streamerId);
+
+        socket.on('tug-of-war-update', (updatedEvent) => {
+            setEvent(updatedEvent);
+        });
+
+        socket.on('tug-of-war-start', (newEvent) => {
+            setEvent(newEvent);
+        });
+
+        socket.on('tug-of-war-stop', () => {
+            setEvent(null);
+        });
+
+        return () => {
+            socket.disconnect();
+        };
     }, [streamerId, fetchActiveEvent]);
 
     const handleStart = async () => {

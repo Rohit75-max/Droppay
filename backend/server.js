@@ -54,6 +54,7 @@ app.use(cors({
 app.use(express.json()); // CRITICAL: Enables parsing of JSON request bodies
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use('/uploads', express.static('uploads'));
 
 // 4. PROTECTION SYNC (Fixed Path Mismatch)
 // Added /signup to the strict limiter to prevent the "Connection Failed" loop

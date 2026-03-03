@@ -19,10 +19,10 @@ const ConfirmModal = ({ open, title, message, confirmLabel, confirmColor = 'bg-r
     <AnimatePresence>
         {open && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-white/95 backdrop-blur-sm">
+                className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
                 <motion.div initial={{ scale: 0.92, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
                     exit={{ scale: 0.92, opacity: 0 }} transition={{ duration: 0.2 }}
-                    className="bg-white rounded-3xl shadow-sm border border-slate-100 w-full max-w-sm p-6">
+                    className="bg-white rounded-3xl shadow-2xl border border-slate-100 w-full max-w-sm p-6">
                     <div className="w-12 h-12 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center mb-4">
                         <AlertTriangle className="w-6 h-6 text-rose-500" />
                     </div>
@@ -34,7 +34,7 @@ const ConfirmModal = ({ open, title, message, confirmLabel, confirmColor = 'bg-r
                             Cancel
                         </button>
                         <button onClick={onConfirm}
-                            className={`flex-1 py-2.5 rounded-2xl font-black uppercase tracking-widest text-xs text-slate-900 transition-all ${confirmColor}`}>
+                            className={`flex-1 py-2.5 rounded-2xl font-black uppercase tracking-widest text-xs text-white transition-all ${confirmColor}`}>
                             {confirmLabel}
                         </button>
                     </div>
@@ -50,8 +50,8 @@ const KpiCard = ({ icon: Icon, label, value, sub, accent, delay, details, detail
 
     // Dynamic 'Command Center' stealth styles
     const bgClass = expanded
-        ? 'bg-slate-100 border-emerald-500/30 shadow-[0_8px_24px_-6px_rgba(0,0,0,0.08)] scale-[1.02] z-10 ring-1 ring-emerald-500/20'
-        : 'bg-white border-slate-200 hover:border-slate-200 hover:bg-slate-50';
+        ? 'bg-white/5 border-emerald-500/30 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] scale-[1.02] z-10 ring-1 ring-emerald-500/20'
+        : 'bg-white/[0.02] border-white/5 hover:border-white/10 hover:bg-white/[0.04]';
 
     return (
         <motion.div layout initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
@@ -61,24 +61,24 @@ const KpiCard = ({ icon: Icon, label, value, sub, accent, delay, details, detail
 
             {/* Hover Glow Effect */}
             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
-                <div className="absolute -inset-px bg-gradient-to-br from-emerald-500/5 via-transparent to-transparent" />
+                <div className="absolute -inset-px bg-gradient-to-br from-emerald-500/10 via-transparent to-transparent" />
             </div>
 
             <motion.div layout className="flex items-start justify-between mb-4 relative">
-                <div className="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center transition-all duration-300 group-hover:border-emerald-500/30 group-hover:bg-emerald-500/10">
-                    <Icon className="w-4 h-4 text-slate-500 group-hover:text-emerald-400" />
+                <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center transition-all duration-300 group-hover:border-emerald-500/30 group-hover:bg-emerald-500/10">
+                    <Icon className="w-4 h-4 text-white/40 group-hover:text-emerald-400" />
                 </div>
                 {sub && (
-                    <span className="text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-500 group-hover:text-slate-600 transition-colors">
+                    <span className="text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-white/40 group-hover:text-white/60 transition-colors">
                         {sub}
                     </span>
                 )}
             </motion.div>
 
-            <motion.p layout className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1 transition-colors duration-300 group-hover:text-emerald-500/40">
+            <motion.p layout className="text-[10px] font-black uppercase tracking-widest text-white/20 mb-1 transition-colors duration-300 group-hover:text-emerald-500/40">
                 {label}
             </motion.p>
-            <motion.p layout className="text-3xl font-black tracking-tight text-slate-900 group-hover:text-emerald-400 transition-colors duration-300">
+            <motion.p layout className="text-3xl font-black tracking-tight text-white group-hover:text-emerald-400 transition-colors duration-300">
                 {value}
             </motion.p>
 
@@ -88,10 +88,10 @@ const KpiCard = ({ icon: Icon, label, value, sub, accent, delay, details, detail
                         initial={{ opacity: 0, height: 0, marginTop: 0 }}
                         animate={{ opacity: 1, height: 'auto', marginTop: 16 }}
                         exit={{ opacity: 0, height: 0, marginTop: 0 }}
-                        className="overflow-hidden border-t border-slate-200 pt-4"
+                        className="overflow-hidden border-t border-white/5 pt-4"
                     >
                         {detailsRender ? detailsRender() : (
-                            <p className="text-xs font-semibold leading-relaxed text-slate-500">
+                            <p className="text-xs font-semibold leading-relaxed text-white/40">
                                 {details}
                             </p>
                         )}
@@ -151,12 +151,12 @@ const UserDetailDrawer = ({ userId, isOpen, onClose, context = 'directory' }) =>
                     {/* Backdrop */}
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="fixed inset-0 z-[100] bg-black/10 backdrop-blur-sm" />
+                        className="fixed inset-0 z-[100] bg-black/20 backdrop-blur-sm" />
 
                     {/* Drawer */}
                     <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
                         transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-                        className="fixed top-0 right-0 h-full w-full max-w-xl bg-white shadow-sm z-[101] border-l border-slate-200 flex flex-col overflow-hidden">
+                        className="fixed top-0 right-0 h-full w-full max-w-xl bg-white shadow-2xl z-[101] border-l border-slate-200 flex flex-col overflow-hidden">
 
                         {loading ? (
                             <div className="flex-1 flex flex-col items-center justify-center text-slate-400">
@@ -238,9 +238,9 @@ const UserDetailDrawer = ({ userId, isOpen, onClose, context = 'directory' }) =>
                                             <CreditCard className="w-3.5 h-3.5" /> Financial Nexus
                                         </h3>
                                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                            <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 hover:border-emerald-300 transition-colors">
-                                                <p className="text-[9px] font-black uppercase tracking-widest text-emerald-700 mb-1">Lifetime TPV</p>
-                                                <p className="text-xl font-mono font-black text-emerald-600">₹{(user.financialMetrics?.totalLifetimeEarnings || 0).toLocaleString()}</p>
+                                            <div className="bg-slate-900 text-white rounded-2xl p-4">
+                                                <p className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-1">Lifetime TPV</p>
+                                                <p className="text-xl font-mono font-black text-emerald-400">₹{(user.financialMetrics?.totalLifetimeEarnings || 0).toLocaleString()}</p>
                                             </div>
                                             <div className="border border-slate-200 rounded-2xl p-4 hover:border-emerald-300 transition-colors">
                                                 <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">Total Settled</p>
@@ -859,7 +859,7 @@ const AdminSecurePortal = () => {
     ];
 
     return (
-        <div className="flex min-h-screen bg-slate-50 font-sans relative text-slate-900 overflow-hidden">
+        <div className="flex min-h-screen bg-[#050505] font-sans relative text-white overflow-hidden">
             {/* Ambient Background Glows */}
             <div className="fixed inset-0 pointer-events-none">
                 <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-emerald-500/5 blur-[120px] animate-pulse" />
@@ -896,20 +896,20 @@ const AdminSecurePortal = () => {
             </AnimatePresence>
 
             {/* ── SIDEBAR (Stealth Glass Theme) ── */}
-            <aside className={`fixed top-0 left-0 h-full w-64 lg:w-56 bg-slate-50/50 border-r border-slate-200 flex flex-col z-50 shrink-0 transition-transform duration-300 ease-in-out backdrop-blur-sm
+            <aside className={`fixed top-0 left-0 h-full w-64 lg:w-56 bg-white/[0.01] border-r border-white/5 flex flex-col z-50 shrink-0 transition-transform duration-300 ease-in-out backdrop-blur-3xl
                 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
                 {/* Logo */}
-                <div className="flex items-center justify-between px-5 py-6 border-b border-slate-200">
+                <div className="flex items-center justify-between px-5 py-6 border-b border-white/5">
                     <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-lg bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center shrink-0">
                             <Zap className="w-4 h-4 text-emerald-400 fill-emerald-400" />
                         </div>
                         <div>
-                            <span className="text-slate-900 font-black text-lg tracking-tight">Drop<span className="text-emerald-500">Pay</span></span>
-                            <p className="text-slate-500 text-[8px] uppercase tracking-[0.2em] font-bold mt-0.5">Command Center</p>
+                            <span className="text-white font-black text-lg tracking-tight">Drop<span className="text-emerald-500">Pay</span></span>
+                            <p className="text-white/40 text-[8px] uppercase tracking-[0.2em] font-bold mt-0.5">Command Center</p>
                         </div>
                     </div>
-                    <button onClick={() => setMobileMenuOpen(false)} className="lg:hidden text-slate-500 p-1 hover:text-slate-900 transition-colors">
+                    <button onClick={() => setMobileMenuOpen(false)} className="lg:hidden text-white/40 p-1 hover:text-white transition-colors">
                         <X className="w-5 h-5" />
                     </button>
                 </div>
@@ -917,25 +917,25 @@ const AdminSecurePortal = () => {
                 {/* Navigation */}
                 <nav className="flex-1 py-6 px-3 space-y-1">
                     <div className="px-3 pb-3">
-                        <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">System Infrastructure</p>
+                        <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/30">System Infrastructure</p>
                     </div>
                     {navItems.map(({ id, icon: Icon, label }) => (
                         <button key={id} onClick={() => { setActiveSection(id); setMobileMenuOpen(false); }}
                             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 group relative
                             ${activeSection === id
                                     ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.05)]'
-                                    : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100 border border-transparent'}`}>
+                                    : 'text-white/40 hover:text-white hover:bg-white/5 border border-transparent'}`}>
                             {activeSection === id && (
                                 <motion.div layoutId="nav-active" className="absolute left-0 w-1 h-4 bg-emerald-500 rounded-full" />
                             )}
-                            <Icon className={`w-4 h-4 shrink-0 transition-colors ${activeSection === id ? 'text-emerald-400' : 'text-slate-400 group-hover:text-slate-600'}`} />
+                            <Icon className={`w-4 h-4 shrink-0 transition-colors ${activeSection === id ? 'text-emerald-400' : 'text-white/20 group-hover:text-white/60'}`} />
                             <span className="text-[11px] font-black uppercase tracking-wider">{label}</span>
                         </button>
                     ))}
                 </nav>
 
                 {/* Exit */}
-                <div className="p-4 border-t border-slate-200">
+                <div className="p-4 border-t border-white/5">
                     <button onClick={() => navigate('/dashboard')}
                         className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-rose-400/60 hover:text-rose-400 hover:bg-rose-500/10 transition-all group border border-transparent">
                         <LogOut className="w-4 h-4 shrink-0 group-hover:-translate-x-1 transition-transform" />
@@ -948,15 +948,15 @@ const AdminSecurePortal = () => {
             <div className="flex-1 flex flex-col lg:ml-56 h-screen w-full transition-all overflow-hidden bg-transparent">
 
                 {/* Top header */}
-                <header className="shrink-0 z-30 bg-white/90 backdrop-blur-sm border-b border-slate-200 px-4 md:px-6 h-[60px] flex items-center justify-between">
+                <header className="shrink-0 z-30 bg-black/40 backdrop-blur-2xl border-b border-white/5 px-4 md:px-6 h-[60px] flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <button onClick={() => setMobileMenuOpen(true)} className="lg:hidden p-1.5 -ml-1.5 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors">
+                        <button onClick={() => setMobileMenuOpen(true)} className="lg:hidden p-1.5 -ml-1.5 text-white/40 hover:bg-white/5 rounded-lg transition-colors">
                             <Menu className="w-5 h-5" />
                         </button>
-                        <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                        <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-white/20">
                             <LayoutDashboard className="hidden sm:block w-3.5 h-3.5" />
-                            <span className="hidden sm:inline text-slate-300">/</span>
-                            <span className="text-slate-900 font-black capitalize">
+                            <span className="hidden sm:inline text-white/10">/</span>
+                            <span className="text-white capitalize">
                                 {activeSection.replace(/_/g, ' ')}
                             </span>
                         </div>
@@ -964,13 +964,13 @@ const AdminSecurePortal = () => {
 
                     <div className="flex items-center gap-3">
                         {/* Live clock */}
-                        <div className="hidden md:flex items-center gap-1.5 text-[10px] font-mono text-slate-500 transition-all">
+                        <div className="hidden md:flex items-center gap-1.5 text-[10px] font-mono text-white/30 transition-all">
                             <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
                             {clock.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                         </div>
                         {/* Refresh */}
                         <button onClick={refreshAll}
-                            className="p-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-500 hover:bg-emerald-500/20 hover:text-emerald-400 hover:border-emerald-500/30 transition-all duration-300">
+                            className="p-2 rounded-xl bg-white/5 border border-white/10 text-white/40 hover:bg-emerald-500/20 hover:text-emerald-400 hover:border-emerald-500/30 transition-all duration-300">
                             <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
                         </button>
                         {/* Admin badge */}
@@ -997,32 +997,32 @@ const AdminSecurePortal = () => {
                             <motion.div key="directory"
                                 initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }}
                                 transition={{ duration: 0.3 }}
-                                className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden backdrop-blur-sm">
+                                className="bg-white/[0.02] rounded-3xl border border-white/5 shadow-2xl overflow-hidden backdrop-blur-xl">
 
                                 {/* Table toolbar */}
-                                <div className="px-8 py-6 border-b border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+                                <div className="px-8 py-6 border-b border-white/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
                                     <div>
-                                        <h2 className="text-xl font-black text-slate-900 tracking-tight">Node Directory</h2>
-                                        <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] mt-1">
+                                        <h2 className="text-xl font-black text-white tracking-tight">Node Directory</h2>
+                                        <p className="text-[10px] text-white/30 font-black uppercase tracking-[0.2em] mt-1">
                                             <span className="text-emerald-500">{totalNodes.toLocaleString()}</span> Total Identities Locked
                                         </p>
                                     </div>
                                     <div className="flex flex-wrap items-center gap-4 w-full sm:w-auto">
                                         {/* Search */}
                                         <div className="relative w-full sm:flex-1 sm:w-80 group">
-                                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-emerald-500 transition-colors" />
+                                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 group-focus-within:text-emerald-500 transition-colors" />
                                             <input type="text" placeholder="Search Node ID, Alias, or Email..."
                                                 value={search}
                                                 onChange={e => { setSearch(e.target.value); setPage(1); }}
-                                                className="w-full pl-12 pr-6 py-3 text-sm bg-slate-100 border border-slate-200 rounded-2xl text-slate-900 placeholder:text-slate-300 focus:outline-none focus:border-emerald-500/50 focus:bg-white transition-all" />
+                                                className="w-full pl-12 pr-6 py-3 text-sm bg-white/5 border border-white/10 rounded-2xl text-white placeholder:text-white/10 focus:outline-none focus:border-emerald-500/50 focus:bg-white/[0.08] transition-all" />
                                         </div>
                                         {/* Role filter pills */}
-                                        <div className="flex bg-slate-100 rounded-2xl p-1 w-full sm:w-auto border border-slate-200">
+                                        <div className="flex bg-white/5 rounded-2xl p-1 w-full sm:w-auto border border-white/5">
                                             {[['all', 'All Nodes'], ['admin', 'Master'], ['user', 'Standard']].map(([val, lbl]) => (
                                                 <button key={val}
                                                     onClick={() => { setRoleFilter(val); setPage(1); }}
                                                     className={`flex-1 sm:flex-none px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap
-                                                    ${roleFilter === val ? 'bg-emerald-500 text-slate-900 shadow-[0_0_20px_rgba(16,185,129,0.2)]' : 'text-slate-500 hover:text-slate-600'}`}>
+                                                    ${roleFilter === val ? 'bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.2)]' : 'text-white/30 hover:text-white/60'}`}>
                                                     {lbl}
                                                 </button>
                                             ))}
@@ -1033,7 +1033,7 @@ const AdminSecurePortal = () => {
                                 {/* Table */}
                                 <div className="overflow-x-auto">
                                     <table className="w-full text-left text-sm min-w-[900px]">
-                                        <thead className="bg-slate-50 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 border-b border-slate-200">
+                                        <thead className="bg-white/[0.03] text-[10px] font-black uppercase tracking-[0.2em] text-white/30 border-b border-white/5">
                                             <tr>
                                                 <th className="px-8 py-5">Node Identity</th>
                                                 <th className="px-8 py-5">Communication Uplink</th>
@@ -1046,10 +1046,10 @@ const AdminSecurePortal = () => {
                                         <tbody>
                                             {loading ? (
                                                 Array.from({ length: 8 }).map((_, i) => (
-                                                    <tr key={i} className="border-b border-slate-200">
+                                                    <tr key={i} className="border-b border-white/5">
                                                         {Array.from({ length: 5 }).map((_, j) => (
                                                             <td key={j} className="px-8 py-6">
-                                                                <div className="h-4 bg-slate-100 rounded-full animate-pulse" style={{ width: `${60 + Math.random() * 30}%` }} />
+                                                                <div className="h-4 bg-white/5 rounded-full animate-pulse" style={{ width: `${60 + Math.random() * 30}%` }} />
                                                             </td>
                                                         ))}
                                                     </tr>
@@ -1057,8 +1057,8 @@ const AdminSecurePortal = () => {
                                             ) : nodes.length === 0 ? (
                                                 <tr>
                                                     <td colSpan="6" className="py-24 text-center">
-                                                        <ShieldOff className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-                                                        <p className="text-slate-400 text-[11px] font-black uppercase tracking-[0.2em]">Zero Identities Detected</p>
+                                                        <ShieldOff className="w-12 h-12 text-white/10 mx-auto mb-4" />
+                                                        <p className="text-white/20 text-[11px] font-black uppercase tracking-[0.2em]">Zero Identities Detected</p>
                                                     </td>
                                                 </tr>
                                             ) : nodes.map(node => {
@@ -1069,7 +1069,7 @@ const AdminSecurePortal = () => {
                                                             setSelectedUserId(node._id);
                                                             setDrawerContext('directory');
                                                         }}
-                                                        className={`border-b border-slate-200 hover:bg-slate-50 transition-all cursor-pointer group
+                                                        className={`border-b border-white/5 hover:bg-white/[0.03] transition-all cursor-pointer group
                                                         ${isBanned ? 'bg-rose-500/5' : ''}`}>
 
                                                         {/* Node Identity */}
@@ -1083,18 +1083,18 @@ const AdminSecurePortal = () => {
                                                                 </div>
                                                                 <div>
                                                                     <div className="flex items-center gap-1.5">
-                                                                        <span className="font-black text-slate-900 text-[13px] tracking-tight group-hover:text-emerald-400 transition-colors">{node.username}</span>
+                                                                        <span className="font-black text-white text-[13px] tracking-tight group-hover:text-emerald-400 transition-colors">{node.username}</span>
                                                                         {node.role === 'admin' && <Star className="w-3 h-3 text-amber-500 fill-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.5)]" />}
                                                                     </div>
-                                                                    <span className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-0.5">ID: {node.streamerId}</span>
+                                                                    <span className="text-[10px] text-white/20 font-black uppercase tracking-widest mt-0.5">ID: {node.streamerId}</span>
                                                                 </div>
                                                             </div>
                                                         </td>
 
                                                         {/* Communication Uplink */}
                                                         <td className="px-8 py-4">
-                                                            <span className="text-slate-600 font-black text-[11px] tracking-wider truncate block max-w-[200px]">{node.email}</span>
-                                                            <span className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Referred {node.referralCount || 0} Nodes</span>
+                                                            <span className="text-white/60 font-black text-[11px] tracking-wider truncate block max-w-[200px]">{node.email}</span>
+                                                            <span className="text-[10px] text-white/20 font-black uppercase tracking-widest">Referred {node.referralCount || 0} Nodes</span>
                                                         </td>
 
                                                         {/* Intelligence & Trust */}
@@ -1102,19 +1102,19 @@ const AdminSecurePortal = () => {
                                                             <div className="flex items-center gap-3">
                                                                 <div className="flex flex-col gap-1">
                                                                     <div className="flex items-center gap-1.5">
-                                                                        <div className="w-12 h-1.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+                                                                        <div className="w-12 h-1.5 bg-white/5 rounded-full overflow-hidden border border-white/10">
                                                                             <motion.div
                                                                                 initial={{ width: 0 }}
                                                                                 animate={{ width: `${node.trustScore || 100}%` }}
                                                                                 className={`h-full ${node.trustScore < 40 ? 'bg-rose-400 shadow-[0_0_10px_rgba(244,63,94,0.4)]' : node.trustScore < 75 ? 'bg-amber-400' : 'bg-emerald-400'}`}
                                                                             />
                                                                         </div>
-                                                                        <span className="text-[9px] font-black text-slate-500">{node.trustScore || 100}%</span>
+                                                                        <span className="text-[9px] font-black text-white/40">{node.trustScore || 100}%</span>
                                                                     </div>
                                                                     <span className={`text-[8px] font-black uppercase tracking-widest ${node.nodeStatus === 'flagged' ? 'text-rose-400' :
                                                                         node.nodeStatus === 'under_review' ? 'text-amber-400' :
                                                                             node.nodeStatus === 'verified' ? 'text-emerald-400' :
-                                                                                'text-slate-400'
+                                                                                'text-white/20'
                                                                         }`}>
                                                                         [{node.nodeStatus || 'standard'}]
                                                                     </span>
@@ -1139,14 +1139,14 @@ const AdminSecurePortal = () => {
                                                                     ${node.tier === 'legend' ? 'bg-amber-500/10 text-amber-500 border-amber-500/30' :
                                                                             node.tier === 'pro' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/30' :
                                                                                 node.tier === 'starter' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' :
-                                                                                    'bg-slate-100 text-slate-500 border-slate-200'}`}
+                                                                                    'bg-white/5 text-white/30 border-white/10'}`}
                                                                 >
                                                                     <option value="none">Ghost</option>
                                                                     <option value="starter">Starter</option>
                                                                     <option value="pro">Pro</option>
                                                                     <option value="legend">Legend</option>
                                                                 </select>
-                                                                <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none opacity-30 text-slate-600" />
+                                                                <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none opacity-30 text-white" />
                                                             </div>
                                                         </td>
 
@@ -1160,19 +1160,19 @@ const AdminSecurePortal = () => {
                                                                         className={`appearance-none pl-3 pr-8 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider border cursor-pointer outline-none transition-all
                                                                         ${node.role === 'admin'
                                                                                 ? 'bg-amber-500/10 text-amber-500 border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.1)]'
-                                                                                : 'bg-slate-100 text-slate-500 border-slate-200'}`}
+                                                                                : 'bg-white/5 text-white/40 border-white/10'}`}
                                                                     >
                                                                         <option value="user">USER</option>
                                                                         <option value="admin">MASTER</option>
                                                                     </select>
-                                                                    <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none opacity-30 text-slate-600" />
+                                                                    <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none opacity-30 text-white" />
                                                                 </div>
                                                                 <button
                                                                     onClick={() => toggleBan(node._id, isBanned)}
                                                                     className={`p-2 rounded-xl transition-all border
                                                                     ${isBanned
-                                                                            ? 'bg-slate-100 text-slate-500 border-slate-200 hover:border-emerald-500/50 hover:text-emerald-400'
-                                                                            : 'bg-rose-500/10 text-rose-500 border-rose-500/20 hover:bg-rose-500 hover:text-slate-900'}`}>
+                                                                            ? 'bg-white/5 text-white/40 border-white/10 hover:border-emerald-500/50 hover:text-emerald-400'
+                                                                            : 'bg-rose-500/10 text-rose-500 border-rose-500/20 hover:bg-rose-500 hover:text-white'}`}>
                                                                     {isBanned ? <ShieldOff className="w-4 h-4" /> : <ShieldAlert className="w-4 h-4" />}
                                                                 </button>
                                                             </div>
@@ -1185,13 +1185,13 @@ const AdminSecurePortal = () => {
                                 </div>
 
                                 {/* Pagination */}
-                                <div className="px-6 py-6 border-t border-slate-200 flex items-center justify-between">
-                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
-                                        Node Matrix Page <span className="text-slate-500">{page}</span> of <span className="text-slate-500">{totalPages}</span>
+                                <div className="px-6 py-6 border-t border-white/5 flex items-center justify-between">
+                                    <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">
+                                        Node Matrix Page <span className="text-white/40">{page}</span> of <span className="text-white/40">{totalPages}</span>
                                     </span>
                                     <div className="flex items-center gap-2">
                                         <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
-                                            className="p-2 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-100 hover:text-slate-900 disabled:opacity-30 transition-all">
+                                            className="p-2 rounded-xl border border-white/10 text-white/40 hover:bg-white/5 hover:text-white disabled:opacity-30 transition-all">
                                             <ChevronLeft className="w-4 h-4" />
                                         </button>
                                         <div className="flex items-center gap-1">
@@ -1201,14 +1201,14 @@ const AdminSecurePortal = () => {
                                                 return (
                                                     <button key={p} onClick={() => setPage(p)}
                                                         className={`w-9 h-9 rounded-xl text-[10px] font-black transition-all border
-                                                        ${p === page ? 'bg-emerald-500 text-slate-900 border-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 'text-slate-400 border-slate-200 hover:border-white/20 hover:text-slate-500'}`}>
+                                                        ${p === page ? 'bg-emerald-500 text-white border-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 'text-white/20 border-white/10 hover:border-white/20 hover:text-white/40'}`}>
                                                         {p}
                                                     </button>
                                                 );
                                             })}
                                         </div>
                                         <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
-                                            className="p-2 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-100 hover:text-slate-900 disabled:opacity-30 transition-all">
+                                            className="p-2 rounded-xl border border-white/10 text-white/40 hover:bg-white/5 hover:text-white disabled:opacity-30 transition-all">
                                             <ChevronRight className="w-4 h-4" />
                                         </button>
                                     </div>
@@ -1234,11 +1234,11 @@ const AdminSecurePortal = () => {
                                     </div>
                                 </div>
 
-                                <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden backdrop-blur-sm">
-                                    <div className="px-8 py-6 border-b border-slate-200 flex items-center justify-between">
+                                <div className="bg-white/[0.02] rounded-3xl border border-white/5 shadow-2xl overflow-hidden backdrop-blur-xl">
+                                    <div className="px-8 py-6 border-b border-white/5 flex items-center justify-between">
                                         <div>
-                                            <h2 className="text-xl font-black text-slate-900 tracking-tight">Settlement Queue</h2>
-                                            <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] mt-1">
+                                            <h2 className="text-xl font-black text-white tracking-tight">Settlement Queue</h2>
+                                            <p className="text-[10px] text-white/30 font-black uppercase tracking-[0.2em] mt-1">
                                                 <span className="text-rose-500">{payoutQueue.length}</span> Nodes Awaiting Financial Clearance
                                             </p>
                                         </div>
@@ -1250,7 +1250,7 @@ const AdminSecurePortal = () => {
 
                                     <div className="overflow-x-auto">
                                         <table className="w-full text-left text-sm min-w-[700px]">
-                                            <thead className="bg-slate-50 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 border-b border-slate-200">
+                                            <thead className="bg-white/[0.03] text-[10px] font-black uppercase tracking-[0.2em] text-white/30 border-b border-white/5">
                                                 <tr>
                                                     <th className="px-8 py-5">Origin Node</th>
                                                     <th className="px-8 py-5">Tier Override</th>
@@ -1266,8 +1266,8 @@ const AdminSecurePortal = () => {
                                                             <div className="w-16 h-16 bg-emerald-500/10 rounded-3xl flex items-center justify-center mx-auto mb-4 border border-emerald-500/20">
                                                                 <CheckCircle2 className="w-8 h-8 text-emerald-400" />
                                                             </div>
-                                                            <p className="text-slate-900 font-black text-sm uppercase tracking-widest">System Fully Settled</p>
-                                                            <p className="text-slate-400 text-[10px] uppercase font-black tracking-[0.2em] mt-2">Zero Pending Liabilities Detected</p>
+                                                            <p className="text-white font-black text-sm uppercase tracking-widest">System Fully Settled</p>
+                                                            <p className="text-white/20 text-[10px] uppercase font-black tracking-[0.2em] mt-2">Zero Pending Liabilities Detected</p>
                                                         </td>
                                                     </tr>
                                                 ) : payoutQueue.map(node => (
@@ -1276,19 +1276,19 @@ const AdminSecurePortal = () => {
                                                             setSelectedUserId(node._id);
                                                             setDrawerContext('finance');
                                                         }}
-                                                        className="border-b border-slate-200 hover:bg-slate-50 transition-all cursor-pointer group">
+                                                        className="border-b border-white/5 hover:bg-white/[0.03] transition-all cursor-pointer group">
                                                         <td className="px-8 py-5">
                                                             <div className="flex items-center gap-4">
                                                                 <Avatar name={node.username} isBanned={false} />
                                                                 <div>
-                                                                    <span className="font-black text-slate-900 text-[13px] tracking-tight group-hover:text-emerald-400 transition-colors">{node.username}</span>
+                                                                    <span className="font-black text-white text-[13px] tracking-tight group-hover:text-emerald-400 transition-colors">{node.username}</span>
                                                                     <br />
-                                                                    <span className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-0.5">ID: {node.streamerId}</span>
+                                                                    <span className="text-[10px] text-white/20 font-black uppercase tracking-widest mt-0.5">ID: {node.streamerId}</span>
                                                                 </div>
                                                             </div>
                                                         </td>
                                                         <td className="px-8 py-5">
-                                                            <span className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] border ${node.tier === 'legend' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : node.tier === 'pro' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' : node.tier === 'starter' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-slate-100 text-slate-400 border-slate-200'}`}>
+                                                            <span className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] border ${node.tier === 'legend' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : node.tier === 'pro' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' : node.tier === 'starter' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-white/5 text-white/20 border-white/10'}`}>
                                                                 {node.tier || 'Ghost'}
                                                             </span>
                                                         </td>
@@ -1304,7 +1304,7 @@ const AdminSecurePortal = () => {
                                                                     e.stopPropagation();
                                                                     executeSettlement(node._id, node.financialMetrics?.pendingPayouts || 0);
                                                                 }}
-                                                                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] bg-emerald-500 hover:bg-emerald-400 text-slate-900 transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] hover:-translate-y-0.5 active:translate-y-0">
+                                                                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] bg-emerald-500 hover:bg-emerald-400 text-white transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] hover:-translate-y-0.5 active:translate-y-0">
                                                                 <Landmark className="w-3.5 h-3.5" /> AUTHORIZE
                                                             </button>
                                                         </td>
@@ -1320,33 +1320,33 @@ const AdminSecurePortal = () => {
                             <motion.div key="broadcast"
                                 initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }}
                                 className="max-w-4xl mx-auto space-y-8">
-                                <div className="bg-white rounded-3xl border border-slate-200 p-8 backdrop-blur-sm relative overflow-hidden group">
+                                <div className="bg-white/[0.02] rounded-3xl border border-white/5 p-8 backdrop-blur-3xl relative overflow-hidden group">
                                     <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
                                         <Zap className="w-32 h-32 text-emerald-500" />
                                     </div>
-                                    <h2 className="text-2xl font-black text-slate-900 tracking-tight mb-2">Global Broadcast Uplink</h2>
-                                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-8">Dispatch high-priority alert packets to all active streamer nodes</p>
+                                    <h2 className="text-2xl font-black text-white tracking-tight mb-2">Global Broadcast Uplink</h2>
+                                    <p className="text-xs font-semibold text-white/30 uppercase tracking-widest mb-8">Dispatch high-priority alert packets to all active streamer nodes</p>
 
                                     <div className="space-y-6 relative">
                                         <div>
-                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 block mb-3">Transmission Payload</label>
+                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 block mb-3">Transmission Payload</label>
                                             <textarea
                                                 value={broadcastMsg}
                                                 onChange={e => setBroadcastMsg(e.target.value)}
-                                                className="w-full bg-slate-100 border border-slate-200 rounded-2xl p-6 text-slate-900 placeholder:text-slate-300 focus:outline-none focus:border-emerald-500/50 focus:bg-white transition-all min-h-[160px] resize-none text-sm font-medium"
+                                                className="w-full bg-white/5 border border-white/10 rounded-2xl p-6 text-white placeholder:text-white/10 focus:outline-none focus:border-emerald-500/50 focus:bg-white/[0.08] transition-all min-h-[160px] resize-none text-sm font-medium"
                                                 placeholder="Enter the broadcast message to be transmitted system-wide..."
                                             />
                                         </div>
 
                                         <div className="flex flex-col sm:flex-row gap-6">
                                             <div className="flex-1">
-                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 block mb-3">Uplink Priority Level</label>
-                                                <div className="flex bg-slate-100 p-1 rounded-2xl border border-slate-200">
+                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 block mb-3">Uplink Priority Level</label>
+                                                <div className="flex bg-white/5 p-1 rounded-2xl border border-white/10">
                                                     {['Standard', 'Advisory', 'Critical'].map(lvl => (
                                                         <button
                                                             key={lvl}
                                                             onClick={() => setBroadcastLevel(lvl)}
-                                                            className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${broadcastLevel === lvl ? 'bg-emerald-500 text-slate-900 shadow-[0_0_20px_rgba(16,185,129,0.2)]' : 'text-slate-400 hover:text-slate-500'}`}>
+                                                            className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${broadcastLevel === lvl ? 'bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.2)]' : 'text-white/20 hover:text-white/40'}`}>
                                                             {lvl}
                                                         </button>
                                                     ))}
@@ -1358,7 +1358,7 @@ const AdminSecurePortal = () => {
                                             onClick={dispatchBroadcast}
                                             disabled={!broadcastMsg}
                                             className={`w-full py-4 rounded-2xl font-black uppercase tracking-[0.3em] text-xs transition-all flex items-center justify-center gap-3
-                                            ${broadcastMsg ? 'bg-emerald-500 hover:bg-emerald-400 text-slate-900 shadow-[0_0_40px_rgba(16,185,129,0.2)] hover:shadow-[0_0_60px_rgba(16,185,129,0.4)]' : 'bg-slate-100 text-slate-300 cursor-not-allowed'}`}>
+                                            ${broadcastMsg ? 'bg-emerald-500 hover:bg-emerald-400 text-white shadow-[0_0_40px_rgba(16,185,129,0.2)] hover:shadow-[0_0_60px_rgba(16,185,129,0.4)]' : 'bg-white/5 text-white/10 cursor-not-allowed'}`}>
                                             <Zap className={`w-4 h-4 ${broadcastMsg ? 'fill-white' : 'fill-white/10'}`} /> DISPATCH BROADCAST
                                         </button>
                                     </div>
@@ -1369,25 +1369,25 @@ const AdminSecurePortal = () => {
                             <motion.div key="security"
                                 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }}
                                 className="space-y-6">
-                                <div className="bg-white rounded-3xl border border-slate-200 p-8 backdrop-blur-sm overflow-hidden relative">
+                                <div className="bg-white/[0.02] rounded-3xl border border-white/5 p-8 backdrop-blur-3xl overflow-hidden relative">
                                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-10">
                                         <div>
-                                            <h2 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+                                            <h2 className="text-2xl font-black text-white tracking-tight flex items-center gap-3">
                                                 <div className="w-10 h-10 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-500/20">
                                                     <Shield className="w-5 h-5 text-emerald-500" />
                                                 </div>
                                                 Security & Audit Nexus
                                             </h2>
-                                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mt-2">Permanent immutable record of all master node operations</p>
+                                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 mt-2">Permanent immutable record of all master node operations</p>
                                         </div>
-                                        <button onClick={() => fetchAuditLogs(logsPage)} className="p-3 bg-slate-100 rounded-2xl hover:bg-slate-100 transition-colors border border-slate-200">
+                                        <button onClick={() => fetchAuditLogs(logsPage)} className="p-3 bg-white/5 rounded-2xl hover:bg-white/10 transition-colors border border-white/10">
                                             <RefreshCw className={`w-4 h-4 text-emerald-500 ${refreshing ? 'animate-spin' : ''}`} />
                                         </button>
                                     </div>
 
                                     <div className="overflow-x-auto">
                                         <table className="w-full text-left text-sm">
-                                            <thead className="bg-slate-50 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 border-b border-slate-200">
+                                            <thead className="bg-white/[0.03] text-[10px] font-black uppercase tracking-[0.2em] text-white/30 border-b border-white/5">
                                                 <tr>
                                                     <th className="px-6 py-4">Timestamp</th>
                                                     <th className="px-6 py-4">Administrator</th>
@@ -1396,10 +1396,10 @@ const AdminSecurePortal = () => {
                                                     <th className="px-6 py-4">Operational Details</th>
                                                 </tr>
                                             </thead>
-                                            <tbody className="divide-y divide-slate-100">
+                                            <tbody className="divide-y divide-white/5">
                                                 {auditLogs.map(log => (
-                                                    <tr key={log._id} className="hover:bg-slate-50/50 transition-colors group">
-                                                        <td className="px-6 py-5 text-[11px] font-black text-slate-500 font-mono">
+                                                    <tr key={log._id} className="hover:bg-white/[0.01] transition-colors group">
+                                                        <td className="px-6 py-5 text-[11px] font-black text-white/40 font-mono">
                                                             {new Date(log.timestamp).toLocaleString('en-IN', { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' })}
                                                         </td>
                                                         <td className="px-6 py-5">
@@ -1407,7 +1407,7 @@ const AdminSecurePortal = () => {
                                                                 <div className="w-6 h-6 rounded-lg bg-emerald-500/20 flex items-center justify-center text-[10px] font-black text-emerald-500 border border-emerald-500/20">
                                                                     {log.adminUsername?.slice(0, 1).toUpperCase()}
                                                                 </div>
-                                                                <span className="text-[12px] font-black text-slate-800">{log.adminUsername}</span>
+                                                                <span className="text-[12px] font-black text-white">{log.adminUsername}</span>
                                                             </div>
                                                         </td>
                                                         <td className="px-6 py-5 text-[10px]">
@@ -1419,9 +1419,9 @@ const AdminSecurePortal = () => {
                                                             </span>
                                                         </td>
                                                         <td className="px-6 py-5">
-                                                            <span className="text-[11px] font-black text-slate-600">{log.targetName || 'SYSTEM'}</span>
+                                                            <span className="text-[11px] font-black text-white/60">{log.targetName || 'SYSTEM'}</span>
                                                         </td>
-                                                        <td className="px-6 py-5 text-[11px] text-slate-500 italic font-medium">
+                                                        <td className="px-6 py-5 text-[11px] text-white/40 italic font-medium">
                                                             {log.details || '—'}
                                                         </td>
                                                     </tr>
@@ -1435,14 +1435,14 @@ const AdminSecurePortal = () => {
                                         <button
                                             disabled={logsPage <= 1}
                                             onClick={() => fetchAuditLogs(logsPage - 1)}
-                                            className="p-2 bg-slate-100 rounded-xl border border-slate-200 disabled:opacity-20 hover:bg-slate-100 transition-colors">
+                                            className="p-2 bg-white/5 rounded-xl border border-white/10 disabled:opacity-20 hover:bg-white/10 transition-colors">
                                             <ChevronLeft className="w-4 h-4" />
                                         </button>
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Sector {logsPage} / {totalLogsPages}</span>
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Sector {logsPage} / {totalLogsPages}</span>
                                         <button
                                             disabled={logsPage >= totalLogsPages}
                                             onClick={() => fetchAuditLogs(logsPage + 1)}
-                                            className="p-2 bg-slate-100 rounded-xl border border-slate-200 disabled:opacity-20 hover:bg-slate-100 transition-colors">
+                                            className="p-2 bg-white/5 rounded-xl border border-white/10 disabled:opacity-20 hover:bg-white/10 transition-colors">
                                             <ChevronRight className="w-4 h-4" />
                                         </button>
                                     </div>
@@ -1455,7 +1455,7 @@ const AdminSecurePortal = () => {
                                 className="space-y-8">
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     {/* Uptime and Node Info */}
-                                    <div className="col-span-1 md:col-span-2 bg-white rounded-3xl border border-slate-200 p-8 backdrop-blur-sm relative overflow-hidden group">
+                                    <div className="col-span-1 md:col-span-2 bg-white/[0.02] rounded-3xl border border-white/5 p-8 backdrop-blur-3xl relative overflow-hidden group">
                                         <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
                                             <Activity className="w-32 h-32 text-indigo-500" />
                                         </div>
@@ -1464,29 +1464,29 @@ const AdminSecurePortal = () => {
                                         </h3>
                                         <div className="grid grid-cols-2 gap-8 relative">
                                             <div>
-                                                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">System Uptime</p>
-                                                <p className="text-3xl font-black text-slate-900 font-mono">{Math.floor((systemHealth?.uptime || 0) / 3600)}h {Math.floor(((systemHealth?.uptime || 0) % 3600) / 60)}m</p>
+                                                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/20 mb-1">System Uptime</p>
+                                                <p className="text-3xl font-black text-white font-mono">{Math.floor((systemHealth?.uptime || 0) / 3600)}h {Math.floor(((systemHealth?.uptime || 0) % 3600) / 60)}m</p>
                                             </div>
                                             <div>
-                                                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">CPU Core Load</p>
+                                                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/20 mb-1">CPU Core Load</p>
                                                 <p className="text-3xl font-black text-emerald-400 font-mono tracking-tighter">{systemHealth?.cpuLoad || 0}%</p>
                                             </div>
                                             <div>
-                                                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">Memory Pipeline</p>
-                                                <p className="text-[13px] font-black text-slate-600 font-mono">{Math.floor((systemHealth?.memoryUsage?.rss || 0) / 1024 / 1024)}MB / 2.0GB</p>
-                                                <div className="w-full h-1 bg-slate-100 rounded-full mt-3 overflow-hidden border border-slate-200">
+                                                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/20 mb-1">Memory Pipeline</p>
+                                                <p className="text-[13px] font-black text-white/60 font-mono">{Math.floor((systemHealth?.memoryUsage?.rss || 0) / 1024 / 1024)}MB / 2.0GB</p>
+                                                <div className="w-full h-1 bg-white/5 rounded-full mt-3 overflow-hidden border border-white/5">
                                                     <div className="h-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.5)]" style={{ width: `${Math.min(100, (systemHealth?.memoryUsage?.rss || 0) / 1024 / 1024 / 20)}%` }} />
                                                 </div>
                                             </div>
                                             <div>
-                                                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">Node Environment</p>
-                                                <p className="text-[13px] font-black text-indigo-400 font-mono">{systemHealth?.nodeVersion} <span className="text-slate-400 text-[10px]">({systemHealth?.platform})</span></p>
+                                                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/20 mb-1">Node Environment</p>
+                                                <p className="text-[13px] font-black text-indigo-400 font-mono">{systemHealth?.nodeVersion} <span className="text-white/20 text-[10px]">({systemHealth?.platform})</span></p>
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* DB & Relay Connections */}
-                                    <div className="bg-white rounded-3xl border border-slate-200 p-8 backdrop-blur-sm flex flex-col justify-between">
+                                    <div className="bg-white/[0.02] rounded-3xl border border-white/5 p-8 backdrop-blur-3xl flex flex-col justify-between">
                                         <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400 mb-8 flex items-center gap-2">
                                             <RefreshCw className="w-3.5 h-3.5" /> Synchronous Relays
                                         </h3>
@@ -1496,8 +1496,8 @@ const AdminSecurePortal = () => {
                                                 { label: 'Payout Engine', val: systemHealth?.payoutEngine },
                                                 { label: 'Broadcast Relay', val: systemHealth?.broadcastRelay }
                                             ].map((relay, i) => (
-                                                <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 border border-slate-200 group hover:bg-slate-100 transition-all">
-                                                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">{relay.label}</span>
+                                                <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.03] border border-white/5 group hover:bg-white/[0.06] transition-all">
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-white/40">{relay.label}</span>
                                                     <span className="flex items-center gap-2 text-[10px] font-black text-emerald-500 uppercase tracking-widest">
                                                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
                                                         {relay.val || 'Online'}
@@ -1516,11 +1516,11 @@ const AdminSecurePortal = () => {
                                 {!adminProfile ? (
                                     <div className="py-24 text-center">
                                         <RefreshCw className="w-12 h-12 text-emerald-500 animate-spin mx-auto mb-4" />
-                                        <p className="text-slate-400 text-[11px] font-black uppercase tracking-[0.2em]">Synchronizing Identity Matrix...</p>
+                                        <p className="text-white/20 text-[11px] font-black uppercase tracking-[0.2em]">Synchronizing Identity Matrix...</p>
                                     </div>
                                 ) : (
                                     <form onSubmit={updateAdminProfileData} className="space-y-8">
-                                        <div className="bg-white rounded-3xl border border-slate-200 p-8 backdrop-blur-sm relative overflow-hidden group">
+                                        <div className="bg-white/[0.02] rounded-3xl border border-white/5 p-8 backdrop-blur-3xl relative overflow-hidden group">
                                             {/* Profile Header */}
                                             <div className="flex flex-col md:flex-row items-center gap-8 mb-12">
                                                 <div className="relative group/avatar">
@@ -1533,7 +1533,7 @@ const AdminSecurePortal = () => {
                                                             (adminProfile.fullName || adminProfile.username || '?').slice(0, 1).toUpperCase()
                                                         )}
                                                         <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                                            <Paintbrush className="w-6 h-6 text-slate-600" />
+                                                            <Paintbrush className="w-6 h-6 text-white" />
                                                         </div>
                                                     </div>
                                                     <input
@@ -1543,21 +1543,21 @@ const AdminSecurePortal = () => {
                                                         className="hidden"
                                                         accept="image/*"
                                                     />
-                                                    <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-xl bg-emerald-500 border-4 border-white flex items-center justify-center">
-                                                        <Shield className="w-4 h-4 text-emerald-600" />
+                                                    <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-xl bg-emerald-500 border-4 border-[#050505] flex items-center justify-center">
+                                                        <Shield className="w-4 h-4 text-white" />
                                                     </div>
                                                 </div>
                                                 <div className="text-center md:text-left flex-1">
-                                                    <h2 className="text-3xl font-black text-slate-900 tracking-tight underline decoration-emerald-500/30 decoration-4 underline-offset-8">
+                                                    <h2 className="text-3xl font-black text-white tracking-tight underline decoration-emerald-500/30 decoration-4 underline-offset-8">
                                                         {adminProfile.username}
                                                         <span className="ml-3 text-emerald-400 text-xs font-black uppercase tracking-[0.2em] bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.1)]">Master Node</span>
                                                     </h2>
-                                                    <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.3em] mt-4 flex items-center justify-center md:justify-start gap-2">
+                                                    <p className="text-white/40 text-[10px] font-black uppercase tracking-[0.3em] mt-4 flex items-center justify-center md:justify-start gap-2">
                                                         <Monitor className="w-3 h-3" /> System Access Level: {adminProfile.adminProfile?.accessLevel || 1}
                                                     </p>
                                                     <div className="mt-6 flex flex-wrap justify-center md:justify-start gap-3">
-                                                        <span className="px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-[9px] font-black uppercase tracking-widest text-slate-500">{adminProfile.email}</span>
-                                                        <span className="px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-[9px] font-black uppercase tracking-widest text-slate-500">ID: {adminProfile.streamerId}</span>
+                                                        <span className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest text-white/40">{adminProfile.email}</span>
+                                                        <span className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest text-white/40">ID: {adminProfile.streamerId}</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -1570,23 +1570,23 @@ const AdminSecurePortal = () => {
                                                     </h3>
                                                     <div className="space-y-4">
                                                         <div>
-                                                            <label className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 block mb-2">Display Profile Name</label>
+                                                            <label className="text-[9px] font-black uppercase tracking-[0.2em] text-white/30 block mb-2">Display Profile Name</label>
                                                             <input type="text"
                                                                 value={adminProfile.fullName || ''}
                                                                 onChange={e => setAdminProfile({ ...adminProfile, fullName: e.target.value })}
-                                                                className="w-full bg-slate-100 border border-slate-200 rounded-2xl px-6 py-4 text-sm text-slate-900 focus:outline-none focus:border-emerald-500/50 focus:bg-white transition-all font-bold"
+                                                                className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm text-white focus:outline-none focus:border-emerald-500/50 focus:bg-white/[0.08] transition-all font-bold"
                                                                 placeholder="Enter your operational name..."
                                                             />
                                                         </div>
                                                         <div>
-                                                            <label className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 block mb-2">Official Admin Title</label>
+                                                            <label className="text-[9px] font-black uppercase tracking-[0.2em] text-white/30 block mb-2">Official Admin Title</label>
                                                             <input type="text"
                                                                 value={adminProfile.adminProfile?.title || ''}
                                                                 onChange={e => setAdminProfile({
                                                                     ...adminProfile,
                                                                     adminProfile: { ...adminProfile.adminProfile, title: e.target.value }
                                                                 })}
-                                                                className="w-full bg-slate-100 border border-slate-200 rounded-2xl px-6 py-4 text-sm text-slate-900 focus:outline-none focus:border-emerald-500/50 focus:bg-white transition-all font-bold"
+                                                                className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm text-white focus:outline-none focus:border-emerald-500/50 focus:bg-white/[0.08] transition-all font-bold"
                                                                 placeholder="e.g. Lead Security Architect"
                                                             />
                                                         </div>
@@ -1600,26 +1600,26 @@ const AdminSecurePortal = () => {
                                                     </h3>
                                                     <div className="space-y-4">
                                                         <div>
-                                                            <label className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 block mb-2">Operational Department</label>
+                                                            <label className="text-[9px] font-black uppercase tracking-[0.2em] text-white/30 block mb-2">Operational Department</label>
                                                             <input type="text"
                                                                 value={adminProfile.adminProfile?.department || ''}
                                                                 onChange={e => setAdminProfile({
                                                                     ...adminProfile,
                                                                     adminProfile: { ...adminProfile.adminProfile, department: e.target.value }
                                                                 })}
-                                                                className="w-full bg-slate-100 border border-slate-200 rounded-2xl px-6 py-4 text-sm text-slate-900 focus:outline-none focus:border-indigo-500/50 focus:bg-white transition-all font-bold"
+                                                                className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm text-white focus:outline-none focus:border-indigo-500/50 focus:bg-white/[0.08] transition-all font-bold"
                                                                 placeholder="e.g. Platform Integrity"
                                                             />
                                                         </div>
                                                         <div>
-                                                            <label className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 block mb-2">Identity Briefing (Bio)</label>
+                                                            <label className="text-[9px] font-black uppercase tracking-[0.2em] text-white/30 block mb-2">Identity Briefing (Bio)</label>
                                                             <textarea
                                                                 value={adminProfile.adminProfile?.bio || ''}
                                                                 onChange={e => setAdminProfile({
                                                                     ...adminProfile,
                                                                     adminProfile: { ...adminProfile.adminProfile, bio: e.target.value }
                                                                 })}
-                                                                className="w-full bg-slate-100 border border-slate-200 rounded-2xl px-6 py-4 text-sm text-slate-900 focus:outline-none focus:border-indigo-500/50 focus:bg-white transition-all font-bold min-h-[100px] resize-none"
+                                                                className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm text-white focus:outline-none focus:border-indigo-500/50 focus:bg-white/[0.08] transition-all font-bold min-h-[100px] resize-none"
                                                                 placeholder="Brief operational history..."
                                                             />
                                                         </div>
@@ -1627,15 +1627,15 @@ const AdminSecurePortal = () => {
                                                 </div>
                                             </div>
 
-                                            <div className="mt-12 pt-8 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-6">
-                                                <div className="flex items-center gap-3 text-slate-500">
+                                            <div className="mt-12 pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-6">
+                                                <div className="flex items-center gap-3 text-white/30">
                                                     <ShieldAlert className="w-4 h-4 text-rose-500/50" />
                                                     <p className="text-[10px] font-bold uppercase tracking-widest leading-relaxed">Changes to this matrix will propagate <br className="hidden sm:block" /> across all secure system logs.</p>
                                                 </div>
                                                 <button
                                                     type="submit"
                                                     disabled={isSavingProfile}
-                                                    className="w-full sm:w-auto px-10 py-4 bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-slate-900 rounded-2xl font-black uppercase tracking-[0.2em] text-xs transition-all shadow-[0_0_30px_rgba(16,185,129,0.2)] hover:shadow-[0_0_50px_rgba(16,185,129,0.4)] flex items-center justify-center gap-3">
+                                                    className="w-full sm:w-auto px-10 py-4 bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-white rounded-2xl font-black uppercase tracking-[0.2em] text-xs transition-all shadow-[0_0_30px_rgba(16,185,129,0.2)] hover:shadow-[0_0_50px_rgba(16,185,129,0.4)] flex items-center justify-center gap-3">
                                                     {isSavingProfile ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
                                                     Synchronize Identity
                                                 </button>
@@ -1643,22 +1643,22 @@ const AdminSecurePortal = () => {
                                         </div>
 
                                         {/* Security Logs Component */}
-                                        <div className="bg-slate-50/50 rounded-3xl border border-slate-200 p-8 backdrop-blur-2xl">
-                                            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-6 flex items-center gap-2">
+                                        <div className="bg-white/[0.01] rounded-3xl border border-white/5 p-8 backdrop-blur-2xl">
+                                            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20 mb-6 flex items-center gap-2">
                                                 <Activity className="w-3.5 h-3.5" /> Recent Master Node Activity
                                             </h3>
                                             <div className="space-y-4">
                                                 {telemetryEvents.filter(ev => ev.type === 'security' || ev.type === 'broadcast').slice(0, 5).map(ev => (
-                                                    <div key={ev.id} className="flex items-center justify-between py-3 border-b border-slate-200">
+                                                    <div key={ev.id} className="flex items-center justify-between py-3 border-b border-white/5">
                                                         <div className="flex items-center gap-3">
                                                             <div className={`w-1.5 h-1.5 rounded-full ${ev.type === 'security' ? 'bg-indigo-500' : 'bg-amber-500'}`} />
-                                                            <span className="text-xs font-bold text-slate-600">{ev.message}</span>
+                                                            <span className="text-xs font-bold text-white/50">{ev.message}</span>
                                                         </div>
-                                                        <span className="text-[9px] font-mono text-slate-400">{ev.time}</span>
+                                                        <span className="text-[9px] font-mono text-white/20">{ev.time}</span>
                                                     </div>
                                                 ))}
                                                 {telemetryEvents.length === 0 && (
-                                                    <p className="text-center py-4 text-[10px] font-black uppercase tracking-widest text-slate-300 italic">Secure session active - awaiting events...</p>
+                                                    <p className="text-center py-4 text-[10px] font-black uppercase tracking-widest text-white/10 italic">Secure session active - awaiting events...</p>
                                                 )}
                                             </div>
                                         </div>
@@ -1671,28 +1671,28 @@ const AdminSecurePortal = () => {
                                 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
                                 className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
                                 <div className="lg:col-span-2 space-y-8">
-                                    <div className="bg-white rounded-3xl border border-slate-200 p-8 backdrop-blur-sm">
-                                        <h3 className="text-xl font-black text-slate-900 tracking-tight mb-8 flex items-center gap-3">
+                                    <div className="bg-white/[0.02] rounded-3xl border border-white/5 p-8 backdrop-blur-3xl">
+                                        <h3 className="text-xl font-black text-white tracking-tight mb-8 flex items-center gap-3">
                                             <Settings className="w-5 h-5 text-emerald-400" />
                                             Platform Calibration
                                         </h3>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                             <div className="space-y-3">
-                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 block">Global Commission (%)</label>
+                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 block">Global Commission (%)</label>
                                                 <input
                                                     type="number"
                                                     value={globalConfig.defaultCommissionRate}
                                                     onChange={e => setGlobalConfig({ ...globalConfig, defaultCommissionRate: parseFloat(e.target.value) || 0 })}
-                                                    className="w-full bg-slate-100 border border-slate-200 rounded-2xl px-5 py-3 text-slate-900 focus:outline-none focus:border-emerald-500/50"
+                                                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3 text-white focus:outline-none focus:border-emerald-500/50"
                                                 />
                                             </div>
                                             <div className="space-y-3">
-                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 block">Min Withdrawal (₹)</label>
+                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 block">Min Withdrawal (₹)</label>
                                                 <input
                                                     type="number"
                                                     value={globalConfig.minWithdrawalThreshold}
                                                     onChange={e => setGlobalConfig({ ...globalConfig, minWithdrawalThreshold: parseFloat(e.target.value) || 0 })}
-                                                    className="w-full bg-slate-100 border border-slate-200 rounded-2xl px-5 py-3 text-slate-900 focus:outline-none focus:border-emerald-500/50"
+                                                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3 text-white focus:outline-none focus:border-emerald-500/50"
                                                 />
                                             </div>
                                         </div>
@@ -1703,15 +1703,15 @@ const AdminSecurePortal = () => {
                                         </button>
                                     </div>
 
-                                    <div className="bg-white rounded-3xl border border-slate-200 p-8 backdrop-blur-sm">
-                                        <h3 className="text-xl font-black text-slate-900 tracking-tight mb-6 flex items-center gap-3">
+                                    <div className="bg-white/[0.02] rounded-3xl border border-white/5 p-8 backdrop-blur-3xl">
+                                        <h3 className="text-xl font-black text-white tracking-tight mb-6 flex items-center gap-3">
                                             <Shield className="w-5 h-5 text-rose-500" />
                                             System Integrity
                                         </h3>
                                         <div className="flex items-center justify-between p-6 bg-rose-500/5 border border-rose-500/10 rounded-2xl">
                                             <div>
                                                 <p className="text-sm font-black text-rose-500 uppercase tracking-wider">Maintenance Protocol</p>
-                                                <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-widest mt-1">Suspend all financial nodes and public uplinks</p>
+                                                <p className="text-[10px] text-white/30 font-semibold uppercase tracking-widest mt-1">Suspend all financial nodes and public uplinks</p>
                                             </div>
                                             <div
                                                 onClick={() => updateGlobalConfig({ maintenanceMode: !globalConfig.maintenanceMode })}
@@ -1723,24 +1723,24 @@ const AdminSecurePortal = () => {
                                 </div>
 
                                 <div className="space-y-8">
-                                    <div className="bg-white rounded-3xl border border-slate-200 p-8 backdrop-blur-sm">
-                                        <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+                                    <div className="bg-white/[0.02] rounded-3xl border border-white/5 p-8 backdrop-blur-3xl">
+                                        <h3 className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
                                             <Activity className="w-3.5 h-3.5 text-emerald-400" />
                                             Live Event Telemetry
                                         </h3>
                                         <div className="space-y-4 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
                                             {telemetryEvents.length === 0 ? (
                                                 <div className="py-20 text-center">
-                                                    <Activity className="w-8 h-8 text-slate-300 mx-auto mb-3" />
-                                                    <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Awaiting Transmissions...</p>
+                                                    <Activity className="w-8 h-8 text-white/5 mx-auto mb-3" />
+                                                    <p className="text-[10px] font-black text-white/10 uppercase tracking-widest">Awaiting Transmissions...</p>
                                                 </div>
                                             ) : telemetryEvents.map(ev => (
-                                                <div key={ev.id} className={`bg-slate-50 border-l-2 p-4 rounded-r-xl transition-all hover:bg-white/[0.05] ${ev.type === 'broadcast' ? 'border-amber-500' : 'border-emerald-500'}`}>
+                                                <div key={ev.id} className={`bg-white/[0.03] border-l-2 p-4 rounded-r-xl transition-all hover:bg-white/[0.05] ${ev.type === 'broadcast' ? 'border-amber-500' : 'border-emerald-500'}`}>
                                                     <p className={`text-[10px] font-black uppercase tracking-widest ${ev.type === 'broadcast' ? 'text-amber-500' : 'text-emerald-400'}`}>
                                                         {ev.type.toUpperCase()}
                                                     </p>
-                                                    <p className="text-xs font-bold text-slate-600 mt-1">{ev.message}</p>
-                                                    <p className="text-[9px] text-slate-400 font-mono mt-1">{ev.time}</p>
+                                                    <p className="text-xs font-bold text-white/60 mt-1">{ev.message}</p>
+                                                    <p className="text-[9px] text-white/20 font-mono mt-1">{ev.time}</p>
                                                 </div>
                                             ))}
                                         </div>
@@ -1752,7 +1752,7 @@ const AdminSecurePortal = () => {
                 </main>
 
                 {/* Status bar */}
-                <footer className="shrink-0 border-t border-slate-200 bg-white/90 backdrop-blur-sm px-6 py-3 flex items-center justify-between">
+                <footer className="shrink-0 border-t border-white/5 bg-black/40 backdrop-blur-2xl px-6 py-3 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <div className="flex items-center gap-2 px-2 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
                             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -1761,11 +1761,11 @@ const AdminSecurePortal = () => {
                     </div>
                     <div className="flex items-center gap-6">
                         <div className="flex items-center gap-2">
-                            <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Active Matrix:</span>
-                            <span className="text-[9px] font-mono text-slate-500">{totalNodes.toLocaleString()} Nodes Locked</span>
+                            <span className="text-[9px] font-black uppercase tracking-widest text-white/20">Active Matrix:</span>
+                            <span className="text-[9px] font-mono text-white/40">{totalNodes.toLocaleString()} Nodes Locked</span>
                         </div>
-                        <div className="h-4 w-px bg-slate-100" />
-                        <span className="text-[9px] font-black uppercase tracking-widest text-slate-300">DropPay Command Center v4.1.0</span>
+                        <div className="h-4 w-px bg-white/5" />
+                        <span className="text-[9px] font-black uppercase tracking-widest text-white/10">DropPay Command Center v4.1.0</span>
                     </div>
                 </footer>
             </div>

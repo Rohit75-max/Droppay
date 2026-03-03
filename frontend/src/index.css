@@ -2,6 +2,33 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================ */
+/* GLOBAL DARK / LIGHT MODE VARIABLES           */
+/* Public pages: Home, Login, Signup, etc.      */
+/* ============================================ */
+:root {
+    /* Default = dark */
+    --dp-bg: #050505;
+    --dp-surface: #0a0a0b;
+    --dp-card: rgba(255, 255, 255, 0.04);
+    --dp-border: rgba(255, 255, 255, 0.08);
+    --dp-text: #f1f5f9;
+    --dp-muted: #94a3b8;
+    --dp-accent: #10B981;
+    --dp-toggle-bg: rgba(255, 255, 255, 0.05);
+}
+
+html.light {
+    --dp-bg: #f8fafc;
+    --dp-surface: #ffffff;
+    --dp-card: #ffffff;
+    --dp-border: #e2e8f0;
+    --dp-text: #0f172a;
+    --dp-muted: #64748b;
+    --dp-accent: #10B981;
+    --dp-toggle-bg: #f1f5f9;
+}
+
 :root {
     --nexus-bg: #050505;
     --nexus-panel: #0a0a0a;

@@ -7,7 +7,9 @@ import {
   Shield, AlertCircle, Eye, EyeOff, Users, Activity,
   TrendingUp, Globe, CheckCircle, Star
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import ThemeToggle from '../components/ThemeToggle';
+import { useTheme } from '../context/ThemeContext';
 
 // API_BASE is now handled by the centralized axios configuration in src/api/axios.js
 
@@ -40,11 +42,11 @@ const StatCard = ({ icon: Icon, label, value, color, delay }) => (
 );
 
 // ─── Premium Input ────────────────────────────────────────────
-const PremiumInput = ({ icon: Icon, label, type, name, value, onChange, placeholder, rightEl }) => {
+const PremiumInput = ({ icon: Icon, label, type, name, value, onChange, placeholder, rightEl, isDark }) => {
   const [focused, setFocused] = useState(false);
   return (
     <div className="space-y-2">
-      <label className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em] transition-colors ${focused ? 'text-emerald-600' : 'text-slate-400'}`}>
+      <label className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em] transition-colors ${focused ? 'text-emerald-500' : isDark ? 'text-white/40' : 'text-slate-400'}`}>
         <Icon className="w-3 h-3" /> {label}
       </label>
       <div className="relative group">
@@ -55,12 +57,15 @@ const PremiumInput = ({ icon: Icon, label, type, name, value, onChange, placehol
           style={{ backgroundSize: '200% 200%' }}
         />
         <div className="relative">
-          <Icon className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors duration-200 ${focused ? 'text-emerald-500' : 'text-slate-300'}`} />
+          <Icon className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors duration-200 ${focused ? 'text-emerald-500' : isDark ? 'text-white/30' : 'text-slate-300'}`} />
           <input
             type={type} name={name} value={value} onChange={onChange}
             onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
             placeholder={placeholder} required
-            className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 pl-12 pr-12 text-sm text-slate-800 placeholder:text-slate-300 focus:outline-none focus:border-transparent transition-all"
+            className={`w-full rounded-2xl py-3.5 pl-12 pr-12 text-sm focus:outline-none focus:border-transparent transition-all ${isDark
+              ? 'bg-white/[0.05] border border-white/10 text-white placeholder:text-white/20'
+              : 'bg-slate-50 border border-slate-200 text-slate-800 placeholder:text-slate-300'
+              }`}
           />
           {rightEl && <div className="absolute right-4 top-1/2 -translate-y-1/2">{rightEl}</div>}
         </div>
@@ -73,6 +78,9 @@ const PremiumInput = ({ icon: Icon, label, type, name, value, onChange, placehol
 // MAIN COMPONENT
 // ─────────────────────────────────────────────────────────────
 const Login = () => {
+  const navigate = useNavigate();
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -115,22 +123,17 @@ const Login = () => {
       // Sync theme preference immediately after successful login
       syncTheme(res.data.user);
 
+      setError(''); // Clear any previous error so both banners don't show at once
       setLoginSuccess(true);
 
-      const { subscription } = res.data.user;
-      setTimeout(() => {
-        if (subscription && subscription.status === 'active') {
-          window.location.href = '/dashboard';
-        } else {
-          window.location.href = '/subscription';
-        }
-      }, 1000);
+      // Always go to dashboard — MissionGate will reroute to /subscription if no active plan
+      setTimeout(() => navigate('/dashboard'), 1000);
     } catch (err) {
       if (err.response?.status === 206) {
         setStep(2);
         setResendTimer(60);
       } else {
-        setError(err.response?.data?.msg || 'Matrix Connection Timeout: Node Unreachable.');
+        setError(err.response?.data?.msg || 'Incorrect email or password. Please try again.');
       }
     } finally { setLoading(false); }
   };
@@ -177,14 +180,8 @@ const Login = () => {
         syncTheme(res.data.user);
 
         setLoginSuccess(true);
-        const { subscription } = res.data.user;
-        setTimeout(() => {
-          if (subscription && subscription.status === 'active') {
-            window.location.href = '/dashboard';
-          } else {
-            window.location.href = '/subscription';
-          }
-        }, 1000);
+        // Always go to dashboard — MissionGate handles plan routing
+        setTimeout(() => navigate('/dashboard'), 1000);
       }
     } catch (err) { setError(err.response?.data?.msg || 'Invalid Transmission Key.'); }
     finally { setLoading(false); }
@@ -204,8 +201,8 @@ const Login = () => {
         initial={{ opacity: 0, y: 32, scale: 0.96 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-        style={{ boxShadow: '0 30px 80px -20px rgba(0,0,0,0.10)' }}
-        className="relative w-full max-w-[980px] rounded-[2.5rem] overflow-hidden flex flex-col lg:flex-row border border-white/80 bg-white"
+        style={{ boxShadow: isDark ? '0 30px 80px -20px rgba(0,0,0,0.5)' : '0 30px 80px -20px rgba(0,0,0,0.10)' }}
+        className={`relative w-full max-w-[980px] rounded-[2.5rem] overflow-hidden flex flex-col lg:flex-row border ${isDark ? 'border-white/10 bg-[#08100c]' : 'border-white/80 bg-white'}`}
       >
         {/* ── LEFT — Holographic Branding Pillar ── */}
         <motion.div
@@ -292,8 +289,8 @@ const Login = () => {
           </motion.div>
         </motion.div>
 
-        {/* ── RIGHT — Login form (Static / Focused) ── */}
-        <div className="flex-1 flex flex-col justify-center p-6 sm:p-8 lg:p-12 bg-white relative z-10 overflow-y-auto">
+        {/* ── RIGHT — Login form ── */}
+        <div className={`flex-1 flex flex-col justify-center p-6 sm:p-8 lg:p-12 relative z-10 overflow-y-auto transition-colors duration-500 ${isDark ? 'bg-[#0a1410]' : 'bg-white'}`}>
           <AnimatePresence mode="wait">
             {step === 1 ? (
               <motion.div key="login" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, x: -20 }}>
@@ -302,21 +299,24 @@ const Login = () => {
                 <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
                   className="flex items-center justify-between mb-10">
                   <div>
-                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Creator Login</p>
-                    <p className="text-[10px] text-slate-300 uppercase tracking-widest">Authorize your streaming node</p>
+                    <p className={`text-[10px] font-black uppercase tracking-[0.3em] ${isDark ? 'text-white/40' : 'text-slate-400'}`}>Creator Login</p>
+                    <p className={`text-[10px] uppercase tracking-widest ${isDark ? 'text-white/20' : 'text-slate-300'}`}>Authorize your streaming node</p>
                   </div>
-                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-100 bg-slate-50">
-                    <motion.div className={`w-1.5 h-1.5 rounded-full ${loginSuccess ? 'bg-emerald-400' : 'bg-amber-400'}`}
-                      animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.5, repeat: Infinity }} />
-                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">
-                      {loginSuccess ? 'Authorized' : loading ? 'Verifying' : 'Ready'}
-                    </span>
+                  <div className="flex items-center gap-2">
+                    <ThemeToggle size="sm" />
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-100 bg-slate-50">
+                      <motion.div className={`w-1.5 h-1.5 rounded-full ${loginSuccess ? 'bg-emerald-400' : 'bg-amber-400'}`}
+                        animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.5, repeat: Infinity }} />
+                      <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">
+                        {loginSuccess ? 'Authorized' : loading ? 'Verifying' : 'Ready'}
+                      </span>
+                    </div>
                   </div>
                 </motion.div>
 
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.55 }}>
-                  <h3 className="text-3xl font-black italic tracking-tighter text-slate-900 mb-1 leading-none">Welcome back.</h3>
-                  <p className="text-slate-400 text-sm font-medium mb-8">Authorize your streaming node to access DropPay.</p>
+                  <h3 className={`text-3xl font-black italic tracking-tighter mb-1 leading-none ${isDark ? 'text-white' : 'text-slate-900'}`}>Welcome back.</h3>
+                  <p className={`text-sm font-medium mb-8 ${isDark ? 'text-white/30' : 'text-slate-400'}`}>Authorize your streaming node to access DropPay.</p>
                 </motion.div>
 
                 {/* Error banner */}
@@ -346,15 +346,15 @@ const Login = () => {
                 <form onSubmit={handleLogin} className="space-y-5">
                   <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
                     <PremiumInput icon={Mail} label="Email Address" type="email" name="email"
-                      value={formData.email} onChange={handleChange} placeholder="you@example.com" />
+                      value={formData.email} onChange={handleChange} placeholder="you@example.com" isDark={isDark} />
                   </motion.div>
 
                   <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}>
                     <PremiumInput icon={Lock} label="Password" type={showPassword ? 'text' : 'password'} name="password"
-                      value={formData.password} onChange={handleChange} placeholder="••••••••••••••••"
+                      value={formData.password} onChange={handleChange} placeholder="••••••••••••••••" isDark={isDark}
                       rightEl={
                         <button type="button" onClick={() => setShowPassword(v => !v)} tabIndex={-1}
-                          className="text-slate-300 hover:text-emerald-500 transition-colors">
+                          className={`transition-colors ${isDark ? 'text-white/30 hover:text-emerald-400' : 'text-slate-300 hover:text-emerald-500'}`}>
                           {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                         </button>
                       }
@@ -364,12 +364,12 @@ const Login = () => {
                   {/* Remember me + forgot */}
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.75 }}
                     className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest">
-                    <label className="flex items-center gap-2 text-slate-400 cursor-pointer hover:text-emerald-600 transition-colors">
+                    <label className={`flex items-center gap-2 cursor-pointer transition-colors ${isDark ? 'text-white/30 hover:text-emerald-400' : 'text-slate-400 hover:text-emerald-600'}`}>
                       <input type="checkbox" checked={rememberMe} onChange={() => setRememberMe(v => !v)}
                         className="accent-emerald-500 w-3.5 h-3.5 rounded" />
                       Remember Node
                     </label>
-                    <Link to="/forgot-password" className="text-emerald-500 hover:text-emerald-600 transition-colors">
+                    <Link to="/forgot-password" className="text-emerald-500 hover:text-emerald-400 transition-colors">
                       Lost Access?
                     </Link>
                   </motion.div>
@@ -393,21 +393,21 @@ const Login = () => {
 
                 {/* Divider */}
                 <div className="flex items-center gap-3 my-6">
-                  <div className="flex-1 h-px bg-slate-100" />
-                  <span className="text-[9px] text-slate-300 uppercase tracking-widest">or</span>
-                  <div className="flex-1 h-px bg-slate-100" />
+                  <div className={`flex-1 h-px ${isDark ? 'bg-white/10' : 'bg-slate-100'}`} />
+                  <span className={`text-[9px] uppercase tracking-widest ${isDark ? 'text-white/20' : 'text-slate-300'}`}>or</span>
+                  <div className={`flex-1 h-px ${isDark ? 'bg-white/10' : 'bg-slate-100'}`} />
                 </div>
 
                 {/* Init new account */}
                 <Link to="/signup"
-                  className="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-2xl border border-slate-200 bg-slate-50 hover:bg-emerald-50 hover:border-emerald-300 text-slate-500 hover:text-emerald-600 transition-all text-[10px] font-black uppercase tracking-widest">
+                  className={`w-full flex items-center justify-center gap-2.5 py-3.5 rounded-2xl border text-[10px] font-black uppercase tracking-widest transition-all hover:border-emerald-300 hover:text-emerald-500 ${isDark ? 'border-white/10 bg-white/[0.03] text-white/40 hover:bg-emerald-500/5' : 'border-slate-200 bg-slate-50 text-slate-500 hover:bg-emerald-50'}`}>
                   <Shield className="w-3.5 h-3.5" /> Initialize New Account
                 </Link>
 
                 {/* Admin portal link */}
                 <div className="mt-4 text-center">
                   <Link to="/admin/login"
-                    className="text-[9px] font-black uppercase tracking-[0.35em] text-slate-300 hover:text-emerald-500 transition-colors">
+                    className={`text-[9px] font-black uppercase tracking-[0.35em] transition-colors hover:text-emerald-500 ${isDark ? 'text-white/20' : 'text-slate-300'}`}>
                     Secure Admin Portal →
                   </Link>
                 </div>
@@ -422,8 +422,8 @@ const Login = () => {
                   <Shield className="w-7 h-7 text-emerald-500 animate-pulse" />
                 </motion.div>
 
-                <h3 className="text-2xl font-black italic tracking-tighter text-slate-900 mb-1 leading-none">Confirm Identity.</h3>
-                <p className="text-slate-400 text-sm font-medium mb-1">Authorization code sent to your mail node:</p>
+                <h3 className={`text-2xl font-black italic tracking-tighter mb-1 leading-none ${isDark ? 'text-white' : 'text-slate-900'}`}>Confirm Identity.</h3>
+                <p className={`text-sm font-medium mb-1 ${isDark ? 'text-white/40' : 'text-slate-400'}`}>Authorization code sent to your mail node:</p>
                 <p className="text-emerald-600 font-black text-sm mb-6">{formData.email}</p>
 
                 {error && (

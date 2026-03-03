@@ -4,8 +4,11 @@ const adminAuth = require('../middleware/adminAuth');
 const {
     getUsers, getUserDetails, toggleBan, updateTier, getSystemMetrics,
     updateRole, getPayoutQueue, executeSettlement,
-    getGlobalConfig, updateGlobalConfig, dispatchBroadcast
+    getGlobalConfig, updateGlobalConfig, dispatchBroadcast,
+    getAdminProfile, updateAdminProfile, uploadAdminAvatar,
+    getAuditLogs, getSystemHealth
 } = require('../controllers/adminController');
+const upload = require('../middleware/uploadMiddleware');
 
 // All routes here are strictly shielded by `adminAuth`
 router.use(adminAuth);
@@ -55,5 +58,29 @@ router.patch('/config', updateGlobalConfig);
 // @route   POST api/admin/broadcast
 // @desc    Dispatch system-wide alert packets
 router.post('/broadcast', dispatchBroadcast);
+
+// --- ADMIN SELF PROFILE ---
+
+// @route   GET api/admin/profile
+// @desc    Fetch self-profile data for logged in admin
+router.get('/profile', getAdminProfile);
+
+// @route   PATCH api/admin/profile
+// @desc    Synchronize self-profile data
+router.patch('/profile', updateAdminProfile);
+
+// @route   POST api/admin/profile/avatar
+// @desc    Upload individual admin identity avatar
+router.post('/profile/avatar', upload.single('avatar'), uploadAdminAvatar);
+
+// --- V5 SCALING UPGRADE ---
+
+// @route   GET api/admin/logs
+// @desc    Retrieve security and audit packets
+router.get('/logs', getAuditLogs);
+
+// @route   GET api/admin/health
+// @desc    Monitor system infrastructure vitals
+router.get('/health', getSystemHealth);
 
 module.exports = router;

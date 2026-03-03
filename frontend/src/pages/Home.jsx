@@ -15,18 +15,14 @@ import AlertPreview from '../components/AlertPreview';
 import SocketModal from '../components/SocketModal';
 import { getOptimizedImage } from '../protocol/cdnHelper';
 import DonationTicker from '../components/widgets/DonationTicker';
+import ThemeToggle from '../components/ThemeToggle';
+import { useTheme } from '../context/ThemeContext';
 
 const Home = () => {
   const navigate = useNavigate();
 
-  // --- UNIFIED GLOBAL THEME PROTOCOL ---
-  const theme = useMemo(() => {
-    return localStorage.getItem('dropPayTheme') || 'light';
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem('dropPayTheme', theme);
-  }, [theme]);
+  // --- UNIFIED GLOBAL THEME PROTOCOL (now from ThemeContext) ---
+  const { theme } = useTheme();
 
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -540,6 +536,7 @@ const Home = () => {
             >
               Login
             </button>
+            <ThemeToggle size="sm" />
             <motion.button
               whileHover={{ scale: 1.02, y: -1 }}
               whileTap={{ scale: 0.98 }}
@@ -550,9 +547,12 @@ const Home = () => {
             </motion.button>
           </div>
 
-          <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className={`md:hidden relative z-[110] ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-            {isMobileMenuOpen ? <X className="w-8 h-8" /> : <Menu className="w-8 h-8" />}
-          </button>
+          <div className="flex items-center gap-3 md:hidden">
+            <ThemeToggle size="sm" />
+            <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className={`relative z-[110] ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+              {isMobileMenuOpen ? <X className="w-8 h-8" /> : <Menu className="w-8 h-8" />}
+            </button>
+          </div>
         </div>
       </nav>
 
@@ -829,13 +829,13 @@ const Home = () => {
             </motion.div>
           </div>
 
-          <div className="lg:col-span-6 relative mt-12 lg:mt-0">
+          <div className="lg:col-span-6 relative mt-8 lg:mt-0">
             {/* MINI-NEXUS PREVIEW — placed directly on the page */}
             <motion.div
               initial={{ opacity: 0, scale: 0.98, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ duration: 0.8, ease: 'easeOut' }}
-              className={`relative min-h-[460px] md:min-h-[520px] flex flex-col overflow-hidden rounded-[2.5rem] md:rounded-[3rem] border glass-shimmer ${theme === 'dark'
+              className={`relative flex flex-col overflow-hidden rounded-[2rem] md:rounded-[3rem] border glass-shimmer ${theme === 'dark'
                 ? 'bg-[#050505]/40 border-white/10 backdrop-blur-3xl shadow-[0_20px_50px_-12px_rgba(0,0,0,0.5)]'
                 : 'bg-white/40 border-white/60 backdrop-blur-3xl shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)]'
                 }`}
@@ -847,10 +847,10 @@ const Home = () => {
                 <div className="glass-orb w-40 h-40 bg-[#8b5cf6] top-[20%] left-[10%]" style={{ animationDelay: '-10s' }} />
               </div>
 
-              <div className="flex-1 flex flex-col p-6 md:p-8 gap-5 relative z-10">
+              <div className="flex-1 flex flex-col p-4 sm:p-6 md:p-8 gap-4 sm:gap-5 relative z-10">
 
-                {/* Top bar — streamer identity with premium glass border */}
-                <div className={`flex items-center gap-3 px-5 py-4 rounded-3xl border transition-all duration-500 ${theme === 'dark' ? 'bg-white/[0.04] border-white/10 shadow-lg' : 'bg-white/80 border-white/90 shadow-sm'}`}>
+                {/* Top bar — streamer identity */}
+                <div className={`flex items-center gap-3 px-4 py-3 rounded-3xl border transition-all duration-500 ${theme === 'dark' ? 'bg-white/[0.04] border-white/10 shadow-lg' : 'bg-white/80 border-white/90 shadow-sm'}`}>
                   <div className="relative group">
                     <div className="absolute inset-0 bg-[#10B981]/40 blur-md rounded-full group-hover:blur-lg transition-all" />
                     <div className="w-10 h-10 rounded-full bg-[#10B981] p-[1.5px] shrink-0 relative z-10">
@@ -874,18 +874,17 @@ const Home = () => {
 
                 {/* Mini-Nexus grid — sidebar + alert area */}
                 <div
-                  className={`flex-1 rounded-[2rem] transition-all duration-700 ${theme === 'dark' ? 'bg-white/[0.02] border-white/[0.06]' : 'bg-black/[0.02] border-black/[0.04]'}`}
+                  className={`flex-1 rounded-[1.5rem] transition-all duration-700 ${theme === 'dark' ? 'bg-white/[0.02] border-white/[0.06]' : 'bg-black/[0.02] border-black/[0.04]'}`}
                   style={{
                     display: 'grid',
-                    gridTemplateColumns: window.innerWidth < 768 ? '45px 1fr' : '85px 1fr',
-                    gap: window.innerWidth < 768 ? '0.75rem' : '1.25rem',
-                    padding: '1.5rem',
-                    borderRadius: '2rem',
+                    gridTemplateColumns: '50px 1fr',
+                    gap: '0.75rem',
+                    padding: '1rem',
+                    borderRadius: '1.5rem',
                     border: '1px solid',
                     backdropFilter: 'blur(30px)',
                     WebkitBackdropFilter: 'blur(30px)',
                     alignItems: 'stretch',
-                    minHeight: '260px',
                   }}
                 >
 
@@ -954,8 +953,8 @@ const Home = () => {
                   </div>
                 </div>
 
-                {/* Bottom stat bar — ultra clean glassmorphism */}
-                <div className={`flex items-center gap-4 px-5 py-3 rounded-2xl border transition-all duration-500 ${theme === 'dark' ? 'bg-white/[0.03] border-white/10 shadow-lg' : 'bg-white/90 border-white/90 shadow-sm'}`}>
+                {/* Bottom stat bar — hidden on mobile */}
+                <div className={`hidden sm:flex items-center gap-4 px-5 py-3 rounded-2xl border transition-all duration-500 ${theme === 'dark' ? 'bg-white/[0.03] border-white/10 shadow-lg' : 'bg-white/90 border-white/90 shadow-sm'}`}>
                   <div className="flex items-center gap-2">
                     <div className="relative">
                       <div className="absolute inset-0 bg-[#10B981]/40 blur-sm rounded-full animate-pulse" />
@@ -1134,7 +1133,7 @@ const Home = () => {
               className="py-0"
             >
               {activeTab === 'streamers' && (
-                <div className="relative overflow-hidden rounded-[3rem] p-8 md:p-16 border transition-all duration-700 bg-opacity-20 backdrop-blur-3xl group">
+                <div className="relative overflow-hidden rounded-[2rem] md:rounded-[3rem] p-5 sm:p-8 md:p-16 border transition-all duration-700 bg-opacity-20 backdrop-blur-3xl group">
                   {/* Internal Glow Orbs */}
                   <motion.div
                     animate={{
@@ -1177,7 +1176,7 @@ const Home = () => {
                       initial={{ opacity: 0, scale: 0.95 }}
                       whileInView={{ opacity: 1, scale: 1 }}
                       viewport={{ once: true }}
-                      className={`relative p-8 rounded-[2.5rem] md:rounded-[3rem] shadow-2xl transition-all duration-700 glass-shimmer simulator-card-premium ${theme === 'dark' ? 'holo-border' : 'bg-white/60 border-white/80 backdrop-blur-3xl'
+                      className={`relative p-5 sm:p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl transition-all duration-700 glass-shimmer simulator-card-premium ${theme === 'dark' ? 'holo-border' : 'bg-white/60 border-white/80 backdrop-blur-3xl'
                         }`}
                       style={{ '--theme-bg': theme === 'dark' ? '#050505' : '#ffffff' }}
                     >
@@ -1187,7 +1186,7 @@ const Home = () => {
                         <div className="glass-orb w-64 h-64 bg-[#3b82f6] bottom-[-20%] left-[-10%]" style={{ animationDelay: '-5s' }} />
                       </div>
 
-                      <div className="relative z-10 space-y-8">
+                      <div className="relative z-10 space-y-4 sm:space-y-6 md:space-y-8">
                         {/* Header & Status */}
                         <div className="flex justify-between items-center">
                           <div className="flex items-center gap-4">
@@ -1198,8 +1197,8 @@ const Home = () => {
                               </div>
                             </div>
                             <div>
-                              <span className={`text-base font-black italic uppercase tracking-tighter block ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Payout Simulator</span>
-                              <p className="text-[10px] font-medium text-slate-500 uppercase tracking-[0.2em] mt-0.5">Real-time Settlement Protocol</p>
+                              <span className={`text-sm font-black italic uppercase tracking-tighter block ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Payout Simulator</span>
+                              <p className="hidden sm:block text-[10px] font-medium text-slate-500 uppercase tracking-[0.2em] mt-0.5">Real-time Settlement Protocol</p>
                             </div>
                           </div>
                           <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-[#10B981]/10 border border-[#10B981]/20">
@@ -1210,11 +1209,11 @@ const Home = () => {
 
                         {/* Input Area */}
                         <div className="space-y-4">
-                          <div className="flex justify-between items-center">
+                          <div className="flex justify-between items-start gap-2 flex-wrap">
                             <label className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500 flex items-center gap-2.5">
                               <Banknote className="w-4 h-4 text-[#10B981]" /> Revenue Calculator
                             </label>
-                            <div className="flex gap-2">
+                            <div className="flex gap-1.5 flex-wrap">
                               {[1000, 10000, 50000].map(preset => (
                                 <button
                                   key={preset}
@@ -1235,7 +1234,7 @@ const Home = () => {
                               type="number"
                               value={calcAmount}
                               onChange={e => setCalcAmount(Number(e.target.value))}
-                              className={`w-full bg-transparent px-6 py-5 text-4xl font-black italic outline-none ${theme === 'dark' ? 'text-[#10B981]' : 'text-[#10B981]'
+                              className={`w-full bg-transparent px-4 py-3 sm:py-5 text-2xl sm:text-4xl font-black italic outline-none ${theme === 'dark' ? 'text-[#10B981]' : 'text-[#10B981]'
                                 }`}
                             />
                             <div className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center gap-2">
@@ -1246,8 +1245,8 @@ const Home = () => {
                         </div>
 
                         {/* Results Grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                          <div className={`p-5 rounded-2xl border transition-all duration-500 overflow-hidden relative group ${theme === 'dark' ? 'bg-white/[0.03] border-white/10' : 'bg-emerald-50/50 border-emerald-100'
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div className={`p-3 sm:p-5 rounded-2xl border transition-all duration-500 overflow-hidden relative group ${theme === 'dark' ? 'bg-white/[0.03] border-white/10' : 'bg-emerald-50/50 border-emerald-100'
                             }`}>
                             <div className="absolute inset-0 bg-gradient-to-br from-[#10B981]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                             <div className="relative z-10">
@@ -1258,7 +1257,7 @@ const Home = () => {
                               <p className={`text-2xl font-black italic ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>₹{streamerCut}</p>
                             </div>
                           </div>
-                          <div className={`p-5 rounded-2xl border transition-all duration-500 group ${theme === 'dark' ? 'bg-white/[0.01] border-white/5' : 'bg-slate-50 border-slate-100'
+                          <div className={`p-3 sm:p-5 rounded-2xl border transition-all duration-500 group ${theme === 'dark' ? 'bg-white/[0.01] border-white/5' : 'bg-slate-50 border-slate-100'
                             }`}>
                             <div className="flex justify-between items-start mb-2">
                               <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Node Fee (5%)</p>
@@ -1268,8 +1267,8 @@ const Home = () => {
                           </div>
                         </div>
 
-                        {/* Split Bar */}
-                        <div className="space-y-3 pt-2">
+                        {/* Split Bar — hidden on mobile to save space */}
+                        <div className="hidden sm:block space-y-3 pt-2">
                           <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-slate-500">
                             <span>Settlement Ratio</span>
                             <span className="text-[#10B981]">95% Efficiency</span>
