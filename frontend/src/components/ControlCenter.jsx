@@ -989,4 +989,17 @@ const ControlCenter = ({
   );
 };
 
-export default ControlCenter;
+const areEqual = (prev, next) => (
+  prev.goalForm === next.goalForm &&
+  prev.alertConfig === next.alertConfig &&
+  prev.nexusTheme === next.nexusTheme &&
+  prev.partnerStickers === next.partnerStickers &&
+  prev.isUpdatingGoal === next.isUpdatingGoal &&
+  prev.isSavingStickers === next.isSavingStickers &&
+  prev.copiedType === next.copiedType &&
+  prev.theme === next.theme &&
+  prev.user?._id === next.user?._id &&
+  prev.user?.tier === next.user?.tier
+);
+
+export default React.memo(ControlCenter, areEqual);

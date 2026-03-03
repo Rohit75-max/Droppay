@@ -363,4 +363,4 @@ const DashboardSummary = ({
   );
 };
 
-export default DashboardSummary;
+export default React.memo(DashboardSummary);

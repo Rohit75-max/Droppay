@@ -77,6 +77,18 @@ app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/tug-of-war', require('./routes/tugOfWarRoutes'));
 app.use('/api/newsletter', require('./routes/newsletterRoutes'));
 
+// ─── KEEP-ALIVE: Health + Ping endpoints ────────────────────────────────────
+// Ping these from cron-job.org every 5-10 min to prevent Render cold starts.
+// GET /health → detailed status, GET /ping → minimal (fastest response)
+app.get('/health', (req, res) => res.json({
+    status: 'ONLINE',
+    uptime: Math.floor(process.uptime()),
+    timestamp: new Date().toISOString(),
+    service: 'DropPay API'
+}));
+app.get('/ping', (req, res) => res.send('pong'));
+// ─────────────────────────────────────────────────────────────────────────────
+
 // 6. MISSION CHECKER
 cron.schedule('0 0 * * *', () => {
     paymentController.checkExpirations();
