@@ -83,4 +83,45 @@ router.get('/logs', getAuditLogs);
 // @desc    Monitor system infrastructure vitals
 router.get('/health', getSystemHealth);
 
+// @route   POST api/admin/referrals/backfill
+// @desc    Recompute referralCount for ALL users from scratch (one-time migration fix)
+router.post('/referrals/backfill', async (req, res) => {
+    try {
+        const User = require('../models/User');
+
+        // Get every user that was referred by someone and is verified
+        const referredUsers = await User.find({
+            referredBy: { $exists: true, $ne: null },
+            isEmailVerified: true
+        }).select('referredBy');
+
+        // Tally counts per referrer
+        const countMap = {};
+        for (const u of referredUsers) {
+            const key = u.referredBy.toString();
+            countMap[key] = (countMap[key] || 0) + 1;
+        }
+
+        // Bulk-update each referrer
+        const ops = Object.entries(countMap).map(([id, count]) =>
+            User.findByIdAndUpdate(id, { referralCount: count })
+        );
+        await Promise.all(ops);
+
+        // Zero out anyone not in the map (no verified referrals)
+        await User.updateMany(
+            { _id: { $nin: Object.keys(countMap).map(id => require('mongoose').Types.ObjectId.createFromHexString(id)) } },
+            { $set: { referralCount: 0 } }
+        );
+
+        res.json({
+            msg: `✅ Backfill complete. Recomputed ${Object.keys(countMap).length} referrer(s).`,
+            breakdown: countMap
+        });
+    } catch (err) {
+        console.error('Backfill error:', err);
+        res.status(500).json({ msg: err.message });
+    }
+});
+
 module.exports = router;

@@ -100,6 +100,7 @@ exports.signup = async (req, res) => {
                         { username: new RegExp(`^${escapeRegex(cleanRef)}$`, 'i') }
                     ]
                 });
+                console.log(`[REFERRAL] Code: "${cleanRef}" → Referrer found: ${referrer ? referrer.username : 'NONE'}`);
             }
 
             user = new User({
