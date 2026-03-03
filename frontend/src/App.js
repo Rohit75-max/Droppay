@@ -172,8 +172,9 @@ const AnimatedRoutes = () => {
   const location = useLocation();
 
   return (
-    // Suspense wraps the entire route tree — lazy chunks resolve here
-    <Suspense fallback={<BootSequence />}>
+    // Use a minimal fallback — BootSequence as route fallback caused full loading screen
+    // on every lazy page navigation (Dashboard, Admin, etc.)
+    <Suspense fallback={<div className="fixed inset-0 bg-[#050505]" />}>
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
           {/* 1. PUBLIC MARKETING & AUTH */}

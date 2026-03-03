@@ -6,7 +6,8 @@ import { motion, AnimatePresence } from 'framer-motion';
  * Bulletproofed: Auto-maps store IDs, handles video loading safely, and supports Store Previews.
  */
 const LiveThemeEngine = ({ currentTheme, isPreview = false, theme = 'dark' }) => {
-    const [isVideoLoaded, setIsVideoLoaded] = useState(false);
+    // Start as true — CSS themes load instantly, only video themes need the spinner
+    const [isVideoLoaded, setIsVideoLoaded] = useState(true);
     const [isNightTime, setIsNightTime] = useState(false);
     const isLight = theme === 'light';
 
