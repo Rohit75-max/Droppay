@@ -93,26 +93,8 @@ body.light:not([class*="theme-"]) {
     background-attachment: fixed;
 }
 
-/* ============================================ */
-/* DARK VOID (DEFAULT) — Unified Card Border    */
-/* Matches the Mission card's thin white border */
-/* across ALL dashboard sections automatically  */
-/* ============================================ */
-body:not(.light):not([class*="theme-"]) .nexus-card {
-    border: 1px solid rgba(255, 255, 255, 0.05) !important;
-    background: rgba(10, 10, 10, 0.55) !important;
-    backdrop-filter: blur(16px) saturate(140%);
-    -webkit-backdrop-filter: blur(16px) saturate(140%);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease !important;
-}
 
-body:not(.light):not([class*="theme-"]) .nexus-card:hover {
-    border-color: rgba(255, 255, 255, 0.1) !important;
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
-}
-
-
+/* CYBER OS THEME */
 body.theme-cyber {
     --nexus-bg: #000800;
     --nexus-panel: #001200;

@@ -21,13 +21,30 @@ import MasterOverlay from './pages/MasterOverlay';
 import LiveThemeEngine from './components/LiveThemeEngine';
 
 // ─── LAZY IMPORTS (code-split — only load when navigated to) ─────────────────
-// Each of these creates a separate JS chunk, shrinking the initial bundle ~40%.
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const AdminSecurePortal = lazy(() => import('./pages/AdminSecurePortal'));
 const SubscriptionPage = lazy(() => import('./pages/SubscriptionPage'));
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 
+// ─── ERROR BOUNDARY — catches any render crash, shows recovery UI not blank page ─
+class ErrorBoundary extends React.Component {
+  constructor(props) { super(props); this.state = { hasError: false }; }
+  static getDerivedStateFromError() { return { hasError: true }; }
+  componentDidCatch(error, info) { console.error('[DropPay] Render crash:', error, info); }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ minHeight: '100vh', background: '#050505', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', fontFamily: 'sans-serif' }}>
+          <div style={{ fontSize: 32, fontWeight: 900, color: '#10B981', letterSpacing: '-1px', fontStyle: 'italic' }}>DropPay</div>
+          <p style={{ color: '#64748b', fontSize: 14, margin: 0 }}>Something went wrong. Please refresh the page.</p>
+          <button onClick={() => window.location.reload()} style={{ padding: '10px 28px', background: '#10B981', color: '#fff', border: 'none', borderRadius: 12, fontWeight: 700, cursor: 'pointer', fontSize: 13 }}>Refresh</button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 // ─── BOOT SEQUENCE — Premium animated loading screen ─────────────────────────
 const BootSequence = () => {
   const letters = 'DROPPAY PROTOCOL'.split('');
@@ -287,11 +304,13 @@ function AppContent() {
 
 function App() {
   return (
-    <ThemeProvider>
-      <Router>
-        <AppContent />
-      </Router>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <Router>
+          <AppContent />
+        </Router>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }
 
