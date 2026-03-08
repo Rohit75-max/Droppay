@@ -310,7 +310,7 @@ const Dashboard = () => {
     } catch (err) {
       console.error("Failed to sync nexus theme", err);
     }
-  }, []);
+  }, [setTheme]);
 
   const equipAsset = async (category, assetId) => {
     try {
