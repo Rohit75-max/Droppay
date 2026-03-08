@@ -64,6 +64,7 @@ const DashboardSummary = ({
   };
 
   const getCardStyle = () => {
+    if (nexusTheme === 'neon_relic') return 'relic-surface font-mono text-white';
     return 'bg-[var(--nexus-panel)] border-[var(--nexus-border)] text-[var(--nexus-text)] shadow-[var(--nexus-glow)] nexus-card';
   };
 
@@ -93,7 +94,7 @@ const DashboardSummary = ({
                       <img src={user.avatar} alt="avatar" className="w-full h-full rounded-full object-cover" />
                     ) : (
                       <div className="w-full h-full rounded-full flex items-center justify-center bg-[#3b82f6]/10 text-[#3b82f6] text-4xl font-black italic border border-[#3b82f6]/30 shadow-inner">
-                        {user.username?.charAt(0).toUpperCase()}
+                        {user.fullName?.charAt(0).toUpperCase() || user.username?.charAt(0).toUpperCase()}
                       </div>
                     )}
                   </div>
@@ -110,8 +111,15 @@ const DashboardSummary = ({
             <EliteCard
               whileHover={{ rotateY: 10, rotateX: 5, z: 50 }}
               style={{ perspective: '1200px' }}
-              className={`md:col-span-4 flex flex-col items-center justify-center p-8 rounded-[3rem] border relative overflow-hidden h-full min-h-[280px] transition-all duration-700 ${getCardStyle()}`}
+              className={`md:col-span-4 flex flex-col items-center justify-center p-8 border relative overflow-hidden h-full min-h-[280px] transition-all duration-700 ${nexusTheme === 'neon_relic' ? 'rounded-none relic-surface' : 'rounded-[3rem]'} ${getCardStyle()}`}
             >
+              {nexusTheme === 'neon_relic' && (
+                <>
+                  <div className="plasma-leak-cyan top-0 right-0 -mt-2 -mr-2"></div>
+                  <div className="plasma-leak-magenta bottom-0 left-0 -mb-2 -ml-2"></div>
+                  <div className="holo-sticker top-4 right-4 rotate-[5deg] z-50">VERIFIED RELIC</div>
+                </>
+              )}
               {/* Vertical Scanning Beam */}
               <motion.div
                 animate={{
@@ -150,7 +158,7 @@ const DashboardSummary = ({
                     />
                   ) : (
                     <div className="w-full h-full rounded-full flex items-center justify-center bg-gradient-to-br from-[var(--nexus-accent)]/20 to-transparent text-[var(--nexus-text)] text-4xl font-black italic tracking-tighter">
-                      {user.username?.charAt(0).toUpperCase()}
+                      {user.fullName?.charAt(0).toUpperCase() || user.username?.charAt(0).toUpperCase()}
                     </div>
                   )}
                 </div>
@@ -159,7 +167,7 @@ const DashboardSummary = ({
               {/* Identity Details */}
               <div className="text-center relative z-10 space-y-1">
                 <div className="flex items-center justify-center gap-2">
-                  <h3 className="text-xl md:text-2xl font-black uppercase italic tracking-tighter text-[var(--nexus-text)] drop-shadow-md">
+                  <h3 className={`text-xl md:text-2xl font-black uppercase italic tracking-tighter drop-shadow-md ${nexusTheme === 'neon_relic' ? 'font-mono text-cyan-400 relic-text-glow' : 'text-[var(--nexus-text)]'}`}>
                     {user.fullName || user.username}
                   </h3>
                   {user.tier === 'legend' && <Crown className="w-4 h-4 text-amber-500 drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]" />}
@@ -218,7 +226,7 @@ const DashboardSummary = ({
                         animate={{ y: 0, opacity: 1, rotateX: 0 }}
                         exit={{ y: -50, opacity: 0, rotateX: 90 }}
                         transition={{ type: "spring", stiffness: 200, damping: 20 }}
-                        className="text-5xl md:text-7xl font-black italic tracking-tighter text-[var(--nexus-text)] absolute"
+                        className={`text-5xl md:text-7xl font-black italic tracking-tighter absolute ${nexusTheme === 'neon_relic' ? 'relic-text-glow' : 'text-[var(--nexus-text)]'}`}
                       >
                         {user.walletBalance?.toLocaleString('en-IN') || '0.00'}
                       </motion.h2>
@@ -241,6 +249,13 @@ const DashboardSummary = ({
             </div>
           ) : (
             <EliteCard className={`md:col-span-8 flex flex-col justify-center p-6 sm:p-8 rounded-[2.5rem] border relative overflow-hidden h-full min-h-[240px] transition-all duration-500 ${getCardStyle()}`}>
+              {nexusTheme === 'neon_relic' && (
+                <>
+                  <div className="plasma-leak-cyan top-0 right-0 -mt-2 -mr-2"></div>
+                  <div className="plasma-leak-magenta bottom-0 left-0 -mb-2 -ml-2"></div>
+                  <div className="holo-sticker top-6 right-8">VAULT AUTH</div>
+                </>
+              )}
               <div className="flex items-center justify-between mb-8 relative z-10">
                 <div className="flex items-center gap-3">
                   <div className="p-2 sm:p-3 rounded-[1rem] bg-[var(--nexus-accent)]/10 border border-[var(--nexus-accent)]/20">
@@ -258,7 +273,7 @@ const DashboardSummary = ({
               </div>
               <div className="flex items-baseline gap-2 mb-8 relative z-10">
                 <span className="text-3xl sm:text-4xl lg:text-5xl font-black italic tracking-tighter text-[var(--nexus-accent)]">₹</span>
-                <h2 className="text-5xl sm:text-6xl lg:text-7xl font-black italic tracking-tighter text-[var(--nexus-text)]">
+                <h2 className={`text-5xl sm:text-6xl lg:text-7xl font-black italic tracking-tighter ${nexusTheme === 'neon_relic' ? 'relic-text-glow' : 'text-[var(--nexus-text)]'}`}>
                   {user.walletBalance?.toLocaleString('en-IN') || '0.00'}
                 </h2>
               </div>
@@ -310,8 +325,15 @@ const DashboardSummary = ({
 
         {/* ANALYTICS DATA STREAM */}
         <EliteCard
-          className={`group border rounded-[2.5rem] p-7 md:p-10 relative transition-all duration-500 overflow-hidden ${getCardStyle()}`}
+          className={`group border p-7 md:p-10 relative transition-all duration-500 overflow-hidden ${nexusTheme === 'neon_relic' ? 'rounded-none relic-surface' : 'rounded-[2.5rem]'} ${getCardStyle()}`}
         >
+          {nexusTheme === 'neon_relic' && (
+            <>
+              <div className="plasma-leak-cyan top-0 right-0 -mt-2 -mr-2"></div>
+              <div className="plasma-leak-magenta bottom-0 left-0 -mb-2 -ml-2"></div>
+              <div className="holo-sticker bottom-6 right-8 rotate-[5deg]">TELEMETRY</div>
+            </>
+          )}
           {/* BGMI Specific HUD Elements */}
           {nexusTheme === 'bgmi' && (
             <div className="absolute top-0 left-0 w-1/3 h-1 bg-[var(--nexus-accent)] z-30" />
@@ -439,28 +461,56 @@ const DashboardSummary = ({
 
         {/* ACTIVITY SIGNAL FEED */}
         <EliteCard
-          className={`group border rounded-[2.5rem] p-7 transition-all duration-500 h-[385px] flex flex-col ${getCardStyle()}`}
+          className={`group border p-7 transition-all duration-500 h-[385px] flex flex-col ${nexusTheme === 'neon_relic' ? 'rounded-none relic-surface' : 'rounded-[2.5rem]'} ${getCardStyle()}`}
         >
+          {nexusTheme === 'neon_relic' && (
+            <>
+              <div className="plasma-leak-cyan top-0 right-0 -mt-2 -mr-2"></div>
+              <div className="plasma-leak-magenta bottom-0 left-0 -mb-2 -ml-2"></div>
+              <div className="holo-sticker top-6 right-8 rotate-[-10deg]">COMM LINK</div>
+            </>
+          )}
           {/* BGMI Specific HUD Elements */}
           {nexusTheme === 'bgmi' && (
             <div className="absolute top-0 left-0 w-1/3 h-1 bg-[var(--nexus-accent)] z-30" />
           )}
 
-          <h3 className="text-[11px] font-black italic mb-8 uppercase flex items-center gap-3 text-[var(--nexus-text-muted)] group-hover:text-[var(--nexus-accent)] transition-colors relative z-20">
+          <h3 className={`text-[11px] font-black italic mb-8 uppercase flex items-center gap-3 transition-colors relative z-20 ${nexusTheme === 'neon_relic' ? 'text-white' : 'text-[var(--nexus-text-muted)] group-hover:text-[var(--nexus-accent)]'}`}>
             <Activity className="w-4 h-4" /> Recent Drop <Volume2 className="w-3 h-3 opacity-30 group-hover:opacity-100 transition-opacity" />
           </h3>
           <div className="space-y-4 overflow-y-auto pr-3 custom-scrollbar flex-1 relative">
             {recentDrops.length === 0 ? (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-center">
-                <div className="relative">
-                  <div className="absolute inset-0 rounded-full bg-[var(--nexus-accent)]/20 animate-ping" />
-                  <div className="relative w-12 h-12 rounded-full border border-[var(--nexus-accent)]/30 flex items-center justify-center bg-[var(--nexus-accent)]/5">
-                    <Target className="w-5 h-5 text-[var(--nexus-accent)] animate-pulse" />
+
+                {nexusTheme === 'neon_relic' ? (
+                  <div className="relative w-32 h-32 border-2 border-slate-700 bg-[#1a1a1a] overflow-hidden flex items-center justify-center" style={{ imageRendering: 'pixelated' }}>
+                    {/* Dithered Grid Background */}
+                    <div className="absolute inset-0 opacity-50" style={{ backgroundImage: 'radial-gradient(#555 1px, transparent 1px)', backgroundSize: '4px 4px' }} />
+
+                    {/* Pink Jagged Sweep Line */}
+                    <motion.div
+                      animate={{ top: ['-20%', '120%'] }}
+                      transition={{ duration: 2, ease: "linear", repeat: Infinity }}
+                      className="absolute left-0 right-0 h-1 bg-pink-500 shadow-[0_0_15px_#ff00ff] z-10"
+                      style={{ clipPath: 'polygon(0 0, 10% 100%, 20% 0, 30% 100%, 40% 0, 50% 100%, 60% 0, 70% 100%, 80% 0, 90% 100%, 100% 0)' }}
+                    />
+
+                    <div className="relative z-20 px-2 py-1 bg-black border border-pink-500 text-pink-500 text-[10px] font-mono font-bold animate-pulse shadow-[0_0_10px_rgba(255,0,255,0.5)]">
+                      SCANNING
+                    </div>
                   </div>
-                </div>
-                <div className="space-y-1">
-                  <p className={`text-xs font-black uppercase tracking-widest text-[var(--nexus-text-muted)]`}>Feed Offline</p>
-                  <p className={`text-[9px] font-bold italic tracking-tighter animate-pulse text-[var(--nexus-accent)]/70`}>Signal waiting for uplink...</p>
+                ) : (
+                  <div className="relative">
+                    <div className="absolute inset-0 rounded-full bg-[var(--nexus-accent)]/20 animate-ping" />
+                    <div className="relative w-12 h-12 rounded-full border border-[var(--nexus-accent)]/30 flex items-center justify-center bg-[var(--nexus-accent)]/5">
+                      <Target className="w-5 h-5 text-[var(--nexus-accent)] animate-pulse" />
+                    </div>
+                  </div>
+                )}
+
+                <div className="space-y-1 mt-2">
+                  <p className={`text-xs font-black uppercase tracking-widest ${nexusTheme === 'neon_relic' ? 'text-pink-500 font-mono' : 'text-[var(--nexus-text-muted)]'}`}>Feed Offline</p>
+                  <p className={`text-[9px] font-bold italic tracking-tighter animate-pulse ${nexusTheme === 'neon_relic' ? 'text-cyan-400 font-mono drop-shadow-[0_0_5px_rgba(0,255,255,0.8)]' : 'text-[var(--nexus-accent)]/70'}`}>Signal waiting for uplink...</p>
                 </div>
               </div>
             ) : (

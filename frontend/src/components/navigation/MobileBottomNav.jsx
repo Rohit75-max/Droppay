@@ -136,8 +136,7 @@ const MobileBottomNav = ({ activeSection, setActiveSection, onLogout, user, them
                     )}
                 </AnimatePresence>
 
-                {/* THE MAIN BOTTOM NAV BAR WITH BRAND BUTTON */}
-                <div className="w-full bg-[var(--nexus-panel)]/60 backdrop-blur-[24px] border-t border-[var(--nexus-border)]/50 px-4 flex items-center justify-between shadow-[0_-20px_40px_rgba(0,0,0,0.4)] transition-all duration-700" style={{ height: '64px', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+                <div className="w-full bg-[var(--nexus-panel)]/60 backdrop-blur-[24px] border-t border-[var(--nexus-border)]/50 px-2 sm:px-4 flex items-center justify-between shadow-[0_-20px_40px_rgba(0,0,0,0.4)] transition-all duration-700" style={{ height: '64px', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
 
                     {/* Left Nav Items */}
                     <div className="flex justify-around flex-1 items-center">
@@ -148,7 +147,7 @@ const MobileBottomNav = ({ activeSection, setActiveSection, onLogout, user, them
                                     key={item.id}
                                     onClick={() => { setActiveSection(item.id); setIsMenuExpanded(false); }}
                                     style={{ background: isActive ? `${item.color}15` : '' }}
-                                    className={`flex flex-col items-center gap-1.5 transition-all group relative px-4 py-2 rounded-2xl`}
+                                    className={`flex flex-col items-center gap-1.5 transition-all group relative px-1 sm:px-3 py-2 rounded-2xl`}
                                 >
                                     <item.icon
                                         style={{
@@ -179,7 +178,7 @@ const MobileBottomNav = ({ activeSection, setActiveSection, onLogout, user, them
                     </div>
 
                     {/* THE CENTRAL BRAND BUTTON */}
-                    <div className="relative -mt-10 px-4 z-10">
+                    <div className="relative -mt-10 px-1 sm:px-4 z-10">
                         <motion.button
                             onClick={() => setIsMenuExpanded(!isMenuExpanded)}
                             animate={isMenuExpanded ? { scale: 1.1, rotate: 180 } : { scale: 1, rotate: 0 }}
@@ -209,7 +208,7 @@ const MobileBottomNav = ({ activeSection, setActiveSection, onLogout, user, them
                                     key={item.id}
                                     onClick={() => { setActiveSection(item.id); setIsMenuExpanded(false); }}
                                     style={{ background: isActive ? `${item.color}15` : '' }}
-                                    className={`flex flex-col items-center gap-1.5 transition-all group relative px-4 py-2 rounded-2xl`}
+                                    className={`flex flex-col items-center gap-1.5 transition-all group relative px-1 sm:px-3 py-2 rounded-2xl`}
                                 >
                                     <item.icon
                                         style={{

@@ -12,6 +12,7 @@ import { toast } from 'react-toastify';
 
 // Component Imports
 import { syncTheme } from '../api/themeSync';
+import { useTheme } from '../context/ThemeContext';
 import ThemeToggle from '../components/ThemeToggle';
 import DashboardSummary from '../components/DashboardSummary';
 import ControlCenter from '../components/ControlCenter';
@@ -44,9 +45,7 @@ const Dashboard = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProtocolMenuOpen, setIsProtocolMenuOpen] = useState(false);
 
-  const [theme, setTheme] = useState(() => {
-    return localStorage.getItem('dropPayTheme') || 'light';
-  });
+  const { theme, setTheme } = useTheme();
 
   const [nexusTheme, setNexusTheme] = useState(() => {
     return localStorage.getItem('nexusTheme') || 'void';
@@ -733,38 +732,56 @@ const Dashboard = () => {
         </main>
       </div>
 
+
       {/* WITHDRAWAL MODAL */}
       <AnimatePresence>
         {showWithdrawModal && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-            <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} className={`w-full max-w-md p-8 rounded-[2.5rem] border shadow-2xl relative overflow-hidden ${theme === 'dark' ? 'bg-[#0a0a0a] border-white/10' : 'bg-white border-slate-200'}`}>
-              <div className="absolute top-0 left-0 w-full h-1 bg-[var(--nexus-accent)]" />
-              <div className="flex flex-col items-center text-center space-y-6">
-                <div className="w-16 h-16 rounded-full bg-[var(--nexus-accent)]/10 flex items-center justify-center border-2 border-[var(--nexus-accent)]/20 shadow-inner">
-                  <IndianRupee className="w-8 h-8 text-[var(--nexus-accent)]" />
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className={`fixed inset-0 z-[200] flex items-center justify-center p-4 ${nexusTheme === 'obsidian_monolith' ? 'bg-black/92 backdrop-blur-none' : 'bg-black/80 backdrop-blur-sm'}`}>
+            <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }}
+              className={`w-full max-w-md p-8 shadow-2xl relative ${nexusTheme === 'obsidian_monolith' ? 'obsidian-vault border-none' : 'rounded-[2.5rem] border overflow-hidden ' + (theme === 'dark' ? 'bg-[#0a0a0a] border-white/10' : 'bg-white border-slate-200')}`}>
+
+              {nexusTheme === 'obsidian_monolith' ? (
+                <>
+                  <div className="vault-bracket top-0 left-0 border-r-0 border-b-0" />
+                  <div className="vault-bracket top-0 right-0 border-l-0 border-b-0" />
+                  <div className="vault-bracket bottom-0 left-0 border-r-0 border-t-0" />
+                  <div className="vault-bracket bottom-0 right-0 border-l-0 border-t-0" />
+                </>
+              ) : (
+                <div className="absolute top-0 left-0 w-full h-1 bg-[var(--nexus-accent)]" />
+              )}
+
+              {/* SUCCESS STATE INTEGRATION */}
+              {isProcessingWithdraw && nexusTheme === 'obsidian_monolith' && (
+                <div className="success-ring"></div>
+              )}
+
+              <div className="flex flex-col items-center text-center space-y-6 relative z-10">
+                <div className={`w-16 h-16 rounded-full flex items-center justify-center ${nexusTheme === 'obsidian_monolith' ? 'bg-transparent filter drop-shadow-[0_0_8px_#3b82f6]' : 'bg-[var(--nexus-accent)]/10 border-2 border-[var(--nexus-accent)]/20 shadow-inner'}`}>
+                  <IndianRupee className="w-8 h-8 text-[#3b82f6]" />
                 </div>
                 <div>
-                  <h3 className={`text-2xl font-black uppercase italic tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Withdraw Funds</h3>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-[var(--nexus-accent)] mt-1">Initiating Payout Sequence</p>
+                  <h3 className={`text-2xl font-black uppercase ${nexusTheme === 'obsidian_monolith' ? 'tracking-[0.2em] text-white drop-shadow-[0_0_5px_#3b82f6]' : 'italic tracking-tighter ' + (theme === 'dark' ? 'text-white' : 'text-slate-900')}`}>Withdraw Server</h3>
+                  <p className={`text-[10px] font-black uppercase tracking-widest mt-1 ${nexusTheme === 'obsidian_monolith' ? 'text-[#3b82f6]' : 'text-[var(--nexus-accent)]'}`}>Initiating Payout Sequence</p>
                 </div>
                 <div className="w-full space-y-4">
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center justify-between px-2">
-                      <span className="text-[10px] uppercase font-black tracking-widest text-[var(--nexus-text-muted)]">Wallet Balance</span>
-                      <span className="text-xs font-mono font-bold text-[var(--nexus-text)]">₹{user.walletBalance?.toLocaleString('en-IN')}</span>
+                      <span className="text-[10px] uppercase font-black tracking-widest text-slate-500">Wallet Balance</span>
+                      <span className={`text-xs font-mono font-bold ${nexusTheme === 'obsidian_monolith' ? 'text-[#3b82f6] drop-shadow-[0_0_5px_#3b82f6]' : 'text-[var(--nexus-text)]'}`}>₹{user.walletBalance?.toLocaleString('en-IN')}</span>
                     </div>
                     <div className="relative">
-                      <IndianRupee className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--nexus-accent)]" />
+                      <IndianRupee className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 ${nexusTheme === 'obsidian_monolith' ? 'text-[#3b82f6]' : 'text-[var(--nexus-accent)]'}`} />
                       <input
                         type="number"
                         min={1000}
                         max={user.walletBalance}
                         value={withdrawalAmount}
                         onChange={(e) => setWithdrawalAmount(Number(e.target.value))}
-                        className={`w-full text-center text-2xl sm:text-3xl font-black p-4 sm:p-5 pl-10 rounded-2xl outline-none border transition-all ${theme === 'dark' ? 'bg-black/40 border-white/5 text-white focus:border-[var(--nexus-accent)]' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-[var(--nexus-accent)]'}`}
+                        className={`w-full text-center text-2xl sm:text-3xl font-black p-4 sm:p-5 pl-10 transition-all ${nexusTheme === 'obsidian_monolith' ? 'vault-slot' : 'rounded-2xl outline-none border ' + (theme === 'dark' ? 'bg-black/40 border-white/5 text-white focus:border-[var(--nexus-accent)]' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-[var(--nexus-accent)]')}`}
                       />
                     </div>
-                    <p className={`text-[9px] font-bold italic ${theme === 'dark' ? 'text-slate-500' : 'text-slate-400'}`}>Minimum withdrawal: ₹1,000</p>
                   </div>
 
                   <div className="flex items-center gap-2 overflow-x-auto py-2 scrollbar-hide">
@@ -772,7 +789,7 @@ const Dashboard = () => {
                       <button
                         key={amt}
                         onClick={() => setWithdrawalAmount(Math.floor(amt))}
-                        className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase border transition-all whitespace-nowrap ${withdrawalAmount === Math.floor(amt) ? 'bg-[var(--nexus-accent)] text-black border-[var(--nexus-accent)]' : 'bg-white/5 text-[var(--nexus-text-muted)] border-[var(--nexus-border)] hover:border-[var(--nexus-accent)]/50'}`}
+                        className={`px-4 py-2 text-[10px] font-black uppercase transition-all whitespace-nowrap ${nexusTheme === 'obsidian_monolith' ? 'rounded-none border border-[#3b82f6] text-[#3b82f6] hover:bg-[#3b82f6]/10' : 'rounded-xl border ' + (withdrawalAmount === Math.floor(amt) ? 'bg-[var(--nexus-accent)] text-black border-[var(--nexus-accent)]' : 'bg-white/5 text-[var(--nexus-text-muted)] border-[var(--nexus-border)] hover:border-[var(--nexus-accent)]/50')}`}
                       >
                         ₹{Math.floor(amt).toLocaleString()}
                       </button>
@@ -782,14 +799,14 @@ const Dashboard = () => {
                   <div className="flex gap-3 pt-2">
                     <button
                       onClick={() => setShowWithdrawModal(false)}
-                      className={`flex-1 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest transition-colors border shadow-sm ${theme === 'dark' ? 'bg-white/5 text-slate-300 border-white/5 hover:bg-white/10' : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'}`}
+                      className={`flex-1 py-4 font-black uppercase text-[10px] tracking-widest transition-colors ${nexusTheme === 'obsidian_monolith' ? 'bg-transparent text-slate-500 border border-slate-800 hover:text-white hover:border-slate-500' : 'rounded-2xl border shadow-sm ' + (theme === 'dark' ? 'bg-white/5 text-slate-300 border-white/5 hover:bg-white/10' : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100')}`}
                     >
                       Cancel
                     </button>
                     <button
                       onClick={() => handleWithdrawRequest(withdrawalAmount)}
                       disabled={isProcessingWithdraw || withdrawalAmount < 1000 || withdrawalAmount > user.walletBalance}
-                      className="flex-[2] py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest bg-[var(--nexus-accent)] text-black hover:brightness-110 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-[var(--nexus-accent)]/20"
+                      className={`flex-[2] py-4 font-black uppercase text-[10px] tracking-widest transition-all disabled:opacity-50 flex items-center justify-center gap-2 ${nexusTheme === 'obsidian_monolith' ? 'bg-[#3b82f6] text-black hover:bg-white hover:shadow-[0_0_20px_#3b82f6]' : 'rounded-2xl bg-[var(--nexus-accent)] text-black hover:brightness-110 shadow-lg shadow-[var(--nexus-accent)]/20'}`}
                     >
                       {isProcessingWithdraw ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirm Payout'}
                     </button>
@@ -800,7 +817,6 @@ const Dashboard = () => {
           </motion.div>
         )}
       </AnimatePresence>
-
       {/* OTP SECURITY MODAL */}
       <AnimatePresence>
         {showOtpModal && (

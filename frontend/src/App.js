@@ -1,6 +1,6 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -10,17 +10,18 @@ import { syncTheme } from './api/themeSync';
 
 // ─── EAGER IMPORTS (critical path — must load instantly) ──────────────────────
 import Home from './pages/Home';
-import Login from './pages/Login';
-import Signup from './pages/Signup';
-import AdminLogin from './pages/AdminLogin';
-import DonationPage from './pages/DonationPage';
-import Overlay from './pages/Overlay';
-import GoalOverlay from './pages/GoalOverlay';
-import TugOfWarOverlay from './pages/TugOfWarOverlay';
-import MasterOverlay from './pages/MasterOverlay';
 import LiveThemeEngine from './components/LiveThemeEngine';
+import BrandSplash from './components/BrandSplash';
 
 // ─── LAZY IMPORTS (code-split — only load when navigated to) ─────────────────
+const Login = lazy(() => import('./pages/Login'));
+const Signup = lazy(() => import('./pages/Signup'));
+const AdminLogin = lazy(() => import('./pages/AdminLogin'));
+const DonationPage = lazy(() => import('./pages/DonationPage'));
+const Overlay = lazy(() => import('./pages/Overlay'));
+const GoalOverlay = lazy(() => import('./pages/GoalOverlay'));
+const TugOfWarOverlay = lazy(() => import('./pages/TugOfWarOverlay'));
+const MasterOverlay = lazy(() => import('./pages/MasterOverlay'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const AdminSecurePortal = lazy(() => import('./pages/AdminSecurePortal'));
 const SubscriptionPage = lazy(() => import('./pages/SubscriptionPage'));
@@ -244,6 +245,16 @@ function AppContent() {
   const location = useLocation();
   const isOverlay = location.pathname.includes('/overlay') || location.pathname.includes('/goal');
 
+  // Splash screen state (never show on overlays)
+  const [isInitialBoot, setIsInitialBoot] = useState(!isOverlay);
+
+  useEffect(() => {
+    if (isInitialBoot) {
+      const timer = setTimeout(() => setIsInitialBoot(false), 2000); // Faster, super-punchy 2-second splash
+      return () => clearTimeout(timer);
+    }
+  }, [isInitialBoot]);
+
   // Listen for custom theme change events (fired from Dashboard)
   useEffect(() => {
     const handleThemeSync = (e) => {
@@ -268,6 +279,21 @@ function AppContent() {
 
   return (
     <div className={`min-h-screen relative overflow-hidden text-[var(--nexus-text)] selection:bg-emerald-500/30 bg-transparent`}>
+      {/* INITIAL SPLASH SCREEN */}
+      <AnimatePresence>
+        {isInitialBoot && (
+          <motion.div
+            key="splash-screen"
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0, scale: 1.05 }}
+            transition={{ duration: 0.8, ease: "easeInOut" }}
+            className="fixed inset-0 z-[9999]"
+          >
+            <BrandSplash />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {!isOverlay && (
         <Helmet>
           <title>DropPay | The Ultimate Streamer Protocol</title>
@@ -314,8 +340,4 @@ function App() {
   );
 }
 
-export default App;
-
-
-
-   
+export default App; 

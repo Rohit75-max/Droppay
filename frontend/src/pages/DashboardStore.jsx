@@ -13,6 +13,13 @@ const ELITE_THEMES = [
         videoPreviewUrl: "https://cdn.pixabay.com/video/2020/04/17/36425-410884849_large.mp4"
     },
     {
+        id: 'neon_relic',
+        title: "Neon Relic",
+        description: "Retro-Vapor-Brutalism with 3D haptics, plasma gas leaks, and peeling holo-stickers.",
+        price: "₹15,000",
+        videoPreviewUrl: "https://cdn.pixabay.com/video/2020/04/17/36425-410884849_large.mp4"
+    },
+    {
         id: 'live_erangel',
         title: "Red-Zone",
         description: "Tactical warzone with battlefield smoke and pulsing red vignettes.",

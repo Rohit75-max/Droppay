@@ -582,6 +582,7 @@ const ControlCenter = ({
                     { id: 'live_dragon', label: 'DRAGON HOARD', desc: 'Mystic Runes (Ember).', icon: <Gem className="w-6 h-6" />, color: '#fbbf24', premium: true },
                     { id: 'midnight-obsidian', label: 'KINETIC OBSIDIAN', desc: 'Liquid gold accents, dark drift.', icon: <Layout className="w-6 h-6" />, color: '#F59E0B', premium: false },
                     { id: 'uplink', label: 'ELITE UPLINK', desc: '2026 Protocol. Multi-layer glass.', icon: <Zap className="w-6 h-6" />, color: '#10B981', premium: false },
+                    { id: 'neon_relic', label: 'NEON RELIC', desc: 'Retro Vapor Brutalism.', icon: <Layout className="w-6 h-6" />, color: '#00ffff', premium: true },
                   ].filter(t => !t.premium || (user?.unlockedNexusThemes || []).includes(t.id)).map((t) => {
                     const isSelected = nexusTheme === t.id;
                     const isHovered = hoveredTheme === t.id;

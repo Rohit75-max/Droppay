@@ -1493,7 +1493,7 @@ const Home = () => {
                           whileHover={{ scale: 1.1, zIndex: 20 }}
                           className="w-12 h-12 rounded-full border-2 border-[#10B981]/30 overflow-hidden shadow-xl"
                         >
-                          <img src={src} alt="Top Contributor" className="w-full h-full object-cover" />
+                          <img src={src} alt="Top Contributor" className="w-full h-full object-cover" loading="lazy" decoding="async" />
                         </motion.div>
                       ))}
                     </div>
@@ -1624,7 +1624,7 @@ const Home = () => {
             ];
             const goCard = (newIdx) => { setPricingDir(newIdx > pricingCard ? 1 : -1); setPricingCard(newIdx); };
             return (
-              <div>
+              <div className="md:hidden">
                 <div className="relative overflow-visible px-2 pt-6 pb-2" style={{ minHeight: 520 }}>
                   <AnimatePresence mode="wait" custom={pricingDir}>
                     {pricingCards.map((card, i) => i === pricingCard && (
@@ -1878,7 +1878,7 @@ const Home = () => {
         <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-[#10B981]/[0.1] blur-[140px] rounded-full pointer-events-none animate-pulse" />
         <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-blue-500/[0.1] blur-[120px] rounded-full pointer-events-none animate-pulse" style={{ animationDelay: '1s' }} />
 
-        <div className="max-w-[1440px] mx-auto px-6 pt-16 md:pt-24 pb-12 relative z-10">
+        <div className="max-w-[1440px] mx-auto px-6 pt-16 md:pt-24 pb-6 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24">
 
             {/* BRAND & MISSION HUB */}
@@ -1915,9 +1915,9 @@ const Home = () => {
             {/* NAV MATRIX - Responsive 3-col on all screens */}
             <div className="lg:col-span-5 grid grid-cols-3 gap-x-4 gap-y-8 sm:gap-x-8 sm:gap-y-10 md:gap-10">
               <div className="space-y-5 sm:space-y-8">
-                <p className={`text-sm sm:text-xl font-black italic uppercase tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'} flex items-center gap-1 sm:gap-2`}>
+                <div className={`text-sm sm:text-xl font-black italic uppercase tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'} flex items-center gap-1 sm:gap-2`}>
                   System <div className="h-[2px] w-4 sm:w-8 bg-[#10B981]/40" />
-                </p>
+                </div>
                 <div className="flex flex-col gap-3 sm:gap-6">
                   {['Features', 'Pricing', 'Dashboard', 'Overlays'].map(item => (
                     <button key={item} className="group flex items-center gap-1 sm:gap-2 text-slate-500 hover:text-[#10B981] text-[10px] sm:text-[13px] font-black uppercase tracking-widest transition-all text-left">
@@ -1928,9 +1928,9 @@ const Home = () => {
                 </div>
               </div>
               <div className="space-y-5 sm:space-y-8">
-                <p className={`text-sm sm:text-xl font-black italic uppercase tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'} flex items-center gap-1 sm:gap-2`}>
+                <div className={`text-sm sm:text-xl font-black italic uppercase tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'} flex items-center gap-1 sm:gap-2`}>
                   Protocol <div className="h-[2px] w-4 sm:w-8 bg-[#10B981]/40" />
-                </p>
+                </div>
                 <div className="flex flex-col gap-3 sm:gap-6">
                   {['API Docs', 'Status', 'Security', 'Changelog'].map(item => (
                     <button key={item} className="group flex items-center gap-1 sm:gap-2 text-slate-500 hover:text-[#10B981] text-[10px] sm:text-[13px] font-black uppercase tracking-widest transition-all text-left">
@@ -1941,9 +1941,9 @@ const Home = () => {
                 </div>
               </div>
               <div className="space-y-5 sm:space-y-8">
-                <p className={`text-sm sm:text-xl font-black italic uppercase tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'} flex items-center gap-1 sm:gap-2`}>
+                <div className={`text-sm sm:text-xl font-black italic uppercase tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'} flex items-center gap-1 sm:gap-2`}>
                   Legal <div className="h-[2px] w-4 sm:w-8 bg-[#10B981]/40" />
-                </p>
+                </div>
                 <div className="flex flex-col gap-3 sm:gap-6">
                   {['Privacy', 'Terms', 'Refunds', 'Contact'].map(item => (
                     <button key={item} className="group flex items-center gap-1 sm:gap-2 text-slate-500 hover:text-[#10B981] text-[10px] sm:text-[13px] font-black uppercase tracking-widest transition-all text-left">
@@ -1986,9 +1986,9 @@ const Home = () => {
                   {subscribing ? <Cpu className="w-5 h-5 animate-spin" /> : <>Join Now <ArrowRight className="w-4 h-4 ml-2" /></>}
                 </button>
               </form>
-              <div className={`flex items-center gap-4 p-5 rounded-[1.5rem] border transition-all duration-500 ${theme === 'dark' ? 'bg-white/[0.03] border-white/5 hover:border-[#10B981]/20' : 'bg-emerald-50 border-emerald-100'}`}>
-                <Shield className="w-5 h-5 text-[#10B981]" />
-                <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest italic">
+              <div className={`flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-2 sm:gap-4 p-3 sm:p-5 rounded-[1.5rem] border transition-all duration-500 mt-4 sm:mt-0 ${theme === 'dark' ? 'bg-white/[0.03] border-white/5 hover:border-[#10B981]/20' : 'bg-emerald-50 border-emerald-100'}`}>
+                <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-[#10B981] shrink-0" />
+                <p className="text-[9px] sm:text-[10px] text-slate-500 font-black uppercase tracking-widest italic text-center lg:text-left leading-tight sm:leading-normal">
                   End-to-end encrypted protocol.
                 </p>
               </div>
@@ -1996,38 +1996,39 @@ const Home = () => {
           </div>
 
           {/* DIVIDER - Cybernetic Line */}
-          <div className="relative mt-16 md:mt-24 mb-16">
+          <div className="relative mt-6 md:mt-10 mb-6 md:mb-8">
             <div className={`h-px w-full ${theme === 'dark' ? 'bg-gradient-to-r from-transparent via-white/10 to-transparent' : 'bg-gradient-to-r from-transparent via-slate-200 to-transparent'}`} />
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-[#10B981] blur-md opacity-50" />
           </div>
 
           {/* SYSTEM STATUS BAR (SOCKET BAR) */}
-          <div className="flex flex-col lg:flex-row justify-between items-center gap-12">
-            <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
-              <p className="text-slate-600 text-[10px] font-black uppercase tracking-[0.3em] opacity-80 italic">
-                © 2026 DROPPAY ARCHITECTURE. ALL RIGHTS RESERVED.
+          <div className="flex flex-col lg:flex-row justify-between items-center gap-6 sm:gap-10">
+            <div className="flex flex-col md:flex-row items-center gap-4 sm:gap-6 md:gap-12 w-full lg:w-auto">
+              <p className="text-slate-600 text-[8px] sm:text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] opacity-80 italic text-center md:text-left leading-relaxed">
+                © 2026 DROPPAY ARCHITECTURE.
+                <br className="md:hidden" /> ALL RIGHTS RESERVED.
               </p>
-              <div className="flex items-center gap-4 px-6 py-3 rounded-2xl bg-white/5 border border-white/10 shadow-lg backdrop-blur-md group">
+              <div className="flex items-center gap-3 sm:gap-4 px-5 py-2.5 sm:px-6 sm:py-3 rounded-2xl bg-white/5 border border-white/10 shadow-md backdrop-blur-md group relative">
                 <div className="relative">
                   <div className="w-2.5 h-2.5 rounded-full bg-[#10B981] animate-pulse" />
                   <div className="absolute inset-0 w-2.5 h-2.5 rounded-full bg-[#10B981] animate-ping opacity-50" />
                 </div>
-                <span className="text-[11px] text-[#10B981] font-black uppercase tracking-[0.4em] italic group-hover:drop-shadow-[0_0_8px_#10B981] transition-all">BUILT IN INDIA 🇮🇳</span>
+                <span className="text-[10px] sm:text-[11px] text-[#10B981] font-black uppercase tracking-[0.4em] italic group-hover:drop-shadow-[0_0_8px_#10B981] transition-all">BUILT IN INDIA 🇮🇳</span>
               </div>
             </div>
 
             {/* Regulatory Logos / Payment Sync Status */}
-            <div className="flex items-center gap-10">
+            <div className="flex items-center justify-center gap-4 sm:gap-10 w-full lg:w-auto">
               <div className="h-6 w-px bg-white/10 hidden lg:block" />
-              <div className="flex items-center gap-8 font-mono">
-                <div className="flex items-center gap-3">
-                  <Lock className="w-3.5 h-3.5 text-slate-500" />
-                  <p className="text-[10px] text-slate-500 font-black tracking-[0.2em] uppercase italic">RAZORPAY_SECURE</p>
+              <div className="flex flex-wrap items-center justify-center gap-5 sm:gap-8 font-mono w-full sm:w-auto">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <Lock className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                  <p className="text-[8px] sm:text-[10px] text-slate-500 font-black tracking-[0.2em] uppercase italic">RAZORPAY_SECURE</p>
                 </div>
-                <div className="w-1.5 h-1.5 rounded-full bg-[#10B981]/30" />
-                <div className="flex items-center gap-3">
-                  <ShieldCheck className="w-3.5 h-3.5 text-slate-500" />
-                  <p className="text-[10px] text-slate-500 font-black tracking-[0.2em] uppercase italic">256-BIT_ENCRYPTION</p>
+                <div className="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-[#10B981]/30 block" />
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <ShieldCheck className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                  <p className="text-[8px] sm:text-[10px] text-slate-500 font-black tracking-[0.2em] uppercase italic">256-BIT_ENCRYPTION</p>
                 </div>
               </div>
             </div>
