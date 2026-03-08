@@ -30,10 +30,19 @@
     (function () {
       try {
         var theme = localStorage.getItem('dropPayTheme');
-        var supportLight = true; // We default to light now
-        if (!theme || theme === 'dark') {
-          theme = 'light';
-          localStorage.setItem('dropPayTheme', 'light');
+        // If empty or explicitly light (for legacy overrides), force it to dark initially as the standard
+        // (Wait, if a user actually *chooses* light mode, we should let them. So only default to dark if not set)
+        if (!theme) {
+          theme = 'dark';
+          localStorage.setItem('dropPayTheme', 'dark');
+        } else if (theme === 'light') {
+           // If they actually had light mode saved from the old bad default, wipe it to dark
+           // Since streamers requested dark mode only.
+           const userHasChosen = localStorage.getItem('dropPayThemeSet') === 'true';
+           if (!userHasChosen) {
+             theme = 'dark';
+             localStorage.setItem('dropPayTheme', 'dark');
+           }
         }
         document.documentElement.classList.add(theme);
       } catch (e) { }
