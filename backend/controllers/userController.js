@@ -379,7 +379,7 @@ exports.equipAsset = async (req, res) => {
         switch (category) {
             case 'theme': {
                 const owned = user.unlockedNexusThemes || [];
-                if (assetId !== 'void' && assetId !== 'aero' && assetId !== 'kawaii' && assetId !== 'arcade' && assetId !== 'bgmi' && !owned.includes(assetId)) {
+                if (assetId !== 'void' && assetId !== 'aero' && assetId !== 'obsidian_monolith' && assetId !== 'kawaii' && assetId !== 'arcade' && assetId !== 'bgmi' && !owned.includes(assetId)) {
                     return res.status(403).json({ msg: "Theme not owned." });
                 }
                 user.nexusTheme = assetId;

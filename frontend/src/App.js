@@ -250,7 +250,7 @@ function AppContent() {
 
   useEffect(() => {
     if (isInitialBoot) {
-      const timer = setTimeout(() => setIsInitialBoot(false), 2800); // 2.8s total sequence length
+      const timer = setTimeout(() => setIsInitialBoot(false), 2000); // Faster, super-punchy 2-second splash
       return () => clearTimeout(timer);
     }
   }, [isInitialBoot]);
