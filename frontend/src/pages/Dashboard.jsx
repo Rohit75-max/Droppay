@@ -132,16 +132,16 @@ const Dashboard = () => {
         syncTheme(res.data);
       }
 
-      // --- FORCE LIGHT THEME MIGRATION ---
-      const currentThemeMode = res.data.nexusThemeMode || 'dark';
-      if (currentThemeMode === 'dark') {
-        syncTheme({ ...res.data, nexusThemeMode: 'light' });
-        // Update profile on server to persist light mode
+      // --- FORCE DARK THEME MIGRATION (Streamer Preference) ---
+      const currentThemeMode = res.data.nexusThemeMode || 'light';
+      if (currentThemeMode === 'light') {
+        syncTheme({ ...res.data, nexusThemeMode: 'dark' });
+        // Update profile on server to persist dark mode
         const token = localStorage.getItem('token');
         axios.post(`/api/user/update-profile`,
-          { nexusThemeMode: 'light' },
+          { nexusThemeMode: 'dark' },
           { headers: { Authorization: `Bearer ${token}` } }
-        ).catch(e => console.error("Failed to persist light theme", e));
+        ).catch(e => console.error("Failed to persist dark theme", e));
       } else {
         syncTheme(res.data);
       }
