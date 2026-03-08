@@ -1901,11 +1901,16 @@ const Home = () => {
 
               {/* Enhanced Social Channels */}
               <div className="flex gap-4">
-                {[Twitter, Instagram, Github, Linkedin].map((Icon, i) => (
+                {[
+                  { Icon: Twitter, hoverClass: theme === 'dark' ? 'hover:border-[#1DA1F2]/60 hover:text-[#1DA1F2] hover:bg-[#1DA1F2]/5 hover:shadow-[0_0_20px_rgba(29,161,242,0.2)]' : 'hover:border-[#1DA1F2]/60 hover:text-[#1DA1F2] hover:bg-[#1DA1F2]/5 hover:shadow-[0_0_20px_rgba(29,161,242,0.1)]' },
+                  { Icon: Instagram, hoverClass: theme === 'dark' ? 'hover:border-[#E1306C]/60 hover:text-[#E1306C] hover:bg-[#E1306C]/5 hover:shadow-[0_0_20px_rgba(225,48,108,0.2)]' : 'hover:border-[#E1306C]/60 hover:text-[#E1306C] hover:bg-[#E1306C]/5 hover:shadow-[0_0_20px_rgba(225,48,108,0.1)]' },
+                  { Icon: Github, hoverClass: theme === 'dark' ? 'hover:border-white/60 hover:text-white hover:bg-white/5 hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]' : 'hover:border-slate-900/60 hover:text-slate-900 hover:bg-slate-900/5 hover:shadow-[0_0_20px_rgba(15,23,42,0.1)]' },
+                  { Icon: Linkedin, hoverClass: theme === 'dark' ? 'hover:border-[#0A66C2]/60 hover:text-[#0A66C2] hover:bg-[#0A66C2]/5 hover:shadow-[0_0_20px_rgba(10,102,194,0.2)]' : 'hover:border-[#0A66C2]/60 hover:text-[#0A66C2] hover:bg-[#0A66C2]/5 hover:shadow-[0_0_20px_rgba(10,102,194,0.1)]' }
+                ].map(({ Icon, hoverClass }, i) => (
                   <button key={i} className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 border relative group shadow-sm ${theme === 'dark'
-                    ? 'bg-white/5 border-white/5 hover:border-[#10B981]/60 text-slate-400 hover:text-white hover:bg-[#10B981]/5 hover:shadow-[0_0_20px_rgba(16,185,129,0.2)]'
-                    : 'bg-slate-50 border-slate-200 hover:border-[#10B981]/60 text-slate-600 hover:text-[#10B981] hover:bg-emerald-50 hover:shadow-[0_0_20px_rgba(16,185,129,0.1)]'
-                    }`}>
+                    ? 'bg-white/5 border-white/5 text-slate-400'
+                    : 'bg-slate-50 border-slate-200 text-slate-600'
+                    } ${hoverClass}`}>
                     <Icon className="w-5 h-5 group-hover:scale-110 transition-transform" />
                   </button>
                 ))}
@@ -1986,12 +1991,7 @@ const Home = () => {
                   {subscribing ? <Cpu className="w-5 h-5 animate-spin" /> : <>Join Now <ArrowRight className="w-4 h-4 ml-2" /></>}
                 </button>
               </form>
-              <div className={`flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-2 sm:gap-4 p-3 sm:p-5 rounded-[1.5rem] border transition-all duration-500 mt-4 sm:mt-0 ${theme === 'dark' ? 'bg-white/[0.03] border-white/5 hover:border-[#10B981]/20' : 'bg-emerald-50 border-emerald-100'}`}>
-                <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-[#10B981] shrink-0" />
-                <p className="text-[9px] sm:text-[10px] text-slate-500 font-black uppercase tracking-widest italic text-center lg:text-left leading-tight sm:leading-normal">
-                  End-to-end encrypted protocol.
-                </p>
-              </div>
+
             </div>
           </div>
 
