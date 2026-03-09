@@ -150,10 +150,7 @@ const Signup = () => {
     try {
       const res = await axios.post('/api/auth/signup', { ...formData, email: formData.email.trim().toLowerCase() });
       if (res.status === 201 || res.status === 206) {
-        setStep(3); // Success/Redirect Step
-        setTimeout(() => {
-          window.location.href = '/login?new=true';
-        }, 3000);
+        setStep(2); // Go to OTP Step
       }
     } catch (err) { setError(err.response?.data?.msg || 'Identity node connection failed: Network protocol mismatch.'); }
     finally { setLoading(false); }
@@ -181,7 +178,13 @@ const Signup = () => {
     try {
       const res = await axios.post('/api/auth/verify-email', { email: formData.email.trim().toLowerCase(), otp: combined });
       if (res.status === 200) {
-        window.location.href = '/login';
+        if (res.data.token) {
+          localStorage.setItem('token', res.data.token);
+        }
+        setStep(3);
+        setTimeout(() => {
+          window.location.href = '/dashboard';
+        }, 3000);
       }
     } catch (err) { setError(err.response?.data?.msg || 'Invalid Transmission Key.'); }
     finally { setLoading(false); }

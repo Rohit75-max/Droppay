@@ -103,6 +103,31 @@ const Login = () => {
     return () => clearInterval(interval);
   }, [resendTimer]);
 
+  // Check for existing valid session
+  useEffect(() => {
+    const checkExistingSession = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+      try {
+        const res = await axios.get('/api/user/profile', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        syncTheme(res.data);
+        const isActiveTier = res.data.tier && res.data.tier !== 'none';
+        const isLegacyActive = res.data.subscription?.status === 'active';
+
+        if (isActiveTier || isLegacyActive) {
+          navigate('/dashboard');
+        } else {
+          navigate('/subscription');
+        }
+      } catch (err) {
+        localStorage.removeItem('token');
+      }
+    };
+    checkExistingSession();
+  }, [navigate]);
+
   // Pre-fill remembered email
   useEffect(() => {
     const saved = localStorage.getItem('rememberedEmail');
