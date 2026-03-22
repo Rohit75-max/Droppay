@@ -388,6 +388,7 @@ const UserDetailDrawer = ({ userId, isOpen, onClose, context = 'directory' }) =>
                                                             itemCount={filteredTransactions.length}
                                                             itemSize={85}
                                                             width="100%"
+                                                            itemData={filteredTransactions}
                                                             className="custom-scrollbar"
                                                         >
                                                             {({ index, style }) => {
@@ -1095,6 +1096,7 @@ const AdminSecurePortal = () => {
                                                 itemCount={nodes.length}
                                                 itemSize={80}
                                                 width="100%"
+                                                itemData={nodes}
                                                 className="custom-scrollbar"
                                             >
                                                 {({ index, style }) => {

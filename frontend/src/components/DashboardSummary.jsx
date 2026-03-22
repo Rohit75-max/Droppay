@@ -496,6 +496,7 @@ const DashboardSummary = ({
                 itemCount={recentDrops.length}
                 itemSize={82} // Explicit average size per row item
                 width="100%"
+                itemData={recentDrops}
                 className="custom-scrollbar"
               >
                 {({ index, style }) => {
