@@ -6,7 +6,7 @@ import {
   LayoutDashboard, Settings, Trophy, HelpCircle,
   MessageSquare, Zap, ChevronRight, LogOut,
   ShieldAlert, Activity, X, Play, Loader2, IndianRupee, History, User,
-  Copy, ExternalLink, Bell, Target, ChevronDown
+  Copy, ExternalLink, Bell, Target, ChevronDown, ShoppingBag
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -26,7 +26,7 @@ import MobileBottomNav from '../components/navigation/MobileBottomNav';
 const navItems = [
   { id: 'summary', icon: LayoutDashboard, label: 'Dashboard' },
   { id: 'control', icon: Settings, label: 'Settings' },
-  { id: 'store', icon: Zap, label: 'Store' },
+  { id: 'store', icon: ShoppingBag, label: 'Store' },
   { id: 'profile', icon: User, label: 'Profile' },
   { id: 'growth', icon: Trophy, label: 'Growth' },
   { id: 'help', icon: HelpCircle, label: 'Help' },
@@ -675,9 +675,9 @@ const Dashboard = () => {
                         <div className="space-y-3">
                           {[
                             { label: 'Payment Profile', icon: IndianRupee, value: `${BASE_URL}/pay/${user?.username}`, color: 'var(--nexus-accent)' },
-                            { label: 'Stream Alerts', icon: Bell, value: `${BASE_URL}/overlay/alerts/${user?.obsKey}`, color: '#f43f5e' },
-                            { label: 'Progress Goal', icon: Target, value: `${BASE_URL}/overlay/goal/${user?.username}`, color: '#f59e0b' },
-                            { label: 'Recent Activity', icon: Activity, value: `${BASE_URL}/overlay/recent/${user?.username}`, color: '#8b5cf6' }
+                            { label: 'Stream Alerts', icon: Bell, value: `${BASE_URL}/overlay/${user?.obsKey}`, color: '#f43f5e' },
+                            { label: 'Progress Goal', icon: Target, value: `${BASE_URL}/goal/${user?.username}`, color: '#f59e0b' },
+                            { label: 'Master Overlay', icon: Activity, value: `${BASE_URL}/overlay/master/${user?.obsKey}`, color: '#8b5cf6' }
                           ].map((item, idx) => (
                             <div key={idx} className="group/item flex flex-col gap-2 p-3 rounded-2xl bg-[var(--nexus-panel)] border border-[var(--nexus-border)] hover:border-[var(--nexus-accent)]/30 transition-all">
                               <div className="flex justify-between items-center">

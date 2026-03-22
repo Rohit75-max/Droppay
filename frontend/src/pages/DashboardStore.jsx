@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from '../api/axios';
-import { Hexagon, Sparkles, AlertTriangle, Loader2, IndianRupee, Store, Monitor, Play, Crown } from 'lucide-react';
+import { Hexagon, Sparkles, AlertTriangle, Loader2, IndianRupee, ShoppingBag, Monitor, Play, Crown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import PremiumStorefront from '../components/store/PremiumStorefront';
 
@@ -291,7 +291,7 @@ const DashboardStore = ({ theme, user, setUser }) => {
 
                 <div className="relative z-10 flex items-center gap-4">
                     <div className={`relative p-3 rounded-xl border group bg-[var(--nexus-accent)]/10 border-[var(--nexus-accent)]/20`}>
-                        <Store className={`w-6 h-6 relative z-10 text-[var(--nexus-accent)]`} />
+                        <ShoppingBag className={`w-6 h-6 relative z-10 text-[var(--nexus-accent)]`} />
                         <Hexagon className={`absolute inset-0 w-full h-full opacity-20 scale-150 group-hover:rotate-90 transition-all duration-700 text-[var(--nexus-accent)]`} />
                         <Crown className={`absolute -top-2 -right-2 w-4 h-4 drop-shadow-[0_0_10px_var(--nexus-accent-glow)] text-[var(--nexus-accent)]`} />
                     </div>
