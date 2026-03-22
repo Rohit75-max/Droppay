@@ -28,11 +28,11 @@ const MobileBottomNav = ({ activeSection, setActiveSection, onLogout, user, them
         <div className="fixed inset-x-0 bottom-6 z-[150] flex flex-col items-center pointer-events-none md:hidden">
             <div className="pointer-events-auto relative flex flex-col items-center w-[92%] max-w-md">
                 
-                {/* FLOATING QUICK ACTIONS MENU (The "Blue Pill") */}
+                {/* FLOATING QUICK ACTIONS MENU (The "Vertical Stack") */}
                 <AnimatePresence>
                     {isMenuExpanded && (
                         <>
-                            {/* Backdrop */}
+                            {/* Backdrop - More immersive full-screen blur */}
                             <motion.div
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
@@ -42,45 +42,65 @@ const MobileBottomNav = ({ activeSection, setActiveSection, onLogout, user, them
                             />
 
                              <motion.div
-                                initial={{ opacity: 0, y: 15, scale: 0.95 }}
-                                animate={{ opacity: 1, y: 0, scale: 1 }}
-                                exit={{ opacity: 0, y: 15, scale: 0.95 }}
-                                transition={{ type: "spring", damping: 20, stiffness: 400 }}
-                                className="fixed bottom-[4.8rem] left-1/2 -translate-x-1/2 bg-[#0c0c0e]/95 backdrop-blur-3xl rounded-[2rem] p-2.5 flex items-center justify-center gap-1.5 shadow-[0_20px_40px_rgba(0,0,0,0.8)] border border-white/5 w-[max-content] max-w-[calc(100vw-2rem)] z-[200] ring-1 ring-white/10"
+                                initial="hidden"
+                                animate="show"
+                                exit="hidden"
+                                variants={{
+                                    show: { 
+                                        transition: { staggerChildren: 0.05, delayChildren: 0.05 } 
+                                    },
+                                    hidden: { 
+                                        transition: { staggerChildren: 0, when: "afterChildren" } 
+                                    }
+                                }}
+                                className="fixed bottom-[4.8rem] left-1/2 -translate-x-1/2 bg-[#020403]/95 backdrop-blur-2xl rounded-[2.5rem] p-3 flex flex-col gap-2 shadow-[0_30px_60px_rgba(0,0,0,0.8)] border border-white/5 w-[240px] z-[200] ring-1 ring-white/10"
                             >
-                                {/* Central Sub-glow */}
-                                <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
+                                {/* Immersive header */}
+                                <div className="px-4 py-2 border-b border-white/5 flex items-center justify-between opacity-50">
+                                    <span className="text-[10px] font-black uppercase tracking-[0.2em]">Quick Actions</span>
+                                    <Zap className="w-3 h-3 fill-current" />
+                                </div>
 
-                                {quickActionItems.map((item, index) => (
+                                {quickActionItems.map((item) => (
                                     <motion.button
                                         key={item.id}
-                                        whileHover={{ scale: 1.1 }}
-                                        whileTap={{ scale: 0.9 }}
+                                        variants={{
+                                            show: { opacity: 1, x: 0, scale: 1 },
+                                            hidden: { opacity: 0, x: -10, scale: 0.95 }
+                                        }}
+                                        whileTap={{ scale: 0.96 }}
                                         onClick={() => {
                                             if (item.id === 'logout') onLogout();
                                             else if (item.id === 'admin') navigate('/admin/secure-portal');
                                             else setActiveSection(item.id);
                                             setIsMenuExpanded(false);
                                         }}
-                                        className="w-11 h-11 flex flex-col items-center justify-center rounded-2xl transition-all relative group/btn"
+                                        className="flex items-center gap-4 px-4 py-2.5 rounded-2xl transition-all relative group/btn w-full"
                                     >
                                         <div 
                                             className="absolute inset-0 rounded-2xl opacity-0 group-hover/btn:opacity-100 transition-all duration-300"
-                                            style={{ 
-                                                backgroundColor: `${item.color}15`,
-                                                boxShadow: `inset 0 0 10px ${item.color}20` 
-                                            }}
+                                            style={{ backgroundColor: `${item.color}15` }}
                                         />
-                                        <item.icon 
-                                            className="w-4.5 h-4.5 relative z-10" 
-                                            style={{ 
-                                                color: item.color,
-                                                filter: `drop-shadow(0 0 8px ${item.color}40)`
-                                            }} 
-                                        />
-                                        <span className="text-[6px] font-black uppercase mt-1 opacity-40 group-hover/btn:opacity-100 transition-opacity" style={{ color: item.color }}>
-                                            {item.label}
-                                        </span>
+                                        <div 
+                                            className="w-10 h-10 rounded-xl flex items-center justify-center relative z-10 shrink-0"
+                                            style={{ backgroundColor: `${item.color}20`, border: `1px solid ${item.color}30` }}
+                                        >
+                                            <item.icon 
+                                                className="w-5 h-5" 
+                                                style={{ 
+                                                    color: item.color,
+                                                    filter: `drop-shadow(0 0 8px ${item.color}40)`
+                                                }} 
+                                            />
+                                        </div>
+                                        <div className="flex flex-col items-start relative z-10">
+                                            <span className="text-[11px] font-black uppercase tracking-widest" style={{ color: item.color }}>
+                                                {item.label}
+                                            </span>
+                                            <span className="text-[8px] font-bold text-white/30 uppercase tracking-tighter">
+                                                Access {item.label.toLowerCase()} hub
+                                            </span>
+                                        </div>
                                     </motion.button>
                                 ))}
                             </motion.div>

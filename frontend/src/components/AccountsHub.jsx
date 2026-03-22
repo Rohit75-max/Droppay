@@ -270,7 +270,7 @@ const AccountsHub = React.memo(({
                             type="email"
                             autoComplete="email"
                             className={`flex-1 min-w-0 rounded-xl p-3 text-xs font-bold text-white bg-black/40 border border-white/10 focus:border-[var(--nexus-accent)] outline-none transition-all placeholder:text-white/30`}
-                            placeholder="your@email.com"
+                            placeholder="official@email.com"
                           />
                           <button
                             disabled={isSendingOtp}
@@ -584,7 +584,7 @@ const AccountsHub = React.memo(({
                     <div className="space-y-3 text-left">
                       <div>
                         <label className="text-[9px] font-black uppercase text-amber-500 tracking-widest mb-1 block">Account Holder Name</label>
-                        <input value={bankForm.name} onChange={(e) => setBankForm({ ...bankForm, name: e.target.value })} placeholder="John Doe" className={`w-full rounded-2xl p-4 text-sm font-bold border-2 transition-all ${getInputStyle()}`} />
+                        <input value={bankForm.name} onChange={(e) => setBankForm({ ...bankForm, name: e.target.value })} placeholder="Full Legal Name" className={`w-full rounded-2xl p-4 text-sm font-bold border-2 transition-all ${getInputStyle()}`} />
                       </div>
                       {bankLinkType === 'bank_account' ? (
                         <>

@@ -13,14 +13,32 @@ import { toast } from 'react-toastify';
 // API_BASE is now handled by the centralized axios configuration in src/api/axios.js
 
 // ─── Floating Orb ─────────────────────────────────────────────
-const Orb = ({ size, x, y, duration, color, delay }) => (
-  <motion.div
-    className="absolute rounded-full pointer-events-none"
-    style={{ width: size, height: size, left: x, top: y, background: color, filter: 'blur(60px)' }}
-    animate={{ y: [0, -25, 0], x: [0, 12, 0], scale: [1, 1.07, 1], opacity: [0.3, 0.5, 0.3] }}
-    transition={{ duration, repeat: Infinity, ease: 'easeInOut', delay }}
-  />
-);
+const Orb = ({ size, x, y, duration, color, delay }) => {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 1024);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+
+  return (
+    <motion.div
+      className="absolute rounded-full pointer-events-none"
+      style={{
+        width: size,
+        height: size,
+        left: x,
+        top: y,
+        background: color,
+        filter: isMobile ? 'none' : 'blur(60px)',
+        opacity: isMobile ? 0.1 : 0.3
+      }}
+      animate={isMobile ? {} : { y: [0, -25, 0], x: [0, 12, 0], scale: [1, 1.07, 1], opacity: [0.3, 0.5, 0.3] }}
+      transition={{ duration, repeat: Infinity, ease: 'easeInOut', delay }}
+    />
+  );
+};
 
 // ─── Stat Card ────────────────────────────────────────────────
 const StatCard = ({ icon: Icon, label, value, color, delay, isDark }) => (
@@ -95,6 +113,14 @@ const Signup = () => {
   const [strength, setStrength] = useState(0);
   const [resendTimer, setResendTimer] = useState(0);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 1024);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   useEffect(() => {
     let interval;
@@ -209,11 +235,11 @@ const Signup = () => {
             <Orb size={350} x="70%" y="50%" color="rgba(6,182,212,0.12)" duration={14} delay={2} />
             <Orb size={300} x="20%" y="80%" color="rgba(244,114,182,0.1)" duration={11} delay={1} />
 
-            {/* Dynamic Cyber Grid */}
+            {/* Dynamic Cyber Grid - Static on Mobile for perf */}
             <motion.div 
-               className="absolute inset-0 pointer-events-none opacity-[0.05]"
+               className="absolute inset-0 pointer-events-none opacity-[0.03]"
                style={{ backgroundImage: 'linear-gradient(to right, #10B981 1px, transparent 1px), linear-gradient(to bottom, #10B981 1px, transparent 1px)', backgroundSize: '40px 40px' }}
-               animate={{ backgroundPosition: ['0px 0px', '40px 40px'] }}
+               animate={isMobile ? {} : { backgroundPosition: ['0px 0px', '40px 40px'] }}
                transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
             />
 
@@ -229,13 +255,13 @@ const Signup = () => {
               transition={{ duration: 30, repeat: Infinity, ease: 'linear' }}
             />
 
-            {/* Active Data Streams */}
+            {/* Active Data Streams - Reduced count on mobile */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              {[...Array(10)].map((_, i) => (
+              {[...Array(isMobile ? 3 : 10)].map((_, i) => (
                 <motion.div
                   key={i}
                   className="absolute w-[1px] h-64 bg-gradient-to-b from-transparent via-[#10B981]/50 to-transparent"
-                  style={{ left: `${(i + 1) * 10}%` }}
+                  style={{ left: `${(i + 1) * (isMobile ? 30 : 10)}%` }}
                   animate={{ top: ['-20%', '120%'] }}
                   transition={{ duration: 3 + (i % 3), repeat: Infinity, ease: 'linear', delay: i * 0.5 }}
                 />
@@ -323,7 +349,9 @@ const Signup = () => {
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-        className={`relative flex-1 flex flex-col justify-center px-6 py-12 sm:px-12 sm:py-16 lg:px-24 lg:py-12 z-10 min-h-screen lg:border-l overflow-y-auto transition-colors duration-500 ${isDark ? 'border-white/5 bg-black/40 lg:backdrop-blur-2xl' : 'border-slate-200 bg-white/60 lg:backdrop-blur-2xl'}`}
+        className={`relative flex-1 flex flex-col justify-center px-6 py-12 sm:px-12 sm:py-16 lg:px-24 lg:py-12 z-10 min-h-screen lg:border-l overflow-y-auto transition-all duration-500 ${isDark 
+          ? `border-white/5 ${isMobile ? 'bg-black/95' : 'bg-black/40 backdrop-blur-2xl'}` 
+          : `border-slate-200 ${isMobile ? 'bg-white' : 'bg-white/60 backdrop-blur-2xl'}`}`}
       >
           <AnimatePresence mode="wait">
             {step === 1 ? (
@@ -375,17 +403,17 @@ const Signup = () => {
                       <PremiumInput icon={Hash} label="Streamer ID" type="text" name="username"
                         value={formData.username}
                         onChange={e => setFormData({ ...formData, username: e.target.value.toLowerCase().replace(/\s+/g, '') })}
-                        placeholder="unique_handle" isDark={isDark} autoComplete="username"
+                        placeholder="e.g. your_unique_handle" isDark={isDark} autoComplete="username"
                         rightEl={<span className="text-[9px] font-black text-emerald-500 uppercase tracking-tight opacity-60 group-focus-within:opacity-100">Handle</span>}
                       />
                     </motion.div>
                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}>
                       <PremiumInput icon={Mail} label="Email" type="email" name="email"
-                        value={formData.email} onChange={handleChange} placeholder="you@example.com" isDark={isDark} autoComplete="email" />
+                        value={formData.email} onChange={handleChange} placeholder="official@email.com" isDark={isDark} autoComplete="email" />
                     </motion.div>
                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.75 }}>
                       <PremiumInput icon={Phone} label="Phone" type="text" name="phone"
-                        value={formData.phone} onChange={handleChange} placeholder="+91 00000 00000" isDark={isDark} autoComplete="tel" />
+                        value={formData.phone} onChange={handleChange} placeholder="Enter 10-digit number" isDark={isDark} autoComplete="tel" />
                     </motion.div>
                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.78 }}>
                       <PremiumInput icon={UserPlus} label="Referral Code" type="text" name="referralCode"

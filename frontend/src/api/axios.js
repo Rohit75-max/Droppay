@@ -1,7 +1,13 @@
 import axios from 'axios';
 
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5001";
+
+if (!process.env.REACT_APP_API_URL && window.location.hostname !== 'localhost') {
+    console.warn("⚠️ [DropPay] REACT_APP_API_URL not set. Falling back to localhost. API calls will fail on live server.");
+}
+
 const API = axios.create({
-    baseURL: process.env.REACT_APP_API_URL || "http://localhost:5001",
+    baseURL: API_URL,
     withCredentials: true // Fixes the cookie issue for ALL pages at once
 });
 

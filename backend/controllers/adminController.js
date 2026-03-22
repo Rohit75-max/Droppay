@@ -407,7 +407,7 @@ exports.updateAdminProfile = async (req, res) => {
 
         if (!admin) return res.status(404).json({ msg: "Admin Node Not Found." });
 
-        if (fullName) admin.fullName = fullName;
+        if (fullName !== undefined) admin.fullName = fullName;
         if (adminProfile) {
             admin.adminProfile = {
                 ...admin.adminProfile,

@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef, lazy, Suspense } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useSpring } from 'framer-motion';
 import {
   Zap, ChevronRight,
   Play, Wand2, Sparkles, Trophy, Globe, Layers, Cpu, Radio,
@@ -166,6 +166,13 @@ const PremiumFeatureCard = ({ feat, index }) => {
 
 const Home = () => {
   const navigate = useNavigate();
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
+  });
+
 
   // --- UNIFIED GLOBAL THEME PROTOCOL (now from ThemeContext) ---
   const theme = 'dark';
@@ -281,15 +288,15 @@ const Home = () => {
   return (
     <div
       onMouseMove={handleMouseMove}
-      className={`min-h-screen font-sans selection:bg-[#10B981]/30 transition-colors duration-700 overflow-x-hidden relative ${theme} ${theme === 'dark' ? 'bg-[#050505] text-slate-100' : 'bg-slate-50 text-slate-900'
+      className={`min-h-screen font-sans selection:bg-[#10B981]/30 transition-all duration-700 overflow-x-hidden relative ${theme} ${theme === 'dark' ? 'bg-[#020403] text-slate-100' : 'bg-slate-50 text-slate-900'
         }`}
     >
       {/* Immersive Moving Background */}
-      <div className="ambient-background">
-        <div className="ambient-orb w-[600px] h-[600px] bg-[#10B981]/15 -top-[10%] -left-[10%]" style={{ animationDelay: '0s' }} />
-        <div className="ambient-orb w-[500px] h-[500px] bg-[#3b82f6]/10 top-[20%] -right-[5%]" style={{ animationDelay: '-5s' }} />
-        <div className="ambient-orb w-[700px] h-[700px] bg-[#8b5cf6]/5 bottom-[-10%] left-[20%]" style={{ animationDelay: '-10s' }} />
-        <div className="ambient-orb w-[400px] h-[400px] bg-[#f59e0b]/10 top-[60%] left-[-10%]" style={{ animationDelay: '-15s' }} />
+      <div className="ambient-background fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div className={`ambient-orb w-[600px] h-[600px] bg-[#10B981] ${theme === 'dark' ? 'opacity-[0.08]' : 'opacity-[0.12]'} -top-[10%] -left-[10%]`} style={{ animationDelay: '0s' }} />
+        <div className={`ambient-orb w-[500px] h-[500px] bg-[#3b82f6] ${theme === 'dark' ? 'opacity-[0.05]' : 'opacity-[0.1]'} top-[20%] -right-[5%]`} style={{ animationDelay: '-5s' }} />
+        <div className={`ambient-orb w-[700px] h-[700px] bg-[#8b5cf6] ${theme === 'dark' ? 'opacity-[0.03]' : 'opacity-[0.05]'} bottom-[-10%] left-[20%]`} style={{ animationDelay: '-10s' }} />
+        <div className={`ambient-orb w-[400px] h-[400px] bg-[#f59e0b] ${theme === 'dark' ? 'opacity-[0.04]' : 'opacity-[0.1]'} top-[60%] left-[-10%]`} style={{ animationDelay: '-15s' }} />
       </div>
       <style dangerouslySetInnerHTML={{
         __html: `
@@ -416,9 +423,16 @@ const Home = () => {
 
         .ambient-orb {
           position: absolute;
-          filter: blur(120px);
+          filter: blur(140px);
           border-radius: 50%;
           animation: ambient-drift 25s ease-in-out infinite;
+        }
+
+        @media (max-width: 1024px) {
+          .ambient-orb {
+            animation: none;
+            filter: blur(80px);
+          }
         }
 
         @property --angle {
@@ -660,6 +674,12 @@ const Home = () => {
         ? 'bg-black/40 border-white/[0.03] shadow-[0_8px_32px_rgba(0,0,0,0.5)]'
         : 'bg-white/60 border-black/[0.03] shadow-[0_8px_32px_rgba(0,0,0,0.05)]'
         }`}>
+        {/* THIN SCROLL PROGRESS LINE */}
+        <motion.div
+          className="absolute top-0 left-0 right-0 h-[2px] bg-[#10B981] origin-left z-[110]"
+          style={{ scaleX }}
+        />
+
         <div className="max-w-[1280px] mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3 cursor-pointer group" onClick={() => navigate('/')}>
             <div className="relative">
@@ -966,7 +986,7 @@ const Home = () => {
                 animate={{ opacity: 1, y: 0, skewY: 0 }}
                 transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
                 className="block text-3xl md:text-6xl leading-tight hero-title-main"
-                style={{ letterSpacing: '-0.02em' }}
+                style={{ letterSpacing: '0.12em', paddingLeft: '0.12em' }}
               >
                 Monetize
                 <span className="hero-title-shine">Monetize</span>

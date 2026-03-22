@@ -143,7 +143,7 @@ const AdminLogin = () => {
     };
 
     return (
-        <div className={`relative min-h-screen w-full flex flex-col lg:flex-row font-sans overflow-hidden transition-colors duration-500 ${isDark ? 'bg-[#030a06]' : 'bg-slate-50'}`}>
+        <div className={`relative min-h-screen w-full flex flex-col lg:flex-row font-sans overflow-hidden transition-colors duration-500 ${isDark ? 'bg-[#020403]' : 'bg-slate-50'}`}>
 
             {/* FULL IMMERSIVE BACKGROUND */}
             <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
@@ -338,7 +338,7 @@ const AdminLogin = () => {
                                 initial={{ opacity: 0, height: 0, marginBottom: 0 }}
                                 animate={{ opacity: 1, height: 'auto', marginBottom: 20 }}
                                 exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-                                className="bg-rose-50 border border-rose-200 rounded-2xl p-4 flex gap-3 overflow-hidden">
+                                className={`${isDark ? 'bg-rose-500/10 border-rose-500/20' : 'bg-rose-50 border border-rose-200'} rounded-2xl p-4 flex gap-3 overflow-hidden`}>
                                 <ShieldAlert className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
                                 <div>
                                     <p className="text-[9px] text-rose-400 uppercase tracking-wider font-black mb-0.5">
@@ -352,14 +352,14 @@ const AdminLogin = () => {
                             <motion.div key="success"
                                 initial={{ opacity: 0, height: 0, marginBottom: 0 }}
                                 animate={{ opacity: 1, height: 'auto', marginBottom: 20 }}
-                                className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex items-center gap-3">
+                                className={`${isDark ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-emerald-50 border border-emerald-200'} rounded-2xl p-4 flex items-center gap-3`}>
                                 <CheckCircle className="w-4 h-4 text-emerald-500" />
                                 <p className="text-[12px] text-emerald-700 font-bold">Clearance Granted — Redirecting...</p>
                             </motion.div>
                         )}
                         {isLocked && (
                             <motion.div key="locked" initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                                className="bg-rose-50 border-2 border-rose-300 rounded-2xl p-5 text-center mb-5">
+                                className={`${isDark ? 'bg-rose-500/10 border-2 border-rose-500/30' : 'bg-rose-50 border-2 border-rose-300'} rounded-2xl p-5 text-center mb-5`}>
                                 <Shield className="w-8 h-8 text-rose-500 mx-auto mb-2" />
                                 <p className="text-rose-600 font-black text-base uppercase tracking-widest mb-1">Account Locked</p>
                                 <p className="text-rose-400 text-[11px] font-bold">Contact system administrator.</p>
@@ -418,7 +418,7 @@ const AdminLogin = () => {
                                 whileTap={{ scale: 0.985 }}
                                 className="relative w-full overflow-hidden py-4 rounded-2xl font-black uppercase tracking-widest text-[13px] flex items-center justify-center gap-3 transition-all
                                 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white
-                                disabled:from-slate-100 disabled:to-slate-100 disabled:text-slate-300 disabled:cursor-not-allowed"
+                                disabled:from-white/5 disabled:to-white/5 disabled:text-slate-700 disabled:border disabled:border-white/5 disabled:cursor-not-allowed"
                             >
                                 {/* Shimmer sweep */}
                                 <motion.div className="absolute inset-0 -skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent"
