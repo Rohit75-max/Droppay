@@ -7,13 +7,14 @@ import 'react-toastify/dist/ReactToastify.css';
 import axios from './api/axios';
 import { ThemeProvider } from './context/ThemeContext';
 import { syncTheme } from './api/themeSync';
+import { io } from 'socket.io-client';
+import MaintenanceMode from './pages/MaintenanceMode';
 
 // ─── EAGER IMPORTS (critical path — must load instantly) ──────────────────────
-import Home from './pages/Home';
 import LiveThemeEngine from './components/LiveThemeEngine';
 
-
 // ─── LAZY IMPORTS (code-split — only load when navigated to) ─────────────────
+const Home = lazy(() => import('./pages/Home'));
 const Login = lazy(() => import('./pages/Login'));
 const Signup = lazy(() => import('./pages/Signup'));
 const AdminLogin = lazy(() => import('./pages/AdminLogin'));
@@ -112,7 +113,11 @@ const AnimatedRoutes = () => {
   return (
     // Use a minimal fallback — BootSequence as route fallback caused full loading screen
     // on every lazy page navigation (Dashboard, Admin, etc.)
-    <Suspense fallback={<div className="fixed inset-0 bg-[#050505]" />}>
+    <Suspense fallback={
+      <div className="fixed inset-0 bg-[#050505] flex items-center justify-center z-50">
+        <div className="w-8 h-8 border-2 border-[#10B981] border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
           {/* 1. PUBLIC MARKETING & AUTH */}
@@ -164,6 +169,23 @@ function AppContent() {
 
   const location = useLocation();
   const isOverlay = location.pathname.includes('/overlay') || location.pathname.includes('/goal');
+  const [isPaused, setIsPaused] = useState(false);
+
+  useEffect(() => {
+    axios.get('/api/user/status')
+      .then(res => setIsPaused(res.data.isPaused))
+      .catch(e => console.warn("Status Offline", e.message));
+
+    const socket = io(process.env.REACT_APP_API_URL || 'http://localhost:5001');
+    socket.on('system_paused', () => setIsPaused(true));
+    socket.on('system_resumed', () => setIsPaused(false));
+
+    return () => {
+      socket.off('system_paused');
+      socket.off('system_resumed');
+      socket.disconnect();
+    };
+  }, []);
 
 
 
@@ -191,13 +213,14 @@ function AppContent() {
 
   return (
     <div className={`min-h-screen relative overflow-hidden text-[var(--nexus-text)] selection:bg-emerald-500/30 bg-transparent`}>
+      {isPaused && !location.pathname.startsWith('/admin') && <MaintenanceMode />}
 
       {!isOverlay && (
         <Helmet>
           <title>DropPay | The Ultimate Streamer Protocol</title>
           <meta name="description" content="Empower your stream with custom 3D alerts and optimized creator revenue." />
           <meta name="theme-color" content="#10B981" />
-          <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
         </Helmet>
       )}
 

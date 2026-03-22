@@ -62,10 +62,9 @@ const ControlCenter = ({
     <div className="w-full max-w-7xl mx-auto space-y-10 pb-20 pt-4 relative z-10">
 
       {/* --- ELITE NAVIGATION HUB --- */}
-      <div className="w-full flex justify-center mb-8 relative z-20">
+      <div className="w-full flex justify-center mb-8 relative z-20 px-4 md:px-0">
         <div
-          className="p-1.5 bg-white/[0.02] backdrop-blur-3xl border border-white/5 rounded-[2.5rem] shadow-2xl flex items-center gap-1 overflow-x-auto scrollbar-hide max-w-full"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          className="p-1.5 bg-white/[0.02] backdrop-blur-3xl border border-white/5 rounded-[2.5rem] shadow-2xl flex items-center justify-between md:justify-center gap-0.5 md:gap-1 w-full md:w-auto max-w-full overflow-hidden"
         >
           {['overlay', 'mission', 'nexus', 'stickers', 'widgets'].map((tab) => {
             const isActive = activeTab === tab;
@@ -76,8 +75,8 @@ const ControlCenter = ({
                 whileHover={{ y: -1 }}
                 whileTap={{ scale: 0.97 }}
                 className={`
-                  relative flex items-center gap-3 px-6 md:px-8 py-3.5 rounded-[2rem]
-                  text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500
+                  relative flex items-center justify-center gap-1.5 md:gap-3 px-3.5 sm:px-6 md:px-8 py-3.5 rounded-[2rem] flex-1 md:flex-none
+                  text-[9px] md:text-[10px] font-black uppercase tracking-[0.1em] md:tracking-[0.2em] transition-all duration-500
                   ${isActive ? 'text-[var(--nexus-bg)]' : 'text-[var(--nexus-text-muted)] hover:text-[var(--nexus-text)] hover:bg-white/[0.03]'}
                 `}
               >
@@ -108,7 +107,7 @@ const ControlCenter = ({
                     {tab === 'stickers' && <Rocket className="w-4 h-4 shrink-0" />}
                     {tab === 'widgets' && <Trophy className="w-4 h-4 shrink-0" />}
                   </motion.div>
-                  <span className="hidden sm:inline whitespace-nowrap italic">
+                  <span className="hidden md:inline whitespace-nowrap italic">
                     {tab === 'overlay' && 'OVERLAY'}
                     {tab === 'mission' && 'GOALS'}
                     {tab === 'nexus' && 'THEMES'}

@@ -250,6 +250,10 @@ const Dashboard = () => {
       setGoalForm(prev => ({ ...prev, ...updatedGoal }));
     });
 
+    socket.on('bank_verified', () => {
+      if (typeof fetchProfileData === 'function') fetchProfileData();
+    });
+
     socket.on('settings-update', (updatedSettings) => {
       setUser(prev => ({ ...prev, overlaySettings: updatedSettings }));
       setAlertConfig(updatedSettings);
@@ -260,7 +264,7 @@ const Dashboard = () => {
       socket.disconnect();
       socketRef.current = null;
     };
-  }, [user?.obsKey]);
+  }, [user?.obsKey, fetchProfileData]);
 
   const updateGoalSettings = useCallback(async (overrideData) => {
     setIsUpdatingGoal(true);

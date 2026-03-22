@@ -3,8 +3,21 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const User = require('../models/User');
 const { addBankAccount } = require('../controllers/onboardingController');
-const { requestWithdrawal, purchasePremiumStyle, purchasePremiumAlert, purchaseNexusTheme, purchaseWidget, equipWidget, equipAsset, createStoreOrder, verifyStorePayment } = require('../controllers/userController');
+const { purchasePremiumStyle, purchasePremiumAlert, purchaseNexusTheme, purchaseWidget, equipWidget, equipAsset, createStoreOrder, verifyStorePayment } = require('../controllers/userController');
+const { requestWithdrawal } = require('../controllers/withdrawController');
 const { cacheProfile, invalidateProfileCache } = require('../middleware/profileCache');
+// @route   GET api/user/status
+// @desc    Retrieve Global Circuit Breaker State (Public Status check)
+router.get('/status', async (req, res) => {
+    try {
+        const redisClient = require('../config/redisClient');
+        const isPaused = await redisClient.get('DROPPAY_GLOBAL_PAUSE');
+        res.status(200).json({ isPaused: isPaused === 'true' });
+    } catch (err) {
+        res.status(500).json({ msg: "Failed to read system status." });
+    }
+});
+
 // @route   POST api/user/add-bank-account
 router.post('/add-bank-account', auth, addBankAccount);
 

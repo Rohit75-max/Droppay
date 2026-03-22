@@ -3,7 +3,7 @@ import { motion, AnimatePresence, useMotionValue, useMotionTemplate } from 'fram
 import {
   CheckCircle, Clock,
   Rocket, Crown, Sparkles, Loader2,
-  ArrowRight, ShieldCheck, Cpu, Database, Activity, Target,
+  ArrowRight, ShieldCheck, Cpu, Database, Activity, Target, Award,
   Zap, Star, Shield, Globe, HardDrive, BarChart3, Infinity as InfinityIcon
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -258,10 +258,10 @@ const SubscriptionPage = () => {
   const plans = [
     {
       id: 'starter',
-      name: 'Starter Plan',
-      price: 699,
+      name: 'Starter Tier',
+      price: 999,
       fee: '15%',
-      icon: Database,
+      icon: <Zap className="w-6 h-6 text-slate-400" />,
       color: 'text-slate-400',
       glow: 'shadow-slate-500/20',
       border: 'border-slate-500/30',
@@ -283,8 +283,8 @@ const SubscriptionPage = () => {
     },
     {
       id: 'pro',
-      name: 'Professional Plan',
-      price: 1499,
+      name: 'Pro Tier',
+      price: 1999,
       fee: '10%',
       icon: Cpu,
       color: 'text-[#10B981]',
@@ -292,7 +292,7 @@ const SubscriptionPage = () => {
       border: 'border-emerald-500/30',
       info: '48hr Payouts',
       popular: true,
-      badge: 'Peak Performance',
+      badge: 'Most Popular',
       bIcon: Rocket,
       features: [
         { icon: CheckCircle, text: '10% Revenue Split' },
@@ -309,10 +309,10 @@ const SubscriptionPage = () => {
     },
     {
       id: 'legend',
-      name: 'Expert Plan',
-      price: 2499,
+      name: 'Legend Tier',
+      price: 2999,
       fee: '5%',
-      icon: ShieldCheck,
+      icon: <Award className="w-6 h-6 text-amber-500" />,
       color: 'text-amber-400',
       glow: 'shadow-amber-500/30',
       border: 'border-amber-400/30',

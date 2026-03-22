@@ -48,7 +48,16 @@
       } catch (e) { }
     })();
   </script>
-  <script src="https://checkout.razorpay.com/v1/checkout.js" defer></script>
+  <script>
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        const script = document.createElement('script');
+        script.src = "https://checkout.razorpay.com/v1/checkout.js";
+        script.defer = true;
+        document.head.appendChild(script);
+      }, 2000);
+    });
+  </script>
 </head>
 
 <body>

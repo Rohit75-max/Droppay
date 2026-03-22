@@ -6,6 +6,7 @@ const paymentQueue = require('../queues/paymentQueue');
 const PlatformMetrics = require('../models/PlatformMetrics');
 const { invalidateProfileCache } = require('../middleware/profileCache');
 const TugOfWarEvent = require('../models/TugOfWarEvent');
+const Transaction = require('../models/Transaction');
 
 const razorpay = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID,
@@ -85,28 +86,50 @@ exports.verifyPayment = async (req, res) => {
             return res.status(403).json({ msg: "Transaction Rejected: Streamer Node Suspended." });
         }
 
-        let creatorPercent = 0.85;
-        if (streamer.tier === 'pro') creatorPercent = 0.90;
-        if (streamer.tier === 'legend') creatorPercent = 0.95;
+        // 1. Idempotency Check (Double-Credit Shield)
+        const existingTx = await Transaction.findOne({ referenceId: razorpay_payment_id });
+        if (existingTx) {
+            return res.status(200).json({ status: "success", msg: "Payment already processed", isIdempotent: true });
+        }
 
-        const creatorShare = Number(amount) * creatorPercent;
-        const platformCut = Number(amount) - creatorShare;
+        // 2. Net Ledger Mathematics
+        let platformCutPercent = 0.15; // 15% Starter default
+        if (streamer.tier === 'pro') platformCutPercent = 0.10;
+        if (streamer.tier === 'legend') platformCutPercent = 0.05;
 
+        const amountInPaise = Number(amount); 
+        const gatewayFee = Math.round(amountInPaise * 0.02);
+        const platformCommission = Math.round(amountInPaise * platformCutPercent);
+        const netAmountToCreator = amountInPaise - (gatewayFee + platformCommission);
+
+        // 3. Atomically Credit Virtual Wallet
         const updatedStreamer = await User.findByIdAndUpdate(
             streamer._id,
             {
                 $inc: {
-                    "walletBalance": creatorShare,
-                    "goalSettings.currentProgress": Number(amount),
-                    "financialMetrics.totalLifetimeEarnings": Number(amount)
+                    "financialMetrics.pendingPayouts": netAmountToCreator,
+                    "goalSettings.currentProgress": amountInPaise,
+                    "financialMetrics.totalLifetimeEarnings": amountInPaise
                 }
             },
             { returnDocument: 'after' }
         );
 
+        // 4. Log Transaction Audit Trail
+        await Transaction.create({
+            userId: streamer._id,
+            type: 'deposit',
+            amount: amountInPaise,
+            gatewayFee: gatewayFee,
+            platformFee: platformCommission,
+            netAmount: netAmountToCreator,
+            referenceId: razorpay_payment_id,
+            status: 'success'
+        });
+
         // Enterprise Ledger Extraction
         const ledger = await PlatformMetrics.getLedger();
-        ledger.totalCommissionRevenue += platformCut;
+        ledger.totalCommissionRevenue += platformCommission;
         await ledger.save();
 
         await Drop.create({
@@ -380,7 +403,7 @@ exports.verifySubscription = async (req, res) => {
         await invalidateProfileCache(userId);
 
         // Enterprise Ledger Extraction (Subscription MRR)
-        const priceMap = { starter: 699, pro: 1499, legend: 2499 };
+        const priceMap = { starter: 999, pro: 1999, legend: 2999 };
         const subRevenue = priceMap[plan] || 0;
 
         const ledger = await PlatformMetrics.getLedger();

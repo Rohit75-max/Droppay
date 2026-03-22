@@ -124,6 +124,12 @@ const UserSchema = new mongoose.Schema({
   razorpayAccountId: { type: String, default: null, index: true }, // Legacy Route ID
   razorpayContactId: { type: String, default: null }, // ADDED: Direct Payouts Contact ID
   razorpayFundAccountId: { type: String, default: null }, // ADDED: Direct Payouts Fund Account ID
+  bankDetails: {
+    account_holder_name: { type: String, default: null },
+    account_number_encrypted: { type: String, default: null },
+    ifsc_encrypted: { type: String, default: null },
+    masked_account: { type: String, default: null } // e.g., ****4321 for display
+  },
 
   // ... (payout/overlay/goal settings remain same) ...
   payoutSettings: {
@@ -133,7 +139,12 @@ const UserSchema = new mongoose.Schema({
       default: 'none'
     },
     lastSettlementDate: { type: Date },
-    bankDetailsLinked: { type: Boolean, default: false }
+    bankDetailsLinked: { type: Boolean, default: false },
+    bankVerificationStatus: { 
+      type: String, 
+      enum: ['none', 'pending', 'verified', 'rejected'], 
+      default: 'none' 
+    }
   },
 
   overlaySettings: {

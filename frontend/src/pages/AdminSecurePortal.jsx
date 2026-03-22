@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { List } from 'react-window';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from '../api/axios';
 import {
@@ -54,7 +55,7 @@ const KpiCard = ({ icon: Icon, label, value, sub, accent, delay, details, detail
         : 'bg-white/[0.03] border-white/5 hover:border-white/10 hover:bg-white/[0.05]';
 
     return (
-        <motion.div layout initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+        <motion.div style={{ willChange: 'transform' }} layout initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
             transition={{ delay, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
             onClick={() => setExpanded(!expanded)}
             className={`cursor-pointer relative overflow-hidden rounded-2xl border p-5 transition-all duration-300 ease-out origin-top backdrop-blur-md group ${bgClass}`}>
@@ -365,69 +366,73 @@ const UserDetailDrawer = ({ userId, isOpen, onClose, context = 'directory' }) =>
                                             </div>
 
                                             <div className="space-y-3">
-                                                {user.recentTransactions && user.recentTransactions.length > 0 ? (
-                                                    user.recentTransactions
-                                                        .filter(tx => {
-                                                            const isStore = tx.donorName === 'SYSTEM_DEBIT';
-                                                            const isWithdrawal = tx.donorName === 'WITHDRAWAL' || tx.donorName === 'SETTLEMENT';
-                                                            const isExpense = isStore || isWithdrawal;
-
-                                                            if (txTab === 'donations') return !isExpense;
-                                                            return isExpense;
-                                                        })
-                                                        .map((tx, idx) => {
-                                                            const isDebit = tx.amount < 0;
-                                                            const isStore = tx.donorName === 'SYSTEM_DEBIT';
-                                                            const isWithdrawal = tx.donorName === 'WITHDRAWAL' || tx.donorName === 'SETTLEMENT';
-
-                                                            let title = tx.donorName;
-                                                            if (isStore) title = "Store Purchase";
-                                                            if (isWithdrawal) title = "Bank Withdrawal";
-
-                                                            let statusColor = "text-slate-400";
-                                                            if (tx.status === 'completed') statusColor = "text-emerald-500";
-                                                            else if (tx.status === 'pending') statusColor = "text-amber-500";
-                                                            else if (tx.status === 'failed' || tx.status === 'cancelled') statusColor = "text-rose-500";
-
-                                                            return (
-                                                                <div key={idx} className="bg-white/[0.03] border border-white/5 rounded-xl p-4 flex items-center justify-between">
-                                                                    <div>
-                                                                        <div className="flex items-center gap-2">
-                                                                            <p className="text-sm font-bold text-white">{title}</p>
-                                                                            {isStore && <span className="px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-400 text-[8px] font-black uppercase tracking-widest border border-indigo-500/20">Asset</span>}
-                                                                            {isWithdrawal && <span className="px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-400 text-[8px] font-black uppercase tracking-widest border border-sky-500/20">Payout</span>}
-                                                                            {!isStore && !isWithdrawal && <span className="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 text-[8px] font-black uppercase tracking-widest border border-emerald-500/20">Tip</span>}
-                                                                        </div>
-                                                                        <p className="text-[10px] text-slate-400 mt-1 line-clamp-1">{tx.message}</p>
-                                                                        <p className="text-[9px] font-mono text-slate-500 mt-0.5">{formatDate(tx.createdAt)}</p>
-                                                                    </div>
-                                                                    <div className="text-right shrink-0">
-                                                                        <p className={`text-sm font-black font-mono ${isDebit ? 'text-rose-600' : 'text-emerald-600'}`}>
-                                                                            {isDebit ? '-' : '+'}₹{Math.abs(tx.amount || 0).toLocaleString()}
-                                                                        </p>
-                                                                        <p className={`text-[8px] font-black uppercase tracking-widest mt-0.5 ${statusColor}`}>
-                                                                            {tx.status}
-                                                                        </p>
-                                                                    </div>
-                                                                </div>
-                                                            );
-                                                        })
-                                                ) : (
-                                                    <div className="text-center py-6 border border-dashed border-slate-200 rounded-xl">
-                                                        <p className="text-xs font-bold text-slate-400">No {txTab} found.</p>
-                                                    </div>
-                                                )}
-
-                                                {/* Fallback empty state if filter yields zero results but array isn't empty */}
-                                                {(user.recentTransactions && user.recentTransactions.length > 0 &&
-                                                    user.recentTransactions.filter(tx => {
-                                                        const isExpense = tx.donorName === 'SYSTEM_DEBIT' || tx.donorName === 'WITHDRAWAL' || tx.donorName === 'SETTLEMENT';
+                                                {(() => {
+                                                    const filteredTransactions = (user.recentTransactions || []).filter(tx => {
+                                                        const isStore = tx.donorName === 'SYSTEM_DEBIT';
+                                                        const isWithdrawal = tx.donorName === 'WITHDRAWAL' || tx.donorName === 'SETTLEMENT';
+                                                        const isExpense = isStore || isWithdrawal;
                                                         return txTab === 'donations' ? !isExpense : isExpense;
-                                                    }).length === 0) && (
-                                                        <div className="text-center py-6 border border-dashed border-slate-200 rounded-xl">
-                                                            <p className="text-xs font-bold text-slate-400">No {txTab} found.</p>
-                                                        </div>
-                                                    )}
+                                                    });
+
+                                                    if (filteredTransactions.length === 0) {
+                                                        return (
+                                                            <div className="text-center py-6 border border-dashed border-slate-200 rounded-xl">
+                                                                <p className="text-xs font-bold text-slate-400">No {txTab} found.</p>
+                                                            </div>
+                                                        );
+                                                    }
+
+                                                    return (
+                                                        <List
+                                                            height={Math.min(350, filteredTransactions.length * 85)}
+                                                            itemCount={filteredTransactions.length}
+                                                            itemSize={85}
+                                                            width="100%"
+                                                            className="custom-scrollbar"
+                                                        >
+                                                            {({ index, style }) => {
+                                                                const tx = filteredTransactions[index];
+                                                                const isDebit = tx.amount < 0;
+                                                                const isStore = tx.donorName === 'SYSTEM_DEBIT';
+                                                                const isWithdrawal = tx.donorName === 'WITHDRAWAL' || tx.donorName === 'SETTLEMENT';
+
+                                                                let title = tx.donorName;
+                                                                if (isStore) title = "Store Purchase";
+                                                                if (isWithdrawal) title = "Bank Withdrawal";
+
+                                                                let statusColor = "text-slate-400";
+                                                                if (tx.status === 'completed') statusColor = "text-emerald-500";
+                                                                else if (tx.status === 'pending') statusColor = "text-amber-500";
+                                                                else if (tx.status === 'failed' || tx.status === 'cancelled') statusColor = "text-rose-500";
+
+                                                                return (
+                                                                    <div style={style} className="pr-2 pb-3">
+                                                                        <div className="bg-white/[0.03] border border-white/5 rounded-xl p-4 flex items-center justify-between h-full">
+                                                                            <div>
+                                                                                <div className="flex items-center gap-2">
+                                                                                    <p className="text-sm font-bold text-white">{title}</p>
+                                                                                    {isStore && <span className="px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-400 text-[8px] font-black uppercase tracking-widest border border-indigo-500/20">Asset</span>}
+                                                                                    {isWithdrawal && <span className="px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-400 text-[8px] font-black uppercase tracking-widest border border-sky-500/20">Payout</span>}
+                                                                                    {!isStore && !isWithdrawal && <span className="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 text-[8px] font-black uppercase tracking-widest border border-emerald-500/20">Tip</span>}
+                                                                                </div>
+                                                                                <p className="text-[10px] text-slate-400 mt-1 line-clamp-1">{tx.message}</p>
+                                                                                <p className="text-[9px] font-mono text-slate-500 mt-0.5">{formatDate(tx.createdAt)}</p>
+                                                                            </div>
+                                                                            <div className="text-right shrink-0">
+                                                                                <p className={`text-sm font-black font-mono ${isDebit ? 'text-rose-600' : 'text-emerald-600'}`}>
+                                                                                    {isDebit ? '-' : '+'}₹{Math.abs(tx.amount || 0).toLocaleString()}
+                                                                                </p>
+                                                                                <p className={`text-[8px] font-black uppercase tracking-widest mt-0.5 ${statusColor}`}>
+                                                                                    {tx.status}
+                                                                                </p>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                );
+                                                            }}
+                                                        </List>
+                                                    );
+                                                })()}
                                             </div>
                                         </section>
                                     )}
@@ -614,6 +619,22 @@ const AdminSecurePortal = () => {
             setSystemHealth(res.data);
         } catch (err) { console.error('System Status Data Offline'); }
     }, [authHeader]);
+
+    const handleTogglePause = async () => {
+        const action = systemHealth?.isPaused ? 'RESUME all payouts?' : 'FREEZE all payouts and orders?';
+        if (!window.confirm(`Are you sure you want to ${action}`)) return;
+
+        try {
+            await axios.put('/api/admin/toggle-pause', {}, { headers: authHeader() });
+            toast.success(systemHealth?.isPaused ? "System Resumed" : "System Frozen", {
+                icon: systemHealth?.isPaused ? '✅' : '🚨',
+                style: { background: '#050505', color: '#10b981', border: '1px solid #10b98120' }
+            });
+            fetchSystemHealth(); // Refresh immediately
+        } catch (err) {
+            toast.error("Circuit Breaker Override Failed");
+        }
+    };
 
     const updateAdminProfileData = async (e) => {
         e.preventDefault();
@@ -1046,138 +1067,125 @@ const AdminSecurePortal = () => {
                                         </div>
                                     </div>
                                 </div>
-
-                                {/* Table */}
                                 <div className="overflow-x-auto">
-                                    <table className="w-full text-left text-sm min-w-[900px]">
-                                        <thead className="bg-white/5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 border-b border-white/10">
-                                            <tr>
-                                                <th className="px-8 py-5">Node Identity</th>
-                                                <th className="px-8 py-5">Communication Uplink</th>
-                                                <th className="px-8 py-5">Intelligence & Trust</th>
-                                                <th className="px-8 py-5">Aggregated TPV</th>
-                                                <th className="px-8 py-5">Tier Override</th>
-                                                <th className="px-8 py-5 text-right">Clearance / Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {loading ? (
-                                                Array.from({ length: 8 }).map((_, i) => (
-                                                    <tr key={i} className="border-b border-slate-200">
-                                                        {Array.from({ length: 5 }).map((_, j) => (
-                                                            <td key={j} className="px-8 py-6">
-                                                                <div className="h-4 bg-slate-100 rounded-full animate-pulse" style={{ width: `${60 + Math.random() * 30}%` }} />
-                                                            </td>
-                                                        ))}
-                                                    </tr>
-                                                ))
-                                            ) : nodes.length === 0 ? (
-                                                <tr>
-                                                    <td colSpan="6" className="py-24 text-center">
-                                                        <ShieldOff className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-                                                        <p className="text-slate-400 text-[11px] font-black uppercase tracking-[0.2em]">Zero Identities Detected</p>
-                                                    </td>
-                                                </tr>
-                                            ) : nodes.map(node => {
-                                                const isBanned = node.security?.accountStatus?.isBanned;
-                                                return (
-                                                    <tr key={node._id}
-                                                        onClick={() => {
-                                                            setSelectedUserId(node._id);
-                                                            setDrawerContext('directory');
-                                                        }}
-                                                        className={`border-b border-white/5 hover:bg-white/5 transition-all cursor-pointer group
-                                                        ${isBanned ? 'bg-rose-500/10' : ''}`}>
+                                    <div className="divide-y divide-white/5 border border-white/10 rounded-2xl overflow-hidden min-w-[900px]">
+                                        {/* Header */}
+                                        <div className="grid grid-cols-[22%_22%_18%_14%_12%_12%] text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 bg-white/5 px-8 py-5 border-b border-white/10 items-center">
+                                            <div>Node Identity</div>
+                                            <div>Communication Uplink</div>
+                                            <div>Intelligence & Trust</div>
+                                            <div>Aggregated TPV</div>
+                                            <div>Tier Override</div>
+                                            <div className="text-right">Clearance</div>
+                                        </div>
 
-                                                        {/* Node Identity */}
-                                                        <td className="px-8 py-4">
-                                                            <div className="flex items-center gap-4">
-                                                                <div className="relative">
-                                                                    <Avatar name={node.username} isBanned={isBanned} />
-                                                                    <div className="absolute -bottom-1 -right-1">
-                                                                        <StatusDot active={!isBanned} />
+                                        {/* Body */}
+                                        {loading ? (
+                                            <div className="p-8 text-center text-slate-400 flex items-center justify-center gap-2">
+                                                <RefreshCw className="w-4 h-4 animate-spin text-emerald-500" /> Scanning Nodes...
+                                            </div>
+                                        ) : nodes.length === 0 ? (
+                                            <div className="py-24 text-center">
+                                                <ShieldOff className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+                                                <p className="text-slate-400 text-[11px] font-black uppercase tracking-[0.2em]">Zero Identities Detected</p>
+                                            </div>
+                                        ) : (
+                                            <List
+                                                height={Math.min(500, nodes.length * 80)}
+                                                itemCount={nodes.length}
+                                                itemSize={80}
+                                                width="100%"
+                                                className="custom-scrollbar"
+                                            >
+                                                {({ index, style }) => {
+                                                    const node = nodes[index];
+                                                    if (!node) return null;
+                                                    const isBanned = node.security?.accountStatus?.isBanned;
+
+                                                    return (
+                                                        <div
+                                                            style={{ ...style, display: 'grid' }}
+                                                            onClick={() => {
+                                                                setSelectedUserId(node._id);
+                                                                setDrawerContext('directory');
+                                                            }}
+                                                            className={`grid grid-cols-[22%_22%_18%_14%_12%_12%] px-8 items-center border-b border-white/5 hover:bg-white/5 transition-all cursor-pointer group text-sm ${isBanned ? 'bg-rose-500/10' : ''}`}
+                                                        >
+                                                            {/* Node Identity */}
+                                                            <div>
+                                                                <div className="flex items-center gap-4">
+                                                                    <div className="relative">
+                                                                        <Avatar name={node.username} isBanned={isBanned} />
+                                                                        <div className="absolute -bottom-1 -right-1">
+                                                                            <StatusDot active={!isBanned} />
+                                                                        </div>
                                                                     </div>
-                                                                </div>
-                                                                <div>
-                                                                    <div className="flex items-center gap-1.5">
-                                                                        <span className="font-black text-white text-[13px] tracking-tight group-hover:text-emerald-400 transition-colors">{node.username}</span>
-                                                                        {node.role === 'admin' && <Star className="w-3 h-3 text-amber-500 fill-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.5)]" />}
+                                                                    <div>
+                                                                        <div className="flex items-center gap-1.5">
+                                                                            <span className="font-black text-white text-[13px] tracking-tight group-hover:text-emerald-400 transition-colors">{node.username}</span>
+                                                                            {node.role === 'admin' && <Star className="w-3 h-3 text-amber-500 fill-amber-500" />}
+                                                                        </div>
+                                                                        <span className="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-0.5">ID: {node.streamerId}</span>
                                                                     </div>
-                                                                    <span className="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-0.5">ID: {node.streamerId}</span>
                                                                 </div>
                                                             </div>
-                                                        </td>
 
-                                                        {/* Communication Uplink */}
-                                                        <td className="px-8 py-4">
-                                                            <span className="text-slate-400 font-black text-[11px] tracking-wider truncate block max-w-[200px]">{node.email}</span>
-                                                            <span className="text-[10px] text-slate-500 font-black uppercase tracking-widest">Referred {node.referralCount || 0} Nodes</span>
-                                                        </td>
+                                                            {/* Communication Uplink */}
+                                                            <div>
+                                                                <span className="text-slate-400 font-black text-[11px] tracking-wider truncate block max-w-[170px]">{node.email}</span>
+                                                                <span className="text-[10px] text-slate-500 font-black uppercase tracking-widest block">Referred {node.referralCount || 0} Nodes</span>
+                                                            </div>
 
-                                                        {/* Intelligence & Trust */}
-                                                        <td className="px-8 py-4">
-                                                            <div className="flex items-center gap-3">
+                                                            {/* Intelligence & Trust */}
+                                                            <div>
                                                                 <div className="flex flex-col gap-1">
                                                                     <div className="flex items-center gap-1.5">
                                                                         <div className="w-12 h-1.5 bg-white/5 rounded-full overflow-hidden border border-white/10">
                                                                             <motion.div
                                                                                 initial={{ width: 0 }}
                                                                                 animate={{ width: `${node.trustScore || 100}%` }}
-                                                                                className={`h-full ${node.trustScore < 40 ? 'bg-rose-400 shadow-[0_0_10px_rgba(244,63,94,0.4)]' : node.trustScore < 75 ? 'bg-amber-400' : 'bg-emerald-400'}`}
+                                                                                className={`h-full ${node.trustScore < 40 ? 'bg-rose-400' : node.trustScore < 75 ? 'bg-amber-400' : 'bg-emerald-400'}`}
                                                                             />
                                                                         </div>
                                                                         <span className="text-[9px] font-black text-slate-500">{node.trustScore || 100}%</span>
                                                                     </div>
-                                                                    <span className={`text-[8px] font-black uppercase tracking-widest ${node.nodeStatus === 'flagged' ? 'text-rose-400' :
-                                                                        node.nodeStatus === 'under_review' ? 'text-amber-400' :
-                                                                            node.nodeStatus === 'verified' ? 'text-emerald-400' :
-                                                                                'text-slate-400'
-                                                                        }`}>
+                                                                    <span className={`text-[8px] font-black uppercase tracking-widest ${node.nodeStatus === 'flagged' ? 'text-rose-400' : node.nodeStatus === 'under_review' ? 'text-amber-400' : node.nodeStatus === 'verified' ? 'text-emerald-400' : 'text-slate-400'}`}>
                                                                         [{node.nodeStatus || 'standard'}]
                                                                     </span>
                                                                 </div>
                                                             </div>
-                                                        </td>
 
-                                                        {/* Aggregated TPV */}
-                                                        <td className="px-8 py-4">
-                                                            <span className="font-black font-mono text-emerald-400 text-[13px] drop-shadow-[0_0_10px_rgba(52,211,153,0.3)]">
-                                                                ₹{(node.financialMetrics?.totalLifetimeEarnings || 0).toLocaleString()}
-                                                            </span>
-                                                        </td>
-
-                                                        {/* Tier Override */}
-                                                        <td className="px-8 py-4">
-                                                            <div className="relative inline-flex items-center" onClick={e => e.stopPropagation()}>
-                                                                <select
-                                                                    value={node.tier || 'none'}
-                                                                    onChange={e => overrideTier(node._id, e.target.value)}
-                                                                    className={`appearance-none pl-3 pr-8 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider border cursor-pointer outline-none transition-all
-                                                                    ${node.tier === 'legend' ? 'bg-amber-500/10 text-amber-500 border-amber-500/30' :
-                                                                            node.tier === 'pro' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/30' :
-                                                                                node.tier === 'starter' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' :
-                                                                                    'bg-white/5 text-slate-500 border-white/10'}`}
-                                                                >
-                                                                    <option value="none">Ghost</option>
-                                                                    <option value="starter">Starter</option>
-                                                                    <option value="pro">Pro</option>
-                                                                    <option value="legend">Legend</option>
-                                                                </select>
-                                                                <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none opacity-30 text-slate-400" />
+                                                            {/* Aggregated TPV */}
+                                                            <div>
+                                                                <span className="font-black font-mono text-emerald-400 text-[13px] drop-shadow-[0_0_10px_rgba(52,211,153,0.3)]">
+                                                                    ₹{(node.financialMetrics?.totalLifetimeEarnings || 0).toLocaleString()}
+                                                                </span>
                                                             </div>
-                                                        </td>
 
-                                                        {/* Clearance / Status */}
-                                                        <td className="px-8 py-4 text-right">
-                                                            <div className="flex items-center justify-end gap-3" onClick={e => e.stopPropagation()}>
+                                                            {/* Tier Override */}
+                                                            <div onClick={e => e.stopPropagation()}>
+                                                                <div className="relative inline-flex items-center">
+                                                                    <select
+                                                                        value={node.tier || 'none'}
+                                                                        onChange={e => overrideTier(node._id, e.target.value)}
+                                                                        className={`appearance-none pl-3 pr-8 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider border cursor-pointer outline-none transition-all ${node.tier === 'legend' ? 'bg-amber-500/10 text-amber-500 border-amber-500/30' : node.tier === 'pro' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/30' : node.tier === 'starter' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-white/5 text-slate-500 border-white/10'}`}
+                                                                    >
+                                                                        <option value="none">Ghost</option>
+                                                                        <option value="starter">Starter</option>
+                                                                        <option value="pro">Pro</option>
+                                                                        <option value="legend">Legend</option>
+                                                                    </select>
+                                                                    <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none opacity-30 text-slate-400" />
+                                                                </div>
+                                                            </div>
+
+                                                            {/* Clearance / Status */}
+                                                            <div className="text-right flex items-center justify-end gap-3" onClick={e => e.stopPropagation()}>
                                                                 <div className="relative inline-flex items-center">
                                                                     <select
                                                                         value={node.role || 'user'}
                                                                         onChange={e => overrideRole(node._id, e.target.value)}
-                                                                        className={`appearance-none pl-3 pr-8 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider border cursor-pointer outline-none transition-all
-                                                                        ${node.role === 'admin'
-                                                                                ? 'bg-amber-500/10 text-amber-500 border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.1)]'
-                                                                                : 'bg-white/5 text-slate-500 border-white/10'}`}
+                                                                        className={`appearance-none pl-3 pr-8 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider border cursor-pointer outline-none transition-all ${node.role === 'admin' ? 'bg-amber-500/10 text-amber-500 border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.1)]' : 'bg-white/5 text-slate-500 border-white/10'}`}
                                                                     >
                                                                         <option value="user">USER</option>
                                                                         <option value="admin">MASTER</option>
@@ -1186,19 +1194,18 @@ const AdminSecurePortal = () => {
                                                                 </div>
                                                                 <button
                                                                     onClick={() => toggleBan(node._id, isBanned)}
-                                                                    className={`p-2 rounded-xl transition-all border
-                                                                    ${isBanned
-                                                                            ? 'bg-white/5 text-slate-500 border-white/10 hover:border-emerald-500/50 hover:text-emerald-400'
-                                                                            : 'bg-rose-500/10 text-rose-500 border-rose-500/20 hover:bg-rose-500 hover:text-black'}`}>
+                                                                    className={`p-2 rounded-xl transition-all border ${isBanned ? 'bg-white/5 text-slate-500 border-white/10 hover:border-emerald-500/50 hover:text-emerald-400' : 'bg-rose-500/10 text-rose-500 border-rose-500/20 hover:bg-rose-500 hover:text-black'}`}
+                                                                >
                                                                     {isBanned ? <ShieldOff className="w-4 h-4" /> : <ShieldAlert className="w-4 h-4" />}
                                                                 </button>
                                                             </div>
-                                                        </td>
-                                                    </tr>
-                                                );
-                                            })}
-                                        </tbody>
-                                    </table>
+                                                        </div>
+                                                    );
+                                                }}
+                                            </List>
+                                        )}
+                                    </div>
+
                                 </div>
 
                                 {/* Pagination */}
@@ -1287,7 +1294,7 @@ const AdminSecurePortal = () => {
                                                             <p className="text-slate-500 text-[10px] uppercase font-black tracking-[0.2em] mt-2">Zero Pending Liabilities Detected</p>
                                                         </td>
                                                     </tr>
-                                                ) : payoutQueue.map(node => (
+                                                ) : payoutQueue.slice(0, 20).map(node => (
                                                     <tr key={node._id}
                                                         onClick={() => {
                                                             setSelectedUserId(node._id);
@@ -1422,7 +1429,7 @@ const AdminSecurePortal = () => {
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-white/10">
-                                                {auditLogs.map(log => (
+                                                {auditLogs.slice(0, 20).map(log => (
                                                     <tr key={log._id} className="hover:bg-white/5 transition-colors group">
                                                         <td className="px-6 py-5 text-[11px] font-black text-slate-500 font-mono">
                                                             {new Date(log.timestamp).toLocaleString('en-IN', { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' })}
@@ -1530,6 +1537,50 @@ const AdminSecurePortal = () => {
                                                 </div>
                                             ))}
                                         </div>
+                                    </div>
+                                </div>
+
+                                {/* ── FINANCIAL ENGINE STATUS (Replicated high-tech grid) ── */}
+                                <div className="bg-white/5 rounded-3xl border border-white/10 p-8 backdrop-blur-md relative overflow-hidden group">
+                                    <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+                                        <Wallet className="w-32 h-32 text-emerald-500" />
+                                    </div>
+                                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400 mb-6 flex items-center gap-2">
+                                        <Landmark className="w-3.5 h-3.5" /> Financial Engine Status
+                                    </h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+                                        <div>
+                                            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 mb-1">Total Platform Revenue</p>
+                                            <p className="text-3xl font-black text-white font-mono">₹{((systemHealth?.financialMatrix?.totalRevenue || 0) / 100).toLocaleString('en-IN', { minimumFractionDigits: 1 })}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">Pending Payout Liability</p>
+                                            <p className="text-3xl font-black text-emerald-400 font-mono tracking-tighter">₹{((systemHealth?.financialMatrix?.pendingLiability || 0) / 100).toLocaleString('en-IN', { minimumFractionDigits: 1 })}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-cyan-400 mb-1">Active Hour Sessions</p>
+                                            <p className="text-3xl font-black text-cyan-400 font-mono">{systemHealth?.financialMatrix?.activeDrops || 0}</p>
+                                        </div>
+                                    </div>
+
+                                    {/* ── PANIC BUTTON INJECTION ── */}
+                                    <div className="mt-8 pt-6 border-t border-white/10 flex items-center justify-between relative z-10">
+                                        <div className="flex items-center gap-3">
+                                            <div className={`w-2.5 h-2.5 rounded-full ${systemHealth?.isPaused ? 'bg-rose-500 animate-pulse shadow-[0_0_10px_rgba(244,63,94,0.5)]' : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]'}`} />
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                                System Flow: {systemHealth?.isPaused ? 'FROZEN / PAUSED' : 'OPERATIONAL'}
+                                            </span>
+                                        </div>
+                                        <button 
+                                            onClick={handleTogglePause}
+                                            className={`px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                                                systemHealth?.isPaused 
+                                                ? 'bg-emerald-500 text-black font-black hover:bg-emerald-400 shadow-[0_4px_12px_rgba(16,185,129,0.3)]' 
+                                                : 'bg-rose-500/10 text-rose-500 border border-rose-500/20 hover:bg-rose-500 hover:text-white shadow-[0_4px_12px_rgba(244,63,94,0.1)]'
+                                            }`}
+                                        >
+                                            {systemHealth?.isPaused ? 'RESUME SYSTEM' : 'SYSTEM PANIC BUTTON'}
+                                        </button>
                                     </div>
                                 </div>
                             </motion.div>
@@ -1797,8 +1848,8 @@ const AdminSecurePortal = () => {
                                                 <div className="py-20 text-center">
                                                     <Activity className="w-8 h-8 text-slate-700 mx-auto mb-3" />
                                                     <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Awaiting Transmissions...</p>
-                                                </div>
-                                            ) : activityLogs.map(ev => (
+                                                 </div>
+                                             ) : activityLogs.slice(0, 20).map(ev => (
                                                 <div key={ev.id} className={`bg-white/5 border-l-2 p-4 rounded-r-xl transition-all hover:bg-white/10 ${ev.type === 'broadcast' ? 'border-amber-500' : 'border-emerald-500'}`}>
                                                     <p className={`text-[10px] font-black uppercase tracking-widest ${ev.type === 'broadcast' ? 'text-amber-500' : 'text-emerald-400'}`}>
                                                         {ev.type.toUpperCase()}

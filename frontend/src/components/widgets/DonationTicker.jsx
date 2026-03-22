@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Zap, IndianRupee } from 'lucide-react';
 import { Player } from '@lottiefiles/react-lottie-player';
+import { InView } from 'react-intersection-observer';
 
 const LOTTIE_STICKER_MAP = {
     // Legacy IDs
@@ -46,7 +47,17 @@ const TickerItem = ({ donation, isOriginal }) => {
             <div className="w-9 h-9 shrink-0 flex items-center justify-center pointer-events-none drop-shadow-md">
                 {/* Lottie only for originals — emoji for the 3× scroll duplicates (perf) */}
                 {isOriginal && lottieUrl ? (
-                    <Player autoplay loop src={lottieUrl} style={{ width: '36px', height: '36px' }} />
+                    <InView triggerOnce>
+                        {({ inView, ref }) => (
+                            <div ref={ref} style={{ width: '36px', height: '36px' }}>
+                                {inView ? (
+                                    <Player autoplay loop src={lottieUrl} style={{ width: '36px', height: '36px' }} />
+                                ) : (
+                                    <span className="text-xl drop-shadow-sm">{stickerFallback[donation.sticker] || stickerFallback[donation.stickerUrl] || '💎'}</span>
+                                )}
+                            </div>
+                        )}
+                    </InView>
                 ) : (
                     <span className="text-xl drop-shadow-sm">{stickerFallback[donation.sticker] || stickerFallback[donation.stickerUrl] || '💎'}</span>
                 )}

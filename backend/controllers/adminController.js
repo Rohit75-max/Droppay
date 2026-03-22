@@ -477,6 +477,34 @@ exports.getSystemHealth = async (req, res) => {
         const loadAvg1m = os.loadavg()[0];
         const cpuLoadPercent = ((loadAvg1m / cpuCores) * 100).toFixed(2);
 
+        const Transaction = require('../models/Transaction');
+        const redisClient = require('../config/redisClient');
+
+        // Circuit Breaker Lookup
+        const isPaused = await redisClient.get('DROPPAY_GLOBAL_PAUSE');
+
+        // 1. Total Platform Revenue (Sum of platformFee)
+        const platformRevenueResult = await Transaction.aggregate([
+            { $match: { type: 'deposit', status: 'success' } },
+            { $group: { _id: null, total: { $sum: "$platformFee" } } }
+        ]);
+
+        // 2. Total Liability (Sum of all users' pendingPayouts)
+        const totalLiabilityResult = await User.aggregate([
+            { $group: { _id: null, total: { $sum: "$financialMetrics.pendingPayouts" } } }
+        ]);
+
+        // 3. Active Drops (Count of transactions in the last hour)
+        const oneHourAgo = new Date(Date.now() - 3600000);
+        const activeDropsCount = await Transaction.countDocuments({
+            type: 'deposit',
+            status: 'success',
+            createdAt: { $gte: oneHourAgo }
+        });
+
+        const totalRevenue = platformRevenueResult.length > 0 ? platformRevenueResult[0].total : 0;
+        const totalLiability = totalLiabilityResult.length > 0 ? totalLiabilityResult[0].total : 0;
+
         const health = {
             uptime: Math.floor(process.uptime()),
             memoryUsage: process.memoryUsage(),
@@ -485,10 +513,117 @@ exports.getSystemHealth = async (req, res) => {
             cpuLoad: parseFloat(cpuLoadPercent),
             dbConnection: mongoose.connection.readyState === 1 ? 'Operational' : 'Degraded',
             payoutEngine: 'Online',
-            broadcastRelay: 'Sync'
+            broadcastRelay: 'Sync',
+            isPaused: isPaused === 'true',
+            financialMatrix: {
+                totalRevenue,
+                pendingLiability: totalLiability,
+                activeDrops: activeDropsCount
+            }
         };
         res.status(200).json(health);
     } catch (err) {
         res.status(500).json({ msg: "Infrastructure telemetry offline." });
+    }
+};
+
+// --- 10. FINANCIAL HEALTH & AUDIT TRAIL LOGS ---
+
+exports.getFinancialStats = async (req, res) => {
+    try {
+        const Transaction = require('../models/Transaction');
+
+        // 1. Total Gross Volume (All success deposits)
+        const grossVolumeResult = await Transaction.aggregate([
+            { $match: { type: 'deposit', status: 'success' } },
+            { $group: { _id: null, total: { $sum: "$amount" } } }
+        ]);
+
+        // 2. Total Platform Revenue (Sum of platformFee)
+        const platformRevenueResult = await Transaction.aggregate([
+            { $match: { type: 'deposit', status: 'success' } },
+            { $group: { _id: null, total: { $sum: "$platformFee" } } }
+        ]);
+
+        // 3. Current Total Liability (pendingPayouts sum across all users)
+        const totalLiabilityResult = await User.aggregate([
+            { $group: { _id: null, total: { $sum: "$financialMetrics.pendingPayouts" } } }
+        ]);
+
+        const totalGross = grossVolumeResult.length > 0 ? grossVolumeResult[0].total : 0;
+        const totalRevenue = platformRevenueResult.length > 0 ? platformRevenueResult[0].total : 0;
+        const totalLiability = totalLiabilityResult.length > 0 ? totalLiabilityResult[0].total : 0;
+
+        res.status(200).json({
+            totalGrossVolume: totalGross,
+            totalPlatformRevenue: totalRevenue,
+            currentTotalLiability: totalLiability
+        });
+
+    } catch (err) {
+        res.status(500).json({ msg: "Financial Stats compilation failed." });
+    }
+};
+
+exports.getTransactionsLog = async (req, res) => {
+    try {
+        const Transaction = require('../models/Transaction');
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 50;
+
+        const totalTransactions = await Transaction.countDocuments();
+        const stats = await Transaction.find()
+            .sort({ createdAt: -1 })
+            .skip((page - 1) * limit)
+            .limit(limit);
+
+        res.status(200).json({
+            transactions: stats || [],
+            totalPages: Math.ceil(totalTransactions / limit) || 1,
+            currentPage: page,
+            totalTransactions
+        });
+    } catch (err) {
+        res.status(500).json({ msg: "Failed to retrieve Transaction log." });
+    }
+};
+
+exports.toggleGlobalPause = async (req, res) => {
+    try {
+        const redisClient = require('../config/redisClient');
+        const { Queue } = require('bullmq');
+        const isPaused = await redisClient.get('DROPPAY_GLOBAL_PAUSE');
+        const newState = isPaused === 'true' ? 'false' : 'true';
+        
+        await redisClient.set('DROPPAY_GLOBAL_PAUSE', newState);
+
+        // Pause/Resume BullMQ order queue to handle backlog iteratively
+        const connection = { url: process.env.REDIS_URI || 'redis://127.0.0.1:6379' };
+        const orderQueue = new Queue('RazorpayOrderQueue', { connection });
+
+        if (newState === 'true') {
+            await orderQueue.pause();
+        } else {
+            await orderQueue.resume();
+        }
+
+        // Emit Global WebSocket Refresh Frame
+        const io = req.app.get('io');
+        if (io) {
+            io.emit(newState === 'true' ? 'system_paused' : 'system_resumed');
+        }
+        
+        await logAudit({
+            adminId: req.user.id,
+            adminUsername: req.user.username,
+            action: newState === 'true' ? 'SYSTEM_FREEZE' : 'SYSTEM_RESUME',
+            details: newState === 'true' ? 'Global Circuit Breaker triggered (Queue Paused)' : 'Circuit Breaker released (Queue Resumed)',
+            level: 'critical',
+            ipAddress: req.ip
+        });
+
+        res.status(200).json({ status: 'success', isPaused: newState === 'true' });
+    } catch (err) {
+        res.status(500).json({ msg: "Failed to toggle system pause status." });
     }
 };

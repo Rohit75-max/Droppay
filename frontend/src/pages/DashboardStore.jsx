@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from '../api/axios';
-import { Hexagon, Sparkles, AlertTriangle, Loader2, IndianRupee, ShoppingBag, Monitor, Play, Crown, Zap } from 'lucide-react';
+import { Hexagon, Sparkles, AlertTriangle, ShoppingBag, Crown, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import PremiumStorefront from '../components/store/PremiumStorefront';
 

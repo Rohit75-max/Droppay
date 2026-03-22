@@ -8,7 +8,7 @@ import { calculateTierStatus } from '../protocol/tierProtocol';
 import {
   User, Zap,
   Mail as MailIcon, Phone, Landmark,
-  ShieldCheck as ShieldCheckIcon, CreditCard, Loader2, ChevronRight, Trophy,
+  CreditCard, Loader2, ChevronRight, Trophy,
   Target, Crosshair, Sparkles, ArrowRight, ShieldAlert, CheckCircle2, AlertCircle,
   Globe, Copy, Check
 } from 'lucide-react';
@@ -38,10 +38,31 @@ const AccountsHub = React.memo(({
   // --- BANKING NODE STATES ---
   const [showBankModal, setShowBankModal] = React.useState(false);
   const [bankLinkType, setBankLinkType] = React.useState('bank_account'); // 'bank_account' | 'vpa'
-  const [bankForm, setBankForm] = React.useState({ name: '', account_number: '', ifsc: '', vpa: '' });
+  const [bankForm, setBankForm] = React.useState({ name: '', account_number: '', confirm_account_number: '', ifsc: '', vpa: '' });
+  const [ifscDetails, setIfscDetails] = React.useState(null);
+  const [isIfscVerifying, setIsIfscVerifying] = React.useState(false);
   const [bankOtpMode, setBankOtpMode] = React.useState(false);
   const [bankOtpInput, setBankOtpInput] = React.useState('');
   const [isProcessingBank, setIsProcessingBank] = React.useState(false);
+
+  React.useEffect(() => {
+    if (bankLinkType === 'bank_account' && bankForm.ifsc.length === 11) {
+      setIsIfscVerifying(true);
+      fetch(`https://ifsc.razorpay.com/${bankForm.ifsc}`)
+        .then(async res => {
+          if (res.ok) {
+            const data = await res.json();
+            setIfscDetails({ bank: data.BANK, branch: data.BRANCH, city: data.CITY, isValid: true });
+          } else {
+            setIfscDetails({ isValid: false });
+          }
+        })
+        .catch(() => setIfscDetails({ isValid: false }))
+        .finally(() => setIsIfscVerifying(false));
+    } else {
+      if (bankForm.ifsc.length < 11) setIfscDetails(null);
+    }
+  }, [bankForm.ifsc, bankLinkType]);
 
   const requestVerification = async (type) => {
     setIsRequestingOtp(true);
@@ -117,16 +138,22 @@ const AccountsHub = React.memo(({
     setIsProcessingBank(true);
     try {
       const token = localStorage.getItem('token');
-      await axios.post('/api/user/add-bank-account', {
+      const res = await axios.post('/api/onboarding/verify-bank', {
         ...bankForm,
         otp: bankOtpInput
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      
       if (typeof fetchProfileData === 'function') await fetchProfileData();
       setShowBankModal(false);
       setBankOtpMode(false);
-      toast.success("Banking details linked successfully.");
+      
+      if (res.data.status === 'pending') {
+         toast.warning(`Penny Drop Success with low match (${Math.round(res.data.similarity * 100)}%). Status set to Pending Admin Review.`);
+      } else {
+         toast.success("Banking details verified & linked successfully.");
+      }
     } catch (err) {
       toast.error(err.response?.data?.msg || "Verification Failed. Try again.");
     } finally {
@@ -475,18 +502,31 @@ const AccountsHub = React.memo(({
             </div>
 
             <div className="space-y-8 flex-1 z-10 w-full">
-              {(user.razorpayFundAccountId || user.razorpayAccountId) && user.payoutSettings?.bankDetailsLinked ? (
+              {user.payoutSettings?.bankVerificationStatus === 'verified' ? (
                 <div className="p-6 rounded-[2rem] border flex items-center gap-5 bg-emerald-500/10 border-emerald-500/20 shadow-inner">
-                  <ShieldCheckIcon className="w-7 h-7 text-emerald-500" />
+                  <CheckCircle2 className="w-7 h-7 text-emerald-500" />
                   <div className="min-w-0">
-                    <span className="text-[8px] font-black uppercase text-emerald-500 tracking-widest">Bank Linked</span>
-                    <p className="text-xs font-mono font-bold text-[var(--nexus-text-muted)] mt-1 truncate">{user.razorpayFundAccountId || user.razorpayAccountId}</p>
+                    <span className="text-[8px] font-black uppercase text-emerald-500 tracking-widest">Bank Verified</span>
+                    <p className="text-xs font-mono font-bold text-[var(--nexus-text-muted)] mt-1 truncate">
+                      {user.bankDetails?.masked_account || "Connected"}
+                    </p>
+                  </div>
+                </div>
+              ) : user.payoutSettings?.bankVerificationStatus === 'pending' ? (
+                <div className="p-6 rounded-[2rem] border flex items-center gap-5 bg-amber-500/10 border-amber-500/20 shadow-inner">
+                  <AlertCircle className="w-7 h-7 text-amber-500 animate-pulse" />
+                  <div className="min-w-0">
+                    <span className="text-[8px] font-black uppercase text-amber-500 tracking-widest">Verification Pending</span>
+                    <p className="text-xs font-mono font-bold text-[var(--nexus-text-muted)] mt-1 truncate">Admin Review Queue</p>
                   </div>
                 </div>
               ) : (
                 <div className="space-y-6 w-full">
                   <div className={`p-6 rounded-[2rem] border-2 border-dashed bg-[var(--nexus-bg)]/40 border-[var(--nexus-border)]`}>
-                    <CreditCard className="w-5 h-5 text-amber-500 mb-4" />
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                      <span className="text-[8px] font-black uppercase text-amber-500 tracking-widest">Action Required</span>
+                    </div>
                     <p className="text-[11px] text-[var(--nexus-text-muted)] font-bold uppercase leading-tight italic">Link your bank account to start receiving payouts.</p>
                   </div>
 
@@ -498,7 +538,7 @@ const AccountsHub = React.memo(({
                   )}
 
                   <button
-                    onClick={() => { setBankOtpMode(false); setBankLinkType('bank_account'); setShowBankModal(true); setBankForm({ name: '', account_number: '', ifsc: '', vpa: '' }); }}
+                    onClick={() => { setBankOtpMode(false); setBankLinkType('bank_account'); setShowBankModal(true); setBankForm({ name: '', account_number: '', confirm_account_number: '', ifsc: '', vpa: '' }); setIfscDetails(null); }}
                     disabled={!user.isPhoneVerified}
                     className={`w-full py-5 rounded-2xl font-black uppercase italic text-[11px] transition-all flex items-center justify-center gap-3 ${user.isPhoneVerified ? 'bg-amber-500 text-black hover:bg-amber-400 shadow-lg shadow-amber-500/20' : 'bg-[var(--nexus-text-muted)]/10 text-[var(--nexus-text-muted)] cursor-not-allowed border border-[var(--nexus-border)]'}`}
                   >
@@ -563,7 +603,7 @@ const AccountsHub = React.memo(({
       <AnimatePresence>
         {showBankModal && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-            <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} className={`w-full max-w-md p-8 rounded-[2.5rem] border shadow-2xl relative overflow-hidden bg-[var(--nexus-panel)] border-[var(--nexus-border)]`}>
+            <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} style={{ willChange: 'transform' }} className={`w-full max-w-md p-8 rounded-[2.5rem] border shadow-2xl relative overflow-hidden bg-[var(--nexus-panel)] border-[var(--nexus-border)]`}>
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-amber-500 to-transparent" />
               <div className="flex flex-col items-center text-center space-y-6">
                 <div className="w-16 h-16 rounded-full bg-amber-500/10 flex items-center justify-center border-2 border-amber-500/20 shadow-inner">
@@ -590,11 +630,27 @@ const AccountsHub = React.memo(({
                         <>
                           <div>
                             <label className="text-[9px] font-black uppercase text-amber-500 tracking-widest mb-1 block">Account Number</label>
-                            <input value={bankForm.account_number} onChange={(e) => setBankForm({ ...bankForm, account_number: e.target.value })} placeholder="0000000000" className={`w-full rounded-2xl p-4 text-sm font-bold font-mono border-2 transition-all ${getInputStyle()}`} />
+                            <input value={bankForm.account_number} onChange={(e) => setBankForm({ ...bankForm, account_number: e.target.value.replace(/\D/g, '') })} placeholder="0000000000" className={`w-full rounded-2xl p-4 text-sm font-bold font-mono border-2 transition-all ${getInputStyle()}`} />
+                          </div>
+                          <div>
+                            <label className="text-[9px] font-black uppercase text-amber-500 tracking-widest mb-1 block">Confirm Account Number</label>
+                            <input value={bankForm.confirm_account_number} onChange={(e) => setBankForm({ ...bankForm, confirm_account_number: e.target.value.replace(/\D/g, '') })} placeholder="Re-enter Account Number" className={`w-full rounded-2xl p-4 text-sm font-bold font-mono border-2 transition-all ${getInputStyle()} ${bankForm.confirm_account_number && bankForm.account_number !== bankForm.confirm_account_number ? 'border-red-500 focus:border-red-500' : ''}`} />
+                            {bankForm.confirm_account_number && bankForm.account_number !== bankForm.confirm_account_number && (
+                              <p className="text-[8px] font-bold text-red-500 mt-1 uppercase tracking-wider">Account numbers do not match</p>
+                            )}
                           </div>
                           <div>
                             <label className="text-[9px] font-black uppercase text-amber-500 tracking-widest mb-1 block">IFSC Code</label>
-                            <input value={bankForm.ifsc} onChange={(e) => setBankForm({ ...bankForm, ifsc: e.target.value.toUpperCase() })} placeholder="IFSC0001234" className={`w-full rounded-2xl p-4 text-sm font-bold font-mono border-2 transition-all ${getInputStyle()}`} />
+                            <div className="relative">
+                              <input value={bankForm.ifsc} onChange={(e) => setBankForm({ ...bankForm, ifsc: e.target.value.toUpperCase().slice(0, 11) })} placeholder="IFSC0001234" className={`w-full rounded-2xl p-4 text-sm font-bold font-mono border-2 transition-all ${getInputStyle()} ${ifscDetails?.isValid === false ? 'border-red-500' : ifscDetails?.isValid ? 'border-emerald-500' : ''}`} />
+                              {isIfscVerifying && <Loader2 className="absolute right-4 top-4 w-5 h-5 animate-spin text-amber-500" />}
+                            </div>
+                            {ifscDetails?.isValid && (
+                              <p className="text-[9px] font-bold text-emerald-500 mt-1 uppercase tracking-wide">✅ {ifscDetails.bank} - {ifscDetails.branch}</p>
+                            )}
+                            {ifscDetails?.isValid === false && (
+                              <p className="text-[8px] font-bold text-red-500 mt-1 uppercase tracking-wide">❌ Invalid IFSC Code</p>
+                            )}
                           </div>
                         </>
                       ) : (
@@ -606,7 +662,20 @@ const AccountsHub = React.memo(({
                     </div>
                     <div className="flex gap-3 pt-4">
                       <button onClick={() => setShowBankModal(false)} className={`flex-1 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest transition-colors border bg-[var(--nexus-accent)]/5 text-[var(--nexus-text-muted)] border-[var(--nexus-border)] hover:bg-[var(--nexus-accent)]/10`}>Back</button>
-                      <button onClick={initiateBankLink} disabled={isProcessingBank} className="flex-[2] py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest bg-amber-500 text-black hover:bg-amber-400 transition-colors shadow-lg shadow-amber-500/20">
+                      <button 
+                        onClick={initiateBankLink} 
+                        disabled={
+                          isProcessingBank || 
+                          !bankForm.name || 
+                          (bankLinkType === 'bank_account' && (
+                            !bankForm.account_number || 
+                            bankForm.account_number !== bankForm.confirm_account_number || 
+                            !ifscDetails?.isValid
+                          )) ||
+                          (bankLinkType === 'vpa' && !bankForm.vpa)
+                        } 
+                        className="flex-[2] py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest bg-amber-500 text-black hover:bg-amber-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg shadow-amber-500/20"
+                      >
                         {isProcessingBank ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Verify'}
                       </button>
                     </div>

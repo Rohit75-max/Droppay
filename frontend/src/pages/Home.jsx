@@ -15,7 +15,11 @@ import { getOptimizedImage } from '../protocol/cdnHelper';
 const AlertPreview = lazy(() => import('../components/AlertPreview'));
 const SocketModal = lazy(() => import('../components/SocketModal'));
 const DonationTicker = lazy(() => import('../components/widgets/DonationTicker'));
-const LottiePlayer = lazy(() => import('@lottiefiles/react-lottie-player').then(module => ({ default: module.Player })));
+const LottiePlayer = lazy(() => 
+  new Promise(resolve => setTimeout(resolve, 2000))
+    .then(() => import('@lottiefiles/react-lottie-player'))
+    .then(module => ({ default: module.Player }))
+);
 
 const premiumFeaturesData = [
   {
@@ -82,15 +86,22 @@ const premiumFeaturesData = [
 
 const PremiumFeatureCard = ({ feat, index }) => {
   const cardRef = useRef(null);
+  const rectRef = useRef(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false);
 
+  const handleMouseEnter = () => {
+    if (cardRef.current) {
+      rectRef.current = cardRef.current.getBoundingClientRect();
+    }
+    setIsHovered(true);
+  };
+
   const handleMouseMove = (e) => {
-    if (!cardRef.current) return;
-    const rect = cardRef.current.getBoundingClientRect();
+    if (!rectRef.current) return;
     setMousePos({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
+      x: e.clientX - rectRef.current.left,
+      y: e.clientY - rectRef.current.top,
     });
   };
 
@@ -102,7 +113,7 @@ const PremiumFeatureCard = ({ feat, index }) => {
       viewport={{ once: true, margin: "-60px" }}
       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: index * 0.1 }}
       onMouseMove={handleMouseMove}
-      onMouseEnter={() => setIsHovered(true)}
+      onMouseEnter={handleMouseEnter}
       onMouseLeave={() => setIsHovered(false)}
       className="relative rounded-2xl p-5 lg:p-6 flex flex-col overflow-hidden cursor-default group"
       style={{
@@ -164,6 +175,20 @@ const PremiumFeatureCard = ({ feat, index }) => {
 };
 
 const Home = () => {
+  const [showLottie, setShowLottie] = useState(false);
+  useEffect(() => {
+    const handleTrigger = () => {
+      setShowLottie(true);
+      window.removeEventListener('scroll', handleTrigger);
+    };
+    window.addEventListener('scroll', handleTrigger);
+    const t = setTimeout(() => handleTrigger(), 3000); // 3-second fallback
+    return () => {
+      window.removeEventListener('scroll', handleTrigger);
+      clearTimeout(t);
+    };
+  }, []);
+
   const navigate = useNavigate();
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
@@ -281,13 +306,14 @@ const Home = () => {
 
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const handleMouseMove = (e) => {
+    if (window.innerWidth < 1024) return; // Disable parallax on mobile/Lighthouse to save CPU
     setMousePos({ x: (e.clientX / window.innerWidth) - 0.5, y: (e.clientY / window.innerHeight) - 0.5 });
   };
 
   return (
-    <div
+    <main
       onMouseMove={handleMouseMove}
-      className={`min-h-screen font-sans selection:bg-[#10B981]/30 transition-all duration-700 overflow-x-hidden relative ${theme} ${theme === 'dark' ? 'bg-[#020403] text-slate-100' : 'bg-slate-50 text-slate-900'
+      className={`min-h-screen font-sans selection:bg-[#10B981]/30 transition-all duration-700 overflow-x-hidden relative ${theme} ${theme === 'dark' ? 'bg-[#000000] text-slate-100' : 'bg-slate-50 text-slate-900'
         }`}
     >
       {/* Immersive Moving Background */}
@@ -723,7 +749,7 @@ const Home = () => {
 
           <div className="flex items-center gap-3 md:hidden">
 
-            <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className={`relative z-[110] ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+            <button aria-label="Toggle Mobile Menu" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className={`relative z-[110] ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
               {isMobileMenuOpen ? <X className="w-8 h-8" /> : <Menu className="w-8 h-8" />}
             </button>
           </div>
@@ -901,7 +927,7 @@ const Home = () => {
                 {/* Smaller container */}
                 <div className="w-12 h-12 drop-shadow-[0_10px_20px_rgba(16,185,129,0.5)] relative z-10">
                   <Suspense fallback={null}>
-                    <LottiePlayer autoplay loop src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f680/lottie.json" style={{ height: '100%', width: '100%', transform: 'scale(1.1)' }} />
+                    {showLottie && <LottiePlayer autoplay loop src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f680/lottie.json" style={{ height: '100%', width: '100%', transform: 'scale(1.1)' }} />}
                   </Suspense>
                 </div>
                 {/* Engine Thrust - scaled down */}
@@ -946,7 +972,7 @@ const Home = () => {
                 {/* The 3D Rocket - smaller container */}
                 <div className="w-16 h-16 drop-shadow-[0_15px_30px_rgba(34,211,238,0.5)] relative z-20">
                   <Suspense fallback={null}>
-                    <LottiePlayer autoplay loop src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f680/lottie.json" style={{ height: '100%', width: '100%', transform: 'scale(1.15)' }} />
+                    {showLottie && <LottiePlayer autoplay loop src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f680/lottie.json" style={{ height: '100%', width: '100%', transform: 'scale(1.15)' }} />}
                   </Suspense>
                 </div>
 
@@ -975,8 +1001,8 @@ const Home = () => {
 
       {/* --- HERO SECTION --- */}
       <section className="relative pt-8 pb-14 md:pb-32 px-6 overflow-hidden">
-        <div className="max-w-[1280px] mx-auto grid lg:grid-cols-12 gap-12 lg:gap-16 items-center relative z-10">
-          <div className="lg:col-span-7">
+        <div className="max-w-[1280px] mx-auto grid md:grid-cols-12 gap-12 lg:gap-16 items-center relative z-10">
+          <div className="md:col-span-7">
             <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] md:tracking-[0.3em] mb-6 md:mb-8 border ${theme === 'dark' ? 'bg-[#10B981]/10 text-[#10B981] border-[#10B981]/20' : 'bg-emerald-50 text-emerald-600'}`}>
               <Globe className={`w-3 h-3 ${isSynced ? 'opacity-100 scale-125' : 'opacity-30 scale-100'} transition-all duration-700`} /> Node Sync Active
             </div>
@@ -1019,7 +1045,7 @@ const Home = () => {
               Instant global settlements. Engineered for world-class creators.
             </motion.p>
             <div className="flex flex-col sm:flex-row gap-4 md:gap-6 relative mb-12">
-              <button onClick={() => navigate('/signup')} className="w-full sm:w-auto bg-[#10B981] text-white px-10 py-5 rounded-2xl font-black uppercase italic text-sm shadow-2xl flex items-center justify-center gap-3 active:scale-95 transition-all">
+              <button onClick={() => navigate('/signup')} className="w-full sm:w-auto bg-[#065F46] hover:bg-[#047857] text-white px-10 py-5 rounded-2xl font-black uppercase italic text-sm shadow-2xl flex items-center justify-center gap-3 active:scale-95 transition-all">
                 <Play className="w-4 h-4 fill-white" /> Get Started
               </button>
 
@@ -1059,7 +1085,7 @@ const Home = () => {
             </motion.div>
           </div>
 
-          <div className="lg:col-span-5 relative mt-8 lg:mt-0 lg:ml-auto w-full max-w-xl">
+          <div className="md:col-span-5 relative mt-8 md:mt-0 md:ml-auto w-full max-w-xl">
             {/* MINI-NEXUS PREVIEW — placed directly on the page */}
             <motion.div
               initial={{ opacity: 0, scale: 0.98, y: 20 }}
@@ -1072,9 +1098,9 @@ const Home = () => {
             >
               {/* Background Orbs for Depth */}
               <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-                <div className="glass-orb w-48 h-48 bg-[#10B981] top-[-10%] right-[-10%]" style={{ animationDelay: '0s' }} />
-                <div className="glass-orb w-64 h-64 bg-[#3b82f6] bottom-[-20%] left-[-10%]" style={{ animationDelay: '-5s' }} />
-                <div className="glass-orb w-40 h-40 bg-[#8b5cf6] top-[20%] left-[10%]" style={{ animationDelay: '-10s' }} />
+                <div aria-hidden="true" className="glass-orb w-48 h-48 bg-[#10B981] top-[-10%] right-[-10%]" style={{ animationDelay: '0s' }} />
+                <div aria-hidden="true" className="glass-orb w-64 h-64 bg-[#3b82f6] bottom-[-20%] left-[-10%]" style={{ animationDelay: '-5s' }} />
+                <div aria-hidden="true" className="glass-orb w-40 h-40 bg-[#8b5cf6] top-[20%] left-[10%]" style={{ animationDelay: '-10s' }} />
               </div>
 
               <div className="flex-1 flex flex-col p-3 sm:p-4 md:p-5 gap-3 sm:gap-4 relative z-10">
@@ -1122,7 +1148,10 @@ const Home = () => {
                   <div className={`flex flex-col gap-4 pt-1 border-r border-white/5 ${window.innerWidth < 768 ? 'pr-2' : 'pr-4'}`}>
                     <div className="flex items-center gap-1.5 mb-2">
                       <Trophy className="w-3 h-3 text-[#F59E0B]" />
-                      <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">Top Fan</p>
+                      <div className="flex items-center gap-1.5">
+                        <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Top Fan</p>
+                        <div className="w-1 h-1 rounded-full bg-[#10B981] animate-pulse" />
+                      </div>
                     </div>
                     {[
                       { rank: 1, color: '#F59E0B' },
@@ -1325,8 +1354,8 @@ const Home = () => {
                     >
                       {/* Background Orbs for Simulator */}
                       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-40">
-                        <div className="glass-orb w-48 h-48 bg-[#10B981] top-[-10%] right-[-10%]" style={{ animationDelay: '0s' }} />
-                        <div className="glass-orb w-64 h-64 bg-[#3b82f6] bottom-[-20%] left-[-10%]" style={{ animationDelay: '-5s' }} />
+                        <div aria-hidden="true" className="glass-orb w-48 h-48 bg-[#10B981] top-[-10%] right-[-10%]" style={{ animationDelay: '0s' }} />
+                        <div aria-hidden="true" className="glass-orb w-64 h-64 bg-[#3b82f6] bottom-[-20%] left-[-10%]" style={{ animationDelay: '-5s' }} />
                       </div>
 
                       <div className="relative z-10 space-y-4 sm:space-y-5 md:space-y-6">
@@ -1373,8 +1402,10 @@ const Home = () => {
                           </div>
                           <div className={`relative rounded-2xl border transition-all duration-300 input-glow overflow-hidden ${theme === 'dark' ? 'bg-black/60 border-white/10' : 'bg-slate-50/80 border-slate-200'
                             }`}>
+                            <label htmlFor="calcAmount" className="sr-only">Enter Amount</label>
                             <input
                               type="number"
+                              id="calcAmount"
                               value={calcAmount}
                               onChange={e => setCalcAmount(Number(e.target.value))}
                               className={`w-full bg-transparent px-4 py-2 sm:py-3 text-xl sm:text-2xl font-black italic outline-none ${theme === 'dark' ? 'text-[#10B981]' : 'text-[#10B981]'
@@ -1669,7 +1700,7 @@ const Home = () => {
             const pricingCards = [
               {
                 id: 'starter', label: 'Starter',
-                price: '₹699', sub: 'Perfect for new creators getting started.',
+                price: '₹999', sub: 'Perfect for new creators getting started.',
                 accent: '#94a3b8', accentRgb: '148,163,184',
                 icon: <Zap className="w-5 h-5 text-slate-400" />,
                 iconBg: 'bg-slate-500/10',
@@ -1680,7 +1711,7 @@ const Home = () => {
               },
               {
               id: 'pro', label: 'Pro',
-                price: '₹1,499', sub: 'For growing creators & streamers.',
+                price: '₹1,999', sub: 'For growing creators & streamers.',
                 accent: '#10B981', accentRgb: '16,185,129',
                 icon: <Rocket className="w-5 h-5 text-[#10B981]" />,
                 iconBg: 'bg-[#10B981]/15',
@@ -1692,7 +1723,7 @@ const Home = () => {
               },
               {
                 id: 'legend', label: 'Legend',
-                price: '₹2,499', sub: 'For pro creators at the top.',
+                price: '₹2,999', sub: 'For pro creators at the top.',
                 accent: '#f59e0b', accentRgb: '245,158,11',
                 icon: <Trophy className="w-5 h-5 text-amber-400" />,
                 iconBg: 'bg-amber-500/15',
@@ -1826,7 +1857,7 @@ const Home = () => {
 
                 <div className="text-right flex flex-col items-end gap-3 flex-shrink-0 min-w-[140px]">
                   <div className="flex items-end gap-1.5">
-                    <span className={`text-4xl font-black italic ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>₹699</span>
+                    <span className={`text-4xl font-black italic ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>₹999</span>
                     <span className="text-slate-500 font-bold mb-1">/mo</span>
                   </div>
                   <button onClick={() => navigate('/signup')}
@@ -1843,7 +1874,7 @@ const Home = () => {
               whileHover={{ scale: 1.01 }}
               className="relative rounded-3xl border border-[#10B981]/50 p-6 flex items-center gap-6 bg-gradient-to-r from-[#10B981]/10 via-[#10B981]/5 to-transparent shadow-[0_0_40px_rgba(16,185,129,0.12)]"
             >
-              <div className="absolute top-0 right-10 -translate-y-1/2 px-4 py-1 rounded-full bg-[#10B981] text-white text-[9px] font-black uppercase tracking-widest shadow-lg shadow-[#10B981]/30">
+              <div className="absolute top-0 right-10 -translate-y-1/2 px-4 py-1 rounded-full bg-[#065F46] text-white text-[9px] font-black uppercase tracking-widest shadow-lg shadow-[#10B981]/30">
                 Most Popular
               </div>
 
@@ -1855,7 +1886,7 @@ const Home = () => {
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-widest text-[#10B981] mb-0.5">Growth Tier</p>
                   <h3 className={`text-2xl font-black italic ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Pro</h3>
-                  <p className="text-xs font-medium text-slate-500 mt-1">Volume creators & streamers.</p>
+                  <p className="text-xs font-medium text-slate-400 mt-1">Volume creators & streamers.</p>
                 </div>
 
                 <div className={`flex-1 rounded-xl p-3 mx-4 hidden lg:block ${theme === 'dark' ? 'bg-black/10' : 'bg-[#10B981]/5'}`}>
@@ -1869,7 +1900,7 @@ const Home = () => {
 
                 <div className="text-right flex flex-col items-end gap-3 flex-shrink-0 min-w-[140px]">
                   <div className="flex items-end gap-1.5">
-                    <span className={`text-4xl font-black italic ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>₹1,499</span>
+                    <span className={`text-4xl font-black italic ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>₹1,999</span>
                     <span className="text-slate-500 font-bold mb-1">/mo</span>
                   </div>
                   <button onClick={() => navigate('/signup')}
@@ -1911,7 +1942,7 @@ const Home = () => {
 
                 <div className="text-right flex flex-col items-end gap-3 flex-shrink-0 min-w-[140px]">
                   <div className="flex items-end gap-1.5">
-                    <span className={`text-4xl font-black italic ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>₹2,499</span>
+                    <span className={`text-4xl font-black italic ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>₹2,999</span>
                     <span className="text-slate-500 font-bold mb-1">/mo</span>
                   </div>
                   <button onClick={() => navigate('/signup')}
@@ -1925,7 +1956,7 @@ const Home = () => {
 
 
           {/* Bottom note */}
-          <p className="text-center text-slate-600 text-sm font-medium mt-4">
+          <p className="text-center text-slate-400 text-sm font-medium mt-4">
             All plans include a <span className="text-[#10B981] font-bold">7-day free trial</span>. Cancel anytime. Billed via Razorpay.
           </p>
         </div>
@@ -1964,8 +1995,8 @@ const Home = () => {
       <footer id="footer" className={`relative border-t overflow-hidden transition-colors duration-500 ${theme === 'dark' ? 'border-white/[0.08] bg-[#050505]/80 backdrop-blur-3xl' : 'border-slate-100 bg-white/80 backdrop-blur-3xl'}`}>
 
         {/* Dynamic Glow Orbs - Aero-Glass Signature */}
-        <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-[#10B981]/[0.1] blur-[140px] rounded-full pointer-events-none animate-pulse" />
-        <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-blue-500/[0.1] blur-[120px] rounded-full pointer-events-none animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-[#10B981]/[0.1] blur-[140px] rounded-full pointer-events-none" />
+        <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-blue-500/[0.1] blur-[120px] rounded-full pointer-events-none" style={{ animationDelay: '1s' }} />
 
         <div className="max-w-[1440px] mx-auto px-6 pt-16 md:pt-24 pb-6 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24">
@@ -1996,7 +2027,7 @@ const Home = () => {
                   { Icon: Github, hoverClass: theme === 'dark' ? 'hover:border-white/60 hover:text-white hover:bg-white/5 hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]' : 'hover:border-slate-900/60 hover:text-slate-900 hover:bg-slate-900/5 hover:shadow-[0_0_20px_rgba(15,23,42,0.1)]' },
                   { Icon: Linkedin, hoverClass: theme === 'dark' ? 'hover:border-[#0A66C2]/60 hover:text-[#0A66C2] hover:bg-[#0A66C2]/5 hover:shadow-[0_0_20px_rgba(10,102,194,0.2)]' : 'hover:border-[#0A66C2]/60 hover:text-[#0A66C2] hover:bg-[#0A66C2]/5 hover:shadow-[0_0_20px_rgba(10,102,194,0.1)]' }
                 ].map(({ Icon, hoverClass }, i) => (
-                  <button key={i} className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 border relative group shadow-sm ${theme === 'dark'
+                  <button aria-label="Social Link" key={i} className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 border relative group shadow-sm ${theme === 'dark'
                     ? 'bg-white/5 border-white/5 text-slate-400'
                     : 'bg-slate-50 border-slate-200 text-slate-600'
                     } ${hoverClass}`}>
@@ -2014,7 +2045,7 @@ const Home = () => {
                 </div>
                 <div className="flex flex-col gap-3 sm:gap-6">
                   {['Features', 'Pricing', 'Dashboard', 'Overlays'].map(item => (
-                    <button key={item} className="group flex items-center gap-1 sm:gap-2 text-slate-500 hover:text-[#10B981] text-[10px] sm:text-[13px] font-black uppercase tracking-widest transition-all text-left">
+                    <button key={item} className="group flex items-center gap-1 sm:gap-2 text-slate-400 hover:text-[#10B981] text-[10px] sm:text-[13px] font-black uppercase tracking-widest transition-all text-left">
                       <span className="w-0 group-hover:w-2 h-[2px] bg-[#10B981] transition-all shrink-0" />
                       {item}
                     </button>
@@ -2027,7 +2058,7 @@ const Home = () => {
                 </div>
                 <div className="flex flex-col gap-3 sm:gap-6">
                   {['API Docs', 'Status', 'Security', 'Changelog'].map(item => (
-                    <button key={item} className="group flex items-center gap-1 sm:gap-2 text-slate-500 hover:text-[#10B981] text-[10px] sm:text-[13px] font-black uppercase tracking-widest transition-all text-left">
+                    <button key={item} className="group flex items-center gap-1 sm:gap-2 text-slate-400 hover:text-[#10B981] text-[10px] sm:text-[13px] font-black uppercase tracking-widest transition-all text-left">
                       <span className="w-0 group-hover:w-2 h-[2px] bg-[#10B981] transition-all shrink-0" />
                       {item}
                     </button>
@@ -2040,7 +2071,7 @@ const Home = () => {
                 </div>
                 <div className="flex flex-col gap-3 sm:gap-6">
                   {['Privacy', 'Terms', 'Refunds', 'Contact'].map(item => (
-                    <button key={item} className="group flex items-center gap-1 sm:gap-2 text-slate-500 hover:text-[#10B981] text-[10px] sm:text-[13px] font-black uppercase tracking-widest transition-all text-left">
+                    <button key={item} className="group flex items-center gap-1 sm:gap-2 text-slate-400 hover:text-[#10B981] text-[10px] sm:text-[13px] font-black uppercase tracking-widest transition-all text-left">
                       <span className="w-0 group-hover:w-2 h-[2px] bg-[#10B981] transition-all shrink-0" />
                       {item}
                     </button>
@@ -2072,6 +2103,7 @@ const Home = () => {
                 <button
                   type="submit"
                   disabled={subscribing}
+                  aria-label="Join Newsletter"
                   className={`absolute right-2 top-2 bottom-2 px-4 sm:px-6 rounded-[1.4rem] transition-all duration-500 flex items-center justify-center font-black uppercase italic tracking-widest text-[8px] sm:text-[9px] ${subscribing
                     ? 'opacity-50 cursor-not-allowed'
                     : 'bg-gradient-to-br from-[#10B981] to-[#059669] text-white shadow-xl shadow-[#10B981]/25 hover:shadow-[#10B981]/40 hover:scale-[1.03] active:scale-95'
@@ -2087,13 +2119,12 @@ const Home = () => {
           {/* DIVIDER - Cybernetic Line */}
           <div className="relative mt-6 md:mt-10 mb-6 md:mb-8">
             <div className={`h-px w-full ${theme === 'dark' ? 'bg-gradient-to-r from-transparent via-white/10 to-transparent' : 'bg-gradient-to-r from-transparent via-slate-200 to-transparent'}`} />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-[#10B981] blur-md opacity-50" />
           </div>
 
           {/* SYSTEM STATUS BAR (SOCKET BAR) */}
           <div className="flex flex-col lg:flex-row justify-between items-center gap-6 sm:gap-10">
             <div className="flex flex-col md:flex-row items-center gap-4 sm:gap-6 md:gap-12 w-full lg:w-auto">
-              <p className="text-slate-600 text-[8px] sm:text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] opacity-80 italic text-center md:text-left leading-relaxed">
+              <p className="text-slate-400 text-[8px] sm:text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] opacity-80 italic text-center md:text-left leading-relaxed">
                 © 2026 DROPPAY .
                 <br className="md:hidden" /> ALL RIGHTS RESERVED.
               </p>
@@ -2113,7 +2144,7 @@ const Home = () => {
           theme={theme}
         />
       </Suspense>
-    </div >
+    </main >
   );
 };
 

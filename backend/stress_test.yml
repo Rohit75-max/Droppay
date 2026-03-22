@@ -1,0 +1,35 @@
+config:
+  target: 'http://localhost:5001'
+  processor: './processor.js'
+  phases:
+    - duration: 60
+      arrivalRate: 10
+      name: 'Phase 1 - Warm-up (10 req/s)'
+    - duration: 30
+      arrivalRate: 100
+      name: 'Phase 2 - Spike (100 req/s)'
+    - duration: 60
+      arrivalCount: 500
+      name: 'Phase 3 - Viral Hit'
+  payload:
+    path: 'tokens.csv'
+    fields:
+      - 'token'
+      - 'userId'
+scenarios:
+  - name: 'Core Ledger Pressure Cycle'
+    flow:
+      - log: 'Dispatching verifyPayment simulation'
+      - post:
+          url: '/api/payment/verify'
+          headers:
+            Authorization: 'Bearer {{ token }}'
+          beforeRequest: 'signPayload'
+      - think: 1
+      - log: 'Dispatching requestWithdrawal simulation'
+      - post:
+          url: '/api/user/withdraw'
+          headers:
+            Authorization: 'Bearer {{ token }}'
+          json:
+            amount: 10000 # 100 INR in Paise

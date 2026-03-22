@@ -9,7 +9,16 @@ const razorpay = new Razorpay({
 });
 
 exports.startPaymentWorker = (io) => {
-    const worker = new Worker('RazorpayOrderQueue', async (job) => {
+    const worker = new Worker('RazorpayOrderQueue', async (job, token) => {
+        const redisClient = require('../config/redisClient');
+        const isPaused = await redisClient.get('DROPPAY_GLOBAL_PAUSE');
+
+        if (isPaused === 'true') {
+            console.log(`[Circuit Breaker] Job ${job.id} paused. Delaying 5min.`);
+            await job.moveToDelayed(Date.now() + 300000, token);
+            return { paused: true };
+        }
+
         const { amount, clientId } = job.data;
         
         // 1. Perform the external network wait asynchronously via Redis
@@ -31,7 +40,11 @@ exports.startPaymentWorker = (io) => {
         return { success: true, orderId: order.id };
     }, {
         connection: { url: process.env.REDIS_URI || 'redis://127.0.0.1:6379' },
-        concurrency: 50 // Handle up to 50 jobs concurrently
+        concurrency: 50, // Handle up to 50 jobs concurrently
+        limiter: {
+            max: 5,        // Max 5 jobs
+            duration: 1000 // In 1 second window to prevent resumed thundering herds
+        }
     });
 
     // 3. Dead Letter Queue & Final Socket Failure Emit
@@ -63,6 +76,9 @@ exports.startPaymentWorker = (io) => {
             console.warn(`⏳ Job ${job.id} failed (Attempt ${job.attemptsMade}). Retrying exponentially...`);
         }
     });
+
+    // Silence background connection error spam for local environments without Redis
+    worker.on('error', () => { });
 
     console.log('✅ Background Worker Active: Monitoring RazorpayOrderQueue');
     return worker;

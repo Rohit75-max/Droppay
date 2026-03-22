@@ -16,4 +16,7 @@ const paymentQueue = new Queue('RazorpayOrderQueue', {
     }
 });
 
+// Silence connection error spam for local environments without Redis
+paymentQueue.on('error', () => { });
+
 module.exports = paymentQueue;

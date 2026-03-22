@@ -20,7 +20,7 @@ const cookieParser = require('cookie-parser');
 const setupSockets = async () => {
     const ioOptions = {
         cors: {
-            origin: process.env.FRONTEND_URL || "http://localhost:3000",
+            origin: function (origin, callback) { callback(null, true); },
             methods: ["GET", "POST"],
             credentials: true // Added to keep sockets synced with your new login
         },
@@ -33,6 +33,11 @@ const setupSockets = async () => {
             socket: { reconnectStrategy: false, connectTimeout: 1000 }
         });
         const subClient = pubClient.duplicate();
+
+        // Silence background connection error spam for local dev without causing crashes
+        pubClient.on('error', () => {});
+        subClient.on('error', () => {});
+
         await Promise.all([pubClient.connect(), subClient.connect()]);
         io = new Server(server, ioOptions);
         io.adapter(createAdapter(pubClient, subClient));
@@ -51,7 +56,7 @@ connectDB();
 
 // 3. MIDDLEWARE
 app.use(cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    origin: function (origin, callback) { callback(null, true); },
     credentials: true, // MUST BE TRUE to allow cookies
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
 }));
@@ -76,6 +81,8 @@ app.post('/api/auth/signup', strictLimiter); // SYNCED WITH FRONTEND
 // 5. ROUTE MOUNTING
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/user', require('./routes/userRoutes'));
+app.use('/api/onboarding', require('./routes/onboardingRoutes'));
+app.use('/api/webhooks', require('./routes/webhookRoutes'));
 app.use('/api/payment', require('./routes/paymentRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/tug-of-war', require('./routes/tugOfWarRoutes'));

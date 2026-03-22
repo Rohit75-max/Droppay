@@ -9,6 +9,8 @@ import PremiumGoalOverlays from './PremiumGoalOverlays';
 import { Player } from '@lottiefiles/react-lottie-player';
 import TopSupporterWidget from './widgets/TopSupporterWidget';
 import EliteCard from './EliteCard';
+import { List } from 'react-window';
+import { InView } from 'react-intersection-observer';
 
 const PREMIUM_GOAL_STYLES = [
   'black_hole', 'hex_core', 'rune_monolith', 'hologram_glitch',
@@ -489,53 +491,76 @@ const DashboardSummary = ({
                 </div>
               </div>
             ) : (
-              recentDrops.map((drop, i) => (
-                <motion.div
-                  key={drop.id || i}
-                  initial={{ opacity: 0, x: -20, scale: 0.95 }}
-                  animate={{ opacity: 1, x: 0, scale: 1 }}
-                  transition={{ type: "spring", stiffness: 100, damping: 15 }}
-                  whileHover={{ x: 4, scale: 1.02 }}
-                  className={`group/card relative overflow-hidden flex items-center justify-between p-4 rounded-[var(--nexus-radius)] border transition-all duration-300 bg-[var(--nexus-panel)] border-[var(--nexus-border)] hover:border-[var(--nexus-accent)]/60 nexus-card`}
-                >
-                  <div className={`absolute inset-0 opacity-0 group-hover/card:opacity-100 transition-opacity duration-500 bg-gradient-to-r from-[var(--nexus-accent)]/0 via-[var(--nexus-accent)]/10 to-[var(--nexus-accent)]/0 -translate-x-full group-hover/card:animate-[shimmer_2s_infinite]`} />
+              <List
+                height={300} // Capped height for virtualization viewport
+                itemCount={recentDrops.length}
+                itemSize={82} // Explicit average size per row item
+                width="100%"
+                className="custom-scrollbar"
+              >
+                {({ index, style }) => {
+                  const drop = recentDrops[index];
+                  if (!drop) return null;
 
-                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-[var(--nexus-accent)] opacity-0 group-hover/card:opacity-100 transition-opacity" />
+                  return (
+                    <div style={style} className="pr-2 pb-2">
+                      <motion.div
+                        initial={{ opacity: 0, x: -20, scale: 0.95 }}
+                        animate={{ opacity: 1, x: 0, scale: 1 }}
+                        transition={{ duration: 0.4 }}
+                        whileHover={{ x: 4, scale: 1.02 }}
+                        className={`group/card relative overflow-hidden flex items-center justify-between p-4 rounded-[var(--nexus-radius)] border transition-all duration-300 bg-[var(--nexus-panel)] border-[var(--nexus-border)] hover:border-[var(--nexus-accent)]/60 nexus-card h-full`}
+                      >
+                        <div className={`absolute inset-0 opacity-0 group-hover/card:opacity-100 transition-opacity duration-500 bg-gradient-to-r from-[var(--nexus-accent)]/0 via-[var(--nexus-accent)]/10 to-[var(--nexus-accent)]/0 -translate-x-full group-hover/card:animate-[shimmer_2s_infinite]`} />
+                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-[var(--nexus-accent)] opacity-0 group-hover/card:opacity-100 transition-opacity" />
 
-                  <div className="flex items-center gap-4 relative z-10">
-                    <div className="flex-shrink-0 w-10 h-10 group-hover/card:scale-110 transition-transform flex items-center justify-center drop-shadow-md overflow-hidden">
-                      {(LOTTIE_STICKER_MAP[drop.sticker] || (typeof drop.sticker === 'string' && drop.sticker.startsWith('http')) || drop.stickerUrl) ? (
-                        <Player
-                          autoplay
-                          loop
-                          src={LOTTIE_STICKER_MAP[drop.sticker] || drop.sticker || drop.stickerUrl}
-                          style={{ width: '40px', height: '40px' }}
-                        />
-                      ) : (
-                        <span className="text-2xl">{stickerFallback[drop.sticker] || '💎'}</span>
-                      )}
+                        <div className="flex items-center gap-4 relative z-10 w-full min-w-0">
+                          <div className="flex-shrink-0 w-10 h-10 group-hover/card:scale-110 transition-transform flex items-center justify-center drop-shadow-md overflow-hidden">
+                            {(LOTTIE_STICKER_MAP[drop.sticker] || (typeof drop.sticker === 'string' && drop.sticker.startsWith('http')) || drop.stickerUrl) ? (
+                              <InView triggerOnce>
+                                {({ inView, ref }) => (
+                                  <div ref={ref} style={{ width: '40px', height: '40px' }}>
+                                    {inView ? (
+                                      <Player
+                                        autoplay
+                                        loop
+                                        src={LOTTIE_STICKER_MAP[drop.sticker] || drop.sticker || drop.stickerUrl}
+                                        style={{ width: '40px', height: '40px' }}
+                                      />
+                                    ) : (
+                                      <span className="text-2xl">{stickerFallback[drop.sticker] || '💎'}</span>
+                                    )}
+                                  </div>
+                                )}
+                              </InView>
+                            ) : (
+                              <span className="text-2xl">{stickerFallback[drop.sticker] || '💎'}</span>
+                            )}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="font-black italic text-[11px] uppercase truncate group-hover/card:text-[var(--nexus-accent)] transition-colors flex items-center gap-1">
+                              <UserCircle className="w-2.5 h-2.5 opacity-50" /> {drop.donorName}
+                              {drop.isTest && <span className="ml-2 px-1 py-0.5 bg-rose-500 text-white text-[6px] rounded uppercase font-bold">Test</span>}
+                            </p>
+                            <p className="text-[9px] text-slate-500 truncate italic font-medium flex items-center gap-1">
+                              <MessageSquare className="w-2.5 h-2.5 opacity-30" /> "{drop.message}"
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex flex-col items-end gap-1 shrink-0 ml-4">
+                          <p className="font-black text-[var(--nexus-accent)] italic text-xs shrink-0 tracking-tighter relative z-10 flex items-center gap-1">
+                            <Gift className="w-2.5 h-2.5" /> ₹{drop.amount}
+                          </p>
+                          <div className="flex items-center gap-1 opacity-0 group-hover/card:opacity-100 transition-opacity">
+                            <Smile className="w-2.5 h-2.5 text-[var(--nexus-accent)]" />
+                            <Lock className="w-2.5 h-2.5 text-slate-600" />
+                          </div>
+                        </div>
+                      </motion.div>
                     </div>
-                    <div className="min-w-0">
-                      <p className="font-black italic text-[11px] uppercase truncate group-hover/card:text-[var(--nexus-accent)] transition-colors flex items-center gap-1">
-                        <UserCircle className="w-2.5 h-2.5 opacity-50" /> {drop.donorName}
-                        {drop.isTest && <span className="ml-2 px-1 py-0.5 bg-rose-500 text-white text-[6px] rounded uppercase font-bold">Test Mode</span>}
-                      </p>
-                      <p className="text-[9px] text-slate-500 truncate italic font-medium flex items-center gap-1">
-                        <MessageSquare className="w-2.5 h-2.5 opacity-30" /> "{drop.message}"
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex flex-col items-end gap-1">
-                    <p className="font-black text-[var(--nexus-accent)] italic text-xs shrink-0 tracking-tighter relative z-10 flex items-center gap-1">
-                      <Gift className="w-2.5 h-2.5" /> ₹{drop.amount}
-                    </p>
-                    <div className="flex items-center gap-1 opacity-0 group-hover/card:opacity-100 transition-opacity">
-                      <Smile className="w-2.5 h-2.5 text-[var(--nexus-accent)]" />
-                      <Lock className="w-2.5 h-2.5 text-slate-600" />
-                    </div>
-                  </div>
-                </motion.div>
-              ))
+                  );
+                }}
+              </List>
             )}
           </div>
 

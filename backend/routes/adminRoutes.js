@@ -6,7 +6,8 @@ const {
     updateRole, getPayoutQueue, executeSettlement, rejectSettlement,
     getGlobalConfig, updateGlobalConfig, dispatchBroadcast,
     getAdminProfile, updateAdminProfile, uploadAdminAvatar,
-    getAuditLogs, getSystemHealth
+    getAuditLogs, getSystemHealth, getFinancialStats, getTransactionsLog,
+    toggleGlobalPause
 } = require('../controllers/adminController');
 const upload = require('../middleware/uploadMiddleware');
 
@@ -127,5 +128,19 @@ router.post('/referrals/backfill', async (req, res) => {
         res.status(500).json({ msg: err.message });
     }
 });
+
+// --- 10. FINANCIAL HEALTH & AUDITS ---
+
+// @route   GET api/admin/stats
+// @desc    Calculate Gross TPV, Net Revenue, and Pending Liability
+router.get('/stats', getFinancialStats);
+
+// @route   GET api/admin/transactions
+// @desc    Retrieve auditing snapshots with pagination bounds
+router.get('/transactions', getTransactionsLog);
+
+// @route   PUT api/admin/toggle-pause
+// @desc    System Panic Button (Circuit Breaker Switch)
+router.put('/toggle-pause', toggleGlobalPause);
 
 module.exports = router;
