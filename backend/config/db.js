@@ -5,6 +5,9 @@ const connectDB = async () => {
     // Professional Configuration for scalability
     const conn = await mongoose.connect(process.env.MONGO_URI, {
       autoIndex: true, // Automatically builds indexes (great for streamerId uniqueness)
+      maxPoolSize: 100, // Handle up to 100 simultaneous connections
+      minPoolSize: 10,  // Keep 10 connections always warm
+      serverSelectionTimeoutMS: 5000, // Fail fast after 5s if DB is unreachable
     });
 
     console.log(`✅ MongoDB Connected: ${conn.connection.host}`);

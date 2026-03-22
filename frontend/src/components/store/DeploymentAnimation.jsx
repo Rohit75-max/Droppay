@@ -57,8 +57,9 @@ const DeploymentAnimation = ({ onComplete, theme }) => {
                     className="absolute inset-0 bg-emerald-500/20 blur-3xl rounded-full"
                 />
 
-                <div className={`relative z-10 w-24 h-24 border-2 border-emerald-500/30 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(16,185,129,0.3)] ${theme === 'light' ? 'bg-white' : 'bg-black'
+                <div className={`relative z-10 w-32 h-32 border-2 rounded-full flex items-center justify-center transition-all duration-700 ${theme === 'light' ? 'bg-white border-emerald-100 shadow-sm' : 'bg-[#0a0a0a] border-white/5 shadow-[0_0_50px_rgba(0,0,0,0.5)]'
                     }`}>
+                    <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-emerald-500/10 via-transparent to-blue-500/10 animate-pulse" />
                     <AnimatePresence mode="wait">
                         {progress < 100 ? (
                             <motion.div
@@ -91,29 +92,31 @@ const DeploymentAnimation = ({ onComplete, theme }) => {
                     <span className={`text-[10px] font-black italic ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>{progress}%</span>
                 </div>
 
-                <div className={`h-1.5 w-full rounded-full overflow-hidden border ${theme === 'light' ? 'bg-slate-100 border-slate-200' : 'bg-white/5 border-white/5'
+                <div className={`h-2 w-full rounded-full overflow-hidden border ${theme === 'light' ? 'bg-slate-100 border-slate-200' : 'bg-black border-white/5 shadow-inner'
                     }`}>
                     <motion.div
-                        className="h-full bg-emerald-500"
+                        className="h-full bg-gradient-to-r from-emerald-600 via-emerald-400 to-emerald-600 bg-[length:200%_100%]"
                         initial={{ width: 0 }}
-                        animate={{ width: `${progress}%` }}
-                        transition={{ ease: 'linear' }}
+                        animate={{ width: `${progress}%`, backgroundPosition: ['0% 0%', '200% 0%'] }}
+                        transition={{ width: { ease: 'linear' }, backgroundPosition: { duration: 2, repeat: Infinity, ease: 'linear' } }}
                         style={{
-                            boxShadow: '0 0 20px rgba(16,185,129,0.5)'
+                            boxShadow: '0 0 25px rgba(16,185,129,0.4)'
                         }}
                     />
                 </div>
 
-                <div className="grid grid-cols-3 gap-2 opacity-30">
-                    <div className={`p-3 rounded-lg border transition-colors ${progress > 30 ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-500' : (theme === 'light' ? 'border-slate-200 text-slate-400' : 'border-white/5 text-slate-500')}`}>
-                        <Cpu className="w-4 h-4 mx-auto" />
-                    </div>
-                    <div className={`p-3 rounded-lg border transition-colors ${progress > 60 ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-500' : (theme === 'light' ? 'border-slate-200 text-slate-400' : 'border-white/5 text-slate-500')}`}>
-                        <Database className="w-4 h-4 mx-auto" />
-                    </div>
-                    <div className={`p-3 rounded-lg border transition-colors ${progress > 90 ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-500' : (theme === 'light' ? 'border-slate-200 text-slate-400' : 'border-white/5 text-slate-500')}`}>
-                        <Download className="w-4 h-4 mx-auto" />
-                    </div>
+                <div className="grid grid-cols-3 gap-3">
+                    {[
+                        { icon: Cpu, stage: 30, color: 'text-blue-500', name: 'CORE' },
+                        { icon: Database, stage: 60, color: 'text-purple-500', name: 'SYNC' },
+                        { icon: Download, stage: 90, color: 'text-emerald-500', name: 'LIVE' }
+                    ].map((item, idx) => (
+                        <div key={idx} className={`p-4 rounded-2xl border transition-all duration-500 relative overflow-hidden group/stage ${progress > item.stage ? `bg-white/[0.03] border-white/10 ${item.color}` : 'bg-black/20 border-white/5 text-slate-600 opacity-30'}`}>
+                            {progress > item.stage && <div className={`absolute inset-0 ${item.color.replace('text', 'bg')}/10 animate-pulse`} />}
+                            <item.icon className={`w-5 h-5 mx-auto relative z-10 transition-transform duration-500 ${progress > item.stage ? 'scale-110' : 'scale-90'}`} />
+                            <div className="text-[7px] font-black uppercase tracking-widest mt-2 relative z-10 opacity-60">{item.name}</div>
+                        </div>
+                    ))}
                 </div>
             </div>
 

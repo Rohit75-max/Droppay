@@ -14,4 +14,7 @@ const SubscriberSchema = new mongoose.Schema({
     }
 });
 
+// ADDED: Index for fast querying by subscription date mapping (e.g. for marketing blasts)
+SubscriberSchema.index({ subscribedAt: -1 });
+
 module.exports = mongoose.model('Subscriber', SubscriberSchema);

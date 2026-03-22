@@ -9,14 +9,13 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 // NOTE: react-toastify CSS is already imported in App.js — do NOT import again here
-import SocketModal from '../components/SocketModal';
 import { getOptimizedImage } from '../protocol/cdnHelper';
-import DonationTicker from '../components/widgets/DonationTicker';
-
-import { Player } from '@lottiefiles/react-lottie-player';
 
 // --- Lazy-loaded heavy components (deferred ~74KB from initial bundle) ---
 const AlertPreview = lazy(() => import('../components/AlertPreview'));
+const SocketModal = lazy(() => import('../components/SocketModal'));
+const DonationTicker = lazy(() => import('../components/widgets/DonationTicker'));
+const LottiePlayer = lazy(() => import('@lottiefiles/react-lottie-player').then(module => ({ default: module.Player })));
 
 const premiumFeaturesData = [
   {
@@ -734,7 +733,9 @@ const Home = () => {
       {/* TICKER BELOW NAV */}
       <div className={`relative pt-[64px] md:pt-[72px] z-90 border-b ticker-sheen transition-all duration-700 ${theme === 'dark' ? 'bg-black/10 border-white/[0.02]' : 'bg-slate-100/30 border-black/[0.02]'
         }`}>
-        <DonationTicker recentDrops={demoDrops} goalPercentage={(goalAmount / goalTarget) * 100} />
+        <Suspense fallback={<div className="h-10 w-full animate-pulse bg-white/5" />}>
+          <DonationTicker recentDrops={demoDrops} goalPercentage={(goalAmount / goalTarget) * 100} />
+        </Suspense>
       </div>
 
       {/* MOBILE MENU SIDEBAR */}
@@ -899,7 +900,9 @@ const Home = () => {
               <div className="relative">
                 {/* Smaller container */}
                 <div className="w-12 h-12 drop-shadow-[0_10px_20px_rgba(16,185,129,0.5)] relative z-10">
-                  <Player autoplay loop src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f680/lottie.json" style={{ height: '100%', width: '100%', transform: 'scale(1.1)' }} />
+                  <Suspense fallback={null}>
+                    <LottiePlayer autoplay loop src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f680/lottie.json" style={{ height: '100%', width: '100%', transform: 'scale(1.1)' }} />
+                  </Suspense>
                 </div>
                 {/* Engine Thrust - scaled down */}
                 <motion.div
@@ -942,7 +945,9 @@ const Home = () => {
 
                 {/* The 3D Rocket - smaller container */}
                 <div className="w-16 h-16 drop-shadow-[0_15px_30px_rgba(34,211,238,0.5)] relative z-20">
-                  <Player autoplay loop src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f680/lottie.json" style={{ height: '100%', width: '100%', transform: 'scale(1.15)' }} />
+                  <Suspense fallback={null}>
+                    <LottiePlayer autoplay loop src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f680/lottie.json" style={{ height: '100%', width: '100%', transform: 'scale(1.15)' }} />
+                  </Suspense>
                 </div>
 
                 {/* Hyperdrive Plasma Thrust Trail - shortened */}
@@ -2101,11 +2106,13 @@ const Home = () => {
       </footer>
 
       {/* --- TECHNICAL SOCKET MODAL (GIANT-TIER) --- */}
-      <SocketModal
-        isOpen={isSocketModalOpen}
-        onClose={() => setIsSocketModalOpen(false)}
-        theme={theme}
-      />
+      <Suspense fallback={null}>
+        <SocketModal
+          isOpen={isSocketModalOpen}
+          onClose={() => setIsSocketModalOpen(false)}
+          theme={theme}
+        />
+      </Suspense>
     </div >
   );
 };

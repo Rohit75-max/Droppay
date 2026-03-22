@@ -210,6 +210,10 @@ const UserSchema = new mongoose.Schema({
 UserSchema.index({ obsKey: 1, "overlaySettings.isPanicMode": 1 });
 
 // 2. Fast lookup for Payout Engine (active accounts that need settlement)
-UserSchema.index({ "payoutSettings.onboardingStatus": 1, walletBalance: -1 });
+// FIXED: Replaced non-existent walletBalance with financialMetrics.pendingPayouts
+UserSchema.index({ "payoutSettings.onboardingStatus": 1, "financialMetrics.pendingPayouts": -1 });
+
+// 3. Fast lookup for Active Subscriptions
+UserSchema.index({ "subscription.status": 1 });
 
 module.exports = mongoose.model('User', UserSchema);

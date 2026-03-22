@@ -37,4 +37,16 @@ const donationLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-module.exports = { globalLimiter, strictLimiter, donationLimiter };
+/**
+ * AUTH LIMITER
+ * Forgiving limit for logins to handle shared IPs, but blocks credential stuffing.
+ */
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20, // 20 attempts
+  message: { msg: "Security Alert: Too many authentication attempts. Please try again in 15 minutes." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+module.exports = { globalLimiter, strictLimiter, donationLimiter, authLimiter };

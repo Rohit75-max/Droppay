@@ -53,8 +53,8 @@ const PremiumStoreCard = ({ item, theme, activeTab, onClick, onPurchase, isProce
     const x = useMotionValue(0);
     const y = useMotionValue(0);
 
-    const mouseXSpring = useSpring(x);
-    const mouseYSpring = useSpring(y);
+    const mouseXSpring = useSpring(x, { stiffness: 50, damping: 20 });
+    const mouseYSpring = useSpring(y, { stiffness: 50, damping: 20 });
 
     const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["7deg", "-7deg"]);
     const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-7deg", "7deg"]);
@@ -95,14 +95,19 @@ const PremiumStoreCard = ({ item, theme, activeTab, onClick, onPurchase, isProce
                 : 'border-[var(--nexus-border)] hover:border-[var(--nexus-accent)]/50'
                 }`}
         >
-            {/* Holographic Glint Line */}
+            {/* Subtle Tech Pattern Layer */}
+            <div className="absolute inset-0 opacity-[0.05] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(255,255,255,0.15) 1px, transparent 0)', backgroundSize: '24px 24px' }} />
+
+            {/* Premium Glow Aura */}
+            <div className={`absolute -inset-20 bg-[var(--nexus-accent)]/5 blur-[100px] opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none`} />
+
+            {/* Holographic Glint (Optimized) */}
             <motion.div
                 animate={{
-                    left: ["-100%", "200%"],
-                    top: ["-100%", "200%"]
+                    left: ["-150%", "150%"],
                 }}
-                transition={{ repeat: Infinity, duration: 4, ease: "linear", delay: Math.random() * 5 }}
-                className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent w-[200%] h-[200%] pointer-events-none skew-x-12 z-10"
+                transition={{ repeat: Infinity, duration: 3, ease: "linear", repeatDelay: 5 }}
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent w-full h-full pointer-events-none skew-x-12 z-10"
             />
 
             {/* Diagonal Tech Texture */}
@@ -123,8 +128,8 @@ const PremiumStoreCard = ({ item, theme, activeTab, onClick, onPurchase, isProce
             </div>
 
             {/* Main Interactive Preview Container */}
-            <div className="w-full h-48 border-b relative flex items-center justify-center overflow-hidden bg-black border-[var(--nexus-border)] group-hover:border-[var(--nexus-accent)] transition-colors duration-500">
-                <div className="absolute inset-0 opacity-50 bg-[radial-gradient(circle_at_center,#1e293b_0%,#000_100%)]" />
+            <div className="w-full h-52 border-b relative flex items-center justify-center overflow-hidden bg-[#050505] border-white/5 group-hover:border-[var(--nexus-accent)]/30 transition-colors duration-700">
+                <div className="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.05)_0%,#000_100%)]" />
 
                 <motion.div
                     style={{ translateZ: 50 }}
@@ -237,7 +242,7 @@ const PremiumStoreCard = ({ item, theme, activeTab, onClick, onPurchase, isProce
             </div>
 
             {/* Info Section */}
-            <div className={`p-5 flex flex-col flex-1 relative z-10 ${isLight ? 'bg-white' : 'bg-gradient-to-t from-[var(--nexus-panel)] to-transparent'}`} style={{ translateZ: 30 }}>
+            <div className={`p-6 flex flex-col flex-1 relative z-10 transition-colors duration-500 ${isLight ? 'bg-white' : 'bg-gradient-to-b from-transparent to-[#020403]/80 backdrop-blur-md'}`} style={{ translateZ: 30 }}>
                 <div className="flex justify-between items-start mb-2">
                     <h3 className={`font-black text-xl uppercase tracking-tighter italic transition-colors group-hover:text-[var(--nexus-accent)] ${isLight ? 'text-slate-900' : 'text-[var(--nexus-text)]'}`}>
                         {item.name}
@@ -245,11 +250,11 @@ const PremiumStoreCard = ({ item, theme, activeTab, onClick, onPurchase, isProce
                     <ArrowUpRight className={`w-5 h-5 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1 text-[var(--nexus-accent)]`} />
                 </div>
 
-                <p className={`text-xs mb-6 flex-1 line-clamp-2 ${isLight ? 'text-slate-500 font-medium' : 'text-[var(--nexus-text-muted)]'}`}>
+                <p className={`text-[11px] mb-8 flex-1 line-clamp-3 leading-relaxed tracking-wide ${isLight ? 'text-slate-500 font-medium' : 'text-slate-400 font-medium'}`}>
                     {item.desc}
                 </p>
 
-                <div className={`flex items-center justify-between mt-auto border-t pt-4 border-[var(--nexus-border)]`}>
+                <div className={`flex items-center justify-between mt-auto border-t pt-5 border-white/5 group-hover:border-[var(--nexus-accent)]/20 transition-colors`}>
                     <div className="flex flex-col">
                         <span className="text-[10px] uppercase tracking-widest text-[var(--nexus-text-muted)] font-bold">Standard Fee</span>
                         <span className={`font-mono font-black text-xl ${isLight ? 'text-slate-900' : 'text-[var(--nexus-text)] drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]'}`}>
@@ -448,31 +453,31 @@ const PremiumStorefront = ({
                         initial={{ left: "-100%" }}
                         animate={{ left: "100%" }}
                         transition={{ duration: 1, ease: "easeInOut" }}
-                        className="absolute bottom-0 h-[2px] w-[200px] bg-gradient-to-r from-transparent via-[var(--nexus-accent)] to-transparent blur-sm z-20 pointer-events-none hidden md:block"
-                        style={{ boxShadow: '0 0 20px var(--nexus-accent)' }}
+                        className="absolute bottom-0 h-[3px] w-[300px] bg-gradient-to-r from-transparent via-[var(--nexus-accent)] to-transparent blur-md z-20 pointer-events-none hidden md:block"
+                        style={{ boxShadow: `0 0 30px var(--nexus-accent-glow)` }}
                     />
                 </AnimatePresence>
 
                 {/* Sliding Tab Navigation */}
-                <div className={`flex gap-1 border-b overflow-x-auto scrollbar-hide perspective-1000 border-[var(--nexus-border)]`}>
+                <div className={`flex gap-6 border-b overflow-x-auto scrollbar-hide perspective-1000 border-white/5`}>
                     {STORE_CATEGORIES.map((category) => (
                         <button
                             key={category.id}
                             onClick={() => setActiveTab(category.id)}
-                            className={`group relative px-4 sm:px-8 py-4 sm:py-5 flex items-center gap-2 sm:gap-3 text-[10px] sm:text-sm font-black uppercase tracking-[0.1em] sm:tracking-[0.2em] transition-all duration-300 flex-shrink-0 ${activeTab === category.id
-                                ? 'text-[var(--nexus-accent)]'
-                                : (theme === 'light' ? 'text-slate-900/40 hover:text-slate-900' : 'text-[var(--nexus-text-muted)] hover:text-[var(--nexus-text)]')
+                            className={`group relative px-6 py-5 flex items-center gap-3 text-[11px] font-black uppercase tracking-[0.25em] transition-all duration-500 flex-shrink-0 ${activeTab === category.id
+                                ? 'text-white'
+                                : (theme === 'light' ? 'text-slate-900/40 hover:text-slate-900' : 'text-slate-500 hover:text-slate-300')
                                 }`}
                         >
                             {/* Kinetic Icon */}
-                            <div className="relative">
+                            <div className={`relative p-2 rounded-xl border transition-all duration-500 ${activeTab === category.id ? 'bg-[var(--nexus-accent)]/10 border-[var(--nexus-accent)]/40 shadow-[0_0_15px_rgba(16,185,129,0.1)]' : 'border-transparent group-hover:border-white/10'}`}>
                                 {category.icon(activeTab === category.id)}
                                 {activeTab === category.id && (
                                     <motion.div
                                         layoutId="icon_ping"
-                                        className="absolute -inset-1 rounded-full border border-[var(--nexus-accent)] opacity-20"
-                                        animate={{ scale: [1, 1.5], opacity: [0.2, 0] }}
-                                        transition={{ repeat: Infinity, duration: 2 }}
+                                        className="absolute -inset-1 rounded-full border border-[var(--nexus-accent)] opacity-30"
+                                        animate={{ scale: [1, 1.6], opacity: [0.3, 0] }}
+                                        transition={{ repeat: Infinity, duration: 2.5 }}
                                     />
                                 )}
                             </div>
@@ -483,9 +488,9 @@ const PremiumStorefront = ({
                             {activeTab === category.id && (
                                 <motion.div
                                     layoutId="activeStoreTab"
-                                    className={`absolute bottom-0 left-0 w-full h-[3px] z-10 bg-[var(--nexus-accent)] shadow-[0_0_20px_var(--nexus-accent-glow)]`}
+                                    className={`absolute bottom-0 left-0 w-full h-[4px] z-10 bg-gradient-to-r from-transparent via-[var(--nexus-accent)] to-transparent shadow-[0_0_20px_var(--nexus-accent-glow)]`}
                                 >
-                                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2 h-2 bg-white rounded-full blur-[1px] -translate-y-1/2" />
+                                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-4 h-[2px] bg-white rounded-full blur-[2px] -translate-y-1/2 shadow-[0_0_10px_#fff]" />
                                 </motion.div>
                             )}
 

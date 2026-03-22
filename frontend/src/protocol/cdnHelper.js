@@ -20,6 +20,11 @@ export const getOptimizedImage = (url, width = 400) => {
     return url.replace('/upload/', `/upload/w_${width},f_auto,q_auto/`);
   }
 
-  // 3. Fallback for local or unoptimized assets
+  // 3. Unsplash-specific optimization (auto=format for WebP/AVIF)
+  if (url.includes('images.unsplash.com') && !url.includes('auto=format')) {
+    return url + (url.includes('?') ? '&' : '?') + 'auto=format&q=80';
+  }
+
+  // 4. Fallback for local or unoptimized assets
   return url;
 };

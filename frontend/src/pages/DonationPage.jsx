@@ -74,6 +74,8 @@ const DonationPage = () => {
   // Tug-of-War State
   const [towEvent, setTowEvent] = useState(null);
   const [selectedSide, setSelectedSide] = useState(null);
+  
+  const [socketInstance, setSocketInstance] = useState(null); // TRACKS SOCKET FOR BACKGROUND PAYMENTS
 
   const quickEmotes = ['💀', '😂', '🔥', '🐐', '💯', 'W', 'L', '🤡', '👽', '👀', '💖'];
 
@@ -137,6 +139,7 @@ const DonationPage = () => {
 
   useEffect(() => {
     const socket = io(process.env.REACT_APP_API_URL || 'http://localhost:5001');
+    setSocketInstance(socket); // Exposed globally for checkout listener
     socket.emit('join-room', streamerId);
     socket.on('goal-update', (updatedGoal) => {
       setGoal(prev => ({ ...prev, ...updatedGoal }));
@@ -209,46 +212,64 @@ const DonationPage = () => {
 
   const handlePayment = async (metadata = {}) => {
     if (!window.Razorpay) {
-      toast.error("Error: Razorpay SDK failed to load. Please disable your adblocker or check your internet connection.");
+      toast.error("Error: Razorpay SDK failed to load. Please check your connection.");
       return;
     }
+    if (!socketInstance?.id) {
+      toast.error("System Error: Real-time connection not established yet.");
+      return;
+    }
+
     setIsProcessing(true);
     try {
-      const { data } = await axios.post('/api/payment/create-order', {
+      await axios.post('/api/payment/create-order', {
         streamerId,
         amount: Number(amount),
         donorName: donorName || 'Anonymous',
         message,
         sticker: selectedSticker,
+        clientId: socketInstance.id, // Routing background worker WebSocket
         ...metadata
       });
-      new window.Razorpay({
-        key: process.env.REACT_APP_RAZORPAY_KEY_ID || "rzp_test_SHrX3upgmJ6sGL",
-        amount: data.amount, currency: "INR", name: "DropPay Protocol", order_id: data.id,
-        handler: async (res) => {
-          try {
-            await axios.post('/api/payment/verify', {
-              ...res,
-              streamerId,
-              donorName: donorName || 'Anonymous',
-              message: message || `Dropped INR ${amount}`,
-              sticker: selectedSticker,
-              amount: Number(amount),
-              tugOfWarSide: selectedSide,
-              ...metadata
-            });
-            setIsSuccess(true);
-          } catch (err) {
-            console.error("Webhook Verification Error:", err);
-            toast.error(err.response?.data?.msg || "Payment was captured but verification failed. Streamer Not Found.");
-          } finally {
-            setIsProcessing(false);
-          }
-        }, modal: { ondismiss: () => setIsProcessing(false) }
-      }).open();
+
+      // We no longer instantiate Razorpay synchronously. 
+      // We wait for the asynchronous worker to generate the secure order via our socket.
+      socketInstance.once('payment-order-ready', (payload) => {
+        new window.Razorpay({
+          key: process.env.REACT_APP_RAZORPAY_KEY_ID || "rzp_test_SHrX3upgmJ6sGL",
+          amount: payload.order.amount, currency: "INR", name: "DropPay Protocol", order_id: payload.order.id,
+          handler: async (res) => {
+            try {
+              await axios.post('/api/payment/verify', {
+                ...res,
+                streamerId,
+                donorName: donorName || 'Anonymous',
+                message: message || `Dropped INR ${amount}`,
+                sticker: selectedSticker,
+                amount: Number(amount),
+                tugOfWarSide: selectedSide,
+                ...metadata
+              });
+              setIsSuccess(true);
+            } catch (err) {
+              console.error("Webhook Verification Error:", err);
+              toast.error(err.response?.data?.msg || "Payment was captured but verification failed.");
+            } finally {
+              setIsProcessing(false);
+            }
+          }, modal: { ondismiss: () => setIsProcessing(false) }
+        }).open();
+      });
+
+      // Listen for explicit Failures from the Dead Letter Queue worker
+      socketInstance.once('payment_failed', (payload) => {
+        toast.error(payload.msg || "Razorpay API timeout. Queue failed.");
+        setIsProcessing(false);
+      });
+
     } catch (err) {
       console.error("Payment Error:", err);
-      toast.error(err.response?.data?.msg || "Payment encountered an unexpected failure.");
+      toast.error(err.response?.data?.msg || "Payment encountered an unexpected background failure.");
       setIsProcessing(false);
     }
   };

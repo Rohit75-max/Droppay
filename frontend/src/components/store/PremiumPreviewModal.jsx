@@ -30,10 +30,10 @@ const PremiumPreviewModal = ({ isOpen, onClose, item, onUnlock, theme }) => {
                     animate={{ scale: 1, y: 0 }}
                     exit={{ scale: 0.9, y: 20 }}
                     onClick={(e) => e.stopPropagation()}
-                    className="relative w-full max-w-6xl h-[85vh] bg-[var(--nexus-panel)] border border-[var(--nexus-border)] flex flex-col md:flex-row overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.8)]"
+                    className="relative w-full max-w-6xl h-[85vh] bg-[#020403] border border-white/10 flex flex-col md:flex-row overflow-hidden shadow-[0_50px_100px_rgba(0,0,0,0.8)]"
                     style={{ clipPath: 'polygon(0 0, 98% 0, 100% 2%, 100% 100%, 2% 100%, 0 98%)' }}
                 >
-                    <button onClick={onClose} className={`absolute top-4 right-4 z-50 p-2 transition-colors border shadow-lg ${isLight ? 'bg-white/80 hover:bg-emerald-500 hover:text-white border-emerald-100 text-emerald-900' : 'bg-black/50 hover:bg-[var(--nexus-accent)] text-white border-[var(--nexus-border)]'}`}>
+                    <button onClick={onClose} className={`absolute top-6 right-6 z-50 p-2.5 transition-all duration-300 rounded-full border shadow-2xl group/close ${isLight ? 'bg-white/80 hover:bg-emerald-500 hover:text-white border-emerald-100 text-emerald-900' : 'bg-black/40 hover:bg-red-500/20 text-white/50 hover:text-red-400 border-white/5 hover:border-red-500/30 backdrop-blur-md'}`}>
                         <X className="w-6 h-6" />
                     </button>
 
@@ -215,7 +215,9 @@ const PremiumPreviewModal = ({ isOpen, onClose, item, onUnlock, theme }) => {
                         </div>
                     </div>
 
-                    <div className="w-full md:w-1/3 h-1/2 md:h-full p-5 sm:p-8 flex flex-col relative bg-[var(--nexus-panel)]">
+                    <div className="w-full md:w-1/3 h-1/2 md:h-full p-8 sm:p-10 flex flex-col relative bg-[#020403]/95 backdrop-blur-3xl">
+                        {/* Ambient Glow behind info */}
+                        <div className="absolute -top-20 -right-20 w-40 h-40 bg-[var(--nexus-accent)]/5 blur-[80px] rounded-full pointer-events-none" />
                         <div className="flex-1 overflow-y-auto pr-1 scrollbar-hide">
                             <div className="flex items-center gap-2 mb-4">
                                 <span className={`px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.2em] border flex items-center gap-1 ${isLight ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-600' : 'border-[var(--nexus-accent)] bg-[var(--nexus-accent)]/10 text-[var(--nexus-accent)]'}`}>
@@ -258,16 +260,19 @@ const PremiumPreviewModal = ({ isOpen, onClose, item, onUnlock, theme }) => {
                         </div>
 
                         {/* UNIVERSAL RESPONSIVE FOOTER */}
-                        <div className="mt-auto pt-4 border-t border-[var(--nexus-border)]">
-                            <div className="flex flex-row items-center justify-between mb-3 md:flex-col md:items-start md:gap-1 md:mb-5">
+                        <div className="mt-auto pt-8 border-t border-white/5">
+                            <div className="flex flex-row items-center justify-between mb-4 md:flex-col md:items-start md:gap-2 md:mb-8">
                                 <div className="flex flex-col">
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-[var(--nexus-text-muted)]">Market Price</span>
-                                    <span className="text-xl md:text-3xl font-black text-[var(--nexus-text)]">
-                                        {item.isOwned ? 'SECURED' : item.price}
-                                    </span>
+                                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500 mb-1">Acquisition Cost</span>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-2xl font-black text-[var(--nexus-accent)] italic">₹</span>
+                                        <span className="text-3xl md:text-5xl font-black text-white italic tracking-tighter">
+                                            {item.isOwned ? 'SECURED' : (parseInt(item.price.replace(/[^0-9]/g, '')) || 0).toLocaleString('en-IN')}
+                                        </span>
+                                    </div>
                                 </div>
-                                <div className="p-2 md:p-4 bg-emerald-500/10 rounded-xl md:rounded-2xl border border-emerald-500/20">
-                                    <Wallet className="w-5 h-5 md:w-6 md:h-6 text-emerald-500" />
+                                <div className="hidden md:flex p-4 bg-emerald-500/5 rounded-2xl border border-emerald-500/10 shadow-inner">
+                                    <Wallet className="w-8 h-8 text-emerald-500/40" />
                                 </div>
                             </div>
                             <button
@@ -275,10 +280,11 @@ const PremiumPreviewModal = ({ isOpen, onClose, item, onUnlock, theme }) => {
                                     onUnlock(item);
                                     onClose();
                                 }}
-                                className="w-full py-3.5 md:py-5 bg-[var(--nexus-accent)] hover:brightness-110 text-black font-black text-sm md:text-lg uppercase tracking-[0.2em] italic flex items-center justify-center gap-3 shadow-[0_0_30px_var(--nexus-accent)] transition-all active:scale-95"
+                                className="w-full py-5 md:py-6 bg-[var(--nexus-accent)] hover:brightness-110 text-black font-black text-sm md:text-xl uppercase tracking-[0.3em] italic flex items-center justify-center gap-4 shadow-[0_20px_40px_rgba(16,185,129,0.2)] transition-all active:scale-[0.98] group/buy"
                                 style={{ clipPath: 'polygon(5% 0, 100% 0, 95% 100%, 0 100%)' }}
                             >
-                                Acquire Asset <Zap className="w-4 h-4 md:w-5 md:h-5" />
+                                <span className="relative z-10">Initialize Acquisition</span>
+                                <Zap className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover/buy:animate-pulse" />
                             </button>
                         </div>
                     </div>

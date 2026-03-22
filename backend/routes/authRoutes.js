@@ -11,19 +11,20 @@ const {
     forgotPassword,
     resetPassword
 } = require('../controllers/authController');
+const { authLimiter } = require('../middleware/rateLimiter');
 
 // --- 1. Manual Auth Routes (SYNCED NAMES) ---
-router.post('/signup', signup);
+router.post('/signup', authLimiter, signup);
 
 // FIXED: Renamed from /verify-otp to /verify-email to match Frontend
-router.post('/verify-email', verifyEmail);
+router.post('/verify-email', authLimiter, verifyEmail);
 
-router.post('/login', login);
-router.post('/admin-login', adminLogin);
+router.post('/login', authLimiter, login);
+router.post('/admin-login', authLimiter, adminLogin);
 
 // Password Recovery Routes
-router.post('/forgot-password', forgotPassword);
-router.post('/reset-password', resetPassword);
+router.post('/forgot-password', authLimiter, forgotPassword);
+router.post('/reset-password', authLimiter, resetPassword);
 
 // --- 2. Google OAuth Routes ---
 router.get('/google', passport.authenticate('google', {

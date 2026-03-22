@@ -6,6 +6,7 @@ const { createClient } = require('redis');
 const { createAdapter } = require('@socket.io/redis-adapter');
 
 const { globalLimiter, strictLimiter } = require('./middleware/rateLimiter');
+const { startPaymentWorker } = require('./workers/paymentWorker');
 const connectDB = require('./config/db');
 const cors = require('cors');
 const cron = require('node-cron');
@@ -100,6 +101,8 @@ cron.schedule('0 0 * * *', () => {
 const PORT = process.env.PORT || 5001;
 
 setupSockets().then(() => {
+    startPaymentWorker(app.get('io'));
+    
     server.listen(PORT, () => {
         console.log(`🚀 System Green: Server on http://localhost:${PORT}`);
     });

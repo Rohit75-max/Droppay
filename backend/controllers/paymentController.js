@@ -2,6 +2,7 @@ const Razorpay = require('razorpay');
 const crypto = require('crypto');
 const User = require('../models/User');
 const Drop = require('../models/Drop');
+const paymentQueue = require('../queues/paymentQueue');
 const PlatformMetrics = require('../models/PlatformMetrics');
 const { invalidateProfileCache } = require('../middleware/profileCache');
 const TugOfWarEvent = require('../models/TugOfWarEvent');
@@ -30,16 +31,19 @@ exports.checkExpirations = async () => {
  */
 exports.createOrder = async (req, res) => {
     try {
-        const { amount } = req.body;
-        const options = {
-            amount: Math.round(Number(amount) * 100),
-            currency: "INR",
-            receipt: `rcpt_${Date.now()}`,
-        };
-        const order = await razorpay.orders.create(options);
-        res.status(200).json(order);
+        const { amount, clientId } = req.body;
+        if (!clientId) return res.status(400).json({ msg: "clientId required for background processing." });
+        
+        await paymentQueue.add('create-razorpay-order', { 
+            amount, clientId 
+        });
+
+        res.status(202).json({ 
+            msg: "Generating secure order...", 
+            status: "processing" 
+        });
     } catch (error) {
-        res.status(500).json({ msg: "System Error: Order generation failed. Secure uplink unstable." });
+        res.status(500).json({ msg: "System Error: Order queueing failed." });
     }
 };
 
