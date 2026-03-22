@@ -66,7 +66,7 @@ const FeedbackStation = ({
       setFeedbackText?.("");
       setSelectedImage(null);
     } catch (err) {
-      toast.error("Uplink Failure: Could not sync with Hub.");
+      toast.error("Connection Error: Could not submit feedback.");
     } finally {
       setIsSubmittingFeedback?.(false);
     }
@@ -74,10 +74,10 @@ const FeedbackStation = ({
 
   const SIGNAL_TYPES = [
     { id: 'bug', label: 'Bug Report', icon: ShieldAlert, color: 'rose' },
-    { id: 'feature', label: 'Feature Node', icon: Rocket, color: 'indigo' },
+    { id: 'feature', label: 'Feature Request', icon: Rocket, color: 'indigo' },
     { id: 'ui', label: 'Visual Polish', icon: Zap, color: 'amber' },
     { id: 'security', label: 'Security Alert', icon: ShieldCheck, color: 'emerald' },
-    { id: 'general', label: 'Global Intel', icon: Globe, color: 'slate' }
+    { id: 'general', label: 'General Feedback', icon: Globe, color: 'slate' }
   ];
 
   const PRIORITIES = [
@@ -107,8 +107,8 @@ const FeedbackStation = ({
               <span className="text-[7px] font-black uppercase tracking-widest text-[var(--nexus-accent)]">DropPay Sync</span>
             </div>
           </div>
-          <h2 className="text-4xl font-black uppercase italic tracking-tighter text-[var(--nexus-text)] mb-4">Transmission Successful</h2>
-          <p className="text-[var(--nexus-text-muted)] text-sm max-w-sm mx-auto leading-relaxed italic">Your signal has been integrated into the central engineering hub. Our technicians will analyze the telemetry shortly.</p>
+          <h2 className="text-4xl font-black uppercase italic tracking-tighter text-[var(--nexus-text)] mb-4">Feedback Received</h2>
+          <p className="text-[var(--nexus-text-muted)] text-sm max-w-sm mx-auto leading-relaxed italic">Your feedback has been received. Our team will review it shortly. Thank you for helping us improve!</p>
         </motion.div>
 
         <motion.button
@@ -118,7 +118,7 @@ const FeedbackStation = ({
           onClick={() => setIsSubmitted(false)}
           className="px-10 py-4 bg-[var(--nexus-accent)] text-black rounded-2xl font-black uppercase text-[10px] tracking-widest hover:scale-105 transition-all shadow-lg shadow-[var(--nexus-accent)]/20"
         >
-          Establish New Link
+          Submit More Feedback
         </motion.button>
       </motion.div>
     );
@@ -142,13 +142,13 @@ const FeedbackStation = ({
             </div>
             <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-3">
               <div className="flex items-center gap-2">
-                <h3 className="text-2xl md:text-3xl font-black italic tracking-tighter text-[var(--nexus-text)] leading-none">DropPay Feedback</h3>
+                <h3 className="text-2xl md:text-3xl font-black italic tracking-tighter text-[var(--nexus-text)] leading-none">Feedback & Support</h3>
                 <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-[var(--nexus-accent)]/10 border border-[var(--nexus-accent)]/20">
                   <div className="w-1.5 h-1.5 rounded-full bg-[var(--nexus-accent)] animate-pulse shadow-[0_0_8px_var(--nexus-accent)]" />
                   <span className="text-[7px] md:text-[8px] font-black uppercase tracking-[0.2em] text-[var(--nexus-accent)] hidden sm:block">Active</span>
                 </div>
               </div>
-              <p className="text-[7px] md:text-[9px] font-black uppercase tracking-[0.3em] text-[var(--nexus-text-muted)] opacity-30 md:mt-1 border-l-0 md:border-l md:pl-3 border-[var(--nexus-border)]/50">Protocol Handshake v2.5</p>
+              <p className="text-[7px] md:text-[9px] font-black uppercase tracking-[0.3em] text-[var(--nexus-text-muted)] opacity-30 md:mt-1 border-l-0 md:border-l md:pl-3 border-[var(--nexus-border)]/50">Direct Feedback v2.5</p>
             </div>
           </div>
         </div>
@@ -158,7 +158,7 @@ const FeedbackStation = ({
           <div className="lg:col-span-4 space-y-6 border-b lg:border-b-0 lg:border-r border-[var(--nexus-border)]/50 pb-6 lg:pb-0 lg:pr-8">
             {/* COMPACT PROTOCOL GRID */}
             <div className="space-y-4">
-              <label className="text-[10px] font-black uppercase text-[var(--nexus-accent)] tracking-[0.3em] ml-1 opacity-70">Signal Origin</label>
+              <label className="text-[10px] font-black uppercase text-[var(--nexus-accent)] tracking-[0.3em] ml-1 opacity-70">Category</label>
               <div className="grid grid-cols-2 gap-2">
                 {SIGNAL_TYPES.map((type) => {
                   const Icon = type.icon;
@@ -187,7 +187,7 @@ const FeedbackStation = ({
 
             {/* TIGHT URGENCY MATRIX */}
             <div className="space-y-4">
-              <label className="text-[10px] font-black uppercase text-[var(--nexus-accent)] tracking-[0.3em] ml-1 opacity-70">Threat Level</label>
+              <label className="text-[10px] font-black uppercase text-[var(--nexus-accent)] tracking-[0.3em] ml-1 opacity-70">Priority Level</label>
               <div className="grid grid-cols-2 gap-2">
                 {PRIORITIES.map((p) => {
                   const isActive = priority === p.id;
@@ -212,7 +212,7 @@ const FeedbackStation = ({
             {/* MINI RATING */}
             <div className="space-y-4">
               <div className="flex justify-between items-center px-1">
-                <label className="text-[10px] font-black uppercase text-[var(--nexus-accent)] tracking-[0.3em] opacity-70">Signal Density</label>
+                <label className="text-[10px] font-black uppercase text-[var(--nexus-accent)] tracking-[0.3em] opacity-70">Rating</label>
                 <span className="text-[9px] font-black italic text-amber-500 tracking-widest">{rating}.0 / 5.0</span>
               </div>
               <div className="flex items-center justify-between p-3.5 bg-white/10 rounded-2xl border border-[var(--nexus-border)]/50 shadow-inner relative overflow-hidden group/rating">
@@ -246,7 +246,7 @@ const FeedbackStation = ({
             <div className="flex-1 space-y-3">
               <div className="flex items-center justify-between px-1">
                 <div className="flex items-center gap-3">
-                  <label className="text-[10px] font-black uppercase text-[var(--nexus-text-muted)] tracking-widest">Protocol Transmission</label>
+                  <label className="text-[10px] font-black uppercase text-[var(--nexus-text-muted)] tracking-widest">Your Message</label>
                   <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-emerald-500/5 border border-emerald-500/10">
                     <span className="text-[6px] font-black uppercase tracking-tighter text-emerald-500">Security v4 Sync</span>
                   </div>
@@ -294,7 +294,7 @@ const FeedbackStation = ({
                   <textarea
                     value={feedbackText || ""}
                     onChange={(e) => setFeedbackText?.(e.target.value)}
-                    placeholder="INITIATE TECHNICAL TRANSMISSION: Describe observations, nodes, or structural telemetry..."
+                    placeholder="HOW CAN WE IMPROVE? Describe your feedback or any issues you've encountered..."
                     className="relative w-full h-full p-8 outline-none resize-none text-[15px] font-medium leading-relaxed bg-white/5 text-[var(--nexus-text)] placeholder:text-[var(--nexus-text-muted)]/20 placeholder:font-black placeholder:uppercase placeholder:tracking-[0.1em] focus:bg-white/10 transition-all scrollbar-hide italic shadow-inner"
                   ></textarea>
 
@@ -326,16 +326,16 @@ const FeedbackStation = ({
                 <div className="absolute inset-0 opacity-0 group-hover/submit:opacity-20 bg-[radial-gradient(circle_at_center,white,transparent_70%)] transition-opacity" />
 
                 {isSubmittingFeedback ? (
-                  <><Loader2 className="w-5 h-5 animate-spin" /> Uplinking Telemetry...</>
+                  <><Loader2 className="w-5 h-5 animate-spin" /> Sending Feedback...</>
                 ) : (
-                  <><Send className="w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" /> Engage Protocol Transmission</>
+                  <><Send className="w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" /> Send Feedback</>
                 )}
               </motion.button>
 
               {!isSubmittingFeedback && feedbackText.length < 10 && (
                 <p className="text-center mt-4 text-[8px] font-black uppercase tracking-[0.5em] text-rose-500/50 flex items-center justify-center gap-2">
                   <span className="w-1 h-1 rounded-full bg-rose-500/50 animate-pulse" />
-                  Link Locked: Insufficient Data Density
+                  Message too short
                   <span className="w-1 h-1 rounded-full bg-rose-500/50 animate-pulse" />
                 </p>
               )}

@@ -157,11 +157,11 @@ const AlertPreview = React.memo(({
           ${isModern ? 'flex-row border-2 backdrop-blur-3xl rounded-[2rem] sm:rounded-[2.5rem] p-5 sm:p-6 sm:px-8 items-center gap-4 sm:gap-6 w-full max-w-none' : 'flex-col justify-center items-center max-w-md mx-auto w-full'}
           ${isComic ? 'rounded-none rotate-[-1deg] p-6 text-center mt-4' : ''}
           ${isPlayful ? 'rounded-[2.5rem] p-6 text-center mt-4' : ''}
-          ${isPixel ? 'rounded-none px-4 py-6 text-center mt-4' : ''}
+          ${isPixel ? 'rounded-none p-6 text-left mt-4' : ''}
           ${isKawaii ? 'rounded-[2rem] p-0 mt-4 overflow-visible' : ''}
           ${isCyberHud ? 'rounded-none p-6 text-center mt-4 overflow-hidden relative' : ''}
-          ${isBgmi ? 'rounded-lg p-6 text-center mt-4' : ''}
-          ${isGta ? 'rounded-xl p-6 text-center mt-4' : ''}
+          ${isBgmi ? 'rounded-lg p-6 text-left mt-4' : ''}
+          ${isGta ? 'rounded-xl px-6 pb-6 pt-14 text-left mt-4' : ''}
           ${isCoc ? 'rounded-xl p-6 text-center mt-4' : ''}
           ${isAvatar ? 'rounded-[3rem] p-6 text-center mt-4' : ''}
           ${isGodzilla ? 'rounded-none p-6 text-center mt-4 border-x-0' : ''}
@@ -315,13 +315,13 @@ const AlertPreview = React.memo(({
         <motion.div
           animate={isGodzilla ? { x: [-2, 2, -2, 2, 0], y: [-1, 1, -1, 1, 0] } : {}}
           transition={isGodzilla ? { repeat: Infinity, duration: 1.5, ease: "linear" } : {}}
-          className={`flex-1 min-w-0 z-10 w-full ${(!isModern && !isCyberHud && !isBgmi && !isGodzilla && !isCoc && !isAvatar) ? 'flex flex-col items-center justify-center text-center' : ''} ${isKawaii ? 'p-6 pt-2 pb-10' : ''} ${isGta ? 'mt-6' : ''} ${isCoc || isAvatar || isGodzilla ? 'text-center' : ''}`}
+          className={`flex-1 min-w-0 z-10 w-full ${(!isModern && !isCyberHud && !isBgmi && !isPixel && !isGta && !isGodzilla && !isCoc && !isAvatar) ? 'flex flex-col items-center justify-center text-center' : 'text-left'} ${isKawaii ? 'p-6 pt-2 pb-10' : ''} ${isCoc || isAvatar || isGodzilla ? 'text-center flex flex-col items-center' : ''}`}
         >
 
           {isModern && (
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-1 w-full gap-2">
               <h4 className={`text-[8px] sm:text-[10px] font-black uppercase tracking-[0.2em] ${s.text}`}>
-                {variant === 'royal' ? 'Legendary Transmission' : 'New Transmission'}
+                {variant === 'royal' ? 'Legendary Alert' : 'New Alert'}
               </h4>
               {/* Move badge to absolute right if needed, or rely on justify-between above - going with absolute for true corner positioning as requested */}
             </div>
@@ -329,7 +329,7 @@ const AlertPreview = React.memo(({
 
           {isCyberHud && (
             <div className="flex justify-between items-center w-full mb-3 border-b-2 border-[#39ff14]/30 pb-2 relative z-40">
-              <span className={`text-[10px] sm:text-xs ${s.text} flex items-center gap-2`}><ShieldAlert className="w-3 h-3" /> INCOMING SECURE TRANSFER</span>
+              <span className={`text-[10px] sm:text-xs ${s.text} flex items-center gap-2`}><ShieldAlert className="w-3 h-3" /> SECURE PAYMENT RECEIVED</span>
               <span className={`text-lg sm:text-xl font-black ${s.text} bg-[#39ff14]/10 px-2 py-0.5`}>₹{amount.toLocaleString('en-IN')}</span>
             </div>
           )}
@@ -363,20 +363,16 @@ const AlertPreview = React.memo(({
           )}
 
           {isGta && (
-            <div className={`mt-2 text-4xl sm:text-6xl font-black italic text-center ${s.text} ${gtaTextShadow}`}>
-              RESPECT +
+            <div className="flex justify-between items-center w-full mb-3 border-b-2 border-[#FFD700]/50 pb-2 relative z-40">
+              <span className={`text-[10px] sm:text-xs ${s.text} flex items-center gap-2 bg-[#FFD700]/20 px-2 py-1 rounded`}><Star className="w-3 h-3 fill-[#FFD700]" /> MISSION PASSED</span>
+              <span className={`text-lg sm:text-xl font-black ${s.text} ${gtaTextShadow}`}>RESPECT +{amount.toLocaleString('en-IN')}</span>
             </div>
           )}
 
           {isPixel && (
-            <div className="w-full flex flex-col items-center">
-              <div className="absolute top-4 left-4 flex gap-1"><Heart className="w-5 h-5 sm:w-6 sm:h-6 fill-red-500 text-black stroke-[3px]" /><Heart className="w-5 h-5 sm:w-6 sm:h-6 fill-red-500 text-black stroke-[3px]" /><Heart className="w-5 h-5 sm:w-6 sm:h-6 fill-red-500 text-black stroke-[3px]" /></div>
-              <motion.span animate={{ y: [0, -6, 0] }} transition={{ repeat: Infinity, duration: 0.6, ease: "steps(2)" }} className={`text-xl sm:text-2xl font-black ${s.text} text-[#FFDE00] tracking-widest ${pixelTextShadow}`}>NEW DONATION!</motion.span>
-              <div className={`relative flex items-center gap-3 mt-2 sm:mt-4 mb-2 text-4xl sm:text-5xl font-black ${s.text} ${pixelTextShadow}`}>
-                <motion.span animate={{ rotateY: [0, 360] }} transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }} style={{ display: 'inline-block', perspective: 1000 }}>{s.accentIcon}</motion.span>
-                {amount.toLocaleString('en-IN')}
-                <motion.div initial={{ opacity: 0, y: 0 }} animate={{ opacity: [0, 1, 0], y: -30 }} transition={{ repeat: Infinity, duration: 2, delay: 0.5 }} className="absolute -right-12 -top-4 text-sm sm:text-xl text-green-400">+XP</motion.div>
-              </div>
+            <div className="flex justify-between items-center w-full mb-3 border-b-[3px] border-black pb-2 relative z-40 bg-white/10 px-2 py-1">
+              <span className={`text-[10px] sm:text-xs ${s.text} flex items-center gap-1.5 bg-[#FFDE00] text-black px-2 py-1 border-2 border-black`}><Heart className="w-3 h-3 fill-red-500 text-black stroke-[2px]" /> LVL UP+</span>
+              <span className={`text-lg sm:text-xl font-black ${s.text} tracking-widest ${pixelTextShadow}`}>₹{amount.toLocaleString('en-IN')}</span>
             </div>
           )}
 
@@ -409,11 +405,7 @@ const AlertPreview = React.memo(({
             </span>
           )}
 
-          {isGta && (
-            <span className={`text-lg sm:text-xl font-black italic uppercase tracking-tighter block mb-1 ${s.text} ${gtaTextShadow}`}>
-              SENT ₹{amount.toLocaleString('en-IN')}
-            </span>
-          )}
+
 
           <p className={`line-clamp-2 mt-1 z-10 relative
             ${isModern ? `text-[10px] italic sm:text-xs font-medium opacity-70 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}` : ''}
@@ -428,11 +420,11 @@ const AlertPreview = React.memo(({
             ${isAvatar ? `text-xs sm:text-sm mt-1 sm:mt-2 text-[#22D3EE] italic opacity-90` : ''}
             ${isGodzilla ? `text-[10px] sm:text-sm mt-1 sm:mt-2 font-bold text-white italic bg-[#0EA5E9]/10 px-3 py-1 border-l-4 border-[#0EA5E9]` : ''}
           `}>
-            "{isCyberHud ? `> DECRYPTING_SIGNAL: ${message || "Support deployed."}` : (isBgmi ? `COMMS: ${message || "Support inbound."}` : (message || "Deploying support to the network..."))}"
+            "{isCyberHud ? `> NOTIFICATION: ${message || "Donation received."}` : (isBgmi ? `COMMS: ${message || "Donation received."}` : (message || "Sending donation..."))}"
           </p>
 
           {isPixel && (
-            <div className="w-[80%] h-3 sm:h-4 bg-black border-2 border-white mt-2 sm:mt-4 p-[2px] z-10 shadow-lg mx-auto">
+            <div className="w-full h-3 sm:h-4 bg-black border-2 border-white mt-3 p-[2px] z-10 shadow-lg">
               <motion.div initial={{ width: "0%" }} animate={{ width: "100%" }} transition={{ duration: 1.5, ease: "circOut" }} className="h-full bg-[#FFDE00]" />
             </div>
           )}

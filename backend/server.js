@@ -62,8 +62,8 @@ const compression = require('compression');
 app.use(compression({ threshold: 1024 }));
 // ────────────────────────────────────────────────────────────────────────────
 
-app.use(express.json()); // CRITICAL: Enables parsing of JSON request bodies
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' })); // CRITICAL: Enables parsing of JSON request bodies up to 10MB for base64 images
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use(cookieParser());
 app.use('/uploads', express.static('uploads'));
 

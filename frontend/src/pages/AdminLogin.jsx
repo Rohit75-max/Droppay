@@ -8,8 +8,10 @@ import {
     TrendingUp, Globe
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useTheme } from '../context/ThemeContext';
-import ThemeToggle from '../components/ThemeToggle';
+
+
+
+
 
 // ─── Floating Orb ────────────────────────────────────────────
 const Orb = ({ size, x, y, duration, color, delay }) => (
@@ -22,19 +24,19 @@ const Orb = ({ size, x, y, duration, color, delay }) => (
 );
 
 // ─── Animated Stat Card ───────────────────────────────────────
-const StatCard = ({ icon: Icon, label, value, color, delay }) => (
+const StatCard = ({ icon: Icon, label, value, color, delay, isDark }) => (
     <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-white/[0.06] border border-white/10 backdrop-blur-sm"
+        className={`flex items-center gap-3 px-4 py-3 rounded-2xl border backdrop-blur-sm ${isDark ? 'bg-white/[0.06] border-white/10' : 'bg-slate-900/[0.04] border-slate-900/10'}`}
     >
         <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${color}`}>
             <Icon className="w-4 h-4" />
         </div>
         <div>
-            <p className="text-[10px] text-white/40 uppercase tracking-widest font-bold">{label}</p>
-            <p className="text-sm font-black text-white leading-none">{value}</p>
+            <p className={`text-[10px] uppercase tracking-widest font-bold ${isDark ? 'text-white/40' : 'text-slate-500'}`}>{label}</p>
+            <p className={`text-sm font-black leading-none ${isDark ? 'text-white' : 'text-slate-900'}`}>{value}</p>
         </div>
     </motion.div>
 );
@@ -70,18 +72,12 @@ const PremiumInput = ({ icon: Icon, label, type, value, onChange, onBlur, disabl
     const [focused, setFocused] = useState(false);
     return (
         <div className="space-y-2">
-            <label className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em] transition-colors ${focused ? 'text-emerald-500' : isDark ? 'text-white/40' : 'text-slate-400'}`}>
+            <label className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em] transition-colors ${focused ? 'text-[#10B981]' : isDark ? 'text-white/40' : 'text-slate-400'}`}>
                 <Icon className="w-3 h-3" /> {label}
             </label>
             <div className="relative group">
-                <motion.div
-                    className="absolute -inset-px rounded-2xl bg-gradient-to-r from-emerald-400 via-cyan-400 to-emerald-400 opacity-0 pointer-events-none"
-                    animate={{ opacity: focused ? 0.6 : 0, backgroundPosition: focused ? ['0% 50%', '100% 50%', '0% 50%'] : '0% 50%' }}
-                    transition={{ opacity: { duration: 0.2 }, backgroundPosition: { duration: 3, repeat: Infinity } }}
-                    style={{ backgroundSize: '200% 200%' }}
-                />
                 <div className="relative">
-                    <Icon className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors duration-200 ${focused ? 'text-emerald-500' : isDark ? 'text-white/30' : 'text-slate-300'}`} />
+                    <Icon className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors duration-200 ${focused ? 'text-[#10B981]' : isDark ? 'text-white/30' : 'text-slate-300'}`} />
                     <input
                         type={type}
                         value={value}
@@ -90,9 +86,9 @@ const PremiumInput = ({ icon: Icon, label, type, value, onChange, onBlur, disabl
                         onFocus={() => setFocused(true)}
                         disabled={disabled}
                         placeholder={placeholder}
-                        className={`w-full rounded-2xl py-3.5 pl-12 pr-12 text-sm focus:outline-none focus:border-transparent focus:ring-0 transition-all disabled:opacity-50 disabled:cursor-not-allowed ${isDark
-                                ? 'bg-white/[0.05] border border-white/10 text-white placeholder:text-white/20'
-                                : 'bg-slate-50 border border-slate-200 text-slate-800 placeholder:text-slate-300'
+                        className={`w-full rounded-2xl py-3.5 pl-12 pr-12 text-sm focus:outline-none focus:ring-0 transition-all disabled:opacity-50 disabled:cursor-not-allowed ${isDark
+                                ? `bg-white/[0.05] border ${focused ? 'border-[#10B981]' : 'border-white/10'} text-white placeholder:text-white/20`
+                                : `bg-slate-50 border ${focused ? 'border-[#10B981]' : 'border-slate-200'} text-slate-800 placeholder:text-slate-300`
                             }`}
                     />
                     {rightEl && <div className="absolute right-4 top-1/2 -translate-y-1/2">{rightEl}</div>}
@@ -107,7 +103,7 @@ const PremiumInput = ({ icon: Icon, label, type, value, onChange, onBlur, disabl
 // ─────────────────────────────────────────────────────────────
 const AdminLogin = () => {
     const navigate = useNavigate();
-    const { theme } = useTheme();
+    const theme = 'dark';
     const isDark = theme === 'dark';
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -147,135 +143,179 @@ const AdminLogin = () => {
     };
 
     return (
-        <div className={`min-h-screen flex items-center justify-center p-4 sm:p-6 font-sans overflow-hidden transition-colors duration-500 ${isDark ? 'bg-[#030a06]' : 'bg-slate-50'}`}>
+        <div className={`relative min-h-screen w-full flex flex-col lg:flex-row font-sans overflow-hidden transition-colors duration-500 ${isDark ? 'bg-[#030a06]' : 'bg-slate-50'}`}>
 
-            {/* Soft background blobs */}
-            <div className="fixed inset-0 pointer-events-none overflow-hidden">
-                <div className={`absolute top-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full blur-[120px] ${isDark ? 'bg-emerald-900/30' : 'bg-emerald-100/60'}`} />
-                <div className={`absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] rounded-full blur-[100px] ${isDark ? 'bg-cyan-900/20' : 'bg-cyan-100/50'}`} />
-            </div>
+            {/* FULL IMMERSIVE BACKGROUND */}
+            <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+                {isDark ? (
+                    <>
+                        <motion.div animate={{ scale: [1, 1.1, 1], rotate: [0, 10, 0] }} transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }} className="absolute top-[-20%] right-[-10%] w-[550px] h-[550px] rounded-full bg-emerald-900/40 blur-[120px]" />
+                        <motion.div animate={{ scale: [1, 1.05, 1], rotate: [0, -5, 0] }} transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }} className="absolute bottom-[-20%] left-[-10%] w-[450px] h-[450px] rounded-full bg-cyan-900/30 blur-[100px]" />
+                    </>
+                ) : (
+                    <>
+                        <motion.div animate={{ scale: [1, 1.1, 1], rotate: [0, 10, 0] }} transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }} className="absolute top-[-20%] right-[-10%] w-[550px] h-[550px] rounded-full bg-emerald-100/60 blur-[120px]" />
+                        <motion.div animate={{ scale: [1, 1.05, 1], rotate: [0, -5, 0] }} transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }} className="absolute bottom-[-20%] left-[-10%] w-[450px] h-[450px] rounded-full bg-cyan-100/50 blur-[100px]" />
+                    </>
+                )}
 
-            {/* ── MAIN SHELL ─────────────────────────────────── */}
-            <motion.div
-                initial={{ opacity: 0, y: 32, scale: 0.96 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-                className={`relative w-full max-w-[960px] rounded-[2.5rem] overflow-hidden flex flex-col lg:flex-row border ${isDark ? 'border-white/10 bg-[#08100c]' : 'border-white/80 bg-white'}`}
-                style={{ boxShadow: isDark ? '0 30px 80px -20px rgba(0,0,0,0.6)' : '0 30px 80px -20px rgba(0,0,0,0.12), 0 0 0 1px rgba(255,255,255,0.8)' }}
-            >
-                {/* ── LEFT — Dark emerald branding panel ── */}
-                <div className="relative lg:w-[380px] shrink-0 bg-[#061a12] overflow-hidden flex flex-col justify-between p-5 sm:p-6 lg:p-8 min-h-[260px] lg:min-h-0">
+                {/* Global Immersive Elements */}
+                {isDark && (
+                    <div className="absolute inset-0">
+                        {/* Holographic Moving Gradients */}
+                        <Orb size={500} x="10%" y="-10%" color="rgba(16,185,129,0.15)" duration={9} delay={0} />
+                        <Orb size={350} x="70%" y="50%" color="rgba(6,182,212,0.12)" duration={14} delay={2} />
+                        <Orb size={300} x="20%" y="80%" color="rgba(244,114,182,0.1)" duration={11} delay={1} />
 
-                    {/* Floating orbs */}
-                    <Orb size={260} x="-60px" y="-60px" color="rgba(16,185,129,0.22)" duration={7} delay={0} />
-                    <Orb size={180} x="60%" y="55%" color="rgba(6,182,212,0.18)" duration={9} delay={2} />
-                    <Orb size={120} x="10%" y="70%" color="rgba(129,140,248,0.14)" duration={6} delay={1} />
+                        {/* Dynamic Cyber Grid */}
+                        <motion.div 
+                            className="absolute inset-0 pointer-events-none opacity-[0.05]"
+                            style={{ backgroundImage: 'linear-gradient(to right, #10B981 1px, transparent 1px), linear-gradient(to bottom, #10B981 1px, transparent 1px)', backgroundSize: '40px 40px' }}
+                            animate={{ backgroundPosition: ['0px 0px', '40px 40px'] }}
+                            transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
+                        />
 
-                    {/* Animated dot grid */}
-                    <div className="absolute inset-0 pointer-events-none opacity-20"
-                        style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.35) 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
+                        {/* Rotating Geometric Data Rings */}
+                        <motion.div 
+                            className="absolute top-[15%] right-[5%] w-[600px] h-[600px] rounded-full border border-[#10B981]/15 border-dashed pointer-events-none"
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 45, repeat: Infinity, ease: 'linear' }}
+                        />
+                        <motion.div 
+                            className="absolute top-[25%] left-[5%] w-[350px] h-[350px] rounded-full border border-[#06b6d4]/15 pointer-events-none"
+                            animate={{ rotate: -360 }}
+                            transition={{ duration: 30, repeat: Infinity, ease: 'linear' }}
+                        />
 
-                    {/* Scan line sweep */}
-                    <motion.div
-                        className="absolute left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-emerald-400/50 to-transparent pointer-events-none"
-                        animate={{ top: ['-2%', '102%'] }}
-                        transition={{ duration: 5, repeat: Infinity, ease: 'linear', repeatDelay: 2 }}
-                    />
-
-                    {/* Brand */}
-                    <div className="relative z-10">
-                        {/* Back button — inside panel, no fixed overlay */}
-                        <motion.div initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}
-                            className="mb-4">
-                            <Link to="/" className="group inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-white/10 bg-white/[0.06] hover:bg-white/10 text-white/50 hover:text-white transition-all text-[9px] font-black uppercase tracking-widest">
-                                <ArrowLeft className="w-3 h-3 group-hover:-translate-x-0.5 transition-transform" />
-                                Back
-                            </Link>
-                        </motion.div>
-                        <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
-                            className="flex items-center gap-3 mb-5">
-                            <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center">
-                                <ShieldAlert className="w-5 h-5 text-emerald-400" />
-                            </div>
-                            <div>
-                                <span className="text-white font-black text-xl italic tracking-tight">Drop<span className="text-emerald-400">Pay</span></span>
-                                <p className="text-white/30 text-[9px] uppercase tracking-[0.25em] font-bold">Admin Console</p>
-                            </div>
-                        </motion.div>
-
-                        <motion.h2 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
-                            className="text-3xl lg:text-4xl font-black italic text-white leading-[1] tracking-tighter mb-2">
-                            Zero-Trust.<br />
-                            <span className="text-transparent bg-clip-text"
-                                style={{ backgroundImage: 'linear-gradient(135deg, #10B981, #06b6d4, #818cf8)', WebkitBackgroundClip: 'text' }}>
-                                Full Control.
-                            </span><br />
-                            Always.
-                        </motion.h2>
-
-                        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.65 }}
-                            className="text-white/40 text-xs font-medium leading-relaxed max-w-xs mb-4">
-                            Every access attempt is encrypted, fingerprinted, and permanently logged. No exceptions.
-                        </motion.p>
-
-                        {/* System health stats */}
-                        <div className="grid grid-cols-2 gap-2 mb-3">
-                            <StatCard icon={Shield} label="Threat Level" value="GREEN" color="bg-emerald-500/20 text-emerald-400" delay={0.7} />
-                            <StatCard icon={Activity} label="Auth Latency" value="18ms" color="bg-cyan-500/20 text-cyan-400" delay={0.8} />
-                            <StatCard icon={Globe} label="Encryption" value="AES-256" color="bg-indigo-500/20 text-indigo-400" delay={0.9} />
-                            <StatCard icon={TrendingUp} label="Sessions Today" value="1,204" color="bg-amber-500/20 text-amber-400" delay={1.0} />
+                        {/* Active Data Streams */}
+                        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                            {[...Array(10)].map((_, i) => (
+                                <motion.div
+                                    key={i}
+                                    className="absolute w-[1px] h-64 bg-gradient-to-b from-transparent via-[#10B981]/50 to-transparent"
+                                    style={{ left: `${(i + 1) * 10}%` }}
+                                    animate={{ top: ['-20%', '120%'] }}
+                                    transition={{ duration: 3 + (i % 3), repeat: Infinity, ease: 'linear', delay: i * 0.5 }}
+                                />
+                            ))}
                         </div>
 
-                        {/* Live access log */}
-                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.05 }}
-                            className="rounded-xl bg-white/[0.04] border border-white/8 p-3 space-y-1.5">
-                            <p className="text-[9px] font-black uppercase tracking-widest text-white/30 mb-2 flex items-center gap-2">
-                                <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse inline-block" />
-                                Live Access Log
-                            </p>
-                            {[
-                                { time: '14:16:02', msg: '> Auth gateway: node sync active', color: 'text-emerald-400/70' },
-                                { time: '14:15:58', msg: '> Session encrypted: TLS 1.3', color: 'text-cyan-400/60' },
-                                { time: '14:15:41', msg: '> MFA challenge issued', color: 'text-amber-400/60' },
-                                { time: '14:15:30', msg: '> IP flagged: 0 anomalies', color: 'text-white/30' },
-                            ].map(({ time, msg, color }, i) => (
-                                <motion.div key={i} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: 1.1 + i * 0.12 }}
-                                    className="flex items-start gap-2">
-                                    <span className="text-[8px] text-white/20 font-mono mt-0.5 shrink-0">{time}</span>
-                                    <span className={`text-[9px] font-mono ${color}`}>{msg}</span>
-                                </motion.div>
-                            ))}
-                        </motion.div>
+                        {/* Scan line sweep */}
+                        <motion.div
+                            className="absolute left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-400/50 to-transparent pointer-events-none blur-[1px]"
+                            animate={{ top: ['-5%', '105%'] }}
+                            transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', repeatDelay: 1 }}
+                        />
+                    </div>
+                )}
+            </div>
+
+            {/* ── LEFT — Holographic Branding Pillar ── */}
+            <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                className="relative flex-1 lg:flex-[1.2] flex flex-col justify-center px-6 py-12 sm:px-12 sm:py-16 mx-auto lg:p-24 min-h-[50vh] lg:min-h-screen z-10 max-w-2xl lg:max-w-none"
+            >
+                {/* Brand */}
+                <div className="relative z-20">
+                    {/* Back button */}
+                    <motion.div initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}
+                        className="mb-4">
+                        <Link to="/" className={`group inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all text-[9px] font-black uppercase tracking-widest ${isDark ? 'border-white/10 bg-white/[0.06] hover:bg-white/10 text-white/50 hover:text-white' : 'border-slate-900/10 bg-slate-900/[0.04] hover:bg-slate-900/[0.08] text-slate-500 hover:text-slate-900'}`}>
+                            <ArrowLeft className="w-3 h-3 group-hover:-translate-x-0.5 transition-transform" />
+                            Back
+                        </Link>
+                    </motion.div>
+                    <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
+                        className="flex items-center gap-3 mb-5">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center">
+                            <ShieldAlert className="w-5 h-5 text-emerald-400" />
+                        </div>
+                        <div>
+                            <span className={`font-black text-xl italic tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>Drop<span className="text-emerald-400">Pay</span></span>
+                            <p className={`text-[9px] uppercase tracking-[0.25em] font-bold ${isDark ? 'text-white/30' : 'text-slate-400'}`}>Admin Console</p>
+                        </div>
+                    </motion.div>
+
+                    <motion.h2 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
+                        className={`text-3xl lg:text-4xl font-black italic leading-[1] tracking-tighter mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                        Secure.<br />
+                        <span className="text-transparent bg-clip-text"
+                            style={{ backgroundImage: 'linear-gradient(135deg, #10B981, #06b6d4, #818cf8)', WebkitBackgroundClip: 'text' }}>
+                            Powerful.
+                        </span><br />
+                        Admin Access.
+                    </motion.h2>
+
+                    <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.65 }}
+                        className={`text-xs font-medium leading-relaxed max-w-xs mb-4 ${isDark ? 'text-white/40' : 'text-slate-500'}`}>
+                        All access is strictly monitored and limited to authorized dropPay personnel.
+                    </motion.p>
+
+                    {/* System health stats */}
+                    <div className="grid grid-cols-2 gap-2 mb-3">
+                        <StatCard icon={Shield} label="System Status" value="Online" color={isDark ? "bg-emerald-500/20 text-emerald-400" : "bg-emerald-500/10 text-emerald-600"} delay={0.7} isDark={isDark} />
+                        <StatCard icon={Activity} label="Auth Latency" value="18ms" color={isDark ? "bg-cyan-500/20 text-cyan-400" : "bg-cyan-500/10 text-cyan-600"} delay={0.8} isDark={isDark} />
+                        <StatCard icon={Globe} label="Encryption" value="AES-256" color={isDark ? "bg-indigo-500/20 text-indigo-400" : "bg-indigo-500/10 text-indigo-600"} delay={0.9} isDark={isDark} />
+                        <StatCard icon={TrendingUp} label="Sessions Today" value="1,204" color={isDark ? "bg-amber-500/20 text-amber-400" : "bg-amber-500/10 text-amber-600"} delay={1.0} isDark={isDark} />
                     </div>
 
-                    {/* Bottom security badges */}
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.4 }}
-                        className="relative z-10 flex flex-wrap gap-1.5 mt-4">
+                    {/* Live access log */}
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.05 }}
+                        className={`rounded-xl border p-3 space-y-1.5 ${isDark ? 'bg-white/[0.04] border-white/8' : 'bg-slate-900/[0.03] border-slate-900/10'}`}>
+                        <p className={`text-[9px] font-black uppercase tracking-widest mb-2 flex items-center gap-2 ${isDark ? 'text-white/30' : 'text-slate-400'}`}>
+                            <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse inline-block" />
+                            Recent Activity
+                        </p>
                         {[
-                            { icon: Shield, text: 'AES-256', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' },
-                            { icon: ShieldAlert, text: 'Zero Trust', color: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20' },
-                            { icon: AlertTriangle, text: 'MFA Enforced', color: 'text-amber-400 bg-amber-500/10 border-amber-500/20' },
-                        ].map(({ icon: Icon, text, color }) => (
-                            <div key={text} className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[9px] font-black uppercase tracking-widest ${color}`}>
-                                <Icon className="w-3 h-3" /> {text}
-                            </div>
+                            { time: '14:16:02', msg: '> Gateway operational', darkColor: 'text-emerald-400/70', lightColor: 'text-emerald-600/80' },
+                            { time: '14:15:58', msg: '> Secure session established', darkColor: 'text-cyan-400/60', lightColor: 'text-cyan-600/80' },
+                            { time: '14:15:41', msg: '> Admin identity verified', darkColor: 'text-amber-400/60', lightColor: 'text-amber-600/80' },
+                            { time: '14:15:30', msg: '> Systems normal', darkColor: 'text-white/30', lightColor: 'text-slate-400' },
+                        ].map(({ time, msg, darkColor, lightColor }, i) => (
+                            <motion.div key={i} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 1.1 + i * 0.12 }}
+                                className="flex items-start gap-2">
+                                <span className={`text-[8px] font-mono mt-0.5 shrink-0 ${isDark ? 'text-white/20' : 'text-slate-400'}`}>{time}</span>
+                                <span className={`text-[9px] font-mono ${isDark ? darkColor : lightColor}`}>{msg}</span>
+                            </motion.div>
                         ))}
                     </motion.div>
                 </div>
 
-                {/* ── RIGHT — Login form ── */}
-                <div className={`flex-1 flex flex-col justify-center p-5 sm:p-8 lg:p-10 transition-colors duration-500 ${isDark ? 'bg-[#0a1410]' : 'bg-white'}`}>
+                {/* Bottom security badges */}
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.4 }}
+                    className="relative z-10 flex flex-wrap gap-1.5 mt-4">
+                    {[
+                        { icon: Shield, text: 'AES-256', darkColor: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20', lightColor: 'text-emerald-600 bg-emerald-50 border-emerald-200' },
+                        { icon: ShieldAlert, text: 'Zero Trust', darkColor: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20', lightColor: 'text-cyan-600 bg-cyan-50 border-cyan-200' },
+                        { icon: AlertTriangle, text: 'MFA Enforced', darkColor: 'text-amber-400 bg-amber-500/10 border-amber-500/20', lightColor: 'text-amber-600 bg-amber-50 border-amber-200' },
+                    ].map(({ icon: Icon, text, darkColor, lightColor }) => (
+                        <div key={text} className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[9px] font-black uppercase tracking-widest ${isDark ? darkColor : lightColor}`}>
+                            <Icon className="w-3 h-3" /> {text}
+                        </div>
+                    ))}
+                </motion.div>
+            </motion.div>
+
+            {/* ── RIGHT — Login form ── */}
+            <motion.div 
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                className={`relative flex-1 flex flex-col justify-center px-6 py-12 sm:px-12 sm:py-16 lg:px-24 lg:py-12 z-10 min-h-screen lg:border-l overflow-y-auto transition-colors duration-500 ${isDark ? 'border-white/5 bg-black/40 lg:backdrop-blur-2xl' : 'border-slate-200 bg-white/60 lg:backdrop-blur-2xl'}`}
+            >
 
                     {/* Status strip */}
                     <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
                         className="flex items-center justify-between mb-5">
                         <div>
-                            <p className={`text-[10px] font-black uppercase tracking-[0.3em] ${isDark ? 'text-white/40' : 'text-slate-400'}`}>Admin Gateway</p>
+                            <p className={`text-[10px] font-black uppercase tracking-[0.3em] ${isDark ? 'text-white/40' : 'text-slate-400'}`}>Admin Login</p>
                             <p className={`text-[10px] uppercase tracking-widest ${isDark ? 'text-white/20' : 'text-slate-300'}`}>Authorized Personnel Only</p>
                         </div>
                         <div className="flex items-center gap-2">
-                            <ThemeToggle size="sm" />
+
                             <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${isDark ? 'border-white/10 bg-white/[0.04]' : 'border-slate-100 bg-slate-50'}`}>
                                 <motion.div className="w-1.5 h-1.5 rounded-full bg-emerald-400"
                                     animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.5, repeat: Infinity }} />
@@ -288,7 +328,7 @@ const AdminLogin = () => {
 
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.55 }}>
                         <h3 className={`text-2xl font-black italic tracking-tighter mb-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>Welcome back.</h3>
-                        <p className={`text-sm font-medium mb-5 ${isDark ? 'text-white/30' : 'text-slate-400'}`}>Enter your clearance credentials to access the control center.</p>
+                        <p className={`text-sm font-medium mb-5 ${isDark ? 'text-white/30' : 'text-slate-400'}`}>Enter your admin credentials to access the dashboard.</p>
                     </motion.div>
 
                     {/* ── Banners ── */}
@@ -331,7 +371,7 @@ const AdminLogin = () => {
                     <form onSubmit={handleAdminAuth} className="space-y-5">
                         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
                             <PremiumInput
-                                icon={Lock} label="Clearance Key (Email)" isDark={isDark}
+                                icon={Lock} label="Admin Email" isDark={isDark}
                                 type="email" value={email}
                                 onChange={e => setEmail(e.target.value)}
                                 onBlur={() => setEmailTouched(true)}
@@ -350,7 +390,7 @@ const AdminLogin = () => {
 
                         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}>
                             <PremiumInput
-                                icon={Key} label="Master Passphrase" isDark={isDark}
+                                icon={Key} label="Password" isDark={isDark}
                                 type={showPass ? 'text' : 'password'} value={password}
                                 onChange={e => setPassword(e.target.value)}
                                 disabled={isLocked || authState === 'success'}
@@ -385,8 +425,8 @@ const AdminLogin = () => {
                                     animate={{ x: ['-200%', '200%'] }}
                                     transition={{ duration: 2.5, repeat: Infinity, ease: 'linear', repeatDelay: 3 }} />
                                 {authState === 'success' ? <><CheckCircle className="w-5 h-5" /> Access Granted</>
-                                    : loading ? <><Loader2 className="w-5 h-5 animate-spin" /> Verifying Identity...</>
-                                        : <>Establish Uplink <ArrowRight className="w-4 h-4" /></>}
+                                    : loading ? <><Loader2 className="w-5 h-5 animate-spin" /> Logging in...</>
+                                        : <>Log In <ArrowRight className="w-4 h-4" /></>}
                             </motion.button>
                         </motion.div>
                     </form>
@@ -402,7 +442,7 @@ const AdminLogin = () => {
                         <Link to="/login"
                             className={`inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] transition-colors group hover:text-emerald-500 ${isDark ? 'text-white/30' : 'text-slate-400 hover:text-emerald-600'}`}>
                             <span className="opacity-0 group-hover:opacity-100 transition-opacity text-emerald-500 font-mono">&gt;</span>
-                            Return to Citizen Auth Portal
+                            Return to User Login
                             <span className="opacity-0 group-hover:opacity-100 transition-opacity text-emerald-500 font-mono">&lt;</span>
                         </Link>
                     </div>
@@ -412,9 +452,8 @@ const AdminLogin = () => {
                         className={`mt-8 text-center text-[9px] uppercase tracking-[0.2em] font-bold ${isDark ? 'text-white/20' : 'text-slate-300'}`}>
                         Unauthorized access strictly prohibited. All attempts are permanently traced.
                     </motion.p>
-                </div>
-            </motion.div>
-        </div>
+                </motion.div>
+        </div >
     );
 };
 

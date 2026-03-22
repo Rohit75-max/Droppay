@@ -93,9 +93,9 @@ const PREMIUM_ALERTS = [
 ];
 
 const PREMIUM_WIDGETS = [
-    { id: 'neural_profile', name: 'Neural Profile', description: 'Aero-Glass Identity Node widget with holographic avatar.', basePrice: 1500, color: 'text-blue-500' },
-    { id: 'atomic_balance', name: 'Atomic Balance', description: 'Liquid floating balance core with dynamic 3D physics.', basePrice: 2000, color: 'text-emerald-500' },
-    { id: 'elite_nexus', name: 'Elite Nexus', description: 'Interactive horizontal glass carousel for social rank.', basePrice: 2500, color: 'text-indigo-500' },
+    { id: 'user_profile', name: 'User Profile', description: 'Modern Glass Profile widget with holographic avatar.', basePrice: 1500, color: 'text-blue-500' },
+    { id: 'wallet_balance', name: 'Wallet Balance', description: 'Liquid floating balance core with dynamic 3D physics.', basePrice: 2000, color: 'text-emerald-500' },
+    { id: 'elite_nexus', name: 'Elite Dashboard', description: 'Interactive horizontal glass carousel for social rank.', basePrice: 2500, color: 'text-indigo-500' },
 ];
 
 const DashboardStore = ({ theme, user, setUser }) => {
@@ -138,7 +138,7 @@ const DashboardStore = ({ theme, user, setUser }) => {
             );
 
             setUser(prev => ({ ...prev, walletBalance: res.data.walletBalance, nexusTheme: res.data.nexusTheme, unlockedNexusThemes: res.data.unlockedNexusThemes }));
-            setSuccessMsg(`Elite Environment Synchronized: ${ELITE_THEMES.find(t => t.id === themeId).title}!`);
+            setSuccessMsg(`Theme Unlocked: ${ELITE_THEMES.find(t => t.id === themeId).title}!`);
             localStorage.setItem('nexusTheme', res.data.nexusTheme);
             window.dispatchEvent(new CustomEvent('nexus-theme-change', { detail: { theme: res.data.nexusTheme } }));
         } catch (err) {
@@ -161,7 +161,7 @@ const DashboardStore = ({ theme, user, setUser }) => {
             localStorage.setItem('nexusTheme', res.data.nexusTheme);
             window.dispatchEvent(new CustomEvent('nexus-theme-change', { detail: { theme: res.data.nexusTheme } }));
         } catch (err) {
-            setErrorMsg("Failed to switch environment.");
+            setErrorMsg("Failed to switch theme.");
         }
     };
 
@@ -177,7 +177,7 @@ const DashboardStore = ({ theme, user, setUser }) => {
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             setUser(prev => ({ ...prev, walletBalance: res.data.walletBalance, ownedWidgets: res.data.ownedWidgets, activeRevenueWidget: res.data.activeRevenueWidget }));
-            setSuccessMsg(`Widget deployed: ${PREMIUM_WIDGETS.find(w => w.id === widgetId).name}!`);
+            setSuccessMsg(`Widget unlocked: ${PREMIUM_WIDGETS.find(w => w.id === widgetId).name}!`);
         } catch (err) {
             setErrorMsg(err.response?.data?.msg || 'Widget Transaction Failed');
         } finally {
@@ -298,10 +298,10 @@ const DashboardStore = ({ theme, user, setUser }) => {
                     <div>
                         <h2 className={`text-xl font-black uppercase tracking-widest flex items-center gap-3 text-[var(--nexus-text)]`}>
                             <Monitor className={`w-5 h-5 opacity-40 shrink-0 text-[var(--nexus-accent)]`} />
-                            Marketplace Hub
+                            Marketplace
                         </h2>
                         <p className={`text-[10px] font-bold uppercase tracking-widest opacity-60 flex items-center gap-2 text-[var(--nexus-text-muted)]`}>
-                            <Play className="w-3 h-3 text-[var(--nexus-accent)]" /> Authorize Node Upgrades
+                            <Play className="w-3 h-3 text-[var(--nexus-accent)]" /> Upgrade your Dashboard
                         </p>
                     </div>
                 </div>
@@ -309,7 +309,7 @@ const DashboardStore = ({ theme, user, setUser }) => {
                 <div className={`border px-6 py-4 rounded-2xl flex items-center gap-4 relative z-10 shrink-0 shadow-inner backdrop-blur-md group/balance bg-[var(--nexus-panel)]/40 border-[var(--nexus-border)]`}>
                     <Loader2 className={`absolute -left-3 top-1/2 -translate-y-1/2 w-8 h-8 opacity-20 animate-spin-slow pointer-events-none text-[var(--nexus-accent)]`} />
                     <div className="flex flex-col">
-                        <span className={`text-[10px] uppercase font-bold tracking-[0.2em] opacity-70 text-[var(--nexus-text-muted)]`}>Node Balance</span>
+                        <span className={`text-[10px] uppercase font-bold tracking-[0.2em] opacity-70 text-[var(--nexus-text-muted)]`}>Current Balance</span>
                         <span className={`text-2xl font-black flex items-center text-[var(--nexus-accent)]`}>
                             <IndianRupee className={`w-5 h-5 mr-1`} /> {user?.walletBalance || 0}
                         </span>

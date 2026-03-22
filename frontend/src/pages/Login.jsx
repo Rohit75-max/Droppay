@@ -8,8 +8,7 @@ import {
   TrendingUp, Globe, CheckCircle, Star
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import ThemeToggle from '../components/ThemeToggle';
-import { useTheme } from '../context/ThemeContext';
+
 import { toast } from 'react-toastify';
 
 // API_BASE is now handled by the centralized axios configuration in src/api/axios.js
@@ -25,19 +24,19 @@ const Orb = ({ size, x, y, duration, color, delay }) => (
 );
 
 // ─── Stat Card ────────────────────────────────────────────────
-const StatCard = ({ icon: Icon, label, value, color, delay }) => (
+const StatCard = ({ icon: Icon, label, value, color, delay, isDark }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ delay, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-    className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-white/[0.06] border border-white/10"
+    className={`flex items-center gap-3 px-4 py-3 rounded-2xl border ${isDark ? 'bg-white/[0.06] border-white/10' : 'bg-slate-900/[0.04] border-slate-900/10'}`}
   >
     <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${color}`}>
       <Icon className="w-4 h-4" />
     </div>
     <div>
-      <p className="text-[10px] text-white/40 uppercase tracking-widest font-bold">{label}</p>
-      <p className="text-sm font-black text-white leading-none">{value}</p>
+      <p className={`text-[10px] uppercase tracking-widest font-bold ${isDark ? 'text-white/40' : 'text-slate-500'}`}>{label}</p>
+      <p className={`text-sm font-black leading-none ${isDark ? 'text-white' : 'text-slate-900'}`}>{value}</p>
     </div>
   </motion.div>
 );
@@ -48,27 +47,21 @@ const PremiumInput = ({ icon: Icon, label, type, name, value, onChange, placehol
   const inputId = `login-${name}`;
   return (
     <div className="space-y-2">
-      <label htmlFor={inputId} className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em] transition-colors ${focused ? 'text-emerald-500' : isDark ? 'text-white/40' : 'text-slate-400'}`}>
+      <label htmlFor={inputId} className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em] transition-colors ${focused ? 'text-[#10B981]' : isDark ? 'text-white/40' : 'text-slate-400'}`}>
         <Icon className="w-3 h-3" /> {label}
       </label>
       <div className="relative group">
-        <motion.div
-          className="absolute -inset-px rounded-2xl bg-gradient-to-r from-emerald-400 via-cyan-400 to-emerald-400 pointer-events-none"
-          animate={{ opacity: focused ? 0.55 : 0 }}
-          transition={{ duration: 0.2 }}
-          style={{ backgroundSize: '200% 200%' }}
-        />
         <div className="relative">
-          <Icon className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors duration-200 ${focused ? 'text-emerald-500' : isDark ? 'text-white/30' : 'text-slate-300'}`} />
+          <Icon className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors duration-200 ${focused ? 'text-[#10B981]' : isDark ? 'text-white/30' : 'text-slate-300'}`} />
           <input
             id={inputId}
             type={type} name={name} value={value} onChange={onChange}
             onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
             placeholder={placeholder} required
             autoComplete={autoComplete}
-            className={`w-full rounded-2xl py-3.5 pl-12 pr-12 text-sm focus:outline-none focus:border-transparent transition-all ${isDark
-              ? 'bg-white/[0.05] border border-white/10 text-white placeholder:text-white/20'
-              : 'bg-slate-50 border border-slate-200 text-slate-800 placeholder:text-slate-300'
+            className={`w-full rounded-2xl py-3.5 pl-12 pr-12 text-sm focus:outline-none transition-all ${isDark
+              ? `bg-white/[0.05] border ${focused ? 'border-[#10B981]' : 'border-white/10'} text-white placeholder:text-white/20`
+              : `bg-slate-50 border ${focused ? 'border-[#10B981]' : 'border-slate-200'} text-slate-800 placeholder:text-slate-300`
               }`}
           />
           {rightEl && <div className="absolute right-4 top-1/2 -translate-y-1/2">{rightEl}</div>}
@@ -83,7 +76,7 @@ const PremiumInput = ({ icon: Icon, label, type, name, value, onChange, placehol
 // ─────────────────────────────────────────────────────────────
 const Login = () => {
   const navigate = useNavigate();
-  const { theme } = useTheme();
+  const theme = 'dark';
   const isDark = theme === 'dark';
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -217,63 +210,86 @@ const Login = () => {
   };
 
   return (
-    <div className={`min-h-screen flex items-center justify-center p-4 sm:p-6 font-sans overflow-hidden transition-colors duration-500 ${isDark ? 'bg-[#030a06]' : 'bg-slate-50'}`}>
+    <div className={`relative min-h-screen w-full flex flex-col lg:flex-row font-sans overflow-hidden transition-colors duration-500 ${isDark ? 'bg-[#030a06]' : 'bg-slate-50'}`}>
 
-      {/* Background blobs — dark or light */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+      {/* FULL IMMERSIVE BACKGROUND */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
         {isDark ? (
           <>
-            <div className="absolute top-[-20%] right-[-10%] w-[550px] h-[550px] rounded-full bg-emerald-900/30 blur-[120px]" />
-            <div className="absolute bottom-[-20%] left-[-10%] w-[450px] h-[450px] rounded-full bg-cyan-900/20 blur-[100px]" />
+            <motion.div animate={{ scale: [1, 1.1, 1], rotate: [0, 10, 0] }} transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }} className="absolute top-[-20%] right-[-10%] w-[550px] h-[550px] rounded-full bg-emerald-900/40 blur-[120px]" />
+            <motion.div animate={{ scale: [1, 1.05, 1], rotate: [0, -5, 0] }} transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }} className="absolute bottom-[-20%] left-[-10%] w-[450px] h-[450px] rounded-full bg-cyan-900/30 blur-[100px]" />
           </>
         ) : (
           <>
-            <div className="absolute top-[-20%] right-[-10%] w-[550px] h-[550px] rounded-full bg-emerald-100/60 blur-[120px]" />
-            <div className="absolute bottom-[-20%] left-[-10%] w-[450px] h-[450px] rounded-full bg-cyan-100/50 blur-[100px]" />
+            <motion.div animate={{ scale: [1, 1.1, 1], rotate: [0, 10, 0] }} transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }} className="absolute top-[-20%] right-[-10%] w-[550px] h-[550px] rounded-full bg-emerald-100/60 blur-[120px]" />
+            <motion.div animate={{ scale: [1, 1.05, 1], rotate: [0, -5, 0] }} transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }} className="absolute bottom-[-20%] left-[-10%] w-[450px] h-[450px] rounded-full bg-cyan-100/50 blur-[100px]" />
           </>
+        )}
+
+        {/* Global Immersive Elements */}
+        {isDark && (
+          <div className="absolute inset-0">
+            {/* Holographic Moving Gradients */}
+            <Orb size={500} x="10%" y="-10%" color="rgba(16,185,129,0.15)" duration={9} delay={0} />
+            <Orb size={350} x="70%" y="50%" color="rgba(6,182,212,0.12)" duration={14} delay={2} />
+            <Orb size={300} x="20%" y="80%" color="rgba(244,114,182,0.1)" duration={11} delay={1} />
+
+            {/* Dynamic Cyber Grid */}
+            <motion.div 
+               className="absolute inset-0 pointer-events-none opacity-[0.05]"
+               style={{ backgroundImage: 'linear-gradient(to right, #10B981 1px, transparent 1px), linear-gradient(to bottom, #10B981 1px, transparent 1px)', backgroundSize: '40px 40px' }}
+               animate={{ backgroundPosition: ['0px 0px', '40px 40px'] }}
+               transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
+            />
+
+            {/* Rotating Geometric Data Rings */}
+            <motion.div 
+              className="absolute top-[15%] right-[5%] w-[600px] h-[600px] rounded-full border border-[#10B981]/15 border-dashed pointer-events-none"
+              animate={{ rotate: 360 }}
+              transition={{ duration: 45, repeat: Infinity, ease: 'linear' }}
+            />
+            <motion.div 
+              className="absolute top-[25%] left-[5%] w-[350px] h-[350px] rounded-full border border-[#06b6d4]/15 pointer-events-none"
+              animate={{ rotate: -360 }}
+              transition={{ duration: 30, repeat: Infinity, ease: 'linear' }}
+            />
+
+            {/* Active Data Streams */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              {[...Array(10)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="absolute w-[1px] h-64 bg-gradient-to-b from-transparent via-[#10B981]/50 to-transparent"
+                  style={{ left: `${(i + 1) * 10}%` }}
+                  animate={{ top: ['-20%', '120%'] }}
+                  transition={{ duration: 3 + (i % 3), repeat: Infinity, ease: 'linear', delay: i * 0.5 }}
+                />
+              ))}
+            </div>
+
+            {/* Scan line sweep */}
+            <motion.div
+              className="absolute left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-400/50 to-transparent pointer-events-none blur-[1px]"
+              animate={{ top: ['-5%', '105%'] }}
+              transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', repeatDelay: 1 }}
+            />
+          </div>
         )}
       </div>
 
-      {/* ── MAIN SHELL ── */}
+      {/* ── LEFT — Holographic Branding Pillar ── */}
       <motion.div
-        initial={{ opacity: 0, y: 32, scale: 0.96 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-        style={{ boxShadow: isDark ? '0 30px 80px -20px rgba(0,0,0,0.5)' : '0 30px 80px -20px rgba(0,0,0,0.10)' }}
-        className={`relative w-full max-w-[980px] rounded-[2.5rem] overflow-hidden flex flex-col lg:flex-row border ${isDark ? 'border-white/10 bg-[#08100c]' : 'border-white/80 bg-white'}`}
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        className="relative flex-1 lg:flex-[1.2] flex flex-col justify-center px-6 py-12 sm:px-12 sm:py-16 mx-auto lg:p-24 min-h-[50vh] lg:min-h-screen z-10 max-w-2xl lg:max-w-none"
       >
-        {/* ── LEFT — Holographic Branding Pillar ── */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          className="relative lg:w-[440px] shrink-0 bg-[#061a12] overflow-hidden flex flex-col justify-between p-6 sm:p-8 lg:p-10 min-h-[300px] lg:min-h-[660px] z-20"
-        >
-
-
-
-          {/* Floating orbs */}
-          <Orb size={260} x="-60px" y="-60px" color="rgba(16,185,129,0.22)" duration={7} delay={0} />
-          <Orb size={180} x="55%" y="50%" color="rgba(6,182,212,0.18)" duration={9} delay={2} />
-          <Orb size={120} x="15%" y="68%" color="rgba(244,114,182,0.12)" duration={6} delay={1} />
-
-          {/* Dot grid */}
-          <div className="absolute inset-0 pointer-events-none opacity-20"
-            style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.35) 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
-
-          {/* Scan line sweep */}
-          <motion.div
-            className="absolute left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-emerald-400/50 to-transparent pointer-events-none z-10"
-            animate={{ top: ['-2%', '102%'] }}
-            transition={{ duration: 5, repeat: Infinity, ease: 'linear', repeatDelay: 2.5 }}
-          />
-
-          {/* Brand content */}
-          <div className="relative z-20">
+        {/* Brand content */}
+        <div className="relative z-20">
             {/* Back button */}
             <motion.div initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}
               className="mb-6">
-              <Link to="/" className="group inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-white/10 bg-white/[0.06] hover:bg-white/10 text-white/50 hover:text-white transition-all text-[9px] font-black uppercase tracking-widest">
+              <Link to="/" className={`group inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all text-[9px] font-black uppercase tracking-widest ${isDark ? 'border-white/10 bg-white/[0.06] hover:bg-white/10 text-white/50 hover:text-white' : 'border-slate-900/10 bg-slate-900/[0.04] hover:bg-slate-900/[0.08] text-slate-500 hover:text-slate-900'}`}>
                 <ArrowLeft className="w-3 h-3 group-hover:-translate-x-0.5 transition-transform" /> Back
               </Link>
             </motion.div>
@@ -284,13 +300,13 @@ const Login = () => {
                 <Zap className="w-5 h-5 text-emerald-400 fill-emerald-400" />
               </div>
               <div>
-                <span className="text-white font-black text-xl italic tracking-tight uppercase">Drop<span className="text-emerald-400">Pay</span></span>
-                <p className="text-white/30 text-[9px] uppercase tracking-[0.25em] font-bold">Creator Protocol</p>
+                <span className={`font-black text-xl italic tracking-tight uppercase ${isDark ? 'text-white' : 'text-slate-900'}`}>Drop<span className="text-emerald-400">Pay</span></span>
+                <p className={`text-[9px] uppercase tracking-[0.25em] font-bold ${isDark ? 'text-white/30' : 'text-slate-400'}`}>Global Accounts</p>
               </div>
             </motion.div>
 
             <motion.h2 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
-              className="text-4xl lg:text-5xl font-black italic text-white leading-[1] tracking-tighter mb-4">
+              className={`text-4xl lg:text-5xl font-black italic leading-[1] tracking-tighter mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}>
               Your Stream.<br />
               <span className="text-transparent bg-clip-text"
                 style={{ backgroundImage: 'linear-gradient(135deg, #10B981, #06b6d4, #f472b6)', WebkitBackgroundClip: 'text' }}>
@@ -300,15 +316,15 @@ const Login = () => {
             </motion.h2>
 
             <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.65 }}
-              className="text-white/40 text-sm font-medium leading-relaxed max-w-xs mb-8">
+              className={`text-sm font-medium leading-relaxed max-w-xs mb-8 ${isDark ? 'text-white/40' : 'text-slate-500'}`}>
               Sub-ms transmission. Instant bank settlements. Built for professional streamers.
             </motion.p>
 
             <div className="grid grid-cols-2 gap-2.5">
-              <StatCard icon={Users} label="Creators" value="48,200+" color="bg-emerald-500/20 text-emerald-400" delay={0.7} />
-              <StatCard icon={TrendingUp} label="Paid Out" value="₹2.4Cr+" color="bg-cyan-500/20 text-cyan-400" delay={0.8} />
-              <StatCard icon={Globe} label="Regions" value="12 Live" color="bg-indigo-500/20 text-indigo-400" delay={0.9} />
-              <StatCard icon={Activity} label="Uptime" value="99.98%" color="bg-rose-500/20 text-rose-400" delay={1.0} />
+              <StatCard icon={Users} label="Creators" value="48,200+" color={isDark ? "bg-emerald-500/20 text-emerald-400" : "bg-emerald-500/10 text-emerald-600"} delay={0.7} isDark={isDark} />
+              <StatCard icon={TrendingUp} label="Paid Out" value="₹2.4Cr+" color={isDark ? "bg-cyan-500/20 text-cyan-400" : "bg-cyan-500/10 text-cyan-600"} delay={0.8} isDark={isDark} />
+              <StatCard icon={Globe} label="Regions" value="12 Live" color={isDark ? "bg-indigo-500/20 text-indigo-400" : "bg-indigo-500/10 text-indigo-600"} delay={0.9} isDark={isDark} />
+              <StatCard icon={Activity} label="Uptime" value="99.98%" color={isDark ? "bg-rose-500/20 text-rose-400" : "bg-rose-500/10 text-rose-600"} delay={1.0} isDark={isDark} />
             </div>
           </div>
 
@@ -316,11 +332,11 @@ const Login = () => {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.1 }}
             className="relative z-20 flex flex-wrap gap-2 mt-8">
             {[
-              { icon: Shield, text: 'Bank-grade SSL', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' },
-              { icon: Star, text: 'Instant Payouts', color: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20' },
-              { icon: Zap, text: 'Sub-ms Latency', color: 'text-amber-400 bg-amber-500/10 border-amber-500/20' },
-            ].map(({ icon: Icon, text, color }) => (
-              <div key={text} className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[9px] font-black uppercase tracking-widest ${color}`}>
+              { icon: Shield, text: 'Bank-grade SSL', darkColor: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20', lightColor: 'text-emerald-600 bg-emerald-50 border-emerald-200' },
+              { icon: Star, text: 'Instant Payouts', darkColor: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20', lightColor: 'text-cyan-600 bg-cyan-50 border-cyan-200' },
+              { icon: Zap, text: 'Sub-ms Latency', darkColor: 'text-amber-400 bg-amber-500/10 border-amber-500/20', lightColor: 'text-amber-600 bg-amber-50 border-amber-200' },
+            ].map(({ icon: Icon, text, darkColor, lightColor }) => (
+              <div key={text} className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[9px] font-black uppercase tracking-widest ${isDark ? darkColor : lightColor}`}>
                 <Icon className="w-3 h-3" /> {text}
               </div>
             ))}
@@ -328,7 +344,12 @@ const Login = () => {
         </motion.div>
 
         {/* ── RIGHT — Login form ── */}
-        <div className={`flex-1 flex flex-col justify-center p-6 sm:p-8 lg:p-12 relative z-10 overflow-y-auto transition-colors duration-500 ${isDark ? 'bg-[#0a1410]' : 'bg-white'}`}>
+        <motion.div 
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+          className={`relative flex-1 flex flex-col justify-center px-6 py-12 sm:px-12 sm:py-16 lg:px-24 lg:py-12 z-10 min-h-screen lg:border-l overflow-y-auto transition-colors duration-500 ${isDark ? 'border-white/5 bg-black/40 lg:backdrop-blur-2xl' : 'border-slate-200 bg-white/60 lg:backdrop-blur-2xl'}`}
+        >
           <AnimatePresence mode="wait">
             {step === 1 ? (
               <motion.div key="login" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, x: -20 }}>
@@ -337,11 +358,11 @@ const Login = () => {
                 <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
                   className="flex items-center justify-between mb-10">
                   <div>
-                    <p className={`text-[10px] font-black uppercase tracking-[0.3em] ${isDark ? 'text-white/40' : 'text-slate-400'}`}>Creator Login</p>
-                    <p className={`text-[10px] uppercase tracking-widest ${isDark ? 'text-white/20' : 'text-slate-300'}`}>Authorize your streaming node</p>
+                    <p className={`text-[10px] font-black uppercase tracking-[0.3em] ${isDark ? 'text-white/40' : 'text-slate-400'}`}>Login</p>
+                    <p className={`text-[10px] uppercase tracking-widest ${isDark ? 'text-white/20' : 'text-slate-300'}`}>Access your account</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <ThemeToggle size="sm" />
+
                     <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border transition-colors duration-500 ${isDark ? 'border-white/10 bg-white/5' : 'border-slate-100 bg-slate-50'}`}>
                       <motion.div className={`w-1.5 h-1.5 rounded-full ${loginSuccess ? 'bg-emerald-400' : 'bg-amber-400'}`}
                         animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.5, repeat: Infinity }} />
@@ -354,7 +375,7 @@ const Login = () => {
 
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.55 }}>
                   <h3 className={`text-3xl font-black italic tracking-tighter mb-1 leading-none ${isDark ? 'text-white' : 'text-slate-900'}`}>Welcome back.</h3>
-                  <p className={`text-sm font-medium mb-8 ${isDark ? 'text-white/30' : 'text-slate-400'}`}>Authorize your streaming node to access DropPay.</p>
+                  <p className={`text-sm font-medium mb-8 ${isDark ? 'text-white/30' : 'text-slate-400'}`}>Enter your credentials to access your account.</p>
                 </motion.div>
 
                 {/* Error banner */}
@@ -375,7 +396,7 @@ const Login = () => {
                       animate={{ opacity: 1, height: 'auto', marginBottom: 20 }}
                       className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex items-center gap-3">
                       <CheckCircle className="w-4 h-4 text-emerald-500" />
-                      <p className="text-[11px] text-emerald-700 font-bold">Node authorized — Connecting to dashboard...</p>
+                      <p className="text-[11px] text-emerald-700 font-bold">Login successful — Connecting to dashboard...</p>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -405,7 +426,7 @@ const Login = () => {
                     <label className={`flex items-center gap-2 cursor-pointer transition-colors ${isDark ? 'text-white/30 hover:text-emerald-400' : 'text-slate-400 hover:text-emerald-600'}`}>
                       <input type="checkbox" checked={rememberMe} onChange={() => setRememberMe(v => !v)}
                         className="accent-emerald-500 w-3.5 h-3.5 rounded" />
-                      Remember Node
+                      Remember Me
                     </label>
                     <Link to="/forgot-password" className="text-emerald-500 hover:text-emerald-400 transition-colors">
                       Lost Access?
@@ -422,9 +443,9 @@ const Login = () => {
                       <motion.div className="absolute inset-0 -skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent"
                         animate={{ x: ['-200%', '200%'] }}
                         transition={{ duration: 2.5, repeat: Infinity, ease: 'linear', repeatDelay: 3 }} />
-                      {loginSuccess ? <><CheckCircle className="w-5 h-5" /> Authorized</>
-                        : loading ? <><Loader2 className="w-5 h-5 animate-spin" /> Verifying...</>
-                          : <>Authorize <ArrowRight className="w-4 h-4" /></>}
+                      {loginSuccess ? <><CheckCircle className="w-5 h-5" /> Success</>
+                        : loading ? <><Loader2 className="w-5 h-5 animate-spin" /> Logging in...</>
+                          : <>Log In <ArrowRight className="w-4 h-4" /></>}
                     </motion.button>
                   </motion.div>
                 </form>
@@ -432,7 +453,7 @@ const Login = () => {
                 {/* Divider */}
                 <div className="flex items-center gap-3 my-6">
                   <div className={`flex-1 h-px ${isDark ? 'bg-white/10' : 'bg-slate-100'}`} />
-                  <span className={`text-[9px] uppercase tracking-widest ${isDark ? 'text-white/20' : 'text-slate-300'}`}>or protocol</span>
+                  <span className={`text-[9px] uppercase tracking-widest ${isDark ? 'text-white/20' : 'text-slate-300'}`}>or continue with</span>
                   <div className={`flex-1 h-px ${isDark ? 'bg-white/10' : 'bg-slate-100'}`} />
                 </div>
 
@@ -468,7 +489,7 @@ const Login = () => {
                 {/* Init new account */}
                 <Link to="/signup"
                   className={`w-full flex items-center justify-center gap-2.5 py-3.5 rounded-2xl border text-[10px] font-black uppercase tracking-widest transition-all hover:border-emerald-300 hover:text-emerald-500 ${isDark ? 'border-white/10 bg-white/[0.03] text-white/40 hover:bg-emerald-500/5' : 'border-slate-200 bg-slate-50 text-slate-500 hover:bg-emerald-50'}`}>
-                  <Shield className="w-3.5 h-3.5" /> Initialize New Account
+                  <Shield className="w-3.5 h-3.5" /> Create Account
                 </Link>
 
                 {/* Admin portal link */}
@@ -489,8 +510,8 @@ const Login = () => {
                   <Shield className="w-7 h-7 text-emerald-500 animate-pulse" />
                 </motion.div>
 
-                <h3 className={`text-2xl font-black italic tracking-tighter mb-1 leading-none ${isDark ? 'text-white' : 'text-slate-900'}`}>Confirm Identity.</h3>
-                <p className={`text-sm font-medium mb-1 ${isDark ? 'text-white/40' : 'text-slate-400'}`}>Authorization code sent to your mail node:</p>
+                <h3 className={`text-2xl font-black italic tracking-tighter mb-1 leading-none ${isDark ? 'text-white' : 'text-slate-900'}`}>Verify Email.</h3>
+                <p className={`text-sm font-medium mb-1 ${isDark ? 'text-white/40' : 'text-slate-400'}`}>We sent a confirmation code to:</p>
                 <p className="text-emerald-600 font-black text-sm mb-6">{formData.email}</p>
 
                 {error && (
@@ -537,8 +558,7 @@ const Login = () => {
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
-      </motion.div>
+        </motion.div>
     </div >
   );
 };

@@ -2,7 +2,8 @@ import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'framer-motion';
 import {
     Paintbrush, Target, BellRing, LayoutTemplate, Loader2,
-    ArrowUpRight, ShoppingCart, Zap, ShieldCheck, Package
+    ArrowUpRight, ShoppingCart, Zap, ShieldCheck, Package,
+    Wallet, User, Trophy, Crown, MessageSquare, Gift
 } from 'lucide-react';
 import LiveThemeEngine from '../LiveThemeEngine';
 import PremiumPreviewModal from './PremiumPreviewModal';
@@ -136,10 +137,74 @@ const PremiumStoreCard = ({ item, theme, activeTab, onClick, onPurchase, isProce
                     )}
 
                     {item.category === 'widgets' && (
-                        <div className="w-full h-full flex items-center justify-center transform scale-[1.1] sm:scale-[1.5]">
-                            <div className="text-[var(--nexus-accent)] opacity-20">
-                                <LayoutTemplate className="w-12 h-12" />
-                            </div>
+                        <div className="w-full h-full flex items-center justify-center p-4">
+                            {item.id === 'user_profile' && (
+                                <div className="flex flex-col items-center justify-center gap-3">
+                                    <div className="relative">
+                                        <div className="absolute -inset-4 rounded-full bg-blue-500/20 blur-xl animate-pulse" />
+                                        <div className="w-16 h-16 rounded-full border-2 border-blue-500/50 p-1 bg-black/40 relative z-10 flex items-center justify-center">
+                                            <User className="w-8 h-8 text-blue-400" />
+                                        </div>
+                                        <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full border-2 border-black flex items-center justify-center">
+                                            <ShieldCheck className="w-3 h-3 text-white" />
+                                        </div>
+                                    </div>
+                                    <div className="h-2 w-20 bg-blue-500/20 rounded-full overflow-hidden">
+                                        <motion.div
+                                            animate={{ x: [-80, 80] }}
+                                            transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+                                            className="h-full w-10 bg-blue-400"
+                                        />
+                                    </div>
+                                </div>
+                            )}
+                            {item.id === 'wallet_balance' && (
+                                <div className="flex flex-col items-center justify-center gap-2">
+                                    <div className="flex items-center gap-2 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+                                        <Wallet className="w-3 h-3 text-emerald-400" />
+                                        <span className="text-[8px] font-black uppercase tracking-widest text-emerald-400">Balance</span>
+                                    </div>
+                                    <div className="text-4xl font-black italic text-emerald-400 flex items-center gap-1">
+                                        <span className="text-2xl opacity-50">₹</span>
+                                        <motion.span
+                                            animate={{ scale: [1, 1.05, 1] }}
+                                            transition={{ repeat: Infinity, duration: 3 }}
+                                        >
+                                            9,999
+                                        </motion.span>
+                                    </div>
+                                    <div className="w-full h-1 bg-emerald-500/10 rounded-full overflow-hidden mt-2">
+                                        <motion.div
+                                            animate={{ width: ["0%", "80%", "0%"] }}
+                                            transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+                                            className="h-full bg-emerald-400"
+                                        />
+                                    </div>
+                                </div>
+                            )}
+                            {item.id === 'elite_nexus' && (
+                                <div className="w-full flex flex-col gap-3">
+                                    <div className="flex items-center gap-2 px-3 py-1 bg-indigo-500/10 border-l-2 border-indigo-500">
+                                        <Trophy className="w-3 h-3 text-indigo-400" />
+                                        <span className="text-[8px] font-black uppercase tracking-widest text-indigo-400">Top Supporters</span>
+                                    </div>
+                                    <div className="flex gap-2 overflow-hidden px-2">
+                                        <div className="shrink-0 w-8 h-8 rounded-full border border-indigo-500/30 bg-black/40 flex items-center justify-center shadow-[0_0_10px_rgba(99,102,241,0.2)]">
+                                            <MessageSquare className="w-4 h-4 text-indigo-400" />
+                                        </div>
+                                        <div className="shrink-0 w-8 h-8 rounded-full border border-indigo-500/30 bg-black/40 flex items-center justify-center shadow-[0_0_10px_rgba(99,102,241,0.2)]">
+                                            <Gift className="w-4 h-4 text-indigo-400" />
+                                        </div>
+                                        <div className="shrink-0 w-8 h-8 rounded-full border border-indigo-500/30 bg-black/40 flex items-center justify-center shadow-[0_0_10px_rgba(99,102,241,0.2)]">
+                                            <div className="w-4 h-4 rounded-full bg-indigo-500/20 animate-pulse" />
+                                        </div>
+                                        <div className="shrink-0 w-8 h-8 rounded-full border border-indigo-500/30 bg-black/40 flex items-center justify-center opacity-50">
+                                            <Crown className="w-4 h-4 text-amber-500/40" />
+                                        </div>
+                                    </div>
+                                    <div className="h-1.5 w-full bg-indigo-500/10 rounded-full" />
+                                </div>
+                            )}
                         </div>
                     )}
 

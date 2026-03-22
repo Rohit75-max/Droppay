@@ -278,7 +278,7 @@ const DonationPage = () => {
             <span className="text-xl md:text-2xl font-black italic text-[var(--nexus-text)] tracking-tighter">DropPay</span>
           </div>
           <h1 className="text-lg md:text-2xl font-black italic uppercase tracking-tighter leading-none text-[var(--nexus-text)]">
-            Donation <span className="text-[var(--nexus-accent)]">Nexus.</span>
+            Donation <span className="text-[var(--nexus-accent)]">Portal.</span>
           </h1>
         </header>
 
@@ -293,26 +293,41 @@ const DonationPage = () => {
         <aside className="w-full relative h-auto lg:w-80 lg:fixed lg:bottom-0 lg:top-[112px] lg:left-0 flex flex-col border-r border-[var(--nexus-border)] bg-[var(--nexus-panel)]/50 backdrop-blur-md lg:overflow-y-auto hide-scroll z-40 shrink-0">
           <div className="p-6 flex flex-col space-y-6">
             {/* ACCOUNT CARD */}
-            <div className={`relative overflow-hidden border ${isLegend ? 'bg-amber-500/10 border-amber-500/30' : 'bg-[var(--nexus-panel)] border-[var(--nexus-border)]'} backdrop-blur-2xl rounded-3xl p-4 sm:p-6 text-center flex flex-col items-center justify-center shadow-lg nexus-card shrink-0 liquid-gold-border`}>
-              <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]" />
-              <div className={`relative w-14 h-14 sm:w-16 sm:h-16 rounded-full p-1 mb-3 ${isLegend ? 'bg-amber-500' : 'bg-[var(--nexus-accent)]'} z-10`}>
-                <div className="w-full h-full rounded-full bg-[var(--nexus-panel)] flex items-center justify-center border-2 border-[#111] relative overflow-hidden">
-                  {streamer?.avatar ? (
-                    <img src={streamer.avatar} alt="Avatar" className="w-full h-full object-cover" />
-                  ) : (
-                    <UserCircle className="w-8 h-8 text-[var(--nexus-text-muted)]" />
-                  )}
+            {/* ACCOUNT CARD (70/30 Fixed Height) */}
+            <div className={`relative overflow-hidden border ${isLegend ? 'bg-amber-500/10 border-amber-500/30' : 'bg-[var(--nexus-panel)] border-[var(--nexus-border)]'} backdrop-blur-2xl rounded-[2rem] h-[320px] flex flex-col shadow-lg nexus-card shrink-0 liquid-gold-border group`}>
+              {/* Top 70% Image Section */}
+              <div className="w-full h-[70%] relative overflow-hidden flex-shrink-0">
+                {streamer?.avatar ? (
+                  <img src={streamer.avatar} alt="Avatar" className="absolute inset-0 w-full h-full object-cover grayscale-[0.1] group-hover:grayscale-0 transition-all duration-700 scale-105 group-hover:scale-100" />
+                ) : (
+                  <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-[var(--nexus-accent)]/20 to-black flex items-center justify-center">
+                    <UserCircle className="w-12 h-12 text-[var(--nexus-accent)] opacity-40" />
+                  </div>
+                )}
+                {/* Visual Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-[var(--nexus-bg)] via-transparent to-transparent pointer-events-none z-10" />
+                
+                {/* ID Overlay (Top Right) */}
+                <div className="absolute top-3 right-3 flex items-center gap-1.5 z-20 bg-black/40 backdrop-blur-md px-2 py-1 rounded-full border border-white/5">
+                   <ShieldCheck className="w-2.5 h-2.5 text-[var(--nexus-accent)] opacity-80" />
+                   <span className="text-[7px] font-mono text-white/90 tracking-widest uppercase">
+                     LIVE-{streamer?.streamerId?.slice(-6).toUpperCase() || 'CORE'}
+                   </span>
                 </div>
               </div>
-              {streamer?.tier && streamer.tier !== 'none' && (
-                <div className={`relative z-10 inline-flex items-center gap-1.5 px-3 py-1 rounded-full border mb-2 text-[8px] font-black uppercase italic ${isLegend ? 'text-amber-500 border-amber-500/30' : 'text-[var(--nexus-accent)] border-[var(--nexus-accent)]/30'} bg-[var(--nexus-bg)]`}>
-                  <Crown className="w-3 h-3" /> {streamer.tier} Verified
-                </div>
-              )}
-              <h3 className="relative z-10 text-lg font-black italic uppercase tracking-tighter text-[var(--nexus-text)] mt-1">
-                {streamer?.fullName || streamer?.username?.toUpperCase()}
-              </h3>
-              <p className="relative z-10 text-[10px] font-mono font-bold text-[var(--nexus-accent)] opacity-60">@{streamer?.username}</p>
+
+              {/* Bottom 30% Details Section */}
+              <div className="w-full h-[30%] p-4 flex flex-col justify-center items-center relative z-20 bg-[var(--nexus-bg)] flex-shrink-0">
+                {streamer?.tier && streamer.tier !== 'none' && (
+                  <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border mb-1.5 text-[7px] font-black uppercase tracking-wider ${isLegend ? 'text-amber-500 border-amber-500/30 bg-amber-500/10' : 'text-[var(--nexus-accent)] border-[var(--nexus-accent)]/30 bg-[var(--nexus-accent)]/10'}`}>
+                    <Crown className="w-2.5 h-2.5" /> {streamer.tier}
+                  </div>
+                )}
+                <h3 className="text-base font-black italic uppercase tracking-tighter text-[var(--nexus-text)] leading-none text-center">
+                  {streamer?.fullName || streamer?.username?.toUpperCase()}
+                </h3>
+                <p className="text-[9px] font-mono font-bold text-[var(--nexus-accent)] opacity-60 mt-1">@{streamer?.username}</p>
+              </div>
             </div>
 
             {/* TOP SUPPORTERS LIST */}
@@ -334,7 +349,7 @@ const DonationPage = () => {
             {/* VERTICAL GOAL BAR */}
             <div className="shrink-0 relative z-20 border-t border-[var(--nexus-border)] pt-6 mt-6">
               <h3 className="text-xs font-black uppercase tracking-widest text-[var(--nexus-text-muted)] mb-4 flex items-center gap-2">
-                <Target className="w-4 h-4 text-[var(--nexus-accent)]" /> Active Mission
+                <Target className="w-4 h-4 text-[var(--nexus-accent)]" /> Active Goal
               </h3>
               {/* Fallback to CyberGoalBar if SquareGoalBar is too large or not built for vertical yet */}
               {isGoalActive ? (
@@ -359,7 +374,7 @@ const DonationPage = () => {
               ) : (
                 <div className="w-full h-24 border-2 border-dashed border-[var(--nexus-border)] rounded-2xl flex flex-col items-center justify-center opacity-40">
                   <Target className="w-6 h-6 mb-2" />
-                  <span className="text-[10px] font-bold uppercase">No Active Mission</span>
+                  <span className="text-[10px] font-bold uppercase">No Active Goal</span>
                 </div>
               )}
             </div>
@@ -374,7 +389,7 @@ const DonationPage = () => {
             {/* PINNED HEADER: Alert Preview */}
             {storeMode === 'classic' && (
               <div className={`shrink-0 bg-[var(--nexus-bg)] rounded-[2rem] border border-[var(--nexus-border)] p-4 flex flex-col items-center justify-center relative min-h-[160px] shadow-sm nexus-card overflow-hidden liquid-gold-border`}>
-                <p className="absolute top-4 left-4 text-[10px] font-black uppercase tracking-[0.2em] italic text-[var(--nexus-text-muted)] z-10 flex items-center gap-2"><Zap className="w-3 h-3 text-[var(--nexus-accent)]" /> Live Preview</p>
+                <p className="absolute top-4 left-4 text-[10px] font-black uppercase tracking-[0.2em] italic text-[var(--nexus-text-muted)] z-10 flex items-center gap-2"><Zap className="w-3 h-3 text-[var(--nexus-accent)]" /> Alert Preview</p>
                 <div className="w-full flex justify-center items-center mt-4 pointer-events-none">
                   <div className="scale-[0.6] sm:scale-[0.7] origin-center flex justify-center w-full">
                     <AlertPreview theme={streamer?.nexusThemeMode || 'dark'} donorName={donorName || 'Donor'} amount={Number(amount) || 0} message={message || 'Message...'} sticker={selectedSticker} tier={streamer?.tier || 'starter'} stylePreference={streamer?.overlaySettings?.stylePreference || 'modern'} />
@@ -389,7 +404,7 @@ const DonationPage = () => {
                 onClick={() => setStoreMode('classic')}
                 className={`flex-1 py-3 lg:py-4 rounded-xl text-xs lg:text-sm font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${storeMode === 'classic' ? 'bg-[var(--nexus-accent)] text-black shadow-lg shadow-[var(--nexus-accent)]/20' : 'text-[var(--nexus-text-muted)] hover:text-[var(--nexus-text)]'}`}
               >
-                <Zap className="w-4 h-4" /> Classic Drop
+                <Zap className="w-4 h-4" /> Send Donation
               </button>
               <button
                 onClick={() => setStoreMode('premium')}
@@ -437,7 +452,7 @@ const DonationPage = () => {
                             ) : (
                               <div className="col-span-3 sm:col-span-5 h-24 flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-2xl opacity-40">
                                 <Lock className="w-6 h-6 mb-2" />
-                                <p className="text-[10px] font-black uppercase">Reach Pro Node Tier</p>
+                                <p className="text-[10px] font-black uppercase">Available for Pro members</p>
                               </div>
                             )
                           )}
@@ -447,7 +462,7 @@ const DonationPage = () => {
                       {/* --- TUG-OF-WAR TEAM SELECTION UI --- */}
                       {towEvent && (
                         <div className="space-y-3">
-                          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--nexus-text-muted)] ml-2">Choose Your Side</label>
+                          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--nexus-text-muted)] ml-2">Select Team</label>
                           <div className="grid grid-cols-2 gap-3">
                             <button
                               type="button"
@@ -481,7 +496,7 @@ const DonationPage = () => {
                               currentTier === 'epic' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' :
                                 'bg-[var(--nexus-bg)] text-[var(--nexus-text-muted)] border border-[var(--nexus-border)]'
                               }`}>
-                              {currentTier} Drop
+                              {currentTier} Donation
                             </div>
                           </div>
                         </div>
@@ -499,11 +514,11 @@ const DonationPage = () => {
 
                       <div className="shrink-0 pt-2 lg:pt-4 space-y-2 mt-auto">
                         <button type="submit" disabled={isProcessing} className="w-full bg-[var(--nexus-accent)] py-4 lg:py-5 rounded-xl lg:rounded-2xl text-sm lg:text-lg text-black font-black flex items-center justify-center gap-3 uppercase italic transition hover:brightness-110 shadow-lg shadow-[var(--nexus-accent)]/20">
-                          {isProcessing ? <Loader2 className="animate-spin w-4 h-4 lg:w-5 lg:h-5" /> : <>Execute Drop <Zap className="w-4 h-4 lg:w-5 lg:h-5" /> <Send className="w-4 h-4 lg:w-5 lg:h-5" /></>}
+                          {isProcessing ? <Loader2 className="animate-spin w-4 h-4 lg:w-5 lg:h-5" /> : <>Send Donation <Zap className="w-4 h-4 lg:w-5 lg:h-5" /> <Send className="w-4 h-4 lg:w-5 lg:h-5" /></>}
                         </button>
 
                         <div className="flex items-center justify-center gap-4 text-[var(--nexus-text-muted)] text-[6px] lg:text-[7px] font-black uppercase pt-1">
-                          <div className="flex items-center gap-1.5"><ShieldCheck className="w-3 h-3" /> Secure Node</div>
+                          <div className="flex items-center gap-1.5"><ShieldCheck className="w-3 h-3" /> Secure Payment</div>
                           <div className="flex items-center gap-1.5"><Sparkles className="w-3 h-3" /> <Gift className="w-3 h-3" /> Razorpay Verified</div>
                         </div>
                       </div>
@@ -511,7 +526,7 @@ const DonationPage = () => {
                   ) : (
                     <div className="text-center py-12">
                       <CheckCircle className="w-16 h-16 text-[var(--nexus-accent)] mx-auto mb-4" />
-                      <h2 className="text-2xl font-black italic uppercase text-[var(--nexus-text)]">Drop Confirmed!</h2>
+                      <h2 className="text-2xl font-black italic uppercase text-[var(--nexus-text)]">Donation Sent!</h2>
                       <button onClick={() => setIsSuccess(false)} className="mt-8 bg-[var(--nexus-panel)] border border-[var(--nexus-border)] px-8 py-4 rounded-xl text-xs font-black uppercase text-[var(--nexus-text)] hover:border-[var(--nexus-accent)]/50 transition-colors">
                         Send Another
                       </button>

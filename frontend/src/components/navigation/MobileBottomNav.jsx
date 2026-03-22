@@ -1,175 +1,123 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LayoutGrid, Wrench, ShoppingBag, Mailbox, Target, LogOut, Shield, Zap, User, HelpCircle, X } from 'lucide-react';
+import { LayoutDashboard, Wrench, Mailbox, Target, LogOut, Shield, Zap, User, HelpCircle, X, ShoppingBag } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const MobileBottomNav = ({ activeSection, setActiveSection, onLogout, user, theme, isMenuExpanded, setIsMenuExpanded }) => {
     const navigate = useNavigate();
 
-    const navItems = [
-        { id: 'dashboard', label: 'Nexus', icon: LayoutGrid, color: '#2DD4BF' },
-        { id: 'accounts', label: 'Identity', icon: User, color: '#60A5FA' },
-        { id: 'settings', label: 'Control', icon: Wrench, color: '#FBBF24' },
+    const mainNavItems = [
+        { id: 'summary', label: 'Dashboard', icon: LayoutDashboard, color: '#2DD4BF' },
+        { id: 'control', label: 'Settings', icon: Wrench, color: '#FBBF24' },
+    ];
+
+    const secondaryNavItems = [
         { id: 'store', label: 'Store', icon: ShoppingBag, color: '#A78BFA' },
+        { id: 'profile', label: 'Profile', icon: User, color: '#60A5FA' },
+    ];
+
+    const quickActionItems = [
+        { id: 'growth', label: 'Growth', icon: Target, color: '#10B981' },
+        { id: 'help', label: 'Help', icon: HelpCircle, color: '#F59E0B' },
+        { id: 'feedback', label: 'Feedback', icon: Mailbox, color: '#EC4899' },
+        ...(user?.role === 'admin' ? [{ id: 'admin', label: 'Admin', icon: Shield, color: '#8B5CF6' }] : []),
+        { id: 'logout', label: 'Logout', icon: LogOut, color: '#F43F5E' },
     ];
 
     return (
-        <div className="fixed inset-x-0 bottom-0 z-[150] flex flex-col items-center pointer-events-none md:hidden">
-            {/* Pointer events enabled only for interactive parts */}
-            <div className="pointer-events-auto flex flex-col items-center w-full">
-
-                {/* THE EXPANDED CONTROL MENU ("Admin Portal", "Logout") */}
+        <div className="fixed inset-x-0 bottom-6 z-[150] flex flex-col items-center pointer-events-none md:hidden">
+            <div className="pointer-events-auto relative flex flex-col items-center w-[92%] max-w-md">
+                
+                {/* FLOATING QUICK ACTIONS MENU (The "Blue Pill") */}
                 <AnimatePresence>
                     {isMenuExpanded && (
                         <>
-                            {/* High-end glassmorphism backdrop */}
+                            {/* Backdrop */}
                             <motion.div
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
                                 onClick={() => setIsMenuExpanded(false)}
-                                className="fixed inset-0 z-[-1] bg-[var(--nexus-bg)]/80 backdrop-blur-md"
+                                className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[-1] pointer-events-auto"
                             />
 
-                            <motion.div
-                                initial={{ opacity: 0, y: 40, scale: 0.9 }}
+                             <motion.div
+                                initial={{ opacity: 0, y: 15, scale: 0.95 }}
                                 animate={{ opacity: 1, y: 0, scale: 1 }}
-                                exit={{ opacity: 0, y: 40, scale: 0.9 }}
-                                transition={{ type: "spring", damping: 20, stiffness: 600 }}
-                                className="w-[94%] max-w-sm mb-4 p-1 rounded-[2.5rem] bg-gradient-to-b from-white/10 to-transparent shadow-[0_30px_60px_rgba(0,0,0,0.5)] relative z-10"
+                                exit={{ opacity: 0, y: 15, scale: 0.95 }}
+                                transition={{ type: "spring", damping: 20, stiffness: 400 }}
+                                className="fixed bottom-[4.8rem] left-1/2 -translate-x-1/2 bg-[#0c0c0e]/95 backdrop-blur-3xl rounded-[2rem] p-2.5 flex items-center justify-center gap-1.5 shadow-[0_20px_40px_rgba(0,0,0,0.8)] border border-white/5 w-[max-content] max-w-[calc(100vw-2rem)] z-[200] ring-1 ring-white/10"
                             >
-                                <div className="w-full h-full p-4 rounded-[2.4rem] bg-[var(--nexus-panel)]/80 backdrop-blur-3xl border border-white/5 flex flex-col gap-4 relative overflow-hidden">
-                                    {/* Atmospheric background beam */}
-                                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 bg-white/5 blur-[60px] rounded-full pointer-events-none" />
+                                {/* Central Sub-glow */}
+                                <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
 
-                                    <div className="flex items-center justify-between gap-4 relative z-10">
-                                        <div className="flex flex-col">
-                                            <span className="text-[8px] font-black uppercase tracking-[0.4em] text-[var(--nexus-accent)] opacity-60 mb-0.5">Uplink Interface</span>
-                                            <h2 className="text-2xl font-black italic tracking-tighter uppercase text-[var(--nexus-text)] leading-none">Protocol Controls</h2>
-                                        </div>
-                                        <button
-                                            onClick={() => setIsMenuExpanded(false)}
-                                            className="h-10 w-10 flex items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white/40 hover:text-white hover:border-white/20 transition-all active:scale-90"
-                                        >
-                                            <X className="w-5 h-5" />
-                                        </button>
-                                    </div>
-
-                                    <div className="flex flex-col gap-3 max-h-[60vh] overflow-y-auto custom-scrollbar pr-1 relative z-10">
-                                        {/* Actions Grid */}
-                                        <div className="grid grid-cols-2 gap-2.5">
-                                            {[
-                                                { id: 'growth', label: 'Growth', sub: 'Missions', icon: Target, color: '#10B981', bg: 'rgba(16, 185, 129, 0.1)', border: 'rgba(16, 185, 129, 0.2)' },
-                                                { id: 'feedback', label: 'Signal', sub: 'Feedback', icon: Mailbox, color: '#3B82F6', bg: 'rgba(59, 130, 246, 0.1)', border: 'rgba(59, 130, 246, 0.2)' },
-                                                { id: 'help', label: 'Support', sub: 'Help Desk', icon: HelpCircle, color: '#F59E0B', bg: 'rgba(245, 158, 11, 0.1)', border: 'rgba(245, 158, 11, 0.2)' },
-                                                { id: 'admin', label: 'Admin', sub: 'Master Node', icon: Shield, color: '#8B5CF6', bg: 'rgba(139, 92, 246, 0.1)', border: 'rgba(139, 92, 246, 0.2)', adminOnly: true },
-                                            ].map((node) => {
-                                                if (node.adminOnly && user?.role !== 'admin') return null;
-                                                const isActive = activeSection === node.id;
-                                                return (
-                                                    <motion.button
-                                                        key={node.id}
-                                                        whileHover={{ scale: 1.02, y: -4 }}
-                                                        whileTap={{ scale: 0.96 }}
-                                                        onClick={() => {
-                                                            if (node.id === 'admin') navigate('/admin/secure-portal');
-                                                            else setActiveSection(node.id);
-                                                            setIsMenuExpanded(false);
-                                                        }}
-                                                        style={{
-                                                            background: isActive ? node.bg : 'rgba(255, 255, 255, 0.03)',
-                                                            borderColor: isActive ? node.border : 'rgba(255, 255, 255, 0.05)',
-                                                            boxShadow: isActive ? `0 10px 40px ${node.color}15` : 'none'
-                                                        }}
-                                                        className="flex flex-col items-center text-center gap-2 p-3.5 rounded-[1.5rem] transition-all border group relative overflow-hidden"
-                                                    >
-                                                        {/* Dynamic Hover Glow */}
-                                                        <div
-                                                            className="absolute inset-0 opacity-0 group-hover:opacity-15 transition-opacity duration-500"
-                                                            style={{ background: `radial-gradient(circle at center, ${node.color}, transparent 70%)` }}
-                                                        />
-
-                                                        <div
-                                                            style={{
-                                                                background: isActive ? node.color : 'rgba(255, 255, 255, 0.05)',
-                                                                color: isActive ? '#000' : node.color,
-                                                                boxShadow: isActive ? `0 0 20px ${node.color}66` : 'none'
-                                                            }}
-                                                            className="h-10 w-10 flex items-center justify-center rounded-xl transition-all duration-300 group-hover:scale-110 group-hover:rotate-6"
-                                                        >
-                                                            <node.icon className="w-5 h-5" />
-                                                        </div>
-                                                        <div className="flex flex-col relative z-10 transition-transform duration-300 group-hover:translate-y-[-1px]">
-                                                            <span
-                                                                style={{ color: isActive ? node.color : 'var(--nexus-text)' }}
-                                                                className="text-[11px] font-black uppercase italic tracking-tight transition-colors opacity-90"
-                                                            >
-                                                                {node.label}
-                                                            </span>
-                                                            <span className="text-[8px] uppercase font-black tracking-[0.2em] text-[var(--nexus-text)] opacity-30">{node.sub}</span>
-                                                        </div>
-                                                    </motion.button>
-                                                );
-                                            })}
-                                        </div>
-
-                                        {/* Destructive Action */}
-                                        <motion.button
-                                            whileHover={{ scale: 1.01, x: 4 }}
-                                            whileTap={{ scale: 0.98 }}
-                                            onClick={() => { setIsMenuExpanded(false); onLogout(); }}
-                                            className="flex items-center gap-3 p-3.5 rounded-[1.5rem] border border-rose-500/10 bg-rose-500/5 hover:bg-rose-500/10 hover:border-rose-500/30 transition-all group mt-1 relative overflow-hidden"
-                                        >
-                                            <div className="absolute inset-0 bg-gradient-to-r from-rose-500/0 via-rose-500/5 to-rose-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-                                            <div className="h-9 w-9 flex items-center justify-center rounded-xl bg-rose-500/10 text-rose-500 group-hover:scale-110 transition-transform shadow-inner">
-                                                <LogOut className="w-4 h-4" />
-                                            </div>
-                                            <div className="flex flex-col text-left relative z-10">
-                                                <span className="text-xs font-black uppercase italic tracking-tight text-rose-400">Exit Protocol</span>
-                                                <span className="text-[8px] text-rose-500/40 uppercase font-black tracking-[0.2em]">Terminate Session</span>
-                                            </div>
-                                        </motion.button>
-                                    </div>
-                                </div>
+                                {quickActionItems.map((item, index) => (
+                                    <motion.button
+                                        key={item.id}
+                                        whileHover={{ scale: 1.1 }}
+                                        whileTap={{ scale: 0.9 }}
+                                        onClick={() => {
+                                            if (item.id === 'logout') onLogout();
+                                            else if (item.id === 'admin') navigate('/admin/secure-portal');
+                                            else setActiveSection(item.id);
+                                            setIsMenuExpanded(false);
+                                        }}
+                                        className="w-11 h-11 flex flex-col items-center justify-center rounded-2xl transition-all relative group/btn"
+                                    >
+                                        <div 
+                                            className="absolute inset-0 rounded-2xl opacity-0 group-hover/btn:opacity-100 transition-all duration-300"
+                                            style={{ 
+                                                backgroundColor: `${item.color}15`,
+                                                boxShadow: `inset 0 0 10px ${item.color}20` 
+                                            }}
+                                        />
+                                        <item.icon 
+                                            className="w-4.5 h-4.5 relative z-10" 
+                                            style={{ 
+                                                color: item.color,
+                                                filter: `drop-shadow(0 0 8px ${item.color}40)`
+                                            }} 
+                                        />
+                                        <span className="text-[6px] font-black uppercase mt-1 opacity-40 group-hover/btn:opacity-100 transition-opacity" style={{ color: item.color }}>
+                                            {item.label}
+                                        </span>
+                                    </motion.button>
+                                ))}
                             </motion.div>
                         </>
                     )}
                 </AnimatePresence>
 
-                <div className="w-full bg-[var(--nexus-panel)]/60 backdrop-blur-[24px] border-t border-[var(--nexus-border)]/50 px-2 sm:px-4 flex items-center justify-between shadow-[0_-20px_40px_rgba(0,0,0,0.4)] transition-all duration-700" style={{ height: '64px', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+                {/* MAIN FLOATING DOCK */}
+                <div className="w-auto min-w-[320px] h-16 bg-[#0c0c0e]/95 backdrop-blur-3xl rounded-[2.5rem] border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_30px_rgba(0,0,0,0.5)] flex items-center justify-center gap-10 px-8 relative overflow-hidden">
+                    
+                    {/* Glossy Overlay for the bar */}
+                    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 
-                    {/* Left Nav Items */}
-                    <div className="flex justify-around flex-1 items-center">
-                        {navItems.slice(0, 2).map((item) => {
+                    {/* Left Items */}
+                    <div className="flex items-center gap-7">
+                        {mainNavItems.map((item) => {
                             const isActive = activeSection === item.id;
                             return (
                                 <button
                                     key={item.id}
                                     onClick={() => { setActiveSection(item.id); setIsMenuExpanded(false); }}
-                                    style={{ background: isActive ? `${item.color}15` : '' }}
-                                    className={`flex flex-col items-center gap-1.5 transition-all group relative px-1 sm:px-3 py-2 rounded-2xl`}
+                                    className="flex flex-col items-center group relative px-1"
                                 >
                                     <item.icon
-                                        style={{
+                                        style={{ 
                                             color: isActive ? item.color : '',
-                                            filter: isActive ? `drop-shadow(0 0 12px ${item.color}80)` : ''
+                                            filter: isActive ? `drop-shadow(0 0 10px ${item.color}B0)` : ''
                                         }}
-                                        className={`w-5 h-5 transition-all duration-500 ${isActive
+                                        className={`w-5.5 h-5.5 transition-all duration-300 ${isActive
                                             ? 'scale-110'
-                                            : 'text-[var(--nexus-text-muted)] opacity-30 group-hover:opacity-60'
+                                            : 'text-white/30 group-hover:text-white/60 group-hover:scale-105'
                                             }`} />
-                                    <span
-                                        style={{ color: isActive ? item.color : '' }}
-                                        className={`text-[8px] font-black uppercase tracking-[0.2em] transition-all duration-500 ${isActive
-                                            ? 'opacity-100'
-                                            : 'text-[var(--nexus-text-muted)] opacity-0 group-hover:opacity-40 translate-y-1 group-hover:translate-y-0'
-                                            }`}>{item.label}</span>
                                     {isActive && (
                                         <motion.div
-                                            layoutId="navGlow"
+                                            layoutId="activeIndicator"
                                             style={{ backgroundColor: item.color }}
-                                            className="absolute -top-4 w-10 h-1 rounded-full blur-[4px] opacity-60"
-                                            transition={{ type: "spring", bounce: 0.3, duration: 0.6 }}
+                                            className="absolute -bottom-3 w-1 h-1 rounded-full shadow-[0_0_12px_currentColor]"
                                         />
                                     )}
                                 </button>
@@ -177,70 +125,68 @@ const MobileBottomNav = ({ activeSection, setActiveSection, onLogout, user, them
                         })}
                     </div>
 
-                    {/* THE CENTRAL BRAND BUTTON */}
-                    <div className="relative -mt-10 px-1 sm:px-4 z-10">
-                        <motion.button
-                            onClick={() => setIsMenuExpanded(!isMenuExpanded)}
-                            animate={isMenuExpanded ? { scale: 1.1, rotate: 180 } : { scale: 1, rotate: 0 }}
-                            whileTap={{ scale: 0.9 }}
-                            transition={{ type: "spring", damping: 12, stiffness: 200 }}
-                            className={`relative flex items-center justify-center h-16 w-16 rounded-[1.7rem] border-2 transition-all backdrop-blur-3xl overflow-hidden group/zap ${isMenuExpanded
-                                ? 'bg-white border-white text-black shadow-[0_15px_40px_rgba(255,255,255,0.3)]'
-                                : 'bg-white/5 border-white/10 text-white shadow-[0_15px_30px_rgba(0,0,0,0.3)] hover:border-white/20'
-                                }`}
-                        >
-                            {isMenuExpanded ? (
-                                <X className="w-7 h-7" />
-                            ) : (
-                                <Zap className="w-7 h-7 fill-current" />
-                            )}
-                            <div className={`absolute inset-0 rounded-[1.5rem] border-4 transition-all duration-700 ${isMenuExpanded ? 'border-white/10 animate-pulse' : 'border-white/0 group-hover/zap:border-white/5'}`} />
-                            <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-white/10 to-transparent opacity-0 group-hover/zap:opacity-100 transition-opacity" />
-                        </motion.button>
-                    </div>
+                    {/* Central Brand Logo / Trigger */}
+                    <motion.button
+                        onClick={() => setIsMenuExpanded(!isMenuExpanded)}
+                        whileHover={{ scale: 1.15, rotate: 5 }}
+                        whileTap={{ scale: 0.9 }}
+                        className={`h-11 w-11 rounded-full flex items-center justify-center transition-all duration-500 relative z-10 ${
+                            isMenuExpanded 
+                            ? 'bg-white text-[var(--nexus-accent)] shadow-[0_0_25px_rgba(255,255,255,0.4)]' 
+                            : 'bg-gradient-to-br from-[var(--nexus-accent)] to-[var(--nexus-accent-dark,var(--nexus-accent))] text-white shadow-[0_0_20px_rgba(0,0,0,0.3)]'
+                        }`}
+                    >
+                        {isMenuExpanded ? (
+                            <X className="w-5 h-5" />
+                        ) : (
+                            <Zap 
+                                className="w-5 h-5 fill-current" 
+                                style={{ 
+                                    filter: `drop-shadow(0 0 8px var(--nexus-accent))` 
+                                }} 
+                            />
+                        )}
+                        
+                        {!isMenuExpanded && (
+                            <motion.div
+                                animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
+                                transition={{ duration: 2, repeat: Infinity }}
+                                className="absolute inset-0 bg-[var(--nexus-accent)] rounded-full blur-md -z-10"
+                            />
+                        )}
+                    </motion.button>
 
-                    {/* Right Nav Items */}
-                    <div className="flex justify-around flex-1 items-center">
-                        {navItems.slice(2, 4).map((item) => {
+                    {/* Right Items */}
+                    <div className="flex items-center gap-7">
+                        {secondaryNavItems.map((item) => {
                             const isActive = activeSection === item.id;
                             return (
                                 <button
                                     key={item.id}
                                     onClick={() => { setActiveSection(item.id); setIsMenuExpanded(false); }}
-                                    style={{ background: isActive ? `${item.color}15` : '' }}
-                                    className={`flex flex-col items-center gap-1.5 transition-all group relative px-1 sm:px-3 py-2 rounded-2xl`}
+                                    className="flex flex-col items-center group relative px-1"
                                 >
                                     <item.icon
-                                        style={{
+                                        style={{ 
                                             color: isActive ? item.color : '',
-                                            filter: isActive ? `drop-shadow(0 0 12px ${item.color}80)` : ''
+                                            filter: isActive ? `drop-shadow(0 0 10px ${item.color}B0)` : ''
                                         }}
-                                        className={`w-5 h-5 transition-all duration-500 ${isActive
+                                        className={`w-5.5 h-5.5 transition-all duration-300 ${isActive
                                             ? 'scale-110'
-                                            : 'text-[var(--nexus-text-muted)] opacity-30 group-hover:opacity-60'
+                                            : 'text-white/30 group-hover:text-white/60 group-hover:scale-105'
                                             }`} />
-                                    <span
-                                        style={{ color: isActive ? item.color : '' }}
-                                        className={`text-[8px] font-black uppercase tracking-[0.2em] transition-all duration-500 ${isActive
-                                            ? 'opacity-100'
-                                            : 'text-[var(--nexus-text-muted)] opacity-0 group-hover:opacity-40 translate-y-1 group-hover:translate-y-0'
-                                            }`}>{item.label}</span>
                                     {isActive && (
                                         <motion.div
-                                            layoutId="navGlow"
+                                            layoutId="activeIndicator"
                                             style={{ backgroundColor: item.color }}
-                                            className="absolute -top-4 w-10 h-1 rounded-full blur-[4px] opacity-60"
-                                            transition={{ type: "spring", bounce: 0.3, duration: 0.6 }}
+                                            className="absolute -bottom-3 w-1 h-1 rounded-full shadow-[0_0_12px_currentColor]"
                                         />
                                     )}
                                 </button>
                             );
                         })}
                     </div>
-
                 </div>
-
-                {/* Global mobile space below footer — handled inline above via paddingBottom */}
             </div>
         </div>
     );

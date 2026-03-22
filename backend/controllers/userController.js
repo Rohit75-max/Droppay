@@ -16,9 +16,11 @@ exports.requestWithdrawal = async (req, res) => {
 
         if (!user) return res.status(404).json({ msg: "Security Alert: Identity Node Not Found in the registry." });
 
+        const currentBalance = Number(user.walletBalance) || 0;
+        const currentPending = Number(user.financialMetrics?.pendingPayouts) || 0;
         const MIN_WITHDRAWAL = 1000;
 
-        if (user.walletBalance < MIN_WITHDRAWAL) {
+        if (currentBalance < MIN_WITHDRAWAL) {
             return res.status(400).json({ msg: `Insufficient Liquidity. Minimum node balance required for payout is ₹${MIN_WITHDRAWAL}.` });
         }
 
@@ -26,13 +28,17 @@ exports.requestWithdrawal = async (req, res) => {
             return res.status(400).json({ msg: `Invalid Amount. Minimum withdrawal is ₹${MIN_WITHDRAWAL}.` });
         }
 
-        if (amount > user.walletBalance) {
+        if (amount > currentBalance) {
             return res.status(400).json({ msg: "Withdrawal exceeds available balance." });
         }
 
         // Secure state transfer: Deduct requested amount & move to pending lock
-        user.walletBalance -= amount;
-        user.financialMetrics.pendingPayouts += amount;
+        user.walletBalance = currentBalance - amount;
+        
+        if (!user.financialMetrics) {
+            user.financialMetrics = { pendingPayouts: 0, totalSettled: 0, highestDrop: 0 };
+        }
+        user.financialMetrics.pendingPayouts = currentPending + amount;
 
         await user.save();
 

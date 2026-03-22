@@ -10,10 +10,10 @@ const HelpCenter = ({ theme }) => {
   const [searchQuery, setSearchQuery] = React.useState("");
 
   const faqItems = [
-    { q: "How do settlements work?", a: "Revenue is auto-settled via Razorpay Route protocols. Standard clearing time is T+2 business days. You can track individual drops in your Nexus Summary." },
-    { q: "How do I unlock lower platform fees?", a: "The Protocol operates on a 15/10/5 system. You can lower your fee by hitting 5 successful referrals in the 'Growth Missions' section." },
-    { q: "Why is my OBS Alert node offline?", a: "Check your OBS Key in the Control Center. Ensure the browser source URL is correct and that OBS has 'Refresh browser when scene becomes active' enabled." },
-    { q: "Can I use custom Lottie animations?", a: "Yes. Pro and Legend tier members can inject custom JSON URLs for alerts via the Partner Pack Studio in the Control Center." }
+    { q: "How do settlements work?", a: "Revenue is auto-settled via our secure payout systems. Standard clearing time is T+2 business days. You can track individual tips in your Dashboard Summary." },
+    { q: "How do I unlock lower platform fees?", a: "Our system operates on a 15/10/5 system. You can lower your fee by reaching 5 successful referrals in the 'Referrals & Rewards' section." },
+    { q: "Why is my OBS Alert source offline?", a: "Check your OBS Key in the Settings. Ensure the browser source URL is correct and that OBS has 'Refresh browser when scene becomes active' enabled." },
+    { q: "Can I use custom Lottie animations?", a: "Yes. Pro and Legend tier members can use custom JSON URLs for alerts via the Sticker Management in the Settings." }
   ];
 
   const filteredFaqs = faqItems.filter(item =>
@@ -36,10 +36,10 @@ const HelpCenter = ({ theme }) => {
               animate={{ opacity: 1, y: 0 }}
               className="text-4xl md:text-5xl lg:text-6xl font-black uppercase italic tracking-tighter text-[var(--nexus-text)] leading-[1.1] md:leading-none"
             >
-              DropPay <span className="text-[var(--nexus-accent)]">Help.</span>
+              DropPay <span className="text-[var(--nexus-accent)]">Support.</span>
             </motion.h2>
             <p className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-[var(--nexus-accent)] italic opacity-60">
-              Official Protocol Intelligence Hub
+              Official Support & Documentation
             </p>
           </div>
 
@@ -56,7 +56,7 @@ const HelpCenter = ({ theme }) => {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search library or OBS diagnostics..."
+              placeholder="Search for answers or setup help..."
               className="w-full bg-[var(--nexus-panel)]/40 backdrop-blur-2xl border-2 border-[var(--nexus-border)] rounded-2xl py-3.5 md:py-4 pl-12 md:pl-14 pr-12 text-sm text-[var(--nexus-text)] focus:border-[var(--nexus-accent)] focus:bg-[var(--nexus-bg)]/80 focus:shadow-[0_10px_30px_rgba(var(--nexus-accent-rgb),0.1)] outline-none transition-all font-bold placeholder:text-[var(--nexus-text-muted)] placeholder:font-medium shadow-lg hover:bg-[var(--nexus-panel)]/60"
             />
             {searchQuery && (
@@ -83,10 +83,10 @@ const HelpCenter = ({ theme }) => {
             <div className="flex flex-row items-center justify-between gap-4 px-2">
               <div className="flex items-center gap-3">
                 <div className="w-1.5 h-6 bg-[var(--nexus-accent)] rounded-full" />
-                <h3 className="text-xl md:text-2xl font-black uppercase italic tracking-tighter text-[var(--nexus-text)]">Knowledge Hub</h3>
+                <h3 className="text-xl md:text-2xl font-black uppercase italic tracking-tighter text-[var(--nexus-text)]">Knowledge Base</h3>
               </div>
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[var(--nexus-bg)]/40 border border-[var(--nexus-border)] text-[8px] font-black uppercase tracking-widest text-[var(--nexus-text-muted)]">
-                <MessageSquare className="w-2.5 h-2.5 text-[var(--nexus-accent)]" /> {filteredFaqs.length} Nodes Identified
+                <MessageSquare className="w-2.5 h-2.5 text-[var(--nexus-accent)]" /> {filteredFaqs.length} Articles Found
               </div>
             </div>
 
@@ -120,8 +120,8 @@ const HelpCenter = ({ theme }) => {
                     <ShieldAlert className="w-6 h-6 text-rose-500" />
                   </div>
                   <div className="space-y-1">
-                    <p className="text-[10px] font-black uppercase italic text-[var(--nexus-text)]">No matching intel found</p>
-                    <p className="text-[8px] font-bold uppercase tracking-widest text-[var(--nexus-text-muted)] opacity-60">Refine your search parameters</p>
+                    <p className="text-[10px] font-black uppercase italic text-[var(--nexus-text)]">No results found</p>
+                    <p className="text-[8px] font-bold uppercase tracking-widest text-[var(--nexus-text-muted)] opacity-60">Try different keywords</p>
                   </div>
                 </div>
               )}
@@ -133,19 +133,19 @@ const HelpCenter = ({ theme }) => {
             <div className="relative z-10 space-y-3">
               <div className="flex items-center justify-center md:justify-start gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-[var(--nexus-accent)] animate-pulse" />
-                <span className="text-[8px] font-black uppercase tracking-[0.2em] text-[var(--nexus-accent)]">Support Sync Active</span>
+                <span className="text-[8px] font-black uppercase tracking-[0.2em] text-[var(--nexus-accent)]">Support Online</span>
               </div>
               <h4 className="text-2xl font-black uppercase italic tracking-tighter text-[var(--nexus-text)] leading-tight">
-                Need More <span className="text-[var(--nexus-accent)]">Help?</span>
+                Need More <span className="text-[var(--nexus-accent)]">Assistance?</span>
               </h4>
               <p className="text-[10px] text-[var(--nexus-text-muted)] font-bold uppercase tracking-widest opacity-50 leading-relaxed max-w-sm">
-                Priority uplink active for Pro & Legend tier protocols. Connect with our technical task force.
+                Priority support is available for Pro & Legend members. Our team is ready to assist you.
               </p>
             </div>
 
             <button className="relative z-10 min-w-[200px] bg-[var(--nexus-accent)] text-black py-4 px-8 rounded-xl font-black uppercase italic text-[10px] shadow-lg hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-3 group">
               <MailIcon className="w-4 h-4 group-hover:rotate-12 transition-transform" />
-              Connect Support Hub
+              Connect to Support
             </button>
           </EliteCard>
         </div>
@@ -157,14 +157,14 @@ const HelpCenter = ({ theme }) => {
           <div className="space-y-6">
             <div className="flex items-center gap-3 px-2">
               <div className="w-1 h-4 bg-[var(--nexus-accent)]/40 rounded-full" />
-              <h3 className="text-lg font-black uppercase italic tracking-tighter text-[var(--nexus-text)]">Support Nodes</h3>
+              <h3 className="text-lg font-black uppercase italic tracking-tighter text-[var(--nexus-text)]">Support Categories</h3>
             </div>
 
             <div className="grid grid-cols-1 gap-4 w-full px-1">
               {[
-                { icon: Zap, title: "Engine Integration", subtitle: "OBS & Overlays", desc: "Sync browser sources and 3D alert nodes." },
-                { icon: Wallet, title: "Settlement Portal", subtitle: "Finance & Payouts", desc: "Manage treasury and settlement cycles." },
-                { icon: ShieldAlert, title: "Security Core", subtitle: "Keys & Encryption", desc: "Audit keys and secure account metadata." }
+                { icon: Zap, title: "Streaming Setup", subtitle: "OBS & Overlays", desc: "Sync browser sources and alert elements." },
+                { icon: Wallet, title: "Payout & Finance", subtitle: "Billing & Earnings", desc: "Manage your wallet and settlement history." },
+                { icon: ShieldAlert, title: "Account Security", subtitle: "Keys & Verification", desc: "Secure your account and manage access keys." }
               ].map((item, i) => (
                 <EliteCard
                   key={i}

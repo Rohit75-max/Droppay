@@ -161,7 +161,7 @@ const UserDetailDrawer = ({ userId, isOpen, onClose, context = 'directory' }) =>
                         {loading ? (
                             <div className="flex-1 flex flex-col items-center justify-center text-slate-400">
                                 <RefreshCw className="w-8 h-8 animate-spin mb-4 text-emerald-500" />
-                                <p className="text-xs font-black uppercase tracking-widest">Loading Telemetry...</p>
+                                <p className="text-xs font-black uppercase tracking-widest">Retrieving Data...</p>
                             </div>
                         ) : user ? (
                             <>
@@ -199,7 +199,7 @@ const UserDetailDrawer = ({ userId, isOpen, onClose, context = 'directory' }) =>
                                     {/* 1. Identity & Contact */}
                                     <section>
                                         <h3 className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">
-                                            <UserIcon className="w-3.5 h-3.5" /> Personal Identity
+                                            <UserIcon className="w-3.5 h-3.5" /> User Information
                                         </h3>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 flex items-start gap-4">
@@ -235,7 +235,7 @@ const UserDetailDrawer = ({ userId, isOpen, onClose, context = 'directory' }) =>
                                     {/* 2. Financial Metrics */}
                                     <section>
                                         <h3 className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">
-                                            <CreditCard className="w-3.5 h-3.5" /> Financial Nexus
+                                            <CreditCard className="w-3.5 h-3.5" /> Financial Summary
                                         </h3>
                                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                                             <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 hover:border-emerald-300 transition-colors">
@@ -268,7 +268,7 @@ const UserDetailDrawer = ({ userId, isOpen, onClose, context = 'directory' }) =>
                                             {/* 3. DropPay Dashboard Preferences */}
                                             <section>
                                                 <h3 className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">
-                                                    <Monitor className="w-3.5 h-3.5" /> Workspace Configuration
+                                                    <Monitor className="w-3.5 h-3.5" /> Platform Preferences
                                                 </h3>
                                                 <div className="grid grid-cols-2 gap-4">
                                                     <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
@@ -295,7 +295,7 @@ const UserDetailDrawer = ({ userId, isOpen, onClose, context = 'directory' }) =>
                                             {/* 4. Streamer Overlay Settings */}
                                             <section>
                                                 <h3 className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">
-                                                    <Paintbrush className="w-3.5 h-3.5" /> Studio Overlay Data
+                                                    <Paintbrush className="w-3.5 h-3.5" /> Streamer Resources
                                                 </h3>
                                                 <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100 space-y-4">
                                                     <div className="flex justify-between items-center border-b border-slate-200 pb-3">
@@ -322,7 +322,7 @@ const UserDetailDrawer = ({ userId, isOpen, onClose, context = 'directory' }) =>
                                             {/* 5. Security & Auth */}
                                             <section>
                                                 <h3 className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">
-                                                    <Settings className="w-3.5 h-3.5" /> Security Logs
+                                                    <Settings className="w-3.5 h-3.5" /> Account History
                                                 </h3>
                                                 <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
                                                     <div className="mb-3">
@@ -441,9 +441,9 @@ const UserDetailDrawer = ({ userId, isOpen, onClose, context = 'directory' }) =>
                                 <div className="w-16 h-16 bg-rose-50 rounded-2xl flex items-center justify-center mb-4 border border-rose-100">
                                     <AlertTriangle className="w-8 h-8 text-rose-400" />
                                 </div>
-                                <h3 className="text-base font-black text-slate-900 tracking-tight">Node Not Found</h3>
+                                <h3 className="text-base font-black text-slate-900 tracking-tight">Account Not Found</h3>
                                 <p className="text-xs text-slate-500 font-medium mt-1 mb-6 text-center max-w-[250px]">
-                                    We couldn't retrieve telemetrics for this node. They may have been fully purged from the system.
+                                    We couldn't retrieve information for this account. It may have been permanently removed from the system.
                                 </p>
                                 <button onClick={onClose} className="px-5 py-2.5 bg-slate-900 text-white hover:bg-slate-800 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all shadow-[0_4px_14px_0_rgba(0,0,0,0.1)] hover:shadow-none hover:translate-y-[1px]">
                                     Go Back
@@ -501,7 +501,7 @@ const AdminSecurePortal = () => {
     });
     const [broadcastMsg, setBroadcastMsg] = useState('');
     const [broadcastLevel, setBroadcastLevel] = useState('Standard');
-    const [telemetryEvents, setTelemetryEvents] = useState([]);
+    const [activityLogs, setActivityLogs] = useState([]);
 
     // — Live clock —
     useEffect(() => {
@@ -561,7 +561,7 @@ const AdminSecurePortal = () => {
                 { headers: authHeader() }
             );
             setGlobalConfig(res.data.settings);
-            toast.success("Platform Variables Synchronized", {
+            toast.success("Platform Settings Updated", {
                 style: { background: '#050505', color: '#10b981', border: '1px solid #10b98120' }
             });
         } catch (err) {
@@ -581,7 +581,7 @@ const AdminSecurePortal = () => {
                 icon: '⚡',
                 style: { background: '#050505', color: '#10b981', border: '1px solid #10b98120' }
             });
-            addTelemetryEvent(`Broadcast Dispatched: ${broadcastMsg.substring(0, 20)}...`, 'broadcast');
+            addActivityLog(`Broadcast Dispatched: ${broadcastMsg.substring(0, 20)}...`, 'broadcast');
         } catch (err) {
             toast.error("Transmission Interrupted");
         }
@@ -612,7 +612,7 @@ const AdminSecurePortal = () => {
         try {
             const res = await axios.get('/api/admin/health', { headers: authHeader() });
             setSystemHealth(res.data);
-        } catch (err) { console.error('System Health Telemetry Offline'); }
+        } catch (err) { console.error('System Status Data Offline'); }
     }, [authHeader]);
 
     const updateAdminProfileData = async (e) => {
@@ -623,10 +623,10 @@ const AdminSecurePortal = () => {
                 fullName: adminProfile.fullName,
                 adminProfile: adminProfile.adminProfile
             }, { headers: authHeader() });
-            toast.success("Identity Matrix Synchronized", {
+            toast.success("Admin Profile Updated", {
                 style: { background: '#050505', color: '#10b981', border: '1px solid #10b98120' }
             });
-            addTelemetryEvent(`Admin Profile Updated`, 'security');
+            addActivityLog(`Admin Profile Updated`, 'security');
         } catch (err) {
             toast.error("Synchronization Failed");
         } finally {
@@ -655,23 +655,23 @@ const AdminSecurePortal = () => {
                     avatar: res.data.avatarUrl
                 }
             }));
-            toast.success("Identity Avatar Synchronized", {
+            toast.success("Profile Picture Updated", {
                 style: { background: '#050505', color: '#10b981', border: '1px solid #10b98120' }
             });
-            addTelemetryEvent(`Admin Avatar Updated`, 'security');
+            addActivityLog(`Admin Avatar Updated`, 'security');
         } catch (err) {
             toast.error("Avatar Synchronization Failed");
         }
     };
 
-    const addTelemetryEvent = (message, type = 'info') => {
+    const addActivityLog = (message, type = 'info') => {
         const newEvent = {
             id: Date.now(),
             message,
             type,
             time: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
         };
-        setTelemetryEvents(prev => [newEvent, ...prev].slice(0, 20));
+        setActivityLogs(prev => [newEvent, ...prev].slice(0, 20));
     };
 
     const fetchAllData = useCallback(async () => {
@@ -782,6 +782,23 @@ const AdminSecurePortal = () => {
                     fetchPayoutQueue();
                     fetchMetrics();
                 } catch (err) { toast.error('Settlement execution failed.'); }
+            }
+        });
+    };
+
+    const rejectSettlement = (id, amount) => {
+        confirm({
+            title: 'Reject Settlement',
+            message: `Reject the ₹${amount.toLocaleString()} payout request and refund it to their standard wallet?`,
+            confirmLabel: 'Reject',
+            confirmColor: 'bg-rose-600',
+            onConfirm: async () => {
+                closeModal();
+                try {
+                    await axios.post(`/api/admin/payouts/${id}/reject`, {}, { headers: authHeader() });
+                    fetchPayoutQueue();
+                    fetchMetrics();
+                } catch (err) { toast.error('Settlement rejection failed.'); }
             }
         });
     };
@@ -976,7 +993,7 @@ const AdminSecurePortal = () => {
                         {/* Admin badge */}
                         <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-500">
                             <Shield className="w-3 h-3" />
-                            <span className="text-[9px] font-black uppercase tracking-widest">Master Node</span>
+                            <span className="text-[9px] font-black uppercase tracking-widest">Primary Administrator</span>
                         </div>
                     </div>
                 </header >
@@ -1187,7 +1204,7 @@ const AdminSecurePortal = () => {
                                 {/* Pagination */}
                                 <div className="px-6 py-6 border-t border-slate-200 flex items-center justify-between">
                                     <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
-                                        Node Matrix Page <span className="text-slate-500">{page}</span> of <span className="text-slate-500">{totalPages}</span>
+                                        User Directory Page <span className="text-slate-500">{page}</span> of <span className="text-slate-500">{totalPages}</span>
                                     </span>
                                     <div className="flex items-center gap-2">
                                         <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
@@ -1215,7 +1232,7 @@ const AdminSecurePortal = () => {
                                 </div>
                             </motion.div>
                         ) : activeSection === 'finance' ? (
-                            /* ── FINANCIAL NEXUS ── */
+                            /* ── FINANCIAL DASHBOARD ── */
                             <motion.div key="finance"
                                 initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }}
                                 transition={{ duration: 0.3 }}>
@@ -1239,7 +1256,7 @@ const AdminSecurePortal = () => {
                                         <div>
                                             <h2 className="text-xl font-black text-slate-900 tracking-tight">Settlement Queue</h2>
                                             <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] mt-1">
-                                                <span className="text-rose-500">{payoutQueue.length}</span> Nodes Awaiting Financial Clearance
+                                                <span className="text-rose-500">{payoutQueue.length}</span> Users Awaiting Financial Clearance
                                             </p>
                                         </div>
                                         <div className="flex items-center gap-3 px-4 py-2 rounded-2xl bg-rose-500/10 border border-rose-500/20 shadow-[0_0_15px_rgba(244,63,94,0.1)]">
@@ -1252,7 +1269,7 @@ const AdminSecurePortal = () => {
                                         <table className="w-full text-left text-sm min-w-[700px]">
                                             <thead className="bg-slate-50 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 border-b border-slate-200">
                                                 <tr>
-                                                    <th className="px-8 py-5">Origin Node</th>
+                                                    <th className="px-8 py-5">Origin User</th>
                                                     <th className="px-8 py-5">Tier Override</th>
                                                     <th className="px-8 py-5 text-emerald-400">Total Settled</th>
                                                     <th className="px-8 py-5 text-rose-400">Pending Settlement</th>
@@ -1298,13 +1315,21 @@ const AdminSecurePortal = () => {
                                                         <td className="px-8 py-5 font-black font-mono text-rose-500 text-[16px] drop-shadow-[0_0_15px_rgba(244,63,94,0.3)]">
                                                             ₹{(node.financialMetrics?.pendingPayouts || 0).toLocaleString()}
                                                         </td>
-                                                        <td className="px-8 py-5 text-right">
+                                                        <td className="px-8 py-5 text-right flex gap-2 justify-end items-center">
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    rejectSettlement(node._id, node.financialMetrics?.pendingPayouts || 0);
+                                                                }}
+                                                                className="inline-flex flex-1 items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] bg-rose-500/10 hover:bg-rose-500 hover:text-white text-rose-500 transition-all border border-rose-500/20 shadow-[0_0_15px_rgba(244,63,94,0.1)] hover:shadow-[0_0_20px_rgba(244,63,94,0.4)] hover:-translate-y-0.5 active:translate-y-0">
+                                                                <X className="w-3.5 h-3.5" /> REJECT
+                                                            </button>
                                                             <button
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
                                                                     executeSettlement(node._id, node.financialMetrics?.pendingPayouts || 0);
                                                                 }}
-                                                                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] bg-emerald-500 hover:bg-emerald-400 text-slate-900 transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] hover:-translate-y-0.5 active:translate-y-0">
+                                                                className="inline-flex flex-1 items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] bg-emerald-500 hover:bg-emerald-400 text-slate-900 transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] hover:-translate-y-0.5 active:translate-y-0">
                                                                 <Landmark className="w-3.5 h-3.5" /> AUTHORIZE
                                                             </button>
                                                         </td>
@@ -1316,7 +1341,7 @@ const AdminSecurePortal = () => {
                                 </div>
                             </motion.div>
                         ) : activeSection === 'broadcast' ? (
-                            /* ── BROADCAST ENGINE ── */
+                            /* ── BROADCAST CENTER ── */
                             <motion.div key="broadcast"
                                 initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }}
                                 className="max-w-4xl mx-auto space-y-8">
@@ -1324,8 +1349,8 @@ const AdminSecurePortal = () => {
                                     <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
                                         <Zap className="w-32 h-32 text-emerald-500" />
                                     </div>
-                                    <h2 className="text-2xl font-black text-slate-900 tracking-tight mb-2">Global Broadcast Uplink</h2>
-                                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-8">Dispatch high-priority alert packets to all active streamer nodes</p>
+                                    <h2 className="text-2xl font-black text-slate-900 tracking-tight mb-2">Global Broadcast Center</h2>
+                                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-8">Dispatch high-priority alerts to all active users</p>
 
                                     <div className="space-y-6 relative">
                                         <div>
@@ -1340,7 +1365,7 @@ const AdminSecurePortal = () => {
 
                                         <div className="flex flex-col sm:flex-row gap-6">
                                             <div className="flex-1">
-                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 block mb-3">Uplink Priority Level</label>
+                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 block mb-3">Broadcast Priority Level</label>
                                                 <div className="flex bg-slate-100 p-1 rounded-2xl border border-slate-200">
                                                     {['Standard', 'Advisory', 'Critical'].map(lvl => (
                                                         <button
@@ -1376,9 +1401,9 @@ const AdminSecurePortal = () => {
                                                 <div className="w-10 h-10 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-500/20">
                                                     <Shield className="w-5 h-5 text-emerald-500" />
                                                 </div>
-                                                Security & Audit Nexus
+                                                Security & Audit Logs
                                             </h2>
-                                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mt-2">Permanent immutable record of all master node operations</p>
+                                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mt-2">Permanent immutable record of all administrative actions</p>
                                         </div>
                                         <button onClick={() => fetchAuditLogs(logsPage)} className="p-3 bg-slate-100 rounded-2xl hover:bg-slate-100 transition-colors border border-slate-200">
                                             <RefreshCw className={`w-4 h-4 text-emerald-500 ${refreshing ? 'animate-spin' : ''}`} />
@@ -1391,9 +1416,9 @@ const AdminSecurePortal = () => {
                                                 <tr>
                                                     <th className="px-6 py-4">Timestamp</th>
                                                     <th className="px-6 py-4">Administrator</th>
-                                                    <th className="px-6 py-4">Action Packet</th>
-                                                    <th className="px-6 py-4">Target Node</th>
-                                                    <th className="px-6 py-4">Operational Details</th>
+                                                    <th className="px-6 py-4">Activity</th>
+                                                    <th className="px-6 py-4">Target User</th>
+                                                    <th className="px-6 py-4">Event Details</th>
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-slate-100">
@@ -1438,7 +1463,7 @@ const AdminSecurePortal = () => {
                                             className="p-2 bg-slate-100 rounded-xl border border-slate-200 disabled:opacity-20 hover:bg-slate-100 transition-colors">
                                             <ChevronLeft className="w-4 h-4" />
                                         </button>
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Sector {logsPage} / {totalLogsPages}</span>
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Page {logsPage} / {totalLogsPages}</span>
                                         <button
                                             disabled={logsPage >= totalLogsPages}
                                             onClick={() => fetchAuditLogs(logsPage + 1)}
@@ -1492,7 +1517,7 @@ const AdminSecurePortal = () => {
                                         </h3>
                                         <div className="space-y-6">
                                             {[
-                                                { label: 'Database Node', val: systemHealth?.dbConnection },
+                                                { label: 'Database Connection', val: systemHealth?.dbConnection },
                                                 { label: 'Payout Engine', val: systemHealth?.payoutEngine },
                                                 { label: 'Broadcast Relay', val: systemHealth?.broadcastRelay }
                                             ].map((relay, i) => (
@@ -1550,7 +1575,7 @@ const AdminSecurePortal = () => {
                                                 <div className="text-center md:text-left flex-1">
                                                     <h2 className="text-3xl font-black text-slate-900 tracking-tight underline decoration-emerald-500/30 decoration-4 underline-offset-8">
                                                         {adminProfile.username}
-                                                        <span className="ml-3 text-emerald-400 text-xs font-black uppercase tracking-[0.2em] bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.1)]">Master Node</span>
+                                                        <span className="ml-3 text-emerald-400 text-xs font-black uppercase tracking-[0.2em] bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.1)]">System Administrator</span>
                                                     </h2>
                                                     <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.3em] mt-4 flex items-center justify-center md:justify-start gap-2">
                                                         <Monitor className="w-3 h-3" /> System Access Level: {adminProfile.adminProfile?.accessLevel || 1}
@@ -1645,10 +1670,10 @@ const AdminSecurePortal = () => {
                                         {/* Security Logs Component */}
                                         <div className="bg-slate-50/50 rounded-3xl border border-slate-200 p-8 backdrop-blur-2xl">
                                             <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-6 flex items-center gap-2">
-                                                <Activity className="w-3.5 h-3.5" /> Recent Master Node Activity
+                                                <Activity className="w-3.5 h-3.5" /> Recent Administrator Activity
                                             </h3>
                                             <div className="space-y-4">
-                                                {telemetryEvents.filter(ev => ev.type === 'security' || ev.type === 'broadcast').slice(0, 5).map(ev => (
+                                                {activityLogs.filter(ev => ev.type === 'security' || ev.type === 'broadcast').slice(0, 5).map(ev => (
                                                     <div key={ev.id} className="flex items-center justify-between py-3 border-b border-slate-200">
                                                         <div className="flex items-center gap-3">
                                                             <div className={`w-1.5 h-1.5 rounded-full ${ev.type === 'security' ? 'bg-indigo-500' : 'bg-amber-500'}`} />
@@ -1657,7 +1682,7 @@ const AdminSecurePortal = () => {
                                                         <span className="text-[9px] font-mono text-slate-400">{ev.time}</span>
                                                     </div>
                                                 ))}
-                                                {telemetryEvents.length === 0 && (
+                                                {activityLogs.length === 0 && (
                                                     <p className="text-center py-4 text-[10px] font-black uppercase tracking-widest text-slate-300 italic">Secure session active - awaiting events...</p>
                                                 )}
                                             </div>
@@ -1711,7 +1736,7 @@ const AdminSecurePortal = () => {
                                         <div className="flex items-center justify-between p-6 bg-rose-500/5 border border-rose-500/10 rounded-2xl">
                                             <div>
                                                 <p className="text-sm font-black text-rose-500 uppercase tracking-wider">Maintenance Protocol</p>
-                                                <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-widest mt-1">Suspend all financial nodes and public uplinks</p>
+                                                <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-widest mt-1">Suspend all financial accounts and public access</p>
                                             </div>
                                             <div
                                                 onClick={() => updateGlobalConfig({ maintenanceMode: !globalConfig.maintenanceMode })}
@@ -1726,15 +1751,15 @@ const AdminSecurePortal = () => {
                                     <div className="bg-white rounded-3xl border border-slate-200 p-8 backdrop-blur-sm">
                                         <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
                                             <Activity className="w-3.5 h-3.5 text-emerald-400" />
-                                            Live Event Telemetry
+                                            Live Event Logs
                                         </h3>
                                         <div className="space-y-4 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
-                                            {telemetryEvents.length === 0 ? (
+                                            {activityLogs.length === 0 ? (
                                                 <div className="py-20 text-center">
                                                     <Activity className="w-8 h-8 text-slate-300 mx-auto mb-3" />
                                                     <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Awaiting Transmissions...</p>
                                                 </div>
-                                            ) : telemetryEvents.map(ev => (
+                                            ) : activityLogs.map(ev => (
                                                 <div key={ev.id} className={`bg-slate-50 border-l-2 p-4 rounded-r-xl transition-all hover:bg-white/[0.05] ${ev.type === 'broadcast' ? 'border-amber-500' : 'border-emerald-500'}`}>
                                                     <p className={`text-[10px] font-black uppercase tracking-widest ${ev.type === 'broadcast' ? 'text-amber-500' : 'text-emerald-400'}`}>
                                                         {ev.type.toUpperCase()}
@@ -1762,7 +1787,7 @@ const AdminSecurePortal = () => {
                     <div className="flex items-center gap-6">
                         <div className="flex items-center gap-2">
                             <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Active Matrix:</span>
-                            <span className="text-[9px] font-mono text-slate-500">{totalNodes.toLocaleString()} Nodes Locked</span>
+                            <span className="text-[9px] font-mono text-slate-500">{totalNodes.toLocaleString()} Accounts Restricted</span>
                         </div>
                         <div className="h-4 w-px bg-slate-100" />
                         <span className="text-[9px] font-black uppercase tracking-widest text-slate-300">DropPay Command Center v4.1.0</span>

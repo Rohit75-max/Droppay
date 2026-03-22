@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ShieldCheck, Zap, Lock, Sparkles, Activity, Target, Wallet } from 'lucide-react';
+import { X, ShieldCheck, Zap, Lock, Sparkles, Activity, Target, Wallet, User, Trophy, Crown, MessageSquare, Gift } from 'lucide-react';
 import PremiumAlertPreview from '../PremiumAlertPreview';
 import PremiumGoalOverlays from '../PremiumGoalOverlays';
 import CyberGoalBar from '../CyberGoalBar';
@@ -104,30 +104,110 @@ const PremiumPreviewModal = ({ isOpen, onClose, item, onUnlock, theme }) => {
                                 )}
 
                                 {item.category === 'widgets' && (
-                                    <div className="w-full flex flex-col items-center justify-center overflow-hidden">
-                                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.05)_0%,transparent_70%)] pointer-events-none" />
-                                        {PREMIUM_GOAL_STYLES.includes(item.id) ? (
-                                            <PremiumGoalOverlays
-                                                goal={{
-                                                    title: item.name,
-                                                    targetAmount: parseInt(item.price.replace('₹', '')) || 5000,
-                                                    currentProgress: (parseInt(item.price.replace('₹', '')) || 5000) * 0.75,
-                                                    stylePreference: item.id
-                                                }}
-                                                percentage={75}
-                                                isComplete={false}
-                                            />
-                                        ) : (
-                                            <CyberGoalBar
-                                                goal={{
-                                                    title: item.name,
-                                                    targetAmount: parseInt(item.price.replace('₹', '')) || 5000,
-                                                    currentProgress: (parseInt(item.price.replace('₹', '')) || 5000) * 0.75
-                                                }}
-                                                percentage={75}
-                                                isComplete={false}
-                                                goalStylePreference={item.id}
-                                            />
+                                    <div className="w-full h-full flex items-center justify-center p-8">
+                                        {item.id === 'user_profile' && (
+                                            <div className="flex flex-col items-center justify-center gap-10 scale-[1.5]">
+                                                <div className="relative">
+                                                    <motion.div
+                                                        animate={{ scale: [1, 1.2, 1], opacity: [0.2, 0.4, 0.2] }}
+                                                        transition={{ repeat: Infinity, duration: 4 }}
+                                                        className="absolute -inset-12 rounded-full bg-blue-500/20 blur-2xl"
+                                                    />
+                                                    <div className="w-32 h-32 rounded-full border-4 border-blue-500/30 p-2 bg-black/40 relative z-10 flex items-center justify-center shadow-[0_0_30px_rgba(59,130,246,0.2)]">
+                                                        <User className="w-16 h-16 text-blue-400" />
+                                                    </div>
+                                                    <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-emerald-500 rounded-full border-4 border-black flex items-center justify-center shadow-lg">
+                                                        <ShieldCheck className="w-6 h-6 text-white" />
+                                                    </div>
+                                                </div>
+                                                <div className="space-y-3 text-center">
+                                                    <div className="h-3 w-40 bg-blue-500/10 rounded-full overflow-hidden">
+                                                        <motion.div
+                                                            animate={{ x: [-160, 160] }}
+                                                            transition={{ repeat: Infinity, duration: 2.5, ease: "linear" }}
+                                                            className="h-full w-20 bg-gradient-to-r from-transparent via-blue-400 to-transparent"
+                                                        />
+                                                    </div>
+                                                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-400 opacity-60">Status: Verified Node</p>
+                                                </div>
+                                            </div>
+                                        )}
+                                        {item.id === 'wallet_balance' && (
+                                            <div className="flex flex-col items-center justify-center gap-6 scale-[1.4]">
+                                                <div className="flex items-center gap-3 bg-emerald-500/10 px-5 py-2 rounded-full border border-emerald-500/20 shadow-inner">
+                                                    <Wallet className="w-4 h-4 text-emerald-400" />
+                                                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-emerald-400 pb-0.5">Revenue</span>
+                                                </div>
+                                                <div className="text-7xl font-black italic text-emerald-400 flex items-center gap-3 drop-shadow-[0_0_20px_rgba(16,185,129,0.3)]">
+                                                    <span className="text-4xl opacity-50">₹</span>
+                                                    <motion.span
+                                                        animate={{ scale: [1, 1.05, 1], y: [0, -2, 0] }}
+                                                        transition={{ repeat: Infinity, duration: 4 }}
+                                                    >
+                                                        12,450
+                                                    </motion.span>
+                                                </div>
+                                                <div className="w-64 h-2 bg-emerald-500/10 rounded-full overflow-hidden mt-4 relative">
+                                                    <motion.div
+                                                        animate={{ width: ["0%", "92%", "0%"] }}
+                                                        transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
+                                                        className="h-full bg-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.8)]"
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
+                                        {item.id === 'elite_nexus' && (
+                                            <div className="w-full max-w-lg flex flex-col gap-8 scale-[1.2]">
+                                                <div className="flex items-center justify-between px-6 py-3 bg-indigo-500/10 border-l-4 border-indigo-500 shadow-inner">
+                                                    <div className="flex items-center gap-3">
+                                                        <Trophy className="w-5 h-5 text-indigo-400" />
+                                                        <span className="text-xs font-black uppercase tracking-[0.3em] text-indigo-400">Elite Supporter Node</span>
+                                                    </div>
+                                                    <Sparkles className="w-4 h-4 text-indigo-400/50 animate-pulse" />
+                                                </div>
+                                                <div className="flex gap-6 overflow-hidden px-4 justify-center">
+                                                    <motion.div
+                                                        animate={{ y: [0, -5, 0] }}
+                                                        transition={{ repeat: Infinity, duration: 3 }}
+                                                        className="shrink-0 w-16 h-16 rounded-2xl border-2 border-indigo-500/30 bg-black/40 flex items-center justify-center shadow-[0_0_20px_rgba(99,102,241,0.2)]"
+                                                    >
+                                                        <MessageSquare className="w-8 h-8 text-indigo-400" />
+                                                    </motion.div>
+                                                    <motion.div
+                                                        animate={{ y: [0, -5, 0] }}
+                                                        transition={{ repeat: Infinity, duration: 3, delay: 0.3 }}
+                                                        className="shrink-0 w-16 h-16 rounded-2xl border-2 border-indigo-500/30 bg-black/40 flex items-center justify-center shadow-[0_0_20px_rgba(99,102,241,0.2)]"
+                                                    >
+                                                        <Gift className="w-8 h-8 text-indigo-400" />
+                                                    </motion.div>
+                                                    {[1, 2].map(i => (
+                                                        <motion.div
+                                                            key={i}
+                                                            animate={{ y: [0, -5, 0] }}
+                                                            transition={{ repeat: Infinity, duration: 3, delay: 0.6 + i * 0.2 }}
+                                                            className="shrink-0 w-16 h-16 rounded-2xl border-2 border-indigo-500/30 bg-black/40 flex items-center justify-center shadow-[0_0_20px_rgba(99,102,241,0.2)]"
+                                                        >
+                                                            <div className="w-8 h-8 rounded-lg bg-indigo-500/10 animate-pulse border border-indigo-500/20" />
+                                                        </motion.div>
+                                                    ))}
+                                                    <div className="shrink-0 w-16 h-16 rounded-2xl border-2 border-dashed border-amber-500/30 bg-black/40 flex items-center justify-center">
+                                                        <Crown className="w-10 h-10 text-amber-500/20" />
+                                                    </div>
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <div className="h-2 w-full bg-indigo-500/10 rounded-full relative overflow-hidden">
+                                                        <motion.div
+                                                            animate={{ x: [-100, 500] }}
+                                                            transition={{ repeat: Infinity, duration: 3, ease: "linear" }}
+                                                            className="absolute top-0 bottom-0 w-20 bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent"
+                                                        />
+                                                    </div>
+                                                    <div className="flex justify-between text-[10px] font-bold text-indigo-400/40 uppercase tracking-widest">
+                                                        <span>Syncing Activity...</span>
+                                                        <span>8.4 GB/s</span>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         )}
                                     </div>
                                 )}

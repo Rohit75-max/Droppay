@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import axios from '../api/axios';
 import {
   Mail, Zap, Loader2, CheckCircle, AlertCircle,
-  Send, ArrowLeft, Shield, Lock, Key, Globe, Sparkles
+  Send, ArrowLeft, Shield, Lock, Key, Globe
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -42,20 +42,17 @@ const PremiumInput = ({ icon: Icon, label, value, onChange, placeholder, type = 
   const [focused, setFocused] = useState(false);
   return (
     <div className="space-y-3">
-      <label className={`flex items-center gap-2.5 text-[10px] font-black uppercase tracking-[0.3em] transition-colors duration-500 ${focused ? 'text-emerald-400' : 'text-white/30'}`}>
+      <label className={`flex items-center gap-2.5 text-[10px] font-black uppercase tracking-[0.3em] transition-colors duration-500 ${focused ? 'text-[#10B981]' : 'text-white/30'}`}>
         <Icon className="w-3.5 h-3.5" /> {label}
       </label>
       <div className="relative group">
-        <motion.div
-          className={`absolute -inset-[1px] rounded-2xl bg-gradient-to-r from-emerald-500/50 via-cyan-500/50 to-emerald-500/50 pointer-events-none transition-opacity duration-500 ${focused ? 'opacity-100' : 'opacity-0'}`}
-        />
         <div className="relative">
-          <Icon className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors duration-500 ${focused ? 'text-emerald-400' : 'text-white/20'}`} />
+          <Icon className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors duration-500 ${focused ? 'text-[#10B981]' : 'text-white/20'}`} />
           <input
             type={type} value={value} onChange={onChange} required
             onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
             placeholder={placeholder}
-            className="w-full bg-black/40 border border-white/5 rounded-2xl py-4 pl-12 pr-4 text-sm text-white placeholder:text-white/10 focus:outline-none transition-all duration-500 backdrop-blur-md"
+            className={`w-full bg-black/40 border ${focused ? 'border-[#10B981]' : 'border-white/5'} rounded-2xl py-4 pl-12 pr-4 text-sm text-white placeholder:text-white/10 focus:outline-none transition-all duration-500 backdrop-blur-md`}
           />
         </div>
       </div>
@@ -77,7 +74,7 @@ const ForgotPassword = () => {
       const res = await axios.post('/api/auth/forgot-password', { email });
       if (res.data) setSent(true);
     } catch (err) {
-      setError(err.response?.data?.msg || 'Recovery transmission failed. Node rejected email.');
+      setError(err.response?.data?.msg || 'Password reset request failed. Please check your email.');
     } finally { setLoading(false); }
   };
 
@@ -109,17 +106,13 @@ const ForgotPassword = () => {
         transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
         className="relative w-full max-w-[1000px] rounded-[3.5rem] overflow-hidden flex flex-col lg:flex-row border border-white/5 bg-[#080808]/80 backdrop-blur-2xl shadow-[0_40px_100px_-20px_rgba(0,0,0,0.8)]"
       >
-        {/* ── LEFT — Cyber Panel ── */}
+        {/* ── LEFT — Info Panel ── */}
         <div className="relative lg:w-[400px] shrink-0 bg-[#050505] overflow-hidden flex flex-col justify-between p-8 lg:p-12 min-h-[300px] lg:min-h-0 border-r border-white/5">
           <div className="absolute inset-0 pointer-events-none opacity-20"
             style={{ backgroundImage: 'radial-gradient(circle, rgba(16,185,129,0.1) 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
 
           <div className="relative z-10">
-            <Link to="/login" className="group inline-flex items-center gap-3 px-5 py-2.5 rounded-2xl bg-white/[0.03] border border-white/5 hover:bg-white/5 hover:border-white/10 text-white/40 hover:text-white transition-all text-[11px] font-black uppercase tracking-[0.3em] mb-12">
-              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Access Portal
-            </Link>
-
-            <div className="flex items-center gap-4 mb-8">
+            <div className="flex items-center gap-4 mb-10">
               <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center relative group">
                 <Zap className="w-6 h-6 text-emerald-400 fill-emerald-400" />
                 <motion.div
@@ -130,32 +123,15 @@ const ForgotPassword = () => {
               </div>
               <div>
                 <span className="text-2xl font-black italic uppercase tracking-tighter">Drop<span className="text-emerald-500">Pay</span></span>
-                <p className="text-white/20 text-[10px] uppercase tracking-[0.4em] font-black">Node Recovery</p>
+                <p className="text-white/20 text-[10px] uppercase tracking-[0.4em] font-black">Account Recovery</p>
               </div>
             </div>
 
-            <h2 className="text-4xl lg:text-5xl font-black italic text-white leading-[0.9] tracking-tighter mb-6 uppercase flex items-center gap-4">
-              Recover<br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-br from-emerald-200 via-emerald-400 to-cyan-600 drop-shadow-[0_0_20px_rgba(16,185,129,0.3)]">
-                Uplink.
-              </span>
-              <motion.div
-                animate={{ rotate: [0, 360], scale: [1, 1.2, 1] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-              >
-                <Sparkles className="w-8 h-8 text-emerald-400/50" />
-              </motion.div>
-            </h2>
-
-            <p className="text-white/40 text-sm font-bold leading-relaxed max-w-xs mb-10 italic">
-              Synchronize your master credentials. We'll transmit a secure reset vector to your registered node.
-            </p>
-
-            <div className="space-y-3">
+            <div className="space-y-3 mt-8">
               {[
-                { icon: Mail, text: 'Identify Node Email', color: 'text-emerald-400 bg-emerald-500/5 border-emerald-500/10' },
-                { icon: Send, text: 'Await Transmission', color: 'text-cyan-400 bg-cyan-500/5 border-cyan-500/10' },
-                { icon: Lock, text: 'Re-calibrate Key', color: 'text-indigo-400 bg-indigo-500/5 border-indigo-500/10' },
+                { icon: Mail, text: 'Enter your email', color: 'text-emerald-400 bg-emerald-500/5 border-emerald-500/10' },
+                { icon: Send, text: 'Check your inbox', color: 'text-cyan-400 bg-cyan-500/5 border-cyan-500/10' },
+                { icon: Lock, text: 'Create new password', color: 'text-indigo-400 bg-indigo-500/5 border-indigo-500/10' },
               ].map(({ icon: Icon, text, color }, i) => (
                 <div key={i} className={`flex items-center gap-4 px-4 py-3 rounded-2xl border ${color} opacity-60`}>
                   <Icon className="w-4 h-4 shrink-0" />
@@ -169,24 +145,24 @@ const ForgotPassword = () => {
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/10 text-[9px] font-black uppercase tracking-widest text-emerald-400/60">
               <Shield className="w-3.5 h-3.5" /> 256-bit Encrypted
             </div>
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/10 text-[9px] font-black uppercase tracking-widest text-amber-400/60">
-              <Key className="w-3.5 h-3.5" /> 15m Protocol
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/10 text-[9px] font-black uppercase tracking-widest text-emerald-400/60">
+              <Key className="w-3.5 h-3.5" /> Secure Vault access
             </div>
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/10 text-[9px] font-black uppercase tracking-widest text-cyan-400/60">
-              <Globe className="w-3.5 h-3.5" /> Global Uplink
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/10 text-[9px] font-black uppercase tracking-widest text-emerald-400/60">
+              <Globe className="w-3.5 h-3.5" /> Global Recovery
             </div>
           </div>
         </div>
 
-        {/* ── RIGHT — Terminals ── */}
+        {/* ── RIGHT — Form ── */}
         <div className="flex-1 flex flex-col justify-center p-8 lg:p-16 relative">
           <AnimatePresence mode="wait">
             {!sent ? (
               <motion.div key="form" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.5 }}>
                 <header className="flex items-center justify-between mb-12">
                   <div>
-                    <h3 className="text-3xl font-black italic tracking-tighter uppercase mb-1">Key Recovery</h3>
-                    <p className="text-white/20 text-[10px] font-black uppercase tracking-[0.3em]">Initialize Reset Sequence</p>
+                    <h3 className="text-3xl font-black italic tracking-tighter uppercase mb-1">Account Recovery</h3>
+                    <p className="text-white/20 text-[10px] font-black uppercase tracking-[0.3em]">Enter your email to continue</p>
                   </div>
                   <div className="flex items-center gap-3 px-4 py-2 rounded-2xl bg-white/[0.03] border border-white/10">
                     <motion.div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]"
@@ -212,7 +188,7 @@ const ForgotPassword = () => {
                 <form onSubmit={handleReset} className="space-y-8">
                   <PremiumInput
                     icon={Mail}
-                    label="Master Node Identity"
+                    label="Email Address"
                     value={email}
                     onChange={e => { setError(''); setEmail(e.target.value); }}
                     placeholder="Enter registered email..."
@@ -233,7 +209,7 @@ const ForgotPassword = () => {
                       animate={{ x: loading ? ['-200%', '200%'] : '[-200%]' }}
                       transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                     />
-                    {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : <><Send className="w-5 h-5" /> Transmit Recovery Vector</>}
+                    {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : "SEND"}
                   </motion.button>
                 </form>
 
@@ -246,7 +222,7 @@ const ForgotPassword = () => {
                 <div className="text-center">
                   <Link to="/login" className="inline-flex items-center gap-3 text-[11px] font-black text-white/30 hover:text-emerald-400 uppercase tracking-[0.3em] transition-all group italic">
                     <ArrowLeft className="w-4 h-4 group-hover:-translate-x-2 transition-transform duration-500" />
-                    Return to Login Console
+                    Return to Login
                   </Link>
                 </div>
               </motion.div>
@@ -266,22 +242,22 @@ const ForgotPassword = () => {
                   />
                 </div>
 
-                <h3 className="text-4xl font-black italic tracking-tighter uppercase mb-4">Transmission Sent.</h3>
+                <h3 className="text-4xl font-black italic tracking-tighter uppercase mb-4">Reset Link Sent.</h3>
                 <p className="text-white/40 text-sm font-bold mb-10 max-w-sm italic">
-                  Synchronization vector dispatched. Check your terminal at:<br />
+                  We've sent a password reset link to:<br />
                   <span className="text-emerald-400 text-base mt-2 block not-italic font-black underline decoration-emerald-500/30 underline-offset-8">{email}</span>
                 </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-md">
                   <Link to="/login" className="flex items-center justify-center gap-3 py-5 rounded-2xl bg-white/5 border border-white/10 font-black uppercase tracking-widest text-[11px] hover:bg-white/10 transition-all italic">
-                    <ArrowLeft className="w-4 h-4" /> Login Portal
+                    <ArrowLeft className="w-4 h-4" /> Back to Login
                   </Link>
                   <button onClick={() => setSent(false)} className="flex items-center justify-center gap-3 py-5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-black uppercase tracking-widest text-[11px] hover:bg-emerald-500/20 transition-all italic">
-                    Transmit Again
+                    Resend Link
                   </button>
                 </div>
 
-                <p className="mt-12 text-white/10 text-[9px] font-black uppercase tracking-[0.5em]">Expected latency: &lt; 2 minutes</p>
+                <p className="mt-12 text-white/10 text-[9px] font-black uppercase tracking-[0.5em]">Expected arrival: &lt; 2 minutes</p>
               </motion.div>
             )}
           </AnimatePresence>

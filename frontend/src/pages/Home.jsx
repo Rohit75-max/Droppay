@@ -1,11 +1,10 @@
-import React, { useState, useMemo, useCallback, useEffect, lazy, Suspense } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Zap, ChevronRight,
   Play, Wand2, Sparkles, Trophy, Globe, Layers, Cpu, Radio,
   ArrowRight, Menu, X, Banknote, Landmark, Rocket,
-  Instagram, Twitter, Target, CheckCircle2, Monitor, Smartphone, PlaySquare, Heart, Github, Linkedin, Layout, User, Shield, BarChart3,
-  Lock, ShieldCheck
+  Instagram, Twitter, Target, CheckCircle2, Monitor, Smartphone, PlaySquare, Heart, Github, Linkedin, Layout, User, Shield, BarChart3
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -13,18 +12,163 @@ import { toast } from 'react-toastify';
 import SocketModal from '../components/SocketModal';
 import { getOptimizedImage } from '../protocol/cdnHelper';
 import DonationTicker from '../components/widgets/DonationTicker';
-import ThemeToggle from '../components/ThemeToggle';
-import { useTheme } from '../context/ThemeContext';
+
 import { Player } from '@lottiefiles/react-lottie-player';
 
 // --- Lazy-loaded heavy components (deferred ~74KB from initial bundle) ---
 const AlertPreview = lazy(() => import('../components/AlertPreview'));
 
+const premiumFeaturesData = [
+  {
+    id: "storefronts",
+    title: "Custom Storefronts.",
+    desc: "Showcase your brand with stunning custom profiles and lightning-fast checkout experiences across all devices.",
+    tags: ["Mobile Optimized", "Brand-First"],
+    accent: "#22d3ee",
+    accentRgb: "34,211,238",
+    iconBgClass: "bg-cyan-400/10 text-cyan-400 border-cyan-400/20",
+    bgIconClass: "text-cyan-400",
+    tag1Class: "bg-cyan-400/10 border-cyan-400/20 text-cyan-400",
+    stat: "12K+",
+    statLabel: "Active Stores",
+    Icon: Monitor,
+    BgIcon: Layout,
+  },
+  {
+    id: "themes",
+    title: "Dynamic Themes.",
+    desc: "Immerse your supporters in breathtaking visual experiences with our premium, fully interactive dynamic themes.",
+    tags: ["4K Assets", "Live Previews"],
+    accent: "#a78bfa",
+    accentRgb: "167,139,250",
+    iconBgClass: "bg-violet-400/10 text-violet-400 border-violet-400/20",
+    bgIconClass: "text-violet-400",
+    tag1Class: "bg-violet-400/10 border-violet-400/20 text-violet-400",
+    stat: "50+",
+    statLabel: "Premium Templates",
+    Icon: Layers,
+    BgIcon: Wand2,
+  },
+  {
+    id: "ticker",
+    title: "Donation Ticker.",
+    desc: "Keep your broadcast clean and engaging with ultra-smooth, non-repetitive high-fidelity fan alerts.",
+    tags: ["Smooth Animations", "Zero Lag"],
+    accent: "#fb7185",
+    accentRgb: "251,113,133",
+    iconBgClass: "bg-rose-400/10 text-rose-400 border-rose-400/20",
+    bgIconClass: "text-rose-400",
+    tag1Class: "bg-rose-400/10 border-rose-400/20 text-rose-400",
+    stat: "99.9%",
+    statLabel: "Uptime SLA",
+    Icon: Radio,
+    BgIcon: Radio,
+  },
+  {
+    id: "targets",
+    title: "Engagement Targets.",
+    desc: "Drive massive audience engagement with visually explosive, real-time interactive funding goals.",
+    tags: ["Instant Alerts", "Goal Tracking"],
+    accent: "#fbbf24",
+    accentRgb: "251,191,36",
+    iconBgClass: "bg-amber-400/10 text-amber-400 border-amber-400/20",
+    bgIconClass: "text-amber-400",
+    tag1Class: "bg-amber-400/10 border-amber-400/20 text-amber-400",
+    stat: "2.4M",
+    statLabel: "Goals Completed",
+    Icon: Target,
+    BgIcon: Trophy,
+  }
+];
+
+const PremiumFeatureCard = ({ feat, index }) => {
+  const cardRef = useRef(null);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleMouseMove = (e) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    setMousePos({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    });
+  };
+
+  return (
+    <motion.div
+      ref={cardRef}
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: index * 0.1 }}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className="relative rounded-2xl p-5 lg:p-6 flex flex-col overflow-hidden cursor-default group"
+      style={{
+        background: isHovered
+          ? `radial-gradient(circle at ${mousePos.x}px ${mousePos.y}px, rgba(${feat.accentRgb},0.15) 0%, #0C1014 60%, #0C1014 100%)`
+          : '#0C1014',
+        border: `1px solid ${isHovered ? `rgba(${feat.accentRgb},0.35)` : 'rgba(255,255,255,0.08)'}`,
+        boxShadow: isHovered ? `0 20px 40px rgba(0,0,0,0.4), 0 0 30px rgba(${feat.accentRgb},0.1)` : '0 10px 25px rgba(0,0,0,0.2)',
+        transition: 'background 0.05s ease, border-color 0.3s ease, box-shadow 0.3s ease',
+      }}
+    >
+      {/* Noise grain overlay for premium texture */}
+      <div className="absolute inset-0 opacity-[0.025] pointer-events-none" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\'/%3E%3C/svg%3E")', backgroundSize: '128px 128px' }} />
+
+      {/* Stat badge top-right */}
+      <div className="absolute top-4 right-4 text-right">
+        <div className="text-lg font-black italic" style={{ color: feat.accent }}>{feat.stat}</div>
+        <div className="text-[8px] font-black uppercase tracking-widest text-white/30">{feat.statLabel}</div>
+      </div>
+
+      {/* Bg watermark icon */}
+      <div className="absolute bottom-0 right-0 p-3 opacity-[0.06] pointer-events-none">
+        <feat.BgIcon className="w-20 h-20" style={{ color: feat.accent }} />
+      </div>
+
+      {/* Main content */}
+      <div className="relative z-10 flex flex-col h-full">
+        <motion.div
+          animate={isHovered ? { y: -4, scale: 1.08 } : { y: 0, scale: 1 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+          className={`w-11 h-11 rounded-xl flex items-center justify-center mb-5 border shrink-0 ${feat.iconBgClass}`}
+          style={{ boxShadow: isHovered ? `0 8px 24px rgba(${feat.accentRgb},0.4)` : 'none' }}
+        >
+          <feat.Icon className="w-5 h-5" />
+        </motion.div>
+
+        <h3 className="text-lg lg:text-xl font-black italic uppercase tracking-tighter mb-2 text-white">
+          {feat.title}
+        </h3>
+        <p className="text-white/40 font-medium text-xs mb-5 leading-relaxed line-clamp-3">
+          {feat.desc}
+        </p>
+
+        <div className="flex gap-1.5 flex-col items-start mt-auto pointer-events-none">
+          <div className={`px-2 lg:px-3 py-1 rounded-full border text-[9px] font-black uppercase tracking-widest ${feat.tag1Class}`}>{feat.tags[0]}</div>
+          <div className="px-2 lg:px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest text-white/30">{feat.tags[1]}</div>
+        </div>
+      </div>
+
+      {/* Bottom accent line */}
+      <motion.div
+        animate={{ scaleX: isHovered ? 1 : 0, opacity: isHovered ? 1 : 0 }}
+        transition={{ duration: 0.3, ease: 'easeOut' }}
+        className="absolute bottom-0 left-0 right-0 h-[2px] origin-left"
+        style={{ background: `linear-gradient(90deg, transparent, ${feat.accent}, transparent)` }}
+      />
+    </motion.div>
+  );
+};
+
 const Home = () => {
   const navigate = useNavigate();
 
   // --- UNIFIED GLOBAL THEME PROTOCOL (now from ThemeContext) ---
-  const { theme } = useTheme();
+  const theme = 'dark';
 
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -137,9 +281,16 @@ const Home = () => {
   return (
     <div
       onMouseMove={handleMouseMove}
-      className={`min-h-screen font-sans selection:bg-[#10B981]/30 transition-colors duration-700 overflow-x-hidden ${theme} ${theme === 'dark' ? 'bg-[#050505] text-slate-100' : 'bg-slate-50 text-slate-900'
+      className={`min-h-screen font-sans selection:bg-[#10B981]/30 transition-colors duration-700 overflow-x-hidden relative ${theme} ${theme === 'dark' ? 'bg-[#050505] text-slate-100' : 'bg-slate-50 text-slate-900'
         }`}
     >
+      {/* Immersive Moving Background */}
+      <div className="ambient-background">
+        <div className="ambient-orb w-[600px] h-[600px] bg-[#10B981]/15 -top-[10%] -left-[10%]" style={{ animationDelay: '0s' }} />
+        <div className="ambient-orb w-[500px] h-[500px] bg-[#3b82f6]/10 top-[20%] -right-[5%]" style={{ animationDelay: '-5s' }} />
+        <div className="ambient-orb w-[700px] h-[700px] bg-[#8b5cf6]/5 bottom-[-10%] left-[20%]" style={{ animationDelay: '-10s' }} />
+        <div className="ambient-orb w-[400px] h-[400px] bg-[#f59e0b]/10 top-[60%] left-[-10%]" style={{ animationDelay: '-15s' }} />
+      </div>
       <style dangerouslySetInnerHTML={{
         __html: `
         .nexus-feature-card {
@@ -228,30 +379,6 @@ const Home = () => {
           width: 100%;
         }
 
-        @keyframes glass-shimmer {
-          0% { transform: translateX(-100%) skewX(-15deg); }
-          25%, 100% { transform: translateX(200%) skewX(-15deg); }
-        }
-
-        .glass-shimmer::after {
-          content: "";
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 40%;
-          height: 100%;
-          background: linear-gradient(
-            to right,
-            transparent,
-            rgba(255, 255, 255, 0.05) 10%,
-            rgba(255, 255, 255, 0.12) 50%,
-            rgba(255, 255, 255, 0.05) 90%,
-            transparent
-          );
-          animation: glass-shimmer 8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-          pointer-events: none;
-          z-index: 20;
-        }
 
         @keyframes float-orb {
           0%, 100% { transform: translate(0, 0); }
@@ -266,6 +393,32 @@ const Home = () => {
           pointer-events: none;
           z-index: 1;
           animation: float-orb 15s ease-in-out infinite;
+        }
+
+        @keyframes ambient-drift {
+          0% { transform: translate(0, 0) scale(1); }
+          33% { transform: translate(50px, -50px) scale(1.1); }
+          66% { transform: translate(-30px, 40px) scale(0.9); }
+          100% { transform: translate(0, 0) scale(1); }
+        }
+
+        .ambient-background {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          pointer-events: none;
+          z-index: 0;
+          overflow: hidden;
+          opacity: 0.4;
+        }
+
+        .ambient-orb {
+          position: absolute;
+          filter: blur(120px);
+          border-radius: 50%;
+          animation: ambient-drift 25s ease-in-out infinite;
         }
 
         @property --angle {
@@ -538,7 +691,7 @@ const Home = () => {
             >
               Login
             </button>
-            <ThemeToggle size="sm" />
+
             <motion.button
               whileHover={{ scale: 1.02, y: -1 }}
               whileTap={{ scale: 0.98 }}
@@ -550,7 +703,7 @@ const Home = () => {
           </div>
 
           <div className="flex items-center gap-3 md:hidden">
-            <ThemeToggle size="sm" />
+
             <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className={`relative z-[110] ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
               {isMobileMenuOpen ? <X className="w-8 h-8" /> : <Menu className="w-8 h-8" />}
             </button>
@@ -644,7 +797,7 @@ const Home = () => {
                   <motion.span animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.4, repeat: Infinity }} className="w-2 h-2 rounded-full bg-[#10B981] shrink-0" />
                   <div>
                     <p className="text-[10px] font-black uppercase tracking-widest text-[#10B981]">All Systems Online</p>
-                    <p className="text-[9px] text-slate-500 font-medium mt-0.5">99.9% Uptime — Live</p>
+                    <p className="text-[9px] text-slate-300 font-medium mt-0.5">99.9% Uptime — Live</p>
                   </div>
                 </motion.div>
 
@@ -797,8 +950,8 @@ const Home = () => {
 
       {/* --- HERO SECTION --- */}
       <section className="relative pt-8 pb-14 md:pb-32 px-6 overflow-hidden">
-        <div className="max-w-[1280px] mx-auto grid lg:grid-cols-12 gap-12 items-center relative z-10">
-          <div className="lg:col-span-6">
+        <div className="max-w-[1280px] mx-auto grid lg:grid-cols-12 gap-12 lg:gap-16 items-center relative z-10">
+          <div className="lg:col-span-7">
             <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] md:tracking-[0.3em] mb-6 md:mb-8 border ${theme === 'dark' ? 'bg-[#10B981]/10 text-[#10B981] border-[#10B981]/20' : 'bg-emerald-50 text-emerald-600'}`}>
               <Globe className={`w-3 h-3 ${isSynced ? 'opacity-100 scale-125' : 'opacity-30 scale-100'} transition-all duration-700`} /> Node Sync Active
             </div>
@@ -838,11 +991,11 @@ const Home = () => {
               transition={{ duration: 0.6, delay: 0.4, ease: 'easeOut' }}
               className="text-slate-500 text-base md:text-lg font-medium max-w-xl mb-10 md:mb-12 italic leading-relaxed"
             >
-              Instant bank settlements. Built for professional creators.
+              Instant global settlements. Engineered for world-class creators.
             </motion.p>
             <div className="flex flex-col sm:flex-row gap-4 md:gap-6 relative mb-12">
               <button onClick={() => navigate('/signup')} className="w-full sm:w-auto bg-[#10B981] text-white px-10 py-5 rounded-2xl font-black uppercase italic text-sm shadow-2xl flex items-center justify-center gap-3 active:scale-95 transition-all">
-                <Play className="w-4 h-4 fill-white" /> Start Hub
+                <Play className="w-4 h-4 fill-white" /> Get Started
               </button>
 
               <div className="relative group w-full sm:w-auto">
@@ -853,7 +1006,7 @@ const Home = () => {
                     : 'bg-white border-slate-200 text-slate-900 hover:bg-slate-100 shadow-sm'
                     }`}
                 >
-                  <Sparkles className="w-4 h-4 text-[#10B981]" /> Inject Demo
+                  <Sparkles className="w-4 h-4 text-[#10B981]" /> Watch Demo
                 </button>
               </div>
             </div>
@@ -866,7 +1019,7 @@ const Home = () => {
               className="grid grid-cols-2 md:grid-cols-3 gap-6 pt-8 border-t border-white/5"
             >
               {[
-                { icon: Zap, label: "Sub-ms Latency", desc: "Edge-node delivery" },
+                { icon: Zap, label: "Lightning Fast", desc: "Global CDN delivery" },
                 { icon: Shield, label: "0% Chargebacks", desc: "Razorpay Protected" },
                 { icon: Landmark, label: "T+2 Payouts", desc: "Automated settlements" }
               ].map((prop, i) => (
@@ -875,19 +1028,19 @@ const Home = () => {
                     <prop.icon className="w-3.5 h-3.5 text-[#10B981]" />
                     <span className={`text-[11px] font-black uppercase tracking-widest ${theme === 'dark' ? 'text-white/80' : 'text-slate-900/80'}`}>{prop.label}</span>
                   </div>
-                  <p className="text-[10px] text-slate-500 font-medium italic">{prop.desc}</p>
+                  <p className="text-[10px] text-slate-300 font-medium italic">{prop.desc}</p>
                 </div>
               ))}
             </motion.div>
           </div>
 
-          <div className="lg:col-span-6 relative mt-8 lg:mt-0">
+          <div className="lg:col-span-5 relative mt-8 lg:mt-0 lg:ml-auto w-full max-w-xl">
             {/* MINI-NEXUS PREVIEW — placed directly on the page */}
             <motion.div
               initial={{ opacity: 0, scale: 0.98, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ duration: 0.8, ease: 'easeOut' }}
-              className={`relative flex flex-col overflow-hidden rounded-[2rem] md:rounded-[3rem] border glass-shimmer ${theme === 'dark'
+              className={`relative flex flex-col overflow-hidden rounded-[2rem] md:rounded-[3rem] border ${theme === 'dark'
                 ? 'bg-[#050505]/40 border-white/10 backdrop-blur-3xl shadow-[0_20px_50px_-12px_rgba(0,0,0,0.5)]'
                 : 'bg-white/40 border-white/60 backdrop-blur-3xl shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)]'
                 }`}
@@ -899,10 +1052,10 @@ const Home = () => {
                 <div className="glass-orb w-40 h-40 bg-[#8b5cf6] top-[20%] left-[10%]" style={{ animationDelay: '-10s' }} />
               </div>
 
-              <div className="flex-1 flex flex-col p-4 sm:p-6 md:p-8 gap-4 sm:gap-5 relative z-10">
+              <div className="flex-1 flex flex-col p-3 sm:p-4 md:p-5 gap-3 sm:gap-4 relative z-10">
 
                 {/* Top bar — streamer identity */}
-                <div className={`flex items-center gap-3 px-4 py-3 rounded-3xl border transition-all duration-500 ${theme === 'dark' ? 'bg-white/[0.04] border-white/10 shadow-lg' : 'bg-white/80 border-white/90 shadow-sm'}`}>
+                <div className={`flex items-center gap-3 px-3 py-2 sm:px-4 sm:py-3 rounded-2xl sm:rounded-3xl border transition-all duration-500 ${theme === 'dark' ? 'bg-white/[0.04] border-white/10 shadow-lg' : 'bg-white/80 border-white/90 shadow-sm'}`}>
                   <div className="relative group">
                     <div className="absolute inset-0 bg-[#10B981]/40 blur-md rounded-full group-hover:blur-lg transition-all" />
                     <div className="w-10 h-10 rounded-full bg-[#10B981] p-[1.5px] shrink-0 relative z-10">
@@ -920,7 +1073,7 @@ const Home = () => {
                   </div>
                   <div className="flex items-center gap-2 px-2 py-1 rounded-full bg-[#10B981]/10 border border-[#10B981]/20">
                     <div className="w-1.5 h-1.5 rounded-full bg-[#10B981] shrink-0 animate-pulse" />
-                    <span className="text-[9px] font-bold text-[#10B981] uppercase tracking-tighter">Sync</span>
+                    <span className="text-[9px] font-bold text-[#10B981] uppercase tracking-tighter">Live</span>
                   </div>
                 </div>
 
@@ -930,9 +1083,9 @@ const Home = () => {
                   style={{
                     display: 'grid',
                     gridTemplateColumns: '50px 1fr',
-                    gap: '0.75rem',
-                    padding: '1rem',
-                    borderRadius: '1.5rem',
+                    gap: '0.5rem',
+                    padding: '0.75rem',
+                    borderRadius: '1.25rem',
                     border: '1px solid',
                     backdropFilter: 'blur(30px)',
                     WebkitBackdropFilter: 'blur(30px)',
@@ -944,7 +1097,7 @@ const Home = () => {
                   <div className={`flex flex-col gap-4 pt-1 border-r border-white/5 ${window.innerWidth < 768 ? 'pr-2' : 'pr-4'}`}>
                     <div className="flex items-center gap-1.5 mb-2">
                       <Trophy className="w-3 h-3 text-[#F59E0B]" />
-                      <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">Legendary</p>
+                      <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">Top Fan</p>
                     </div>
                     {[
                       { rank: 1, color: '#F59E0B' },
@@ -970,8 +1123,8 @@ const Home = () => {
                             <div className="absolute inset-0 bg-[#10B981]/20 blur-xl rounded-full animate-pulse" />
                             <Radio className="w-8 h-8 relative z-10 text-[#10B981]" />
                           </div>
-                          <p className={`text-sm font-black italic uppercase tracking-tight ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Awaiting Drop</p>
-                          <p className="text-[8px] font-black uppercase tracking-widest text-slate-500 text-center leading-relaxed">Broadcast Nexus live.<br />Inject Demo to start.</p>
+                          <p className={`text-sm font-black italic uppercase tracking-tight ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Awaiting Support</p>
+                          <p className="text-[8px] font-black uppercase tracking-widest text-slate-500 text-center leading-relaxed">Stream is live.<br />Watch Demo to start.</p>
                         </motion.div>
                       )}
                       {showPreview && (
@@ -980,9 +1133,9 @@ const Home = () => {
                           initial={{ opacity: 0, scale: 0.92, y: 10 }}
                           animate={{ opacity: 1, scale: 1, y: 0 }}
                           exit={{ opacity: 0, scale: 0.92, y: -10 }}
-                          className="w-full flex items-center justify-center overflow-hidden h-[160px] sm:h-auto relative"
+                          className="w-full flex items-center justify-center overflow-hidden h-[160px] sm:h-[240px] relative"
                         >
-                          <div className="w-[320px] sm:w-full transform scale-[0.6] min-[400px]:scale-[0.7] sm:scale-100 origin-center absolute sm:relative">
+                          <div className="w-[320px] sm:w-full flex items-center justify-center h-full transform scale-[0.55] min-[400px]:scale-[0.65] sm:scale-[0.7] md:scale-[0.75] lg:scale-[0.8] origin-center absolute sm:relative">
                             <Suspense fallback={<div className="h-[150px] w-full rounded-3xl bg-white/5 animate-pulse" />}>
                               <AlertPreview
                                 stylePreference={alertVariants[activeAlert]}
@@ -1045,107 +1198,17 @@ const Home = () => {
       <section className="pt-10 pb-12 md:py-16 px-6 bg-gradient-to-b from-transparent via-[#10B981]/5 to-transparent">
         <div className="max-w-[1280px] mx-auto w-full">
           <div className="mb-8 md:mb-10">
-            <h2 className="text-3xl md:text-5xl font-black italic uppercase tracking-tighter mb-2">Elite <span className="text-[#10B981]">Nexus.</span></h2>
-            <p className="text-slate-500 font-medium italic text-xs md:text-sm max-w-2xl leading-relaxed">Refined architecture for high-concurrency streaming nodes.</p>
+            <h2 className="text-3xl md:text-5xl font-black italic uppercase tracking-tighter mb-2">Premium <span className="text-[#10B981]">Features.</span></h2>
+            <p className="text-slate-300 font-medium italic text-xs md:text-sm max-w-2xl leading-relaxed">Enterprise-grade infrastructure designed to seamlessly handle massive global audiences.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
-            {/* 1. STOREFRONT NEXUS */}
-            <motion.div
-              whileHover={{ y: -4 }}
-              className={`nexus-feature-card rounded-2xl p-6 lg:p-8 relative overflow-hidden group cursor-default nexus-cyan-card ${theme === 'dark' ? 'nexus-feature-card-dark' : 'nexus-feature-card-light'
-                }`}
-            >
-              <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-                <Layout className="w-20 h-20 text-cyan-400" />
-              </div>
-              <div className="relative z-10">
-                <div className="w-10 h-10 rounded-xl bg-cyan-400/10 flex items-center justify-center mb-4 text-cyan-400 border border-cyan-400/20">
-                  <Monitor className="w-5 h-5" />
-                </div>
-                <h3 className={`text-2xl font-black italic uppercase tracking-tighter mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Storefront Nexus.</h3>
-                <p className="text-slate-500 font-medium italic text-sm max-w-sm mb-4 lead-relaxed">
-                  Identity-first architecture with custom sidebars and sub-ms responsiveness across all device nodes.
-                </p>
-                <div className="flex gap-2 flex-wrap">
-                  <div className="px-3 py-1 rounded-full bg-cyan-400/10 border border-cyan-400/20 text-[10px] font-black uppercase tracking-widest text-cyan-400">Mobile Optimized</div>
-                  <div className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest text-slate-500">Identity-First</div>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* 2. THEME CONTROL HUB */}
-            <motion.div
-              whileHover={{ y: -4 }}
-              className={`nexus-feature-card rounded-2xl p-6 lg:p-8 relative overflow-hidden group cursor-default nexus-indigo-card ${theme === 'dark' ? 'nexus-feature-card-dark' : 'nexus-feature-card-light'
-                }`}
-            >
-              <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-                <Wand2 className="w-20 h-20 text-indigo-400" />
-              </div>
-              <div className="relative z-10">
-                <div className="w-10 h-10 rounded-xl bg-indigo-400/10 flex items-center justify-center mb-4 text-indigo-400 border border-indigo-400/20">
-                  <Layers className="w-5 h-5" />
-                </div>
-                <h3 className={`text-2xl font-black italic uppercase tracking-tighter mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Theme Control.</h3>
-                <p className="text-slate-500 font-medium italic text-sm max-w-sm mb-4 lead-relaxed">
-                  Deploy Nebula, Aero, and Midnight Obsidian styles with real-time hover-glow and glassmorphism.
-                </p>
-                <div className="flex gap-2 flex-wrap">
-                  <div className="px-3 py-1 rounded-full bg-indigo-400/10 border border-indigo-400/20 text-[10px] font-black uppercase tracking-widest text-indigo-400">Super-High UHD</div>
-                  <div className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest text-slate-500">Live Inject</div>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* 3. BROADCAST TICKER */}
-            <motion.div
-              whileHover={{ y: -4 }}
-              className={`nexus-feature-card rounded-2xl p-6 lg:p-8 relative overflow-hidden group cursor-default nexus-rose-card ${theme === 'dark' ? 'nexus-feature-card-dark' : 'nexus-feature-card-light'
-                }`}
-            >
-              <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-                <Radio className="w-20 h-20 text-rose-400" />
-              </div>
-              <div className="relative z-10">
-                <div className="w-10 h-10 rounded-xl bg-rose-400/10 flex items-center justify-center mb-4 text-rose-400 border border-rose-400/20">
-                  <Radio className="w-5 h-5" />
-                </div>
-                <h3 className={`text-2xl font-black italic uppercase tracking-tighter mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Broadcast Ticker.</h3>
-                <p className="text-slate-500 font-medium italic text-sm max-w-sm mb-4 lead-relaxed">
-                  Professional non-repeating Lottie sticker feed. Single-pass logic for zero-clutter transmission.
-                </p>
-                <div className="flex gap-2 flex-wrap">
-                  <div className="px-3 py-1 rounded-full bg-rose-400/10 border border-rose-400/20 text-[10px] font-black uppercase tracking-widest text-rose-400">Lottie Native</div>
-                  <div className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest text-slate-500">No Buffering</div>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* 4. MISSION DYNAMICS */}
-            <motion.div
-              whileHover={{ y: -4 }}
-              className={`nexus-feature-card rounded-2xl p-6 lg:p-8 relative overflow-hidden group cursor-default nexus-amber-card ${theme === 'dark' ? 'nexus-feature-card-dark' : 'nexus-feature-card-light'
-                }`}
-            >
-              <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-                <Trophy className="w-20 h-20 text-amber-500" />
-              </div>
-              <div className="relative z-10">
-                <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center mb-4 text-amber-500 border border-amber-500/20">
-                  <Target className="w-5 h-5" />
-                </div>
-                <h3 className={`text-2xl font-black italic uppercase tracking-tighter mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Mission Dynamics.</h3>
-                <p className="text-slate-500 font-medium italic text-sm max-w-sm mb-4 lead-relaxed">
-                  Interactive goal bars with supernova celebration effects. Real-time funding updates.
-                </p>
-                <div className="flex gap-2 flex-wrap">
-                  <div className="px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-[10px] font-black uppercase tracking-widest text-amber-500">Auto Celebration</div>
-                  <div className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest text-slate-500">Supernova Inject</div>
-                </div>
-              </div>
-            </motion.div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5 relative">
+            {premiumFeaturesData.map((feat, index) => (
+              <PremiumFeatureCard key={feat.id} feat={feat} index={index} />
+            ))}
           </div>
+
+
         </div>
       </section>
 
@@ -1159,12 +1222,11 @@ const Home = () => {
           transition={{ duration: 0.7, ease: "easeOut" }}
         >
           <div className="flex flex-col items-center mb-10 px-0 md:px-6">
-            <h2 className={`text-3xl md:text-5xl font-black italic uppercase tracking-tighter mb-6 text-center ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Protocol Architecture</h2>
             <div className={`p-1.5 md:p-2 rounded-2xl flex flex-wrap justify-center md:flex-nowrap border ${theme === 'dark' ? 'bg-black/40 border-white/5' : 'bg-white shadow-md border-slate-100'}`}>
               {[
-                { id: 'streamers', label: 'Engine', icon: <Cpu className="w-4 h-4" /> },
-                { id: 'developers', label: 'Nodes', icon: <Monitor className="w-4 h-4" /> },
-                { id: 'community', label: 'Social', icon: <Heart className="w-4 h-4" /> }
+                { id: 'streamers', label: 'Platform', icon: <Cpu className="w-4 h-4" /> },
+                { id: 'developers', label: 'Developers', icon: <Monitor className="w-4 h-4" /> },
+                { id: 'community', label: 'Community', icon: <Heart className="w-4 h-4" /> }
               ].map(tab => (
                 <button
                   key={tab.id}
@@ -1189,7 +1251,7 @@ const Home = () => {
               className="py-0"
             >
               {activeTab === 'streamers' && (
-                <div className="relative overflow-hidden rounded-[2rem] md:rounded-[3rem] p-5 sm:p-8 md:p-16 border transition-all duration-700 bg-opacity-20 backdrop-blur-3xl group">
+                <div className="relative overflow-hidden p-0 sm:p-2 md:p-4 lg:p-6 transition-all duration-700 group flex flex-col justify-center min-h-[480px] w-full">
                   {/* Internal Glow Orbs */}
                   <motion.div
                     animate={{
@@ -1200,20 +1262,20 @@ const Home = () => {
                     className="absolute -top-20 -right-20 w-64 h-64 bg-[#10B981]/10 blur-[80px] rounded-full pointer-events-none"
                   />
 
-                  <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center relative z-10">
+                  <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-center relative z-10">
                     <motion.div
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       className="space-y-6 md:space-y-8"
                     >
                       <div className="inline-flex items-center gap-3 px-3 py-1.5 md:px-4 md:py-2 rounded-2xl bg-[#10B981]/10 border border-[#10B981]/20 text-[#10B981] font-black uppercase text-[9px] md:text-[10px] tracking-widest">
-                        <BarChart3 className="w-3.5 h-3.5 md:w-4 md:h-4" /> Yield Optimization
+                        <BarChart3 className="w-3.5 h-3.5 md:w-4 md:h-4" /> Revenue Optimization
                       </div>
                       <h3 className={`text-3xl md:text-6xl font-black italic uppercase leading-[1] md:leading-[0.9] tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
                         Maximize <br /> <span className="text-[#10B981]">Every Drop</span>
                       </h3>
-                      <p className="text-slate-500 font-medium text-base md:text-lg leading-relaxed max-w-md">
-                        Our proprietary Razorpay Route integration ensures your revenue clears T+2 settlements with zero manual intervention.
+                      <p className="text-slate-300 font-medium text-base md:text-lg leading-relaxed max-w-md">
+                        Our enterprise-grade global payment infrastructure ensures your revenue hits your bank automatically, anywhere in the world.
                       </p>
                       <div className="flex gap-4 md:gap-6 items-center pt-2">
                         <div className="p-2.5 md:p-3 rounded-2xl bg-white/5 border border-white/10">
@@ -1232,7 +1294,7 @@ const Home = () => {
                       initial={{ opacity: 0, scale: 0.95 }}
                       whileInView={{ opacity: 1, scale: 1 }}
                       viewport={{ once: true }}
-                      className={`relative p-5 sm:p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl transition-all duration-700 glass-shimmer simulator-card-premium ${theme === 'dark' ? 'holo-border' : 'bg-white/60 border-white/80 backdrop-blur-3xl'
+                      className={`relative p-5 sm:p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl transition-all duration-700 simulator-card-premium ${theme === 'dark' ? 'holo-border' : 'bg-white/60 border-white/80 backdrop-blur-3xl'
                         }`}
                       style={{ '--theme-bg': theme === 'dark' ? '#050505' : '#ffffff' }}
                     >
@@ -1242,7 +1304,7 @@ const Home = () => {
                         <div className="glass-orb w-64 h-64 bg-[#3b82f6] bottom-[-20%] left-[-10%]" style={{ animationDelay: '-5s' }} />
                       </div>
 
-                      <div className="relative z-10 space-y-4 sm:space-y-6 md:space-y-8">
+                      <div className="relative z-10 space-y-4 sm:space-y-5 md:space-y-6">
                         {/* Header & Status */}
                         <div className="flex justify-between items-center">
                           <div className="flex items-center gap-4">
@@ -1254,12 +1316,12 @@ const Home = () => {
                             </div>
                             <div>
                               <span className={`text-sm font-black italic uppercase tracking-tighter block ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Payout Simulator</span>
-                              <p className="hidden sm:block text-[10px] font-medium text-slate-500 uppercase tracking-[0.2em] mt-0.5">Real-time Settlement Protocol</p>
+                              <p className="hidden sm:block text-[10px] font-medium text-slate-500 uppercase tracking-[0.2em] mt-0.5">Real-time Earnings Calculator</p>
                             </div>
                           </div>
                           <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-[#10B981]/10 border border-[#10B981]/20">
                             <motion.span animate={{ opacity: [1, 0.4, 1] }} transition={{ duration: 2, repeat: Infinity }} className="w-2 h-2 rounded-full bg-[#10B981]" />
-                            <span className="text-[9px] font-black uppercase tracking-widest text-[#10B981]">Node Active</span>
+                            <span className="text-[9px] font-black uppercase tracking-widest text-[#10B981]">System Active</span>
                           </div>
                         </div>
 
@@ -1290,7 +1352,7 @@ const Home = () => {
                               type="number"
                               value={calcAmount}
                               onChange={e => setCalcAmount(Number(e.target.value))}
-                              className={`w-full bg-transparent px-4 py-3 sm:py-5 text-2xl sm:text-4xl font-black italic outline-none ${theme === 'dark' ? 'text-[#10B981]' : 'text-[#10B981]'
+                              className={`w-full bg-transparent px-4 py-2 sm:py-3 text-xl sm:text-2xl font-black italic outline-none ${theme === 'dark' ? 'text-[#10B981]' : 'text-[#10B981]'
                                 }`}
                             />
                             <div className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center gap-2">
@@ -1302,7 +1364,7 @@ const Home = () => {
 
                         {/* Results Grid */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div className={`p-3 sm:p-5 rounded-2xl border transition-all duration-500 overflow-hidden relative group ${theme === 'dark' ? 'bg-white/[0.03] border-white/10' : 'bg-emerald-50/50 border-emerald-100'
+                          <div className={`p-3 sm:p-4 rounded-2xl border transition-all duration-500 overflow-hidden relative group ${theme === 'dark' ? 'bg-white/[0.03] border-white/10' : 'bg-emerald-50/50 border-emerald-100'
                             }`}>
                             <div className="absolute inset-0 bg-gradient-to-br from-[#10B981]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                             <div className="relative z-10">
@@ -1313,10 +1375,10 @@ const Home = () => {
                               <p className={`text-2xl font-black italic ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>₹{streamerCut}</p>
                             </div>
                           </div>
-                          <div className={`p-3 sm:p-5 rounded-2xl border transition-all duration-500 group ${theme === 'dark' ? 'bg-white/[0.01] border-white/5' : 'bg-slate-50 border-slate-100'
+                          <div className={`p-3 sm:p-4 rounded-2xl border transition-all duration-500 group ${theme === 'dark' ? 'bg-white/[0.01] border-white/5' : 'bg-slate-50 border-slate-100'
                             }`}>
                             <div className="flex justify-between items-start mb-2">
-                              <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Node Fee (5%)</p>
+                              <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Platform Fee (5%)</p>
                               <Shield className="w-3.5 h-3.5 text-slate-500/50" />
                             </div>
                             <p className="text-2xl font-black italic text-slate-400">₹{platformFee}</p>
@@ -1326,8 +1388,8 @@ const Home = () => {
                         {/* Split Bar — hidden on mobile to save space */}
                         <div className="hidden sm:block space-y-3 pt-2">
                           <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-slate-500">
-                            <span>Settlement Ratio</span>
-                            <span className="text-[#10B981]">95% Efficiency</span>
+                            <span>Payout Ratio</span>
+                            <span className="text-[#10B981]">95% To You</span>
                           </div>
                           <div className={`h-2.5 rounded-full overflow-hidden p-0.5 ${theme === 'dark' ? 'bg-white/5' : 'bg-slate-100'}`}>
                             <motion.div
@@ -1338,7 +1400,7 @@ const Home = () => {
                               className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-[#10B981] to-cyan-500 shadow-[0_0_15px_rgba(16,185,129,0.5)]"
                             />
                           </div>
-                          <p className="text-[9px] font-medium text-center text-slate-500 uppercase tracking-[0.25em] opacity-60">Settlement Protocol: Razorpay Route T+2</p>
+                          <p className="text-[9px] font-medium text-center text-slate-500 uppercase tracking-[0.25em] opacity-60">Processing Partner: Razorpay (T+2)</p>
                         </div>
                       </div>
                     </motion.div>
@@ -1346,7 +1408,7 @@ const Home = () => {
                 </div>
               )}
               {activeTab === 'developers' && (
-                <div className="relative overflow-hidden rounded-[3rem] p-8 md:p-16 border transition-all duration-700 bg-opacity-20 backdrop-blur-3xl group">
+                <div className="relative overflow-hidden p-0 sm:p-2 md:p-4 lg:p-6 transition-all duration-700 group flex flex-col justify-center min-h-[480px] w-full">
                   {/* Internal Glow Orbs */}
                   <motion.div
                     animate={{
@@ -1357,7 +1419,7 @@ const Home = () => {
                     className="absolute -bottom-20 -left-20 w-64 h-64 bg-blue-500/10 blur-[80px] rounded-full pointer-events-none"
                   />
 
-                  <div className="grid md:grid-cols-2 gap-16 items-center relative z-10">
+                  <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-center relative z-10">
                     <motion.div
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
@@ -1370,7 +1432,7 @@ const Home = () => {
                           <div className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]" />
                           <div className="w-2.5 h-2.5 rounded-full bg-[#27c93f]" />
                         </div>
-                        <div className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">drop_nexus_protocol.json</div>
+                        <div className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">api_response.json</div>
                         <div className="w-10" />
                       </div>
 
@@ -1381,11 +1443,11 @@ const Home = () => {
                         </div>
                         <div className="flex gap-4">
                           <span className="text-slate-600 select-none">02</span>
-                          <span className="pl-4 text-slate-300">"node"</span>: <span className="text-emerald-400">"drop_nexus_04"</span>,
+                          <span className="pl-4 text-slate-300">"server"</span>: <span className="text-emerald-400">"asia-south1"</span>,
                         </div>
                         <div className="flex gap-4">
                           <span className="text-slate-600 select-none">03</span>
-                          <span className="pl-4 text-slate-300">"status"</span>: <span className="text-emerald-400">"synchronized"</span>,
+                          <span className="pl-4 text-slate-300">"status"</span>: <span className="text-emerald-400">"connected"</span>,
                         </div>
                         <div className="flex gap-4">
                           <span className="text-slate-600 select-none">04</span>
@@ -1393,7 +1455,7 @@ const Home = () => {
                         </div>
                         <div className="flex gap-4">
                           <span className="text-slate-600 select-none">05</span>
-                          <span className="pl-4 text-slate-300">"protocol"</span>: <span className="text-emerald-400">"TCP/HYPER"</span>
+                          <span className="pl-4 text-slate-300">"protocol"</span>: <span className="text-emerald-400">"WebSocket"</span>
                         </div>
                         <div className="flex gap-4">
                           <span className="text-slate-600 select-none">06</span>
@@ -1413,13 +1475,13 @@ const Home = () => {
                       className="order-1 md:order-2 space-y-8"
                     >
                       <div className="inline-flex items-center gap-3 px-4 py-2 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 font-black uppercase text-[10px] tracking-widest">
-                        <Shield className="w-4 h-4" /> Secure Architecture
+                        <Shield className="w-4 h-4" /> Developer First
                       </div>
                       <h3 className={`text-4xl md:text-6xl font-black italic uppercase leading-[0.9] tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-                        API First <br /> <span className="text-blue-400">Mentality</span>
+                        API First <br /> <span className="text-blue-400">Architecture</span>
                       </h3>
-                      <p className="text-slate-500 font-medium text-lg leading-relaxed max-w-md">
-                        Websocket clusters with automatic failover. Your alerts never go offline, even under extreme concurrent loads.
+                      <p className="text-slate-300 font-medium text-lg leading-relaxed max-w-md">
+                        Robust Webhooks and WebSocket APIs with automatic failover. Built for high concurrency and scale.
                       </p>
                       <div className="flex gap-8">
                         <div className="flex flex-col gap-2">
@@ -1460,7 +1522,7 @@ const Home = () => {
                 </div>
               )}
               {activeTab === 'community' && (
-                <div className="relative overflow-hidden rounded-[2.5rem] p-8 md:p-12 text-center max-w-3xl mx-auto border transition-all duration-700 bg-opacity-20 backdrop-blur-3xl group">
+                <div className="relative overflow-hidden p-0 sm:p-2 md:p-4 lg:p-6 text-center transition-all duration-700 group flex flex-col justify-center min-h-[480px] w-full">
                   {/* Internal Glow Orbs */}
                   <motion.div
                     animate={{
@@ -1481,7 +1543,7 @@ const Home = () => {
                     className="absolute -bottom-20 -left-20 w-56 h-56 bg-indigo-500/10 blur-[70px] rounded-full pointer-events-none"
                   />
 
-                  <div className="relative z-10 space-y-10">
+                  <div className="relative z-10 space-y-6 sm:space-y-8 max-w-3xl mx-auto w-full">
                     <div className="flex justify-center -space-x-3">
                       {[
                         getOptimizedImage('https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop'),
@@ -1491,7 +1553,7 @@ const Home = () => {
                         <motion.div
                           key={i}
                           whileHover={{ scale: 1.1, zIndex: 20 }}
-                          className="w-12 h-12 rounded-full border-2 border-[#10B981]/30 overflow-hidden shadow-xl"
+                          className="w-10 h-10 rounded-full border-2 border-[#10B981]/30 overflow-hidden shadow-xl"
                         >
                           <img src={src} alt="Top Contributor" className="w-full h-full object-cover" loading="lazy" decoding="async" />
                         </motion.div>
@@ -1501,7 +1563,7 @@ const Home = () => {
                     <div className="flex justify-center">
                       <motion.div
                         whileHover={{ scale: 1.1, rotate: 10 }}
-                        className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#10B981] to-emerald-400 p-0.5 shadow-xl shadow-emerald-500/20"
+                        className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#10B981] to-emerald-400 p-0.5 shadow-xl shadow-emerald-500/20"
                       >
                         <div className={`w-full h-full rounded-[0.9rem] flex items-center justify-center ${theme === 'dark' ? 'bg-[#0a0a0a]' : 'bg-white'}`}>
                           <Heart className="w-7 h-7 text-[#10B981] fill-[#10B981]/20" />
@@ -1510,11 +1572,11 @@ const Home = () => {
                     </div>
 
                     <div className="space-y-3">
-                      <h3 className={`text-3xl md:text-5xl font-black italic uppercase tracking-tighter leading-none ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-                        Join the <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#10B981] to-blue-500">Collective</span>
+                      <h3 className={`text-3xl md:text-4xl font-black italic uppercase tracking-tighter leading-none ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+                        Join the <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#10B981] to-blue-500">Community</span>
                       </h3>
-                      <p className="text-slate-500 font-medium text-sm md:text-base max-w-xl mx-auto leading-relaxed">
-                        Connect with 5,000+ top-tier creators in our encrypted Discord node. Share premium assets and hyper-growth strategies.
+                      <p className="text-slate-300 font-medium text-sm md:text-base max-w-xl mx-auto leading-relaxed">
+                        Connect with 5,000+ top-tier creators in our exclusive Discord server. Share resources, collaborate, and grow together.
                       </p>
                     </div>
 
@@ -1525,7 +1587,7 @@ const Home = () => {
                         onClick={() => document.getElementById('footer')?.scrollIntoView({ behavior: 'smooth' })}
                         className="px-8 py-4 bg-[#10B981] hover:bg-emerald-400 text-white rounded-xl font-black uppercase italic tracking-widest text-xs flex items-center gap-2.5 shadow-xl shadow-emerald-500/30 transition-all"
                       >
-                        <Zap className="w-4 h-4 fill-white" /> Connect Node
+                        <Zap className="w-4 h-4 fill-white" /> Join Community
                       </motion.button>
 
                       <div className="flex gap-5 items-center px-6 py-3.5 rounded-xl border border-white/5 bg-white/5 backdrop-blur-sm">
@@ -1546,9 +1608,9 @@ const Home = () => {
                     </div>
 
                     <div className="pt-4 flex flex-wrap justify-center gap-x-10 gap-y-3 opacity-40 grayscale group-hover:grayscale-0 transition-all duration-700">
-                      <span className="text-[8px] font-black uppercase tracking-widest">Enterprise Encrypted</span>
-                      <span className="text-[8px] font-black uppercase tracking-widest">24/7 Node Support</span>
-                      <span className="text-[8px] font-black uppercase tracking-widest">Global Mesh Access</span>
+                      <span className="text-[8px] font-black uppercase tracking-widest">Enterprise Security</span>
+                      <span className="text-[8px] font-black uppercase tracking-widest">24/7 Priority Support</span>
+                      <span className="text-[8px] font-black uppercase tracking-widest">Global Edge Network</span>
                     </div>
                   </div>
                 </div>
@@ -1572,7 +1634,7 @@ const Home = () => {
             <h2 className={`text-4xl md:text-5xl lg:text-6xl font-black italic uppercase tracking-tighter mb-3 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
               Transparent <span className="text-[#10B981]">Pricing.</span>
             </h2>
-            <p className="text-slate-500 font-medium text-sm md:text-base max-w-xl mx-auto italic">
+            <p className="text-slate-300 font-medium text-sm md:text-base max-w-xl mx-auto italic">
               Every plan includes real-time alerts, OBS overlays, and instant settlements.
             </p>
           </div>
@@ -1581,123 +1643,125 @@ const Home = () => {
           {(() => {
             const pricingCards = [
               {
-                id: 'starter',
-                label: 'Core Node — Starter',
-                price: '₹699', sub: 'Entry-level node for new creators.',
+                id: 'starter', label: 'Starter',
+                price: '₹699', sub: 'Perfect for new creators getting started.',
+                accent: '#94a3b8', accentRgb: '148,163,184',
                 icon: <Zap className="w-5 h-5 text-slate-400" />,
                 iconBg: 'bg-slate-500/10',
-                labelColor: 'text-slate-500',
-                cardClass: theme === 'dark' ? 'bg-white/[0.03] border-white/10' : 'bg-white border-slate-200',
-                features: ['85% Revenue Split (15% Fee)', 'Real-time OBS Alerts', 'Custom Donation Page', 'Lottie Sticker Packs', 'Goal Bar Overlays', 'Weekly Payouts'],
-                featureColor: theme === 'dark' ? 'text-slate-400' : 'text-slate-600',
+                features: ['85% Revenue Split', 'Real-time OBS Alerts', 'Custom Donation Page', 'Goal Bar Overlays', 'Weekly Payouts'],
                 checkColor: 'text-[#10B981]',
-                btnClass: theme === 'dark' ? 'border border-white/10 text-white hover:bg-white/5' : 'border border-slate-200 text-slate-700',
-                btnLabel: 'Activate Starter Node',
+                btnClass: 'border border-white/10 text-white hover:bg-white/5',
+                btnLabel: 'Start Free Trial',
               },
               {
-                id: 'pro', label: 'Elite Mesh — Pro',
-                price: '₹1,499', sub: 'Best for growing creators & streamers.',
+              id: 'pro', label: 'Pro',
+                price: '₹1,499', sub: 'For growing creators & streamers.',
+                accent: '#10B981', accentRgb: '16,185,129',
                 icon: <Rocket className="w-5 h-5 text-[#10B981]" />,
                 iconBg: 'bg-[#10B981]/15',
-                labelColor: 'text-[#10B981]',
                 badge: 'Most Popular',
-                cardClass: 'border-[#10B981]/50 bg-gradient-to-b from-[#10B981]/10 to-transparent shadow-[0_0_40px_rgba(16,185,129,0.15)]',
-                features: ['90% Revenue Split (10% Fee)', 'Everything in Starter', 'Priority Alert Delivery', '20+ Premium Alert Styles', '48hr Payout Processing', 'Priority Support'],
-                featureColor: theme === 'dark' ? 'text-slate-300' : 'text-slate-700',
+                features: ['90% Revenue Split', 'Priority Alert Delivery', '20+ Premium Styles', '48hr Payouts', 'Priority Support'],
                 checkColor: 'text-[#10B981]',
-                btnClass: 'bg-[#10B981] text-white shadow-lg shadow-[#10B981]/30',
-                btnLabel: 'Deploy Elite Node',
+                btnClass: 'bg-[#10B981] text-white shadow-lg shadow-[#10B981]/30 hover:bg-emerald-400',
+                btnLabel: 'Get Started',
               },
               {
-                id: 'legend', label: 'Legendary Uplink — Legend',
-                price: '₹2,499', sub: 'For professional creators at the top.',
+                id: 'legend', label: 'Legend',
+                price: '₹2,499', sub: 'For pro creators at the top.',
+                accent: '#f59e0b', accentRgb: '245,158,11',
                 icon: <Trophy className="w-5 h-5 text-amber-400" />,
                 iconBg: 'bg-amber-500/15',
-                labelColor: 'text-amber-500',
-                cardClass: theme === 'dark' ? 'bg-[#0a0808]/60 border-amber-500/25' : 'bg-amber-50 border-amber-200',
-                features: ['95% Revenue Split (5% Fee)', 'Everything in Pro', 'Dedicated WebSocket Node', 'Unlimited Premium Styles', 'Instant Payouts', 'Dedicated Account Manager'],
-                featureColor: theme === 'dark' ? 'text-slate-300' : 'text-slate-700',
+                features: ['95% Revenue Split', 'Dedicated Server', 'Unlimited Styles', 'Instant Payouts', 'Account Manager'],
                 checkColor: 'text-amber-400',
-                btnClass: 'bg-amber-500 text-black shadow-lg shadow-amber-500/25',
-                btnLabel: 'Go Legendary',
+                btnClass: 'bg-amber-500 text-black shadow-lg shadow-amber-500/25 hover:bg-amber-400',
+                btnLabel: 'Get Started',
               },
             ];
             const goCard = (newIdx) => { setPricingDir(newIdx > pricingCard ? 1 : -1); setPricingCard(newIdx); };
             return (
               <div className="md:hidden">
-                <div className="relative overflow-visible px-2 pt-6 pb-2" style={{ minHeight: 520 }}>
+                {/* Modern segmented pill tab switcher */}
+                <div className="flex justify-center mb-6">
+                  <div className="flex items-center gap-1 p-1 rounded-2xl bg-white/[0.04] border border-white/[0.07]">
+                    {pricingCards.map((c, i) => (
+                      <button
+                        key={c.id}
+                        onClick={() => goCard(i)}
+                        className="relative px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300"
+                        style={{
+                          color: i === pricingCard ? '#fff' : 'rgba(255,255,255,0.35)',
+                        }}
+                      >
+                        {i === pricingCard && (
+                          <motion.div
+                            layoutId="pricing-pill"
+                            className="absolute inset-0 rounded-xl"
+                            style={{ background: `rgba(${pricingCards[i].accentRgb},0.2)`, border: `1px solid rgba(${pricingCards[i].accentRgb},0.35)` }}
+                            transition={{ type: 'spring', stiffness: 400, damping: 35 }}
+                          />
+                        )}
+                        <span className="relative z-10">{c.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Cards */}
+                <div className="relative overflow-visible px-2" style={{ minHeight: 440 }}>
                   <AnimatePresence mode="wait" custom={pricingDir}>
                     {pricingCards.map((card, i) => i === pricingCard && (
                       <motion.div
                         key={card.id}
                         custom={pricingDir}
-                        initial={{ opacity: 0, x: pricingDir * 60, scale: 0.97 }}
+                        initial={{ opacity: 0, x: pricingDir * 50, scale: 0.97 }}
                         animate={{ opacity: 1, x: 0, scale: 1 }}
-                        exit={{ opacity: 0, x: pricingDir * -60, scale: 0.97 }}
-                        transition={{ type: 'spring', stiffness: 320, damping: 30 }}
-                        className={`relative rounded-3xl border p-7 flex flex-col ${card.cardClass}`}
+                        exit={{ opacity: 0, x: pricingDir * -50, scale: 0.97 }}
+                        transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                        className="relative rounded-3xl p-6 flex flex-col overflow-hidden"
+                        style={{
+                          background: `radial-gradient(ellipse at top left, rgba(${card.accentRgb},0.12) 0%, rgba(255,255,255,0.02) 60%)`,
+                          border: `1px solid rgba(${card.accentRgb},0.25)`,
+                          boxShadow: `0 0 40px rgba(${card.accentRgb},0.08)`,
+                        }}
                       >
                         {card.badge && (
-                          <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-5 py-1.5 rounded-full bg-[#10B981] text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-[#10B981]/30">
+                          <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-white text-[9px] font-black uppercase tracking-widest shadow-lg"
+                            style={{ background: card.accent, boxShadow: `0 4px 16px rgba(${card.accentRgb},0.4)` }}>
                             {card.badge}
                           </div>
                         )}
-                        <div className={`w-10 h-10 rounded-xl ${card.iconBg} flex items-center justify-center mb-4 ${card.badge ? 'mt-3' : ''}`}>
-                          {card.icon}
+
+                        <div className="flex items-start justify-between mb-5 mt-2">
+                          <div className={`w-11 h-11 rounded-2xl ${card.iconBg} flex items-center justify-center`}>
+                            {card.icon}
+                          </div>
+                          <div className="text-right">
+                            <div className="text-3xl font-black italic text-white">{card.price}</div>
+                            <div className="text-[10px] font-bold text-white/30 uppercase tracking-widest">/month</div>
+                          </div>
                         </div>
-                        <p className={`text-[10px] font-black uppercase tracking-widest mb-1 ${card.labelColor}`}>{card.label}</p>
-                        <div className="flex items-end gap-2 mb-1">
-                          <span className={`text-5xl font-black italic ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{card.price}</span>
-                          <span className="text-slate-500 font-bold mb-1.5">/mo</span>
-                        </div>
-                        <p className="text-sm font-medium text-slate-500 mb-5">{card.sub}</p>
+
+                        <p className="text-xs font-medium text-white/40 mb-5 leading-relaxed">{card.sub}</p>
+
                         <ul className="space-y-2.5 mb-6">
                           {card.features.map(f => (
-                            <li key={f} className="flex items-center gap-3 text-sm">
+                            <li key={f} className="flex items-center gap-2.5 text-sm">
                               <CheckCircle2 className={`w-4 h-4 ${card.checkColor} shrink-0`} />
-                              <span className={card.featureColor}>{f}</span>
+                              <span className="text-white/70 font-medium">{f}</span>
                             </li>
                           ))}
                         </ul>
+
                         <button onClick={() => navigate('/signup')}
-                          className={`w-full py-4 rounded-2xl font-black uppercase italic text-sm tracking-widest transition-all ${card.btnClass}`}>
+                          className={`w-full py-3.5 rounded-2xl font-black uppercase italic text-sm tracking-widest transition-all mt-auto ${card.btnClass}`}>
                           {card.btnLabel}
                         </button>
+
+                        {/* Bottom glow line */}
+                        <div className="absolute bottom-0 left-8 right-8 h-px" style={{ background: `linear-gradient(90deg, transparent, rgba(${card.accentRgb},0.5), transparent)` }} />
                       </motion.div>
                     ))}
                   </AnimatePresence>
-                </div>
-                <div className="flex items-center justify-center gap-4 mt-6">
-                  <button onClick={() => goCard(Math.max(0, pricingCard - 1))}
-                    disabled={pricingCard === 0}
-                    className="w-9 h-9 rounded-full border border-white/10 bg-white/5 flex items-center justify-center text-slate-400 hover:text-white disabled:opacity-25 transition-all">
-                    <ChevronRight className="w-4 h-4 rotate-180" />
-                  </button>
-                  <div className="flex gap-2">
-                    {pricingCards.map((c, i) => (
-                      <button key={c.id} onClick={() => goCard(i)}
-                        className={`rounded-full transition-all duration-300 ${i === pricingCard
-                          ? (i === 1 ? 'w-6 h-2.5 bg-[#10B981]' : i === 2 ? 'w-6 h-2.5 bg-amber-400' : 'w-6 h-2.5 bg-slate-400')
-                          : 'w-2.5 h-2.5 bg-white/15 hover:bg-white/30'
-                          }`} />
-                    ))}
-                  </div>
-                  <button onClick={() => goCard(Math.min(pricingCards.length - 1, pricingCard + 1))}
-                    disabled={pricingCard === pricingCards.length - 1}
-                    className="w-9 h-9 rounded-full border border-white/10 bg-white/5 flex items-center justify-center text-slate-400 hover:text-white disabled:opacity-25 transition-all">
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
-                <div className="flex gap-2 justify-center mt-4">
-                  {pricingCards.map((c, i) => (
-                    <button key={c.id} onClick={() => goCard(i)}
-                      className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest transition-all ${i === pricingCard
-                        ? (i === 1 ? 'bg-[#10B981]/20 text-[#10B981] border border-[#10B981]/30' : i === 2 ? 'bg-amber-500/15 text-amber-400 border border-amber-500/25' : 'bg-white/10 text-white border border-white/15')
-                        : 'text-slate-600 hover:text-slate-400'
-                        }`}>
-                      {i === 0 ? 'Starter' : i === 1 ? 'Pro' : 'Legend'}
-                    </button>
-                  ))}
                 </div>
               </div>
             );
@@ -1721,7 +1785,7 @@ const Home = () => {
 
               <div className="flex-grow flex items-center justify-between gap-6">
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-0.5">Core Node</p>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-0.5">Basic Tier</p>
                   <h3 className={`text-2xl font-black italic ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Starter</h3>
                   <p className="text-xs font-medium text-slate-500 mt-1">Free forever. Great for beginners.</p>
                 </div>
@@ -1742,7 +1806,7 @@ const Home = () => {
                   </div>
                   <button onClick={() => navigate('/signup')}
                     className={`px-5 py-2.5 rounded-xl font-black uppercase italic text-[11px] tracking-widest transition-all border ${theme === 'dark' ? 'border-white/10 text-white hover:bg-white/5' : 'border-slate-200 text-slate-700 hover:bg-slate-50'}`}>
-                    Deploy
+                    Start Trial
                   </button>
                 </div>
               </div>
@@ -1764,7 +1828,7 @@ const Home = () => {
 
               <div className="flex-grow flex items-center justify-between gap-6">
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-[#10B981] mb-0.5">Elite Mesh</p>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-[#10B981] mb-0.5">Growth Tier</p>
                   <h3 className={`text-2xl font-black italic ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Pro</h3>
                   <p className="text-xs font-medium text-slate-500 mt-1">Volume creators & streamers.</p>
                 </div>
@@ -1785,7 +1849,7 @@ const Home = () => {
                   </div>
                   <button onClick={() => navigate('/signup')}
                     className="px-5 py-2.5 rounded-xl font-black uppercase italic text-[11px] tracking-widest transition-all bg-[#10B981] text-white hover:bg-emerald-400 shadow-lg shadow-[#10B981]/30 hover:shadow-[#10B981]/50">
-                    Deploy
+                    Get Started
                   </button>
                 </div>
               </div>
@@ -1806,15 +1870,15 @@ const Home = () => {
 
               <div className="flex-grow flex items-center justify-between gap-6 relative z-10">
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-amber-500 mb-0.5">Legendary Uplink</p>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-amber-500 mb-0.5">Premium Tier</p>
                   <h3 className={`text-2xl font-black italic ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Legend</h3>
-                  <p className="text-xs font-medium text-slate-500 mt-1">Professional bespoke node.</p>
+                  <p className="text-xs font-medium text-slate-500 mt-1">Professional bespoke plan.</p>
                 </div>
 
                 <div className={`flex-1 rounded-xl p-3 mx-4 hidden lg:block ${theme === 'dark' ? 'bg-black/10' : 'bg-amber-500/5'}`}>
                   <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
                     <span className={`flex items-center gap-1.5 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}><CheckCircle2 className="w-3 h-3 text-amber-400" /> 95% Split (5% Fee)</span>
-                    <span className={`flex items-center gap-1.5 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}><CheckCircle2 className="w-3 h-3 text-amber-400" /> Dedicated WebSocket</span>
+                    <span className={`flex items-center gap-1.5 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}><CheckCircle2 className="w-3 h-3 text-amber-400" /> Dedicated Server</span>
                     <span className={`flex items-center gap-1.5 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}><CheckCircle2 className="w-3 h-3 text-amber-400" /> Unlimited Premium</span>
                     <span className={`flex items-center gap-1.5 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}><CheckCircle2 className="w-3 h-3 text-amber-400" /> Instant Processing</span>
                   </div>
@@ -1827,7 +1891,7 @@ const Home = () => {
                   </div>
                   <button onClick={() => navigate('/signup')}
                     className="px-5 py-2.5 rounded-xl font-black uppercase italic text-[11px] tracking-widest transition-all relative z-10 bg-amber-500 text-black hover:bg-amber-400 shadow-lg shadow-amber-500/25">
-                    Deploy
+                    Get Started
                   </button>
                 </div>
               </div>
@@ -1836,7 +1900,7 @@ const Home = () => {
 
 
           {/* Bottom note */}
-          <p className="text-center text-slate-600 text-sm font-medium mt-10">
+          <p className="text-center text-slate-600 text-sm font-medium mt-4">
             All plans include a <span className="text-[#10B981] font-bold">7-day free trial</span>. Cancel anytime. Billed via Razorpay.
           </p>
         </div>
@@ -1849,13 +1913,13 @@ const Home = () => {
             <div className="relative z-10 text-center md:text-left">
               <div className="flex items-center justify-center md:justify-start gap-3 mb-4">
                 <div className="w-2.5 h-2.5 rounded-full bg-[#10B981] animate-pulse" />
-                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#10B981]">Core Engineers Online</span>
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#10B981]">Enterprise Team Online</span>
               </div>
               <h2 className={`text-4xl md:text-5xl font-black italic uppercase tracking-tighter mb-4 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-                Need Custom <span className="text-[#10B981]">Architecture?</span>
+                Need a Custom <span className="text-[#10B981]">Solution?</span>
               </h2>
-              <p className="text-slate-500 font-medium italic max-w-xl mx-auto md:mx-0 text-sm md:text-base">
-                Enterprise transaction limits, custom protocol integrations, or dedicated mesh clusters. Open a direct socket with our architecture team.
+              <p className="text-slate-300 font-medium italic max-w-xl mx-auto md:mx-0 text-sm md:text-base">
+                Need higher transaction limits, custom features, or a dedicated account manager? Get in touch with our enterprise team.
               </p>
             </div>
             <div className="relative z-10 shrink-0 w-full md:w-auto">
@@ -1863,7 +1927,7 @@ const Home = () => {
               <button
                 onClick={() => setIsSocketModalOpen(true)}
                 className={`w-full md:w-auto px-10 py-5 rounded-2xl font-black uppercase italic tracking-widest text-sm transition-all flex items-center justify-center gap-3 border ${theme === 'dark' ? 'bg-white/5 border-[#10B981]/30 text-[#10B981] hover:bg-[#10B981]/10' : 'bg-white border-[#10B981]/30 text-[#10B981] hover:bg-emerald-50 shadow-md'}`}>
-                <Radio className="w-5 h-5" /> Open Socket
+                <Radio className="w-5 h-5" /> Get Started
               </button>
             </div>
           </div>
@@ -1894,8 +1958,8 @@ const Home = () => {
                     Drop<span className="text-[#10B981] drop-shadow-[0_0_10px_rgba(16,185,129,0.4)]">Pay</span>
                   </span>
                 </div>
-                <p className="text-slate-500 text-sm font-bold italic leading-[1.8] max-w-sm">
-                  The professional-grade monetisation engine for creators, streamers, and live broadcasters. Deployed for high-frequency nodes and zero-latency transmission.
+                <p className="text-slate-300 text-sm font-bold italic leading-[1.8] max-w-sm">
+                  Empowering the innovative creators. DropPay delivers a seamless monetization ecosystem to scale your revenue, elevate fan experiences, and manage global payouts instantly.
                 </p>
               </div>
 
@@ -1921,7 +1985,7 @@ const Home = () => {
             <div className="lg:col-span-5 grid grid-cols-3 gap-x-4 gap-y-8 sm:gap-x-8 sm:gap-y-10 md:gap-10">
               <div className="space-y-5 sm:space-y-8">
                 <div className={`text-sm sm:text-xl font-black italic uppercase tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'} flex items-center gap-1 sm:gap-2`}>
-                  System <div className="h-[2px] w-4 sm:w-8 bg-[#10B981]/40" />
+                  Product <div className="h-[2px] w-4 sm:w-8 bg-[#10B981]/40" />
                 </div>
                 <div className="flex flex-col gap-3 sm:gap-6">
                   {['Features', 'Pricing', 'Dashboard', 'Overlays'].map(item => (
@@ -1934,7 +1998,7 @@ const Home = () => {
               </div>
               <div className="space-y-5 sm:space-y-8">
                 <div className={`text-sm sm:text-xl font-black italic uppercase tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'} flex items-center gap-1 sm:gap-2`}>
-                  Protocol <div className="h-[2px] w-4 sm:w-8 bg-[#10B981]/40" />
+                  Resources <div className="h-[2px] w-4 sm:w-8 bg-[#10B981]/40" />
                 </div>
                 <div className="flex flex-col gap-3 sm:gap-6">
                   {['API Docs', 'Status', 'Security', 'Changelog'].map(item => (
@@ -1963,19 +2027,19 @@ const Home = () => {
             {/* NEWSLETTER NODE - World-Class CTA */}
             <div className="lg:col-span-3 space-y-10">
               <div className="space-y-4 text-center lg:text-left">
-                <p className={`text-xl font-black italic uppercase tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Stay Synced</p>
-                <p className="text-slate-500 text-sm font-bold italic leading-relaxed">
-                  Join 5,000+ creators getting weekly protocol updates.
+                <p className={`text-xl font-black italic uppercase tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Stay Updated</p>
+                <p className="text-slate-300 text-sm font-bold italic leading-relaxed">
+                  Join 5,000+ creators getting weekly product updates.
                 </p>
               </div>
-              <form onSubmit={handleSubscribe} className="relative group/form">
+              <form onSubmit={handleSubscribe} className="relative group/form w-full overflow-hidden">
                 <input
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   type="email"
                   required
-                  placeholder="SUBSCRIPTION_EMAIL_NODE..."
-                  className={`w-full px-7 py-6 rounded-[2rem] text-xs font-black uppercase tracking-widest italic outline-none border transition-all duration-500 ${theme === 'dark'
+                  placeholder="ENTER_EMAIL..."
+                  className={`w-full pl-5 sm:pl-8 pr-[110px] sm:pr-[140px] py-4 sm:py-5 rounded-[2rem] text-[9px] sm:text-[10px] font-black uppercase tracking-widest italic outline-none border transition-all duration-500 ${theme === 'dark'
                     ? 'bg-white/5 border-white/5 focus:border-[#10B981]/60 text-white shadow-inner focus:shadow-[0_0_30px_rgba(16,185,129,0.1)]'
                     : 'bg-white border-slate-200 focus:border-[#10B981]/60 text-slate-900 shadow-sm'
                     }`}
@@ -1983,12 +2047,12 @@ const Home = () => {
                 <button
                   type="submit"
                   disabled={subscribing}
-                  className={`absolute right-3 top-3 bottom-3 px-8 rounded-2xl transition-all duration-500 flex items-center justify-center font-black uppercase italic tracking-widest text-[10px] ${subscribing
+                  className={`absolute right-2 top-2 bottom-2 px-4 sm:px-6 rounded-[1.4rem] transition-all duration-500 flex items-center justify-center font-black uppercase italic tracking-widest text-[8px] sm:text-[9px] ${subscribing
                     ? 'opacity-50 cursor-not-allowed'
-                    : 'bg-gradient-to-br from-[#10B981] to-[#059669] text-white shadow-xl shadow-[#10B981]/25 hover:shadow-[#10B981]/40 hover:scale-[1.05] active:scale-95'
+                    : 'bg-gradient-to-br from-[#10B981] to-[#059669] text-white shadow-xl shadow-[#10B981]/25 hover:shadow-[#10B981]/40 hover:scale-[1.03] active:scale-95'
                     }`}
                 >
-                  {subscribing ? <Cpu className="w-5 h-5 animate-spin" /> : <>Join Now <ArrowRight className="w-4 h-4 ml-2" /></>}
+                  {subscribing ? <Cpu className="w-4 h-4 animate-spin" /> : <>Join Now <ArrowRight className="w-3.5 h-3.5 ml-1.5" /></>}
                 </button>
               </form>
 
@@ -2005,33 +2069,13 @@ const Home = () => {
           <div className="flex flex-col lg:flex-row justify-between items-center gap-6 sm:gap-10">
             <div className="flex flex-col md:flex-row items-center gap-4 sm:gap-6 md:gap-12 w-full lg:w-auto">
               <p className="text-slate-600 text-[8px] sm:text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] opacity-80 italic text-center md:text-left leading-relaxed">
-                © 2026 DROPPAY ARCHITECTURE.
+                © 2026 DROPPAY .
                 <br className="md:hidden" /> ALL RIGHTS RESERVED.
               </p>
-              <div className="flex items-center gap-3 sm:gap-4 px-5 py-2.5 sm:px-6 sm:py-3 rounded-2xl bg-white/5 border border-white/10 shadow-md backdrop-blur-md group relative">
-                <div className="relative">
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#10B981] animate-pulse" />
-                  <div className="absolute inset-0 w-2.5 h-2.5 rounded-full bg-[#10B981] animate-ping opacity-50" />
-                </div>
-                <span className="text-[10px] sm:text-[11px] text-[#10B981] font-black uppercase tracking-[0.4em] italic group-hover:drop-shadow-[0_0_8px_#10B981] transition-all">BUILT IN INDIA 🇮🇳</span>
-              </div>
+
             </div>
 
-            {/* Regulatory Logos / Payment Sync Status */}
-            <div className="flex items-center justify-center gap-4 sm:gap-10 w-full lg:w-auto">
-              <div className="h-6 w-px bg-white/10 hidden lg:block" />
-              <div className="flex flex-wrap items-center justify-center gap-5 sm:gap-8 font-mono w-full sm:w-auto">
-                <div className="flex items-center gap-2 sm:gap-3">
-                  <Lock className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-                  <p className="text-[8px] sm:text-[10px] text-slate-500 font-black tracking-[0.2em] uppercase italic">RAZORPAY_SECURE</p>
-                </div>
-                <div className="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-[#10B981]/30 block" />
-                <div className="flex items-center gap-2 sm:gap-3">
-                  <ShieldCheck className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-                  <p className="text-[8px] sm:text-[10px] text-slate-500 font-black tracking-[0.2em] uppercase italic">256-BIT_ENCRYPTION</p>
-                </div>
-              </div>
-            </div>
+
           </div>
         </div>
       </footer>

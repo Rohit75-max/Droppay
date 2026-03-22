@@ -158,7 +158,7 @@ const PlanCard = ({ plan, index, isActive, isThisLoading, discounted, onClick, o
             className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000 ease-in-out"
             style={{ skewX: '-20deg' }}
           />
-          {isThisLoading ? <Loader2 className="animate-spin w-5 h-5 sm:w-6 sm:h-6" /> : <>Initialize Uplink <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover/btn:translate-x-2 transition-transform duration-500" /></>}
+          {isThisLoading ? <Loader2 className="animate-spin w-5 h-5 sm:w-6 sm:h-6" /> : <>Select Plan <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover/btn:translate-x-2 transition-transform duration-500" /></>}
         </button>
       </div>
     </motion.div>
@@ -221,7 +221,7 @@ const SubscriptionPage = () => {
         key: "rzp_test_SHrX3upgmJ6sGL",
         subscription_id: subRes.data.id,
         name: "DropPay Terminal",
-        description: `Activating ${planId.toUpperCase()} Node`,
+        description: `Activating ${planId.toUpperCase()} Plan`,
         handler: async (response) => {
           try {
             const verifyRes = await axios.post('/api/payment/verify-subscription', {
@@ -250,7 +250,7 @@ const SubscriptionPage = () => {
       const rzp = new window.Razorpay(options);
       rzp.open();
     } catch (err) {
-      setError(err.response?.data?.msg || "Deployment Node Offline: Payment gateway unreachable.");
+      setError(err.response?.data?.msg || "Service Unavailable: Payment gateway unreachable.");
       setLoadingPlan(null);
     }
   };
@@ -258,7 +258,7 @@ const SubscriptionPage = () => {
   const plans = [
     {
       id: 'starter',
-      name: 'Core Node',
+      name: 'Starter Plan',
       price: 699,
       fee: '15%',
       icon: Database,
@@ -272,7 +272,7 @@ const SubscriptionPage = () => {
         { icon: CheckCircle, text: '15% Revenue Split' },
         { icon: Clock, text: 'Weekly Payout Cycle' },
         { icon: Shield, text: 'Standard Encryption' },
-        { icon: Globe, text: 'Shared Uplink Node' }
+        { icon: Globe, text: 'Shared Infrastructure' }
       ],
       specs: [
         { icon: Activity, label: 'Latent Ops', value: '45ms' },
@@ -283,7 +283,7 @@ const SubscriptionPage = () => {
     },
     {
       id: 'pro',
-      name: 'Elite Mesh',
+      name: 'Professional Plan',
       price: 1499,
       fee: '10%',
       icon: Cpu,
@@ -298,7 +298,7 @@ const SubscriptionPage = () => {
         { icon: CheckCircle, text: '10% Revenue Split' },
         { icon: Clock, text: '48hr Payout Terminal' },
         { icon: ShieldCheck, text: 'Advanced Encryption' },
-        { icon: Zap, text: 'High-Bandwidth Uplink' }
+        { icon: Zap, text: 'Priority Connection' }
       ],
       specs: [
         { icon: Activity, label: 'Latent Ops', value: '18ms' },
@@ -309,7 +309,7 @@ const SubscriptionPage = () => {
     },
     {
       id: 'legend',
-      name: 'Legendary Uplink',
+      name: 'Expert Plan',
       price: 2499,
       fee: '5%',
       icon: ShieldCheck,
@@ -323,7 +323,7 @@ const SubscriptionPage = () => {
         { icon: CheckCircle, text: '5% Revenue Split' },
         { icon: Clock, text: 'Instant Settlement' },
         { icon: ShieldCheck, text: 'Military Grade Sec' },
-        { icon: Rocket, text: 'Dedicated 10Gbps Uplink' }
+        { icon: Rocket, text: 'Dedicated Infrastructure' }
       ],
       specs: [
         { icon: Activity, label: 'Latent Ops', value: 'Sub-ms' },
@@ -394,7 +394,7 @@ const SubscriptionPage = () => {
                   className="absolute -inset-1 bg-current blur-sm rounded-full opacity-20"
                 />
               </div>
-              <span className="relative z-10">7-Day Trial Protocol Active</span>
+              <span className="relative z-10">7-Day Trial Active</span>
               <div className="h-4 w-[1px] bg-white/10" />
               <Sparkles className="w-4 h-4 sm:w-6 sm:h-6 animate-spin-slow text-white/40" />
             </div>
@@ -402,7 +402,7 @@ const SubscriptionPage = () => {
             <div className="flex items-center gap-3 sm:gap-4 text-amber-500 font-mono text-[9px] md:text-[11px] font-black bg-black/40 border border-amber-500/30 px-5 py-3 md:px-8 md:py-3 rounded-2xl tracking-[0.2em] sm:tracking-[0.3em] uppercase shadow-[0_10px_30px_rgba(0,0,0,0.5)] backdrop-blur-md relative overflow-hidden group">
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-500/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
               <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-amber-500 animate-pulse mr-1" />
-              Node Activation Window: <span className="text-white ml-1">{String(timeLeft.hours).padStart(2, '0')}:{String(timeLeft.minutes).padStart(2, '0')}:{String(timeLeft.seconds).padStart(2, '0')}</span>
+              Special Offer Ends In: <span className="text-white ml-1">{String(timeLeft.hours).padStart(2, '0')}:{String(timeLeft.minutes).padStart(2, '0')}:{String(timeLeft.seconds).padStart(2, '0')}</span>
             </div>
           </motion.div>
 
@@ -412,7 +412,7 @@ const SubscriptionPage = () => {
             className="text-3xl sm:text-6xl md:text-8xl lg:text-9xl font-black italic uppercase mb-8 md:mb-12 leading-[0.85] tracking-tighter"
           >
             Secure <span className={`text-transparent bg-clip-text bg-gradient-to-br transition-all duration-1000 drop-shadow-[0_0_30px_rgba(255,255,255,0.1)] ${selectedPlan === 'legend' ? 'from-amber-200 via-amber-400 to-amber-600' : selectedPlan === 'starter' ? 'from-slate-200 via-slate-400 to-slate-600' : 'from-emerald-200 via-emerald-400 to-emerald-600'}`}>
-              Your Uplink.
+              Your Plan.
             </span>
           </motion.h1>
 
@@ -504,7 +504,7 @@ const SubscriptionPage = () => {
                 <h2 className="text-2xl md:text-4xl font-black italic uppercase tracking-tighter">Enterprise <span className="text-white/40">Custom Solutions</span></h2>
               </div>
               <p className="text-white/40 text-sm md:text-lg font-bold leading-relaxed mb-10 max-w-xl">
-                Require unique infrastructure, custom payout protocols, or high-volume enterprise nodes? Our engineering team builds bespoke uplink channels for established creator networks.
+                Require unique infrastructure, custom payout settings, or high-volume enterprise support? Our team builds dedicated solutions for established creator networks.
               </p>
               <div className="flex flex-wrap gap-10 opacity-30 group-hover:opacity-100 transition-opacity duration-700">
                 <div className="flex items-center gap-3">
@@ -523,7 +523,7 @@ const SubscriptionPage = () => {
             </div>
 
             <button className="relative px-12 py-6 rounded-[2.5rem] bg-white text-black font-black uppercase italic text-sm tracking-[0.3em] overflow-hidden hover:scale-105 transition-transform duration-500 shadow-[0_20px_40px_rgba(255,255,255,0.1)]">
-              <span className="relative z-10">Request Uplink</span>
+              <span className="relative z-10">Contact Sales</span>
               <motion.div
                 animate={{ x: ['-250%', '250%'] }}
                 transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
@@ -539,10 +539,10 @@ const SubscriptionPage = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-20 opacity-30 hover:opacity-100 transition-opacity duration-700">
               {[
-                { icon: Shield, text: 'Quantum SSL Encryption', sub: '256-bit Node Security' },
-                { icon: Zap, text: 'Instant Settlement Hub', sub: 'Real-time Ledger Sync' },
-                { icon: Activity, text: 'Uptime Protocol: 99.9%', sub: 'Global Node Redundancy' },
-                { icon: Star, text: 'Elite Priority Sync', sub: '24/7 Technical Support' }
+                { icon: Shield, text: 'Advanced Encryption', sub: 'Secure Infrastructure' },
+                { icon: Zap, text: 'Instant Payouts', sub: 'Real-time Ledger Sync' },
+                { icon: Activity, text: '99.9% Uptime SLA', sub: 'Global Reliability' },
+                { icon: Star, text: 'Elite Priority Support', sub: '24/7 Technical Support' }
               ].map((item, i) => (
                 <div key={i} className="flex flex-col items-center gap-4 group transition-all duration-500">
                   <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-emerald-500/10 group-hover:border-emerald-500/20 group-hover:scale-110 transition-all duration-500">
@@ -557,7 +557,7 @@ const SubscriptionPage = () => {
             </div>
 
             <div className="text-white/10 text-[9px] font-black uppercase tracking-[0.5em] italic">
-              Powered by DropPay Creator Architecture v4.0.2-final
+              Powered by DropPay Creator Infrastructure v4.0.2-final
             </div>
           </div>
         </footer>

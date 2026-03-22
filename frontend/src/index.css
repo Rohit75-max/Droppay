@@ -2,10 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ============================================ */
+
 /* GLOBAL DARK / LIGHT MODE VARIABLES           */
-/* Public pages: Home, Login, Signup, etc.      */
-/* ============================================ */
+
 :root {
     /* Default = dark */
     --dp-bg: #050505;
@@ -74,6 +73,22 @@ html.light {
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: var(--nexus-accent);
     box-shadow: 0 0 10px var(--nexus-accent);
+}
+
+/* Laser Scrollbar for Theme Selectors */
+.laser-scroll::-webkit-scrollbar {
+    height: 2px;
+}
+
+.laser-scroll::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 10px;
+}
+
+.laser-scroll::-webkit-scrollbar-thumb {
+    background: var(--nexus-accent);
+    box-shadow: 0 0 10px var(--nexus-accent);
+    border-radius: 10px;
 }
 
 body {
@@ -733,9 +748,8 @@ body.theme-obsidian_monolith .text-\[var\(--nexus-accent\)\] {
     filter: drop-shadow(0 0 5px #3b82f6) !important;
 }
 
-/* ------------------------------------------ */
 /* THEME UTILITIES                            */
-/* ------------------------------------------ */
+
 .theme-btn-active {
     border: 2px solid #10B981 !important;
     /* DropPay Emerald */
@@ -743,7 +757,6 @@ body.theme-obsidian_monolith .text-\[var\(--nexus-accent\)\] {
     transform: scale(1.05) !important;
 }
 
-/* ------------------------------------------ */
 /* BASE OVERRIDES (Used to apply the variables) */
 /* ------------------------------------------ */
 

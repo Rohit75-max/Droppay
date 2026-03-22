@@ -3,7 +3,7 @@ const router = express.Router();
 const adminAuth = require('../middleware/adminAuth');
 const {
     getUsers, getUserDetails, toggleBan, updateTier, getSystemMetrics,
-    updateRole, getPayoutQueue, executeSettlement,
+    updateRole, getPayoutQueue, executeSettlement, rejectSettlement,
     getGlobalConfig, updateGlobalConfig, dispatchBroadcast,
     getAdminProfile, updateAdminProfile, uploadAdminAvatar,
     getAuditLogs, getSystemHealth
@@ -44,6 +44,10 @@ router.get('/payouts', getPayoutQueue);
 // @route   POST api/admin/payouts/:id/settle
 // @desc    Execute node payout clearing active wallet debt
 router.post('/payouts/:id/settle', executeSettlement);
+
+// @route   POST api/admin/payouts/:id/reject
+// @desc    Reject node payout and refund to wallet
+router.post('/payouts/:id/reject', rejectSettlement);
 
 // --- GLOBAL SYSTEMS ---
 

@@ -71,14 +71,14 @@ const DashboardSummary = ({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full max-w-7xl mx-auto pt-4">
 
-      {/* LEFT COLUMN: TELEMETRY & PROGRESS */}
+      {/* LEFT COLUMN: ANALYTICS & PROGRESS */}
       <div className="col-span-1 lg:col-span-8 space-y-6">
 
         {/* TOP ROW: NEURAL PROFILE & ATOMIC BALANCE (AERO-GLASS PROTOCOL) */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
 
           {/* WIDGET 1: NEURAL PROFILE (IDENTITY NODE) */}
-          {user?.ownedWidgets?.includes('neural_profile') ? (
+          {user?.ownedWidgets?.includes('user_profile') ? (
             <div className="md:col-span-4" style={{ perspective: '1000px' }}>
               <div className="aero-widget scanner-active w-full h-full min-h-[240px] relative border-[var(--nexus-border)] border overflow-hidden p-6 flex flex-col items-center justify-center group"
                 style={{
@@ -102,95 +102,70 @@ const DashboardSummary = ({
                 <h3 className="text-xl font-black tracking-widest text-[var(--nexus-text)] truncate w-full text-center hover:text-[#3b82f6] transition-colors">{user.username}</h3>
 
                 <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 absolute bottom-4 text-center w-full">
-                  <p className="font-mono text-[10px] tracking-widest text-[#3b82f6] drop-shadow-[0_0_5px_rgba(59,130,246,0.8)]"><ShieldCheck className="w-3 h-3 inline mr-1" />NODE STATUS: SECURE</p>
-                  <p className="font-mono text-[8px] text-[var(--nexus-text-muted)] mt-1 flex items-center justify-center gap-1"><User className="w-2.5 h-2.5 opacity-50" /> ID: DROP-{user.streamerId?.slice(-6).toUpperCase() || 'NODE'}</p>
+                  <p className="font-mono text-[10px] tracking-widest text-[#3b82f6] drop-shadow-[0_0_5px_rgba(59,130,246,0.8)]"><ShieldCheck className="w-3 h-3 inline mr-1" />STATUS: VERIFIED</p>
+                  <p className="font-mono text-[8px] text-[var(--nexus-text-muted)] mt-1 flex items-center justify-center gap-1"><User className="w-2.5 h-2.5 opacity-50" /> ID: USER-{user.streamerId?.slice(-6).toUpperCase() || 'CORE'}</p>
                 </div>
               </div>
             </div>
           ) : (
             <EliteCard
-              whileHover={{ rotateY: 10, rotateX: 5, z: 50 }}
-              style={{ perspective: '1200px' }}
-              className={`md:col-span-4 flex flex-col items-center justify-center p-8 border relative overflow-hidden h-full min-h-[280px] transition-all duration-700 ${nexusTheme === 'neon_relic' ? 'rounded-none relic-surface' : 'rounded-[3rem]'} ${getCardStyle()}`}
+              whileHover={{ scale: 1.01, z: 10 }}
+              className={`md:col-span-4 flex flex-col items-stretch border relative overflow-hidden h-[320px] transition-all duration-700 ${nexusTheme === 'neon_relic' ? 'rounded-none relic-surface' : 'rounded-[2.5rem]'} bg-[#070707] border-[var(--nexus-border)]`}
             >
-              {nexusTheme === 'neon_relic' && (
-                <>
-                  <div className="plasma-leak-cyan top-0 right-0 -mt-2 -mr-2"></div>
-                  <div className="plasma-leak-magenta bottom-0 left-0 -mb-2 -ml-2"></div>
-                  <div className="holo-sticker top-4 right-4 rotate-[5deg] z-50">VERIFIED RELIC</div>
-                </>
-              )}
-              {/* Vertical Scanning Beam */}
-              <motion.div
-                animate={{
-                  top: ['-10%', '110%'],
-                  opacity: [0, 1, 0]
-                }}
-                transition={{
-                  duration: 4,
-                  repeat: Infinity,
-                  ease: "linear"
-                }}
-                className="absolute left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[var(--nexus-accent)] to-transparent z-20 pointer-events-none blur-[1px]"
-              />
-
-              {/* Status Indicator (Top Right) */}
-              <div className="absolute top-6 right-6 flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
-                <span className="text-[7px] font-black uppercase tracking-[0.2em] text-[var(--nexus-text-muted)] opacity-50">Online</span>
+              {/* Profile Image Section (Top 70%) */}
+              <div className="w-full h-[70%] relative overflow-hidden group/avatar flex-shrink-0">
+                {user.avatar ? (
+                  <img
+                    src={user.avatar}
+                    alt="avatar"
+                    className="absolute inset-0 w-full h-full object-cover grayscale-[0.2] group-hover/avatar:grayscale-0 transition-all duration-1000 scale-105 group-hover/avatar:scale-100"
+                  />
+                ) : (
+                  <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-gradient-to-br from-[var(--nexus-accent)]/20 to-[#070707] text-[var(--nexus-text)] text-4xl font-black italic tracking-tighter">
+                    {user.fullName?.charAt(0).toUpperCase() || user.username?.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                
+                {/* Visual Overlays */}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#070707] via-transparent to-transparent pointer-events-none z-10" />
+                
+                {nexusTheme === 'neon_relic' && (
+                  <>
+                    <div className="plasma-leak-cyan top-0 left-0 -mt-2 -ml-2 opacity-40"></div>
+                    <div className="holo-sticker top-2 left-4 rotate-[-5deg] z-20 scale-50 origin-top-left">ID: RELIC</div>
+                  </>
+                )}
+                
+                {/* User ID Overlay (Top Right) */}
+                <div className="absolute top-4 right-4 flex items-center gap-2 z-20 bg-black/40 backdrop-blur-xl px-2 py-1 rounded-full border border-white/5">
+                  <User className="w-2 h-2 text-[var(--nexus-accent)] opacity-80" />
+                  <span className="text-[7px] font-mono text-white/90 tracking-widest uppercase">
+                    ID-{user.streamerId?.slice(-6).toUpperCase() || 'CORE'}
+                  </span>
+                </div>
               </div>
 
-              {/* Avatar / Identity Node */}
-              <div className="relative mb-6 group/avatar">
-                {/* Breathing Glow */}
-                <motion.div
-                  animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.6, 0.3] }}
-                  transition={{ duration: 3, repeat: Infinity }}
-                  className="absolute -inset-4 rounded-full bg-[var(--nexus-accent)]/10 blur-xl"
-                />
-
-                <div className="w-24 h-24 rounded-full border-2 border-[var(--nexus-accent)]/40 p-1.5 relative z-10 bg-black/40 backdrop-blur-md shadow-[0_0_20px_var(--nexus-accent-glow)] flex items-center justify-center overflow-hidden">
-                  {user.avatar ? (
-                    <img
-                      src={user.avatar}
-                      alt="avatar"
-                      className="w-full h-full rounded-full object-cover grayscale-[0.3] group-hover/avatar:grayscale-0 transition-all duration-500"
-                    />
-                  ) : (
-                    <div className="w-full h-full rounded-full flex items-center justify-center bg-gradient-to-br from-[var(--nexus-accent)]/20 to-transparent text-[var(--nexus-text)] text-4xl font-black italic tracking-tighter">
-                      {user.fullName?.charAt(0).toUpperCase() || user.username?.charAt(0).toUpperCase()}
+              {/* Identity Details Section (Bottom 30%) */}
+              <div className="w-full h-[30%] p-4 flex flex-col justify-center items-center relative z-20 bg-[#070707] flex-shrink-0">
+                <div className="space-y-4 w-full text-center">
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-center gap-2">
+                      <h3 className={`text-xl font-black uppercase italic tracking-tighter leading-none ${nexusTheme === 'neon_relic' ? 'font-mono text-cyan-400 relic-text-glow' : 'text-[var(--nexus-text)]'}`}>
+                        {user.fullName || user.username}
+                      </h3>
+                      {user.tier === 'legend' && <Crown className="w-4 h-4 text-amber-500 drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]" />}
                     </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Identity Details */}
-              <div className="text-center relative z-10 space-y-1">
-                <div className="flex items-center justify-center gap-2">
-                  <h3 className={`text-xl md:text-2xl font-black uppercase italic tracking-tighter drop-shadow-md ${nexusTheme === 'neon_relic' ? 'font-mono text-cyan-400 relic-text-glow' : 'text-[var(--nexus-text)]'}`}>
-                    {user.fullName || user.username}
-                  </h3>
-                  {user.tier === 'legend' && <Crown className="w-4 h-4 text-amber-500 drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]" />}
-                </div>
-
-                <div className="flex flex-col items-center">
-                  <p className="text-[10px] font-black uppercase tracking-[0.4em] text-[var(--nexus-accent)] mb-2">
-                    {user.tier || 'Starter'} Unit
-                  </p>
-
-                  <div className="bg-white/5 border border-white/10 px-4 py-1.5 rounded-full flex items-center gap-2">
-                    <User className="w-3 h-3 text-[var(--nexus-text-muted)]" />
-                    <span className="text-[9px] font-mono font-bold tracking-widest text-[var(--nexus-text-muted)]">
-                      NODE-{user.streamerId?.slice(-6).toUpperCase() || 'CORE'}
-                    </span>
+                    <p className="text-[9px] font-black uppercase tracking-[0.4em] text-[var(--nexus-accent)] block">
+                      {user.tier || 'Starter'} Unit
+                    </p>
                   </div>
                 </div>
               </div>
             </EliteCard>
           )}
 
-          {/* WIDGET 2: ATOMIC BALANCE (REVENUE NODE) */}
-          {user?.activeRevenueWidget === 'atomic_balance' ? (
+          {/* WIDGET 2: WALLET BALANCE (REVENUE SUMMARY) */}
+          {user?.activeRevenueWidget === 'wallet_balance' ? (
             <div className="md:col-span-8" style={{ perspective: '1000px' }}>
               <div className="aero-widget border border-[var(--nexus-border)] w-full h-full min-h-[240px] relative overflow-hidden p-7 md:p-10 flex flex-col justify-between group"
                 style={{ backdropFilter: 'blur(35px) saturate(200%)', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '2.5rem' }}>
@@ -203,14 +178,14 @@ const DashboardSummary = ({
                 <div className="relative z-10 flex items-center justify-between">
                   <div className="flex items-center gap-2 bg-[#3b82f6]/10 px-3 py-1.5 rounded-full border border-[#3b82f6]/20 backdrop-blur-md">
                     <Wallet className="w-4 h-4 text-[#3b82f6]" />
-                    <span className="text-[10px] uppercase font-black tracking-[0.3em] text-[#3b82f6]">Atomic Balance <Send className="w-3 h-3 inline ml-1" /></span>
+                    <span className="text-[10px] uppercase font-black tracking-[0.3em] text-[#3b82f6]">Wallet Balance <Send className="w-3 h-3 inline ml-1" /></span>
                   </div>
                   <button
                     onClick={() => setShowWithdrawModal(true)}
-                    disabled={isProcessingWithdraw || user.walletBalance < 1000}
-                    className={`px-6 py-2.5 text-[10px] uppercase font-black tracking-widest rounded-full transition-all duration-300 border backdrop-blur-lg ${user.walletBalance >= 1000 ? 'bg-[#3b82f6]/20 border-[#3b82f6]/50 text-[#3b82f6] hover:bg-[#3b82f6] hover:text-white hover:shadow-[0_0_20px_rgba(59,130,246,0.6)] hover:scale-105' : 'bg-[var(--nexus-panel)] border-[var(--nexus-border)] text-[var(--nexus-text-muted)] cursor-not-allowed opacity-50'}`}
+                    disabled={isProcessingWithdraw || (Number(user.walletBalance) || 0) < 1000}
+                    className={`px-6 py-2.5 text-[10px] uppercase font-black tracking-widest rounded-full transition-all duration-300 border backdrop-blur-lg ${(Number(user.walletBalance) || 0) >= 1000 ? 'bg-[#3b82f6]/20 border-[#3b82f6]/50 text-[#3b82f6] hover:bg-[#3b82f6] hover:text-white hover:shadow-[0_0_20px_rgba(59,130,246,0.6)] hover:scale-105' : 'bg-[var(--nexus-panel)] border-[var(--nexus-border)] text-[var(--nexus-text-muted)] cursor-not-allowed opacity-50'}`}
                   >
-                    {isProcessingWithdraw ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Liquidate'}
+                    {isProcessingWithdraw ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Withdraw'}
                   </button>
                 </div>
 
@@ -236,12 +211,12 @@ const DashboardSummary = ({
 
                 <div className="relative z-10 flex gap-6 mt-auto origin-left transform transition-transform group-hover:scale-105">
                   <div className="flex flex-col">
-                    <span className="text-[8px] uppercase font-black tracking-widest text-[#3b82f6] mb-1 opacity-80">Pending Settlement</span>
+                    <span className="text-[8px] uppercase font-black tracking-widest text-[#3b82f6] mb-1 opacity-80">Pending Payout</span>
                     <span className="text-lg md:text-xl font-mono font-bold text-[var(--nexus-text)] drop-shadow-md">₹{user.financialMetrics?.pendingPayouts?.toLocaleString('en-IN') || '0'}</span>
                   </div>
                   <div className="w-px h-8 bg-[#3b82f6]/20 mx-2 hidden sm:block"></div>
                   <div className="flex flex-col hidden sm:flex">
-                    <span className="text-[8px] uppercase font-black tracking-widest text-[var(--nexus-text-muted)] mb-1">Total Mined <TrendingUp className="w-3 h-3 inline ml-1 text-[var(--nexus-accent)]" /></span>
+                    <span className="text-[8px] uppercase font-black tracking-widest text-[var(--nexus-text-muted)] mb-1">Total Earned <TrendingUp className="w-3 h-3 inline ml-1 text-[var(--nexus-accent)]" /></span>
                     <span className="text-lg md:text-xl font-mono font-bold text-[var(--nexus-text-muted)]">₹{user.financialMetrics?.totalSettled?.toLocaleString('en-IN') || '0'}</span>
                   </div>
                 </div>
@@ -253,7 +228,7 @@ const DashboardSummary = ({
                 <>
                   <div className="plasma-leak-cyan top-0 right-0 -mt-2 -mr-2"></div>
                   <div className="plasma-leak-magenta bottom-0 left-0 -mb-2 -ml-2"></div>
-                  <div className="holo-sticker top-6 right-8">VAULT AUTH</div>
+                  <div className="holo-sticker top-6 right-8">ACCOUNT SECURE</div>
                 </>
               )}
               <div className="flex items-center justify-between mb-8 relative z-10">
@@ -261,12 +236,12 @@ const DashboardSummary = ({
                   <div className="p-2 sm:p-3 rounded-[1rem] bg-[var(--nexus-accent)]/10 border border-[var(--nexus-accent)]/20">
                     <Wallet className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--nexus-accent)]" />
                   </div>
-                  <h3 className="text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-[var(--nexus-text-muted)] italic">Node Balance</h3>
+                  <h3 className="text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-[var(--nexus-text-muted)] italic">Current Balance</h3>
                 </div>
                 <button
                   onClick={() => setShowWithdrawModal(true)}
-                  disabled={isProcessingWithdraw || user.walletBalance < 1000}
-                  className={`px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2 border ${user.walletBalance >= 1000 ? 'bg-[var(--nexus-accent)] text-[var(--nexus-panel)] border-[var(--nexus-accent)] hover:brightness-110 shadow-[0_0_15px_var(--nexus-accent)]' : 'bg-[var(--nexus-panel)] border-[var(--nexus-border)] text-[var(--nexus-text-muted)] cursor-not-allowed opacity-50'}`}
+                  disabled={isProcessingWithdraw || (Number(user.walletBalance) || 0) < 1000}
+                  className={`px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2 border ${(Number(user.walletBalance) || 0) >= 1000 ? 'bg-[var(--nexus-accent)] text-[var(--nexus-panel)] border-[var(--nexus-accent)] hover:brightness-110 shadow-[0_0_15px_var(--nexus-accent)]' : 'bg-[var(--nexus-panel)] border-[var(--nexus-border)] text-[var(--nexus-text-muted)] cursor-not-allowed opacity-50'}`}
                 >
                   {isProcessingWithdraw ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Withdraw'}
                 </button>
@@ -284,7 +259,7 @@ const DashboardSummary = ({
                 </div>
                 <div className="w-px h-8 bg-[var(--nexus-border)] mx-1 sm:mx-2 hidden sm:block"></div>
                 <div className="flex flex-col hidden sm:flex">
-                  <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-[var(--nexus-text-muted)] opacity-60">Total Mined</span>
+                  <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-[var(--nexus-text-muted)] opacity-60">Total Earned</span>
                   <span className="text-sm sm:text-lg font-mono font-bold text-[var(--nexus-text-muted)] mt-1">₹{user.financialMetrics?.totalSettled?.toLocaleString('en-IN') || '0'}</span>
                 </div>
               </div>
@@ -298,7 +273,7 @@ const DashboardSummary = ({
             {PREMIUM_GOAL_STYLES.includes(user.goalSettings?.stylePreference) ? (
               <PremiumGoalOverlays
                 goal={{
-                  title: user.goalSettings?.title || "Active Objective",
+                  title: user.goalSettings?.title || "Active Goal",
                   currentProgress: user.goalSettings?.currentProgress || 0,
                   targetAmount: user.goalSettings?.targetAmount || 100,
                   stylePreference: user.goalSettings?.stylePreference
@@ -308,7 +283,7 @@ const DashboardSummary = ({
               />
             ) : (
               <CyberGoalBar
-                goal={{ title: user.goalSettings?.title || "Active Objective", currentProgress: user.goalSettings?.currentProgress || 0, targetAmount: user.goalSettings?.targetAmount || 100 }}
+                goal={{ title: user.goalSettings?.title || "Active Goal", currentProgress: user.goalSettings?.currentProgress || 0, targetAmount: user.goalSettings?.targetAmount || 100 }}
                 tier={user.tier || 'starter'}
                 runnerUrl={
                   user.goalSettings?.runnerType === 'custom'
@@ -346,8 +321,8 @@ const DashboardSummary = ({
                 <Zap className={`w-5 h-5 text-[var(--nexus-accent)]`} />
               </div>
               <div className="flex flex-col">
-                <h3 className="text-xs font-black uppercase tracking-widest text-[var(--nexus-text-muted)] italic flex items-center gap-2">DropPay Telemetry <Sparkles className="w-3 h-3 text-[var(--nexus-accent)]" /></h3>
-                <span className="text-[7px] font-bold text-[var(--nexus-accent)] uppercase animate-pulse flex items-center gap-1"><CheckCircle className="w-2 h-2" /> Live Analytics Engine</span>
+                <h3 className="text-xs font-black uppercase tracking-widest text-[var(--nexus-text-muted)] italic flex items-center gap-2">DropPay Analytics <Sparkles className="w-3 h-3 text-[var(--nexus-accent)]" /></h3>
+                <span className="text-[7px] font-bold text-[var(--nexus-accent)] uppercase animate-pulse flex items-center gap-1"><CheckCircle className="w-2 h-2" /> Real-time Analytics</span>
               </div>
             </div>
             <div className={`w-full sm:w-auto flex p-1 rounded-[var(--nexus-radius)] border backdrop-blur-xl bg-[var(--nexus-panel)] border-[var(--nexus-border)] shadow-inner`}>
@@ -411,12 +386,12 @@ const DashboardSummary = ({
       {/* RIGHT COLUMN: RECENT SIGNAL & HALL OF FAME */}
       <div className="col-span-1 lg:col-span-4 space-y-6">
 
-        {/* WIDGET 3: ELITE NEXUS SUPPORTERS (SOCIAL NODE) */}
+        {/* WIDGET 3: TOP SUPPORTERS (COMMUNITY HUB) */}
         {user?.ownedWidgets?.includes('elite_nexus') ? (
           <div style={{ perspective: '1000px' }} className="mb-6">
             <div className="aero-widget border border-[var(--nexus-border)] py-5 relative overflow-hidden"
               style={{ backdropFilter: 'blur(35px) saturate(200%)', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '2rem' }}>
-              <h3 className="text-[10px] px-5 font-black uppercase tracking-widest text-[#3b82f6] mb-4 flex items-center gap-2 drop-shadow-[0_0_8px_rgba(59,130,246,0.6)]"><Crown className="w-3 h-3" /> <Trophy className="w-3 h-3" /> Elite Nexus</h3>
+              <h3 className="text-[10px] px-5 font-black uppercase tracking-widest text-[#3b82f6] mb-4 flex items-center gap-2 drop-shadow-[0_0_8px_rgba(59,130,246,0.6)]"><Crown className="w-3 h-3" /> <Trophy className="w-3 h-3" /> Top Supporters</h3>
 
               <div className="flex overflow-hidden relative w-full h-12">
                 <div className="flex animate-[ticker-loop_25s_linear_infinite] w-max gap-4 px-4 items-center hover:[animation-play-state:paused]">
@@ -476,7 +451,7 @@ const DashboardSummary = ({
           )}
 
           <h3 className={`text-[11px] font-black italic mb-8 uppercase flex items-center gap-3 transition-colors relative z-20 ${nexusTheme === 'neon_relic' ? 'text-white' : 'text-[var(--nexus-text-muted)] group-hover:text-[var(--nexus-accent)]'}`}>
-            <Activity className="w-4 h-4" /> Recent Drop <Volume2 className="w-3 h-3 opacity-30 group-hover:opacity-100 transition-opacity" />
+            <Activity className="w-4 h-4" /> Recent Tips <Volume2 className="w-3 h-3 opacity-30 group-hover:opacity-100 transition-opacity" />
           </h3>
           <div className="space-y-4 overflow-y-auto pr-3 custom-scrollbar flex-1 relative">
             {recentDrops.length === 0 ? (
@@ -510,7 +485,7 @@ const DashboardSummary = ({
 
                 <div className="space-y-1 mt-2">
                   <p className={`text-xs font-black uppercase tracking-widest ${nexusTheme === 'neon_relic' ? 'text-pink-500 font-mono' : 'text-[var(--nexus-text-muted)]'}`}>Feed Offline</p>
-                  <p className={`text-[9px] font-bold italic tracking-tighter animate-pulse ${nexusTheme === 'neon_relic' ? 'text-cyan-400 font-mono drop-shadow-[0_0_5px_rgba(0,255,255,0.8)]' : 'text-[var(--nexus-accent)]/70'}`}>Signal waiting for uplink...</p>
+                  <p className={`text-[9px] font-bold italic tracking-tighter animate-pulse ${nexusTheme === 'neon_relic' ? 'text-cyan-400 font-mono drop-shadow-[0_0_5px_rgba(0,255,255,0.8)]' : 'text-[var(--nexus-accent)]/70'}`}>Waiting for contributions...</p>
                 </div>
               </div>
             ) : (
@@ -543,7 +518,7 @@ const DashboardSummary = ({
                     <div className="min-w-0">
                       <p className="font-black italic text-[11px] uppercase truncate group-hover/card:text-[var(--nexus-accent)] transition-colors flex items-center gap-1">
                         <UserCircle className="w-2.5 h-2.5 opacity-50" /> {drop.donorName}
-                        {drop.isTest && <span className="ml-2 px-1 py-0.5 bg-rose-500 text-white text-[6px] rounded uppercase font-bold">Simulator</span>}
+                        {drop.isTest && <span className="ml-2 px-1 py-0.5 bg-rose-500 text-white text-[6px] rounded uppercase font-bold">Test Mode</span>}
                       </p>
                       <p className="text-[9px] text-slate-500 truncate italic font-medium flex items-center gap-1">
                         <MessageSquare className="w-2.5 h-2.5 opacity-30" /> "{drop.message}"

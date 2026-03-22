@@ -14,12 +14,12 @@ const SUPER_TIERS = [
 const TTS_VOICES = [
   { id: 'male', label: 'Deep Male', icon: '🗣️' },
   { id: 'female', label: 'Clear Female', icon: '👩' },
-  { id: 'robot', label: 'Cyber AI', icon: '🤖' },
+  { id: 'robot', label: 'Smart AI', icon: '🤖' },
   { id: 'demon', label: 'Demon', icon: '😈' },
 ];
 
 const INTERACTION_CARDS = [
-  { id: 'emp_blast', label: 'EMP Blast', price: 250, icon: '⚡', description: 'Trigger a holographic glitch effect.', color: 'from-cyan-400 to-blue-500', glow: 'shadow-cyan-500/50' },
+  { id: 'emp_blast', label: 'EMP Blast', price: 250, icon: '⚡', description: 'Trigger a premium visual alert.', color: 'from-cyan-400 to-blue-500', glow: 'shadow-cyan-500/50' },
   { id: 'tactical_nuke', label: 'Tactical Nuke', price: 1000, icon: '☢️', description: 'Massive screen-filling animation.', color: 'from-orange-500 to-red-600', glow: 'shadow-orange-500/50' },
   { id: 'hydration_check', label: 'Hydration', price: 100, icon: '💧', description: 'Drink water reminder on screen.', color: 'from-blue-400 to-cyan-400', glow: 'shadow-blue-400/50' },
   { id: 'sound_meme', label: 'Meme Sound', price: 50, icon: '🔊', description: 'Plays a random funny sound.', color: 'from-green-400 to-emerald-500', glow: 'shadow-green-500/50' },
@@ -127,7 +127,7 @@ const DigitalStore = ({
               <div className="bg-emerald-500/10 border border-emerald-500/30 p-4 rounded-2xl flex items-center justify-between">
                 <div>
                   <h3 className="text-emerald-400 font-black uppercase text-sm flex items-center gap-2">
-                    <Volume2 className="w-4 h-4" /> TTS Active
+                    <Volume2 className="w-4 h-4" /> Text-to-Speech Active
                   </h3>
                   <p className="text-emerald-700/80 text-xs mt-1">Your message will be spoken live on stream.</p>
                 </div>
@@ -205,7 +205,7 @@ const DigitalStore = ({
           {/* --- TUG-OF-WAR TEAM SELECTION UI --- */}
           {towEvent && (
             <div className="space-y-3">
-              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--nexus-text-muted)] ml-2">Choose Your Side</label>
+              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--nexus-text-muted)] ml-2">Select Team</label>
               <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
@@ -269,7 +269,7 @@ const DigitalStore = ({
               }`}
           >
             {isProcessing ? <Loader2 className="animate-spin w-5 h-5" /> : (
-              <>Deploy {
+              <>Send {
                 activeTab === 'superchat' ? 'Super Msg' :
                   activeTab === 'tts' ? 'Premium TTS' :
                     'Power-up Card'

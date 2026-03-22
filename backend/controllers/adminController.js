@@ -283,6 +283,43 @@ exports.executeSettlement = async (req, res) => {
     }
 };
 
+exports.rejectSettlement = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const user = await User.findById(id);
+        if (!user || user.financialMetrics.pendingPayouts <= 0) return res.status(400).json({ msg: "No pending payout requested to reject." });
+
+        const payoutAmount = user.financialMetrics.pendingPayouts;
+
+        // Refund the pending payout back to the wallet
+        user.walletBalance += payoutAmount;
+        user.financialMetrics.pendingPayouts = 0;
+        await user.save();
+
+        // V5 Logging
+        await logAudit({
+            adminId: req.user.id,
+            adminUsername: req.user.username,
+            action: 'SETTLEMENT_REJECTION',
+            targetId: user._id,
+            targetName: user.username,
+            details: `Rejected payout request of ₹${payoutAmount.toLocaleString()} and refunded to standard wallet`,
+            level: 'warning',
+            ipAddress: req.ip
+        });
+
+        // Transition pending withdrawal drops to rejected
+        await Drop.updateMany(
+            { streamerId: user.streamerId, donorName: "WITHDRAWAL", status: 'pending' },
+            { $set: { status: 'failed', message: "Payout Request Rejected by Admin" } }
+        );
+
+        res.status(200).json({ msg: "Settlement Request Rejected Successfully.", refundedAmount: payoutAmount });
+    } catch (err) {
+        res.status(500).json({ msg: "Settlement Rejection Failed." });
+    }
+};
+
 // --- 7. GLOBAL CONFIGURATION & BROADCAST ENGINE ---
 
 exports.getGlobalConfig = async (req, res) => {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -11,7 +11,7 @@ import { syncTheme } from './api/themeSync';
 // ─── EAGER IMPORTS (critical path — must load instantly) ──────────────────────
 import Home from './pages/Home';
 import LiveThemeEngine from './components/LiveThemeEngine';
-import BrandSplash from './components/BrandSplash';
+
 
 // ─── LAZY IMPORTS (code-split — only load when navigated to) ─────────────────
 const Login = lazy(() => import('./pages/Login'));
@@ -46,90 +46,10 @@ class ErrorBoundary extends React.Component {
     return this.props.children;
   }
 }
-// ─── BOOT SEQUENCE — Premium animated loading screen ─────────────────────────
-const BootSequence = () => {
-  const letters = 'DROPPAY PROTOCOL'.split('');
-  return (
-    <div className="fixed inset-0 bg-[#030a06] flex flex-col items-center justify-center gap-8 overflow-hidden">
-      {/* Deep background glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-emerald-500/5 blur-[120px] pointer-events-none animate-pulse" />
-      <div className="absolute top-[-20%] right-[-10%] w-96 h-96 rounded-full bg-cyan-900/15 blur-[100px] pointer-events-none" />
-
-      {/* Central ring + logo */}
-      <div className="relative flex items-center justify-center">
-        {/* Outer slow pulse ring */}
-        <div className="absolute w-32 h-32 rounded-full border border-emerald-500/10 animate-ping" style={{ animationDuration: '2.5s' }} />
-        {/* Fast orbit ring */}
-        <div className="absolute w-24 h-24 rounded-full"
-          style={{
-            background: 'conic-gradient(from 0deg, transparent 60%, #10B981 100%)',
-            animation: 'spin 1.2s linear infinite',
-            borderRadius: '50%'
-          }}
-        />
-        {/* Inner ring border */}
-        <div className="absolute w-24 h-24 rounded-full border border-white/5" />
-        {/* Core logo badge */}
-        <div className="relative z-10 w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-transparent border border-emerald-500/30 flex items-center justify-center shadow-[0_0_40px_rgba(16,185,129,0.2)]">
-          <span className="text-2xl font-black italic text-emerald-400 tracking-tighter">DP</span>
-        </div>
-      </div>
-
-      {/* Staggered letter animation */}
-      <div className="flex items-center gap-[3px]">
-        {letters.map((char, i) => (
-          <span
-            key={i}
-            className="text-[11px] font-black uppercase tracking-[0.25em] text-white/80"
-            style={{
-              animationName: 'fadeInUp',
-              animationDuration: '0.4s',
-              animationDelay: `${i * 0.04}s`,
-              animationFillMode: 'both',
-              opacity: 0,
-              color: char === ' ' ? 'transparent' : undefined
-            }}
-          >
-            {char === ' ' ? '\u00A0' : char}
-          </span>
-        ))}
-      </div>
-
-      {/* Scanning progress bar */}
-      <div className="w-48 h-[2px] bg-white/5 rounded-full overflow-hidden relative">
-        <div
-          className="absolute inset-y-0 left-0 bg-gradient-to-r from-emerald-500/40 via-emerald-400 to-emerald-500/40 rounded-full"
-          style={{ animation: 'scanBar 1.8s ease-in-out infinite' }}
-        />
-      </div>
-
-      {/* Status text */}
-      <p
-        className="text-[9px] font-black uppercase tracking-[0.5em] text-emerald-500/50"
-        style={{ animation: 'pulse 2s ease-in-out infinite' }}
-      >
-        Initializing Node...
-      </p>
-
-      {/* Keyframes injected inline */}
-      <style>{`
-        @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(6px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes scanBar {
-          0%   { width: 0%; left: 0; }
-          50%  { width: 60%; left: 20%; }
-          100% { width: 0%; left: 100%; }
-        }
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to   { transform: rotate(360deg); }
-        }
-      `}</style>
-    </div>
-  );
-};
+// ─── MINIMAL BOOT SEQUENCE — Reusing Suspense fallback for seamless loading ───
+const BootSequence = () => (
+  <div className="fixed inset-0 bg-[#050505]" />
+);
 
 
 // --- DYNAMIC INFRASTRUCTURE (Fixes Mobile Persistence) ---
@@ -245,15 +165,7 @@ function AppContent() {
   const location = useLocation();
   const isOverlay = location.pathname.includes('/overlay') || location.pathname.includes('/goal');
 
-  // Splash screen state (never show on overlays)
-  const [isInitialBoot, setIsInitialBoot] = useState(!isOverlay);
 
-  useEffect(() => {
-    if (isInitialBoot) {
-      const timer = setTimeout(() => setIsInitialBoot(false), 2000); // Faster, super-punchy 2-second splash
-      return () => clearTimeout(timer);
-    }
-  }, [isInitialBoot]);
 
   // Listen for custom theme change events (fired from Dashboard)
   useEffect(() => {
@@ -279,20 +191,6 @@ function AppContent() {
 
   return (
     <div className={`min-h-screen relative overflow-hidden text-[var(--nexus-text)] selection:bg-emerald-500/30 bg-transparent`}>
-      {/* INITIAL SPLASH SCREEN */}
-      <AnimatePresence>
-        {isInitialBoot && (
-          <motion.div
-            key="splash-screen"
-            initial={{ opacity: 1 }}
-            exit={{ opacity: 0, scale: 1.05 }}
-            transition={{ duration: 0.8, ease: "easeInOut" }}
-            className="fixed inset-0 z-[9999]"
-          >
-            <BrandSplash />
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {!isOverlay && (
         <Helmet>

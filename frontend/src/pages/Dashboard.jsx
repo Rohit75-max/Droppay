@@ -3,9 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import axios from '../api/axios';
 import { io } from 'socket.io-client';
 import {
-  LayoutDashboard, Settings, UserCircle, Trophy, HelpCircle,
+  LayoutDashboard, Settings, Trophy, HelpCircle,
   MessageSquare, Zap, ChevronRight, LogOut,
-  ShieldAlert, Activity, X, Play, Loader2, IndianRupee
+  ShieldAlert, Activity, X, Play, Loader2, IndianRupee, History, User,
+  Copy, ExternalLink, Bell, Target, ChevronDown
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -13,7 +14,6 @@ import { toast } from 'react-toastify';
 // Component Imports
 import { syncTheme } from '../api/themeSync';
 import { useTheme } from '../context/ThemeContext';
-import ThemeToggle from '../components/ThemeToggle';
 import DashboardSummary from '../components/DashboardSummary';
 import ControlCenter from '../components/ControlCenter';
 import AccountsHub from '../components/AccountsHub';
@@ -24,13 +24,13 @@ import DashboardStore from './DashboardStore';
 import MobileBottomNav from '../components/navigation/MobileBottomNav';
 
 const navItems = [
-  { id: 'dashboard', label: 'Nexus', icon: LayoutDashboard },
-  { id: 'settings', label: 'Control', icon: Settings },
-  { id: 'store', label: 'Store', icon: Zap },
-  { id: 'accounts', label: 'Identity', icon: UserCircle },
-  { id: 'growth', label: 'Growth', icon: Trophy },
-  { id: 'help', label: 'Support', icon: HelpCircle },
-  { id: 'feedback', label: 'Signal', icon: MessageSquare },
+  { id: 'summary', icon: LayoutDashboard, label: 'Dashboard' },
+  { id: 'control', icon: Settings, label: 'Settings' },
+  { id: 'store', icon: Zap, label: 'Store' },
+  { id: 'profile', icon: User, label: 'Profile' },
+  { id: 'growth', icon: Trophy, label: 'Growth' },
+  { id: 'help', icon: HelpCircle, label: 'Help' },
+  { id: 'feedback', icon: MessageSquare, label: 'Feedback' },
 ];
 
 // --- DYNAMIC INFRASTRUCTURE (Fixes Mobile Persistence) ---
@@ -39,13 +39,16 @@ const navItems = [
 const Dashboard = () => {
   const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState(() => {
-    return localStorage.getItem('dropPayActiveSection') || 'dashboard';
+    return localStorage.getItem('dropPayActiveSection') || 'summary';
   });
   const [user, setUser] = useState(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isProtocolMenuOpen, setIsProtocolMenuOpen] = useState(false);
+  const [isMobileMenuExpanded, setIsMobileMenuExpanded] = useState(false);
+  const socketRef = useRef(null);
 
   const { theme, setTheme } = useTheme();
+  const [isQuickLinksOpen, setIsQuickLinksOpen] = useState(false);
+  const BASE_URL = window.location.origin;
 
   const [nexusTheme, setNexusTheme] = useState(() => {
     return localStorage.getItem('nexusTheme') || 'void';
@@ -79,13 +82,11 @@ const Dashboard = () => {
   const [timeRange, setTimeRange] = useState('7D');
 
   const [goalForm, setGoalForm] = useState({ title: '', targetAmount: 0, showOnDashboard: true, stylePreference: 'modern' });
-  const [editForm, setEditForm] = useState({ fullName: '', username: '', bio: '', streamerId: '' });
   const [alertConfig, setAlertConfig] = useState({ ttsEnabled: false, volume: 50 });
   const [partnerStickers, setPartnerStickers] = useState([]);
   const [isSavingStickers, setIsSavingStickers] = useState(false);
 
   // PROFILE MUTATION & OTP STATES
-  const [isEditing, setIsEditing] = useState(false);
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [otpInput, setOtpInput] = useState('');
   const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
@@ -93,11 +94,6 @@ const Dashboard = () => {
   const [isLinkingBank, setIsLinkingBank] = useState(false);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [withdrawalAmount, setWithdrawalAmount] = useState(1000);
-
-  // AVATAR UPLOAD STATES
-  const fileInputRef = useRef(null);
-  const [profilePreview, setProfilePreview] = useState(null);
-  const [avatarBase64, setAvatarBase64] = useState(null);
 
   // SHARED STATES FOR CONTROL & COPY
   const [isUpdatingGoal, setIsUpdatingGoal] = useState(false);
@@ -146,18 +142,12 @@ const Dashboard = () => {
         syncTheme(res.data);
       }
       setGoalForm({
-        title: res.data.goalSettings?.title || "New Mission",
+        title: res.data.goalSettings?.title || "New Goal",
         targetAmount: res.data.goalSettings?.targetAmount || 0,
         showOnDashboard: res.data.goalSettings?.showOnDashboard ?? true,
         stylePreference: res.data.goalSettings?.stylePreference || "glass_jar"
       });
-      setEditForm({
-        fullName: res.data.fullName || "",
-        username: res.data.username || "",
-        bio: res.data.bio || "",
-        streamerId: res.data.streamerId || ""
-      });
-      if (res.data.avatar) setProfilePreview(res.data.avatar);
+
       if (res.data.overlaySettings) setAlertConfig(res.data.overlaySettings);
       if (res.data.partnerPack) setPartnerStickers(res.data.partnerPack);
 
@@ -188,7 +178,7 @@ const Dashboard = () => {
         return;
       }
 
-      setError("Uplink Failure: Node connection lost.");
+      setError("Connection Error: Service unreachable.");
       setLoading(false);
     }
   }, [navigate, timeRange]);
@@ -205,7 +195,10 @@ const Dashboard = () => {
   useEffect(() => {
     if (!user?.obsKey) return;
 
+    if (socketRef.current) socketRef.current.disconnect();
+
     const socket = io(process.env.REACT_APP_API_URL || 'http://localhost:5001');
+    socketRef.current = socket;
 
     socket.on('connect', () => {
       socket.emit('join-overlay', user.obsKey);
@@ -262,7 +255,11 @@ const Dashboard = () => {
       setAlertConfig(updatedSettings);
     });
 
-    return () => socket.disconnect();
+    return () => {
+      socket.off('new-drop');
+      socket.disconnect();
+      socketRef.current = null;
+    };
   }, [user?.obsKey]);
 
   const updateGoalSettings = useCallback(async (overrideData) => {
@@ -371,7 +368,7 @@ const Dashboard = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       await fetchProfileData();
-      toast.success("Partner Pack Synchronized");
+      toast.success("Stickers Updated");
     } catch (err) {
       console.error("Failed to sync partner pack", err);
     } finally {
@@ -379,41 +376,6 @@ const Dashboard = () => {
     }
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) return toast.error("Image exceeds 5MB limit.");
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProfilePreview(reader.result);
-        setAvatarBase64(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const saveProfileUpdates = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const payload = { ...editForm };
-      if (avatarBase64) payload.avatar = avatarBase64;
-
-      const res = await axios.post('/api/user/update-profile', payload, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      if (res.status === 206) {
-        setShowOtpModal(true); // Failsafe, though main edit form shouldn't hit this anymore
-      } else {
-        await fetchProfileData();
-        setIsEditing(false);
-        setAvatarBase64(null);
-        toast.success("Node Identity Synchronized");
-      }
-    } catch (err) {
-      toast.error(err.response?.data?.msg || "Update Sequence Failed.");
-    }
-  };
 
   // ISOLATED OTP PIPELINE FOR EMAIL/PHONE
   const saveContactUpdate = async (type, value) => {
@@ -445,11 +407,10 @@ const Dashboard = () => {
       });
       await fetchProfileData();
       setShowOtpModal(false);
-      setIsEditing(false);
       setOtpInput('');
-      toast.success("Security Clear: Identity Synchronized");
+      toast.success("Identity Verified & Updated");
     } catch (err) {
-      toast.error(err.response?.data?.msg || "Invalid Authorization Key.");
+      toast.error(err.response?.data?.msg || "Invalid Security Code.");
     } finally {
       setIsVerifyingOtp(false);
     }
@@ -468,7 +429,7 @@ const Dashboard = () => {
         toast.error("Bank linkage initialization failed.");
       }
     } catch (err) {
-      toast.error("Failed to connect banking interface.");
+      toast.error("Failed to connect payout settings.");
     } finally {
       setIsLinkingBank(false);
     }
@@ -481,11 +442,11 @@ const Dashboard = () => {
       const res = await axios.post('/api/user/withdraw', { amount }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      toast.success(res.data.msg || "Withdrawal sequence initiated.");
+      toast.success(res.data.msg || "Withdrawal requested.");
       setShowWithdrawModal(false);
       await fetchProfileData(); // Refresh wallet UI instantly
     } catch (err) {
-      toast.error(err.response?.data?.msg || "Payout sequence failed.");
+      toast.error(err.response?.data?.msg || "Withdrawal failed.");
     } finally {
       setIsProcessingWithdraw(false);
     }
@@ -508,7 +469,7 @@ const Dashboard = () => {
         <Loader2 className="w-12 h-12 text-[#10B981] animate-spin" />
         <Activity className="w-6 h-6 text-[#10B981] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-50" />
       </div>
-      <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#10B981] animate-pulse">Syncing Network</span>
+      <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#10B981] animate-pulse">Loading Dashboard</span>
     </div>
   );
 
@@ -517,7 +478,7 @@ const Dashboard = () => {
       <ShieldAlert className="w-16 h-16 text-rose-500 mb-6 animate-bounce" />
       <h2 className="text-xl font-black uppercase italic text-[var(--nexus-text)] mb-2">{error}</h2>
       <button onClick={() => window.location.reload()} className="bg-[#10B981] text-black px-10 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:scale-105 transition-all">
-        Restart Handshake
+        Try Again
       </button>
     </div>
   );
@@ -570,21 +531,9 @@ const Dashboard = () => {
             navigate('/login');
           }} className={`px-7 py-4 flex items-center gap-4 transition-colors ${user?.role !== 'admin' ? 'mt-auto' : ''} text-rose-500 hover:text-rose-400 hover:bg-rose-500/10`}>
             <LogOut className="w-6 h-6 flex-shrink-0" />
-            <span className="font-black italic uppercase text-[10px] tracking-widest opacity-0 group-hover:opacity-100 transition-all whitespace-nowrap">Exit</span>
+            <span className="font-black italic uppercase text-[10px] tracking-widest opacity-0 group-hover:opacity-100 transition-all whitespace-nowrap">Logout</span>
           </button>
 
-          {/* PROTOCOL CONTROL TRIGGER (DESKTOP) */}
-          <div className="px-4 py-4 border-t border-[var(--nexus-border)]/50">
-            <button
-              onClick={() => setIsProtocolMenuOpen(!isProtocolMenuOpen)}
-              className={`w-full flex items-center justify-center h-12 rounded-xl border-2 transition-all overflow-hidden ${isProtocolMenuOpen
-                ? 'bg-white border-white text-black shadow-[0_10px_30px_rgba(255,255,255,0.2)]'
-                : 'bg-white/5 border-white/10 text-white hover:border-white/20'
-                }`}
-            >
-              <Zap className={`w-5 h-5 ${isProtocolMenuOpen ? 'fill-current' : 'text-[var(--nexus-accent)]'}`} />
-            </button>
-          </div>
         </aside>
 
 
@@ -600,8 +549,8 @@ const Dashboard = () => {
           }}
           user={user}
           theme={theme}
-          isMenuExpanded={isProtocolMenuOpen}
-          setIsMenuExpanded={setIsProtocolMenuOpen}
+          isMenuExpanded={isMobileMenuExpanded}
+          setIsMenuExpanded={setIsMobileMenuExpanded}
         />
 
         <AnimatePresence>
@@ -657,7 +606,7 @@ const Dashboard = () => {
                   localStorage.removeItem('nexusTheme');
                   localStorage.removeItem('dropPayTheme');
                   navigate('/login');
-                }} className={`w-full py-3 md:py-4 font-black italic uppercase text-base md:text-lg flex items-center gap-4 ${theme === 'light' ? 'text-rose-600' : 'text-rose-500'}`}><LogOut className="w-5 h-5 md:w-6 md:h-6" /> Exit Protocol</button>
+                }} className={`w-full py-3 md:py-4 font-black italic uppercase text-base md:text-lg flex items-center gap-4 ${theme === 'light' ? 'text-rose-600' : 'text-rose-500'}`}><LogOut className="w-5 h-5 md:w-6 md:h-6" /> Logout</button>
               </div>
             </motion.div>
           )}
@@ -666,19 +615,122 @@ const Dashboard = () => {
         <main className="flex-1 flex flex-col relative overflow-hidden pt-0 bg-transparent">
           <header className="px-6 py-3 md:px-12 md:py-4 flex justify-between items-center z-40 bg-[var(--nexus-panel)] backdrop-blur-3xl border-b border-[var(--nexus-border)]">
             <div className="flex flex-col">
-              <span className="text-[9px] font-black tracking-[0.4em] text-[var(--nexus-accent)] uppercase mb-1">DropPay Protocol</span>
-              <h1 className={`text-2xl md:text-3xl font-black uppercase tracking-tighter leading-none text-[var(--nexus-text)]`}>
-                {activeSection} <span className="text-[var(--nexus-accent)]">NEXUS.</span>
-              </h1>
+                  <span className="text-[7px] font-black uppercase tracking-[0.4em] text-[var(--nexus-accent)] drop-shadow-[0_0_8px_var(--nexus-accent-glow)]">DropPay Analytics</span>
+                  <div className="flex items-center gap-4">
+                    <h1 className={`text-4xl md:text-5xl font-black italic tracking-tighter ${nexusTheme === 'neon_relic' ? 'relic-text-glow' : 'text-[var(--nexus-text)]'}`}>
+                      {(navItems.find(item => item.id === activeSection)?.label || 'DASHBOARD').toUpperCase()}.
+                    </h1>
+                    <div className="hidden sm:flex items-center gap-3">
+                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--nexus-bg)]/40 border border-[var(--nexus-border)]">
+                        <History className="w-3 h-3 text-emerald-500/60" />
+                        <span className="text-[9px] font-black uppercase tracking-widest text-[var(--nexus-text-muted)]">Status:</span>
+                        <span className="text-[9px] font-black uppercase tracking-widest text-emerald-500">Online</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+            {/* Profile Pill & Quick Links */}
+            <div className="relative">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setIsQuickLinksOpen(!isQuickLinksOpen)}
+                className="flex items-center gap-3 pl-2 pr-4 py-1.5 rounded-full bg-[var(--nexus-panel)] border border-[var(--nexus-border)] shadow-lg hover:shadow-[var(--nexus-glow)] transition-all group"
+              >
+                <div className="w-8 h-8 rounded-full bg-[var(--nexus-accent)] flex items-center justify-center text-[var(--nexus-bg)] font-black text-xs shadow-[0_0_10px_var(--nexus-accent-glow)]">
+                  {user?.fullName?.charAt(0).toUpperCase() || user?.username?.charAt(0).toUpperCase() || 'U'}
+                </div>
+                <div className="flex flex-col items-start hidden sm:flex">
+                  <span className="text-[10px] font-black text-[var(--nexus-text)] tracking-wider">0x{user?.streamerId?.slice(-4).toUpperCase() || 'CORE'}</span>
+                  <span className="text-[8px] font-bold text-[var(--nexus-text-muted)] uppercase tracking-[0.2em]">{user?.username || 'Verified'}</span>
+                </div>
+                <ChevronDown className={`w-4 h-4 text-[var(--nexus-text-muted)] transition-transform duration-300 ${isQuickLinksOpen ? 'rotate-180' : ''}`} />
+              </motion.button>
+
+              <AnimatePresence>
+                {isQuickLinksOpen && (
+                  <>
+                    {/* Overlay Backdrop for closing on click outside */}
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      onClick={() => setIsQuickLinksOpen(false)}
+                      className="fixed inset-0 z-40 bg-black/20"
+                    />
+                    
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      className="absolute right-0 mt-4 w-72 md:w-80 bg-[var(--nexus-bg)] border border-[var(--nexus-border)] rounded-[2rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.6)] z-50 overflow-hidden"
+                    >
+                      <div className="p-6 space-y-5">
+                        <div className="flex flex-col gap-1 border-b border-[var(--nexus-border)] pb-4">
+                          <h4 className="text-[11px] font-black uppercase tracking-[0.3em] text-[var(--nexus-accent)]">Share Profiles & Overlays</h4>
+                          <p className="text-[9px] font-bold text-[var(--nexus-text-muted)] italic">Manage your public payment and overlay URLs</p>
+                        </div>
+
+                        <div className="space-y-3">
+                          {[
+                            { label: 'Payment Profile', icon: IndianRupee, value: `${BASE_URL}/pay/${user?.username}`, color: 'var(--nexus-accent)' },
+                            { label: 'Stream Alerts', icon: Bell, value: `${BASE_URL}/overlay/alerts/${user?.obsKey}`, color: '#f43f5e' },
+                            { label: 'Progress Goal', icon: Target, value: `${BASE_URL}/overlay/goal/${user?.username}`, color: '#f59e0b' },
+                            { label: 'Recent Activity', icon: Activity, value: `${BASE_URL}/overlay/recent/${user?.username}`, color: '#8b5cf6' }
+                          ].map((item, idx) => (
+                            <div key={idx} className="group/item flex flex-col gap-2 p-3 rounded-2xl bg-[var(--nexus-panel)] border border-[var(--nexus-border)] hover:border-[var(--nexus-accent)]/30 transition-all">
+                              <div className="flex justify-between items-center">
+                                <div className="flex items-center gap-2">
+                                  <div className="p-1.5 rounded-lg bg-black/20" style={{ color: item.color }}>
+                                    <item.icon className="w-3.5 h-3.5" />
+                                  </div>
+                                  <span className="text-[9px] font-black uppercase tracking-wider text-[var(--nexus-text)]">{item.label}</span>
+                                </div>
+                                <button
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(item.value);
+                                    toast.success(`${item.label} Copied!`, {
+                                      position: "top-center",
+                                      autoClose: 2000,
+                                      hideProgressBar: true,
+                                      theme: theme === 'dark' ? 'dark' : 'light'
+                                    });
+                                  }}
+                                  className="p-1.5 rounded-lg hover:bg-[var(--nexus-accent)]/10 text-[var(--nexus-text-muted)] hover:text-[var(--nexus-accent)] transition-all"
+                                >
+                                  <Copy className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                              <div className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-black/20 border border-white/5">
+                                <span className="text-[8px] font-mono text-[var(--nexus-text-muted)] truncate flex-1">{item.value}</span>
+                                <a href={item.value} target="_blank" rel="noopener noreferrer" className="shrink-0 opacity-40 hover:opacity-100 transition-opacity">
+                                  <ExternalLink className="w-2.5 h-2.5" />
+                                </a>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        <button 
+                          onClick={() => setIsQuickLinksOpen(false)}
+                          className="w-full py-3 rounded-xl bg-[var(--nexus-border)] hover:bg-[var(--nexus-accent)] text-[var(--nexus-text)] hover:text-[var(--nexus-bg)] font-black uppercase text-[9px] tracking-[0.2em] transition-all"
+                        >
+                          Close Quick Links
+                        </button>
+                      </div>
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
             </div>
-            <ThemeToggle size="md" />
           </header>
 
-          <div className="flex-1 overflow-y-auto custom-scrollbar px-4 md:px-8 pb-24 md:pb-12">
+          <div className={`flex-1 overflow-y-auto custom-scrollbar px-4 md:px-8 pb-24 md:pb-12 transition-all duration-300 ${isQuickLinksOpen ? 'blur-[8px] opacity-50 border-white/5 saturate-[0.5]' : ''}`}>
             <AnimatePresence mode="wait">
-              <motion.div key={activeSection} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }} transition={{ duration: 0.2 }} className="max-w-7xl mx-auto w-full flex flex-col items-center transition-all duration-500">
+              <motion.div key={activeSection} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }} transition={{ duration: 0.2 }} className="max-w-7xl mx-auto w-full flex flex-col items-center">
                 <div className="w-full">
-                  {activeSection === 'dashboard' && (
+                  {activeSection === 'summary' && (
                     <DashboardSummary {...{
                       theme, user, chartData, timeRange, setTimeRange,
                       recentDrops, topDonors, getProgressPercentage,
@@ -687,7 +739,7 @@ const Dashboard = () => {
                       Play
                     }} />
                   )}
-                  {activeSection === 'settings' && (
+                  {activeSection === 'control' && (
                     <ControlCenter
                       theme={theme} user={user}
                       goalForm={goalForm} setGoalForm={setGoalForm}
@@ -710,7 +762,7 @@ const Dashboard = () => {
                       setActiveSection={setActiveSection}
                     />
                   )}
-                  {activeSection === 'accounts' && <AccountsHub theme={theme} user={user} editForm={editForm} setEditForm={setEditForm} isEditing={isEditing} setIsEditing={setIsEditing} saveProfileUpdates={saveProfileUpdates} saveContactUpdate={saveContactUpdate} profilePreview={profilePreview} handleImageChange={handleImageChange} fileInputRef={fileInputRef} handleBankLink={handleBankLink} isLinkingBank={isLinkingBank} setActiveSection={setActiveSection} copyToClipboard={copyToClipboard} copiedType={copiedType} />}
+                  {activeSection === 'profile' && <AccountsHub theme={theme} user={user} saveContactUpdate={saveContactUpdate} handleBankLink={handleBankLink} isLinkingBank={isLinkingBank} setActiveSection={setActiveSection} fetchProfileData={fetchProfileData} copyToClipboard={copyToClipboard} copiedType={copiedType} />}
                   {activeSection === 'growth' && <GrowthMissions theme={theme} user={user} copyToClipboard={copyToClipboard} copiedType={copiedType} />}
                   {activeSection === 'help' && <HelpCenter theme={theme} user={user} />}
                   {activeSection === 'store' && <DashboardStore theme={theme} user={user} setUser={setUser} fetchProfileData={fetchProfileData} />}
@@ -762,21 +814,21 @@ const Dashboard = () => {
                   <IndianRupee className="w-8 h-8 text-[#3b82f6]" />
                 </div>
                 <div>
-                  <h3 className={`text-2xl font-black uppercase ${nexusTheme === 'obsidian_monolith' ? 'tracking-[0.2em] text-white drop-shadow-[0_0_5px_#3b82f6]' : 'italic tracking-tighter ' + (theme === 'dark' ? 'text-white' : 'text-slate-900')}`}>Withdraw Server</h3>
-                  <p className={`text-[10px] font-black uppercase tracking-widest mt-1 ${nexusTheme === 'obsidian_monolith' ? 'text-[#3b82f6]' : 'text-[var(--nexus-accent)]'}`}>Initiating Payout Sequence</p>
+                  <h3 className={`text-2xl font-black uppercase ${nexusTheme === 'obsidian_monolith' ? 'tracking-[0.2em] text-white drop-shadow-[0_0_5px_#3b82f6]' : 'italic tracking-tighter ' + (theme === 'dark' ? 'text-white' : 'text-slate-900')}`}>Withdraw Funds</h3>
+                  <p className={`text-[10px] font-black uppercase tracking-widest mt-1 ${nexusTheme === 'obsidian_monolith' ? 'text-[#3b82f6]' : 'text-[var(--nexus-accent)]'}`}>Processing Withdrawal</p>
                 </div>
                 <div className="w-full space-y-4">
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center justify-between px-2">
                       <span className="text-[10px] uppercase font-black tracking-widest text-slate-500">Wallet Balance</span>
-                      <span className={`text-xs font-mono font-bold ${nexusTheme === 'obsidian_monolith' ? 'text-[#3b82f6] drop-shadow-[0_0_5px_#3b82f6]' : 'text-[var(--nexus-text)]'}`}>₹{user.walletBalance?.toLocaleString('en-IN')}</span>
+                      <span className={`text-xs font-mono font-bold ${nexusTheme === 'obsidian_monolith' ? 'text-[#3b82f6] drop-shadow-[0_0_5px_#3b82f6]' : 'text-[var(--nexus-text)]'}`}>₹{(Number(user.walletBalance) || 0).toLocaleString('en-IN')}</span>
                     </div>
                     <div className="relative">
                       <IndianRupee className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 ${nexusTheme === 'obsidian_monolith' ? 'text-[#3b82f6]' : 'text-[var(--nexus-accent)]'}`} />
                       <input
                         type="number"
                         min={1000}
-                        max={user.walletBalance}
+                        max={Number(user.walletBalance) || 0}
                         value={withdrawalAmount}
                         onChange={(e) => setWithdrawalAmount(Number(e.target.value))}
                         className={`w-full text-center text-2xl sm:text-3xl font-black p-4 sm:p-5 pl-10 transition-all ${nexusTheme === 'obsidian_monolith' ? 'vault-slot' : 'rounded-2xl outline-none border ' + (theme === 'dark' ? 'bg-black/40 border-white/5 text-white focus:border-[var(--nexus-accent)]' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-[var(--nexus-accent)]')}`}
@@ -785,7 +837,7 @@ const Dashboard = () => {
                   </div>
 
                   <div className="flex items-center gap-2 overflow-x-auto py-2 scrollbar-hide">
-                    {[1000, 2500, 5000, user.walletBalance].map(amt => (
+                    {[1000, 2500, 5000, Number(user.walletBalance) || 0].map(amt => (
                       <button
                         key={amt}
                         onClick={() => setWithdrawalAmount(Math.floor(amt))}
@@ -805,10 +857,10 @@ const Dashboard = () => {
                     </button>
                     <button
                       onClick={() => handleWithdrawRequest(withdrawalAmount)}
-                      disabled={isProcessingWithdraw || withdrawalAmount < 1000 || withdrawalAmount > user.walletBalance}
+                      disabled={isProcessingWithdraw || withdrawalAmount < 1000 || withdrawalAmount > (Number(user.walletBalance) || 0)}
                       className={`flex-[2] py-4 font-black uppercase text-[10px] tracking-widest transition-all disabled:opacity-50 flex items-center justify-center gap-2 ${nexusTheme === 'obsidian_monolith' ? 'bg-[#3b82f6] text-black hover:bg-white hover:shadow-[0_0_20px_#3b82f6]' : 'rounded-2xl bg-[var(--nexus-accent)] text-black hover:brightness-110 shadow-lg shadow-[var(--nexus-accent)]/20'}`}
                     >
-                      {isProcessingWithdraw ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirm Payout'}
+                      {isProcessingWithdraw ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirm Withdrawal'}
                     </button>
                   </div>
                 </div>
@@ -831,12 +883,12 @@ const Dashboard = () => {
                 </div>
 
                 <div>
-                  <h3 className={`text-2xl font-black uppercase italic tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Security Gateway</h3>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-[#10B981] mt-1">Identity Migration Engaged</p>
+                  <h3 className={`text-2xl font-black uppercase italic tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Security Verification</h3>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-[#10B981] mt-1">Verification Required</p>
                 </div>
 
-                <p className={`text-sm italic ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
-                  We detected a change to sensitive communication nodes. Please enter the 6-digit key transmitted to your current email.
+                <p className={`text-sm ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
+                  We sent a <strong>6-digit verification code</strong> to your current email address. Enter it below to confirm the change.
                 </p>
 
                 <div className="w-full space-y-4 pt-4">
@@ -853,14 +905,14 @@ const Dashboard = () => {
                       onClick={() => setShowOtpModal(false)}
                       className={`flex-1 py-4 rounded-2xl font-black uppercase text-[10px] transition-colors border ${theme === 'dark' ? 'bg-white/5 text-slate-300 border-white/5 hover:bg-white/10' : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'}`}
                     >
-                      Abort
+                      Cancel
                     </button>
                     <button
                       onClick={verifyProfileOtp}
                       disabled={isVerifyingOtp || otpInput.length !== 6}
                       className="flex-[2] py-4 rounded-2xl font-black uppercase text-[10px] bg-[#10B981] text-black hover:bg-[#0fa672] transition-colors disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-[#10B981]/20"
                     >
-                      {isVerifyingOtp ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Authorize Override'}
+                      {isVerifyingOtp ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirm Changes'}
                     </button>
                   </div>
                 </div>

@@ -5,7 +5,7 @@ import {
   Zap, Globe, Target, Save,
   Trash2, Plus, Copy, Check, Rocket,
   Monitor, Volume2, Activity, Layout, Palette, Sparkles, Crown, Gamepad2, Heart,
-  Flame, Leaf, Skull, Battery, Coins, Trophy, Star, Music, Cloud, Gem
+  Flame, Leaf, Skull, Battery, Coins, Trophy, Star, Music, Cloud, Gem, ChevronLeft, ChevronRight
 } from 'lucide-react';
 
 import AlertPreview from './AlertPreview';
@@ -33,6 +33,8 @@ const ControlCenter = ({
   const [editingStickerIdx, setEditingStickerIdx] = useState(null);
   const [tempStickerData, setTempStickerData] = useState(null);
   const jsonInputRef = useRef(null);
+  const nexusScrollRef = useRef(null);
+  const goalScrollRef = useRef(null);
 
   // BASE URL for local environment
   const BASE_URL = window.location.origin;
@@ -48,6 +50,12 @@ const ControlCenter = ({
     const updatedConfig = { ...alertConfig, [key]: newStyle };
     setAlertConfig(updatedConfig); // Instant UI update
     saveAlertSettings(updatedConfig); // Push to your database
+  };
+
+  const handleScroll = (ref, offset) => {
+    if (ref.current) {
+      ref.current.scrollBy({ left: offset, behavior: 'smooth' });
+    }
   };
 
   return (
@@ -101,7 +109,11 @@ const ControlCenter = ({
                     {tab === 'widgets' && <Trophy className="w-4 h-4 shrink-0" />}
                   </motion.div>
                   <span className="hidden sm:inline whitespace-nowrap italic">
-                    {tab === 'nexus' ? 'NEXUS' : tab}
+                    {tab === 'overlay' && 'OVERLAY'}
+                    {tab === 'mission' && 'GOALS'}
+                    {tab === 'nexus' && 'THEMES'}
+                    {tab === 'stickers' && 'STICKERS'}
+                    {tab === 'widgets' && 'ADDONS'}
                   </span>
                 </div>
               </motion.button>
@@ -131,10 +143,10 @@ const ControlCenter = ({
                   <div className={`p-6 md:p-8 rounded-[2rem] border transition-all ${getStudioStyle()}`}>
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-4">
-                        <div className={`p-3 rounded-2xl bg-[var(--nexus-accent)]/10 text-[var(--nexus-accent)]`}>
-                          <Palette className="w-6 h-6" />
+                        <div className="flex flex-col">
+                          <h2 className="text-3xl font-black italic tracking-tighter text-[var(--nexus-text)]">NOTIFICATIONS</h2>
+                          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--nexus-text-muted)] opacity-50 mt-1">Configure real-time visual alerts</p>
                         </div>
-                        <h3 className="text-xl font-black uppercase italic tracking-widest">Alert Aesthetics</h3>
                       </div>
                       {isSavingAlerts && <Activity className="w-5 h-5 animate-spin text-[var(--nexus-accent)]" />}
                     </div>
@@ -198,7 +210,7 @@ const ControlCenter = ({
                         className={`relative flex flex-col items-center justify-center gap-2 p-3 md:p-4 rounded-2xl border-2 transition-all overflow-hidden border-[#39ff14] bg-[#39ff14]/10 hover:bg-[#39ff14]/20 ${currentStyle === 'cyberhud' ? 'shadow-[0_0_20px_rgba(57,255,20,0.4)] bg-[#39ff14]/20' : ''}`}
                       >
                         <Activity className={`w-5 h-5 md:w-6 md:h-6 text-[#39ff14] animate-pulse`} />
-                        <span className={`text-[8px] md:text-[9px] font-mono uppercase tracking-widest text-[#39ff14]`}>Cyber HUD</span>
+                        <span className={`text-[8px] md:text-[9px] font-mono uppercase tracking-widest text-[#39ff14]`}>Digital HUD</span>
                         {currentStyle === 'cyberhud' && <div className="absolute top-2 right-2"><Check className="w-3 h-3 text-[#39ff14]" /></div>}
                       </motion.button>
                       <motion.button
@@ -251,11 +263,11 @@ const ControlCenter = ({
                     <div>
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3">
-                          <Monitor className="w-5 h-5 text-[var(--nexus-accent)]" />
-                          <h3 className="text-sm font-black uppercase italic tracking-widest text-[var(--nexus-accent)]">Alert Studio</h3>
+                          <Palette className="w-5 h-5 text-[var(--nexus-accent)]" />
+                          <h3 className="text-sm font-black italic flex items-center gap-2 text-[var(--nexus-text)] uppercase tracking-tight">Notification Style</h3>
                         </div>
                         <div className="flex items-center gap-1.5 text-[9px] font-black text-[var(--nexus-accent)] bg-[var(--nexus-accent)]/10 px-3 py-1 rounded-lg italic border border-[var(--nexus-accent)]/20">
-                          <Activity className="w-3 h-3 animate-pulse" /> LIVE CALIBRATION
+                          <Activity className="w-3 h-3 animate-pulse" /> PREVIEW
                         </div>
                       </div>
 
@@ -271,7 +283,7 @@ const ControlCenter = ({
                             <AlertPreview
                               donorName="DropPay Tester"
                               amount={500}
-                              message="Studio Handshake Active!"
+                              message="Preview Status: Active"
                               sticker="zap"
                               variant="zap"
                               theme={theme}
@@ -289,7 +301,7 @@ const ControlCenter = ({
                         onClick={() => triggerTestSignal('zap')}
                         className="w-full py-4 rounded-2xl bg-[var(--nexus-accent)] text-black font-black uppercase text-[10px] tracking-widest transition-all flex items-center justify-center gap-2 hover:brightness-110 shadow-lg"
                       >
-                        <Zap className="w-3.5 h-3.5" /> Simulate Signal
+                        <Zap className="w-3.5 h-3.5" /> Simulate Alert
                       </button>
                     </div>
                   </div>
@@ -300,13 +312,13 @@ const ControlCenter = ({
                       <div className={`p-3 rounded-2xl bg-[var(--nexus-accent)]/10 text-[var(--nexus-accent)]`}>
                         <Volume2 className="w-5 h-5" />
                       </div>
-                      <h3 className="text-xs font-black uppercase italic tracking-widest">Signal TTS Settings</h3>
+                      <h3 className="text-xs font-black uppercase italic tracking-widest">Alert Audio Settings</h3>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
                       <div className="space-y-3">
                         <div className="flex justify-between items-center">
-                          <span className="text-[10px] font-black uppercase text-[var(--nexus-text-muted)] tracking-widest flex items-center gap-2">Signal Volume</span>
+                          <span className="text-[10px] font-black uppercase text-[var(--nexus-text-muted)] tracking-widest flex items-center gap-2">Alert Volume</span>
                           <span className="text-[10px] font-black text-[var(--nexus-accent)]">{alertConfig?.volume || 50}%</span>
                         </div>
                         <input type="range"
@@ -358,13 +370,15 @@ const ControlCenter = ({
                   <div className={`w-full relative p-6 md:p-8 rounded-[2rem] border bg-[var(--nexus-panel)] overflow-hidden shadow-2xl transition-all ${getStudioStyle()}`}>
                     <div className="absolute -top-32 -left-32 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
                     <div className="relative z-10">
-                      <div className="flex items-center gap-3 mb-8">
-                        <div className={`p-3 rounded-2xl bg-gradient-to-br from-amber-400/20 to-orange-500/10 border border-amber-500/20 shadow-[0_0_30px_rgba(245,158,11,0.15)] text-amber-500`}>
-                          <Target className="w-5 h-5 animate-[pulse_3s_ease-in-out_infinite]" />
-                        </div>
-                        <div>
-                          <h3 className="text-base font-black uppercase italic tracking-widest bg-clip-text text-transparent bg-gradient-to-r from-amber-400 to-orange-500">Mission Calibration</h3>
-                          <p className="text-[9px] font-bold text-[var(--nexus-text-muted)] uppercase tracking-widest mt-0.5">Configure your primary objective.</p>
+                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-[var(--nexus-border)] pb-8">
+                        <div className="flex items-center gap-4">
+                          <div className="p-3.5 bg-indigo-500/10 rounded-[1.5rem] border border-indigo-500/20 shadow-inner">
+                            <Target className="w-8 h-8 text-indigo-500" />
+                          </div>
+                          <div className="flex flex-col">
+                            <h2 className="text-3xl font-black italic tracking-tighter text-[var(--nexus-text)]">DONATION GOALS</h2>
+                            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--nexus-text-muted)] opacity-50 mt-1">Configure your active donation goal</p>
+                          </div>
                         </div>
                       </div>
 
@@ -414,7 +428,7 @@ const ControlCenter = ({
                             className="h-[58px] px-8 bg-gradient-to-r from-amber-400 to-orange-500 text-black rounded-xl font-black uppercase italic tracking-widest text-[10px] transition-all flex items-center gap-3 shadow-lg hover:scale-[1.02] active:scale-[0.98] whitespace-nowrap"
                           >
                             {isUpdatingGoal ? <Activity className="animate-spin w-4 h-4" /> : <Rocket className="w-4 h-4" />}
-                            <span>Deploy</span>
+                            <span>Set Goal</span>
                           </button>
                         </div>
                       </div>
@@ -427,7 +441,7 @@ const ControlCenter = ({
                       <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-3">
                           <Monitor className="w-4 h-4 text-amber-500" />
-                          <h3 className="text-xs font-black uppercase italic tracking-widest text-amber-500">Goal Studio Preview</h3>
+                          <h3 className="text-xs font-black uppercase italic tracking-widest text-amber-500">Goal Bar Preview</h3>
                         </div>
                         <div className="flex items-center gap-1.5 text-[9px] font-black text-amber-500 bg-amber-500/10 px-3 py-1 rounded-lg italic border border-amber-500/20">
                           <Activity className="w-3 h-3 animate-pulse" /> LIVE SYNC
@@ -487,7 +501,25 @@ const ControlCenter = ({
                     <h3 className="text-xs font-black uppercase italic tracking-widest text-indigo-500">Goal Bar Theme</h3>
                   </div>
 
-                  <div className="flex overflow-x-auto snap-x snap-mandatory gap-3 px-1 py-3 scrollbar-hide [&::-webkit-scrollbar]:hidden items-center" style={{ msOverflowStyle: 'none', scrollbarWidth: 'none' }}>
+                  <div className="relative group/scroll">
+                    {/* Directional Controllers */}
+                    <button 
+                      onClick={() => handleScroll(goalScrollRef, -240)}
+                      className="absolute left-[-15px] top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-black/80 border border-white/10 flex items-center justify-center text-indigo-400 opacity-0 group-hover/scroll:opacity-100 transition-all hover:bg-black hover:scale-110 shadow-[0_0_15px_rgba(99,102,241,0.3)] hidden md:flex"
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
+                    <button 
+                      onClick={() => handleScroll(goalScrollRef, 240)}
+                      className="absolute right-[-15px] top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-black/80 border border-white/10 flex items-center justify-center text-indigo-400 opacity-0 group-hover/scroll:opacity-100 transition-all hover:bg-black hover:scale-110 shadow-[0_0_15px_rgba(99,102,241,0.3)] hidden md:flex"
+                    >
+                      <ChevronRight className="w-5 h-5" />
+                    </button>
+
+                    <div 
+                      ref={goalScrollRef}
+                      className="flex overflow-x-auto snap-x snap-mandatory gap-3 px-1 py-4 laser-scroll items-center"
+                    >
                     {[
                       { id: 'modern', label: 'Cyber Pill', icon: <Zap className="w-5 h-5" />, color: '6, 182, 212' },
                       { id: 'glass_jar', label: 'Glass Jar', icon: <Activity className="w-5 h-5" />, color: '56, 189, 248' },
@@ -540,6 +572,7 @@ const ControlCenter = ({
                         </motion.button>
                       );
                     })}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -559,12 +592,30 @@ const ControlCenter = ({
               <div className="w-full">
                 <div className="flex flex-col items-center text-center space-y-3 mb-10">
                   <div className="px-4 py-1.5 rounded-full bg-[var(--nexus-accent)]/10 border border-[var(--nexus-accent)]/20">
-                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[var(--nexus-accent)]">Theme Interface</span>
+                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[var(--nexus-accent)]">UI Theme</span>
                   </div>
-                  <p className="max-w-xl text-xs italic text-[var(--nexus-text-muted)]">Transform your control center into a thematic cockpit. Choose an interface style that matches your stream identity.</p>
+                  <p className="max-w-xl text-xs italic text-[var(--nexus-text-muted)]">Transform your control center into a thematic dashboard. Choose an interface style that matches your stream identity.</p>
                 </div>
 
-                <div className="flex overflow-x-auto snap-x snap-mandatory gap-5 p-4 -m-4 pb-8 scrollbar-hide [&::-webkit-scrollbar]:hidden items-stretch" style={{ msOverflowStyle: 'none', scrollbarWidth: 'none' }}>
+                <div className="relative group/scroll">
+                  {/* Directional Controllers */}
+                  <button 
+                    onClick={() => handleScroll(nexusScrollRef, -300)}
+                    className="absolute left-[-20px] top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full bg-black/80 border border-white/10 flex items-center justify-center text-[var(--nexus-accent)] opacity-0 group-hover/scroll:opacity-100 transition-all hover:bg-black hover:scale-110 shadow-[0_0_20px_rgba(16,185,129,0.3)] hidden md:flex"
+                  >
+                    <ChevronLeft className="w-6 h-6" />
+                  </button>
+                  <button 
+                    onClick={() => handleScroll(nexusScrollRef, 300)}
+                    className="absolute right-[-20px] top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full bg-black/80 border border-white/10 flex items-center justify-center text-[var(--nexus-accent)] opacity-0 group-hover/scroll:opacity-100 transition-all hover:bg-black hover:scale-110 shadow-[0_0_20px_rgba(16,185,129,0.3)] hidden md:flex"
+                  >
+                    <ChevronRight className="w-6 h-6" />
+                  </button>
+
+                  <div 
+                    ref={nexusScrollRef}
+                    className="flex overflow-x-auto snap-x snap-mandatory gap-5 p-4 -m-4 pb-8 laser-scroll items-stretch"
+                  >
                   {[
                     { id: 'void', label: 'VOID (DEFAULT)', desc: 'Pitch black, neon accents.', icon: <Layout className="w-6 h-6" />, color: '#10B981', premium: false },
                     { id: 'aero', label: 'AERO (GLASS)', desc: 'Frosted glass, macOS vibe.', icon: <Sparkles className="w-6 h-6" />, color: '#38bdf8', premium: false },
@@ -581,7 +632,7 @@ const ControlCenter = ({
                     { id: 'live_kawaii', label: 'SKY SANCTUARY', desc: 'Day/Night (Parallax).', icon: <Cloud className="w-6 h-6" />, color: '#a1c4fd', premium: true },
                     { id: 'live_dragon', label: 'DRAGON HOARD', desc: 'Mystic Runes (Ember).', icon: <Gem className="w-6 h-6" />, color: '#fbbf24', premium: true },
                     { id: 'midnight-obsidian', label: 'KINETIC OBSIDIAN', desc: 'Liquid gold accents, dark drift.', icon: <Layout className="w-6 h-6" />, color: '#F59E0B', premium: false },
-                    { id: 'uplink', label: 'ELITE UPLINK', desc: '2026 Protocol. Multi-layer glass.', icon: <Zap className="w-6 h-6" />, color: '#10B981', premium: false },
+                    { id: 'uplink', label: 'ELITE INTERFACE', desc: 'Modern Design. Multi-layer glass.', icon: <Zap className="w-6 h-6" />, color: '#10B981', premium: false },
                     { id: 'neon_relic', label: 'NEON RELIC', desc: 'Retro Vapor Brutalism.', icon: <Layout className="w-6 h-6" />, color: '#00ffff', premium: true },
                   ].filter(t => !t.premium || (user?.unlockedNexusThemes || []).includes(t.id)).map((t) => {
                     const isSelected = nexusTheme === t.id;
@@ -639,9 +690,10 @@ const ControlCenter = ({
                         {/* Owned premium glow shimmer */}
                         {t.premium && <div className="absolute inset-0 rounded-[1.5rem] pointer-events-none ring-1 ring-yellow-400/10 shadow-[inset_0_0_20px_rgba(234,179,8,0.05)]" />}
                       </motion.button>
-                    );
-                  })}
-                </div>
+                  );
+                })}
+              </div>
+            </div>
 
                 {/* Prompt to visit store if user has no premium themes */}
                 {(user?.unlockedNexusThemes || []).length === 0 && (
@@ -668,12 +720,9 @@ const ControlCenter = ({
               <div className="w-full">
                 <div className="flex justify-between items-center mb-10">
                   <div className="flex items-center gap-4">
-                    <div className={`p-4 rounded-2xl ${theme === 'dark' ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20' : 'bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-sm'}`}>
-                      <Rocket className="w-7 h-7" />
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <h3 className="text-2xl font-black uppercase italic tracking-tighter text-indigo-500">Partner Pack</h3>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-[var(--nexus-text-muted)] opacity-60">Architect your stream's signature visual signals.</p>
+                    <div className="flex flex-col">
+                      <h2 className="text-3xl font-black italic tracking-tighter text-[var(--nexus-text)]">PARTNER PACK</h2>
+                      <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--nexus-text-muted)] opacity-50 mt-1">Architect your stream's signature visual signals.</p>
                     </div>
                   </div>
                 </div>
@@ -733,7 +782,7 @@ const ControlCenter = ({
                     <div className="w-12 h-12 rounded-full bg-[var(--nexus-border)]/5 flex items-center justify-center">
                       <Plus className="w-6 h-6" />
                     </div>
-                    <span className="text-[9px] font-black uppercase tracking-widest">Register Signal</span>
+                    <span className="text-[9px] font-black uppercase tracking-widest">Add Sticker</span>
                   </motion.button>
                 </div>
 
@@ -747,7 +796,7 @@ const ControlCenter = ({
                       } disabled:opacity-30 hover:scale-[1.01]`}
                   >
                     {isSavingStickers ? <Activity className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
-                    SYNCHRONIZE PACK
+                    Save Changes
                   </button>
                 </div>
               </div>
