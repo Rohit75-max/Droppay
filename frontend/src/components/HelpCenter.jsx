@@ -25,7 +25,7 @@ const HelpCenter = ({ theme }) => {
     <div className="max-w-6xl mx-auto space-y-12 font-sans pb-20 w-full animate-in fade-in slide-in-from-bottom-4 duration-700 px-4 md:px-8 pt-4">
 
       {/* --- HERO SECTION (REFINED) --- */}
-      <div className="relative w-full py-16 px-4 md:px-8 overflow-hidden rounded-[4rem]">
+      <div className="relative w-full py-16 px-4 md:px-8 overflow-hidden rounded-[var(--nexus-radius)]">
         {/* Large, Atmospheric Background Glows */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-gradient-to-r from-[var(--nexus-accent)]/10 via-purple-500/5 to-emerald-500/10 blur-[120px] rounded-full opacity-60" />
 
@@ -79,7 +79,7 @@ const HelpCenter = ({ theme }) => {
         {/* MAIN COLUMN (LEFT) - FAQ CONTENT */}
         <div className="lg:col-span-8 space-y-10">
           {/* --- KNOWLEDGE HUB (FAQ) --- */}
-          <EliteCard className="space-y-6 w-full p-8 rounded-[3rem] bg-[var(--nexus-panel)]/40 border-[var(--nexus-border)] shadow-xl">
+          <EliteCard className="space-y-6 w-full p-8 rounded-[var(--nexus-radius)] bg-[var(--nexus-panel)]/40 border-[var(--nexus-border)] shadow-xl nexus-card">
             <div className="flex flex-row items-center justify-between gap-4 px-2">
               <div className="flex items-center gap-3">
                 <div className="w-1.5 h-6 bg-[var(--nexus-accent)] rounded-full" />
@@ -129,7 +129,7 @@ const HelpCenter = ({ theme }) => {
           </EliteCard>
 
           {/* --- GLOBAL ACCESS CTA --- */}
-          <EliteCard className="relative w-full p-8 md:p-10 flex flex-col md:flex-row items-center text-center md:text-left justify-between gap-8 overflow-hidden rounded-[2.5rem] bg-[var(--nexus-bg)]/60 backdrop-blur-xl border border-[var(--nexus-accent)]/30">
+          <EliteCard className="relative w-full p-8 md:p-10 flex flex-col md:flex-row items-center text-center md:text-left justify-between gap-8 overflow-hidden rounded-[var(--nexus-radius)] bg-[var(--nexus-bg)]/60 backdrop-blur-xl border border-[var(--nexus-border)]">
             <div className="relative z-10 space-y-3">
               <div className="flex items-center justify-center md:justify-start gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-[var(--nexus-accent)] animate-pulse" />
@@ -168,7 +168,7 @@ const HelpCenter = ({ theme }) => {
               ].map((item, i) => (
                 <EliteCard
                   key={i}
-                  className="relative p-6 rounded-[2rem] border border-[var(--nexus-border)] bg-[var(--nexus-panel)]/40 hover:border-[var(--nexus-accent)]/30 transition-all cursor-pointer group flex items-start text-left overflow-hidden shadow-sm"
+                  className="relative p-6 rounded-[var(--nexus-radius)] border border-[var(--nexus-border)] bg-[var(--nexus-panel)]/40 hover:border-[var(--nexus-accent)]/30 transition-all cursor-pointer group flex items-start text-left overflow-hidden shadow-sm"
                 >
                   <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity pointer-events-none">
                     <item.icon className="w-16 h-16" />

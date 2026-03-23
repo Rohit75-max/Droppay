@@ -93,7 +93,7 @@ const TugOfWarControl = ({ user, nexusTheme, streamerId, theme }) => {
         <div className="w-full bg-[var(--nexus-panel)] border border-[var(--nexus-border)] rounded-[2.5rem] p-8 nexus-card overflow-hidden">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
                 <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-2xl bg-yellow-500/10 flex items-center justify-center border-2 border-yellow-500/20 text-yellow-500">
+                    <div className="w-14 h-14 rounded-2xl bg-[var(--nexus-accent)]/10 flex items-center justify-center border-2 border-[var(--nexus-accent)]/20 text-[var(--nexus-accent)]">
                         <Swords className="w-7 h-7" />
                     </div>
                     <div>
@@ -154,7 +154,7 @@ const TugOfWarControl = ({ user, nexusTheme, streamerId, theme }) => {
                                     <button
                                         key={m}
                                         onClick={() => setFormData({ ...formData, durationMinutes: m })}
-                                        className={`flex-1 py-3 rounded-xl font-black text-xs transition-all border ${formData.durationMinutes === m ? 'bg-[var(--nexus-accent)] text-black border-[var(--nexus-accent)]' : 'bg-[var(--nexus-panel)] text-[var(--nexus-text-muted)] border-[var(--nexus-border)] hover:border-[var(--nexus-accent)]/40'}`}
+                                        className={`flex-1 py-3 rounded-xl font-black text-xs transition-all border ${formData.durationMinutes === m ? 'bg-[var(--nexus-accent)] text-black border-[var(--nexus-accent)] shadow-[0_0_15px_var(--nexus-accent-glow)]' : 'bg-[var(--nexus-panel)] text-[var(--nexus-text-muted)] border-[var(--nexus-border)] hover:border-[var(--nexus-accent)]/40'}`}
                                     >
                                         {m}m
                                     </button>
@@ -174,7 +174,7 @@ const TugOfWarControl = ({ user, nexusTheme, streamerId, theme }) => {
                             animate={{ opacity: 1 }}
                             onClick={handleStart}
                             disabled={isStarting}
-                            className="w-full bg-[var(--nexus-accent)] text-black py-5 rounded-2xl font-black uppercase tracking-[0.2em] italic text-xs shadow-lg shadow-[var(--nexus-accent)]/20 hover:scale-[1.02] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                            className="w-full bg-[var(--nexus-accent)] text-black py-5 rounded-2xl font-black uppercase tracking-[0.2em] italic text-xs shadow-lg shadow-[var(--nexus-accent)]/30 hover:scale-[1.02] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                         >
                             {isStarting ? <Zap className="animate-spin w-4 h-4" /> : <Save className="w-4 h-4" />}
                             {isStarting ? "Initializing War..." : "START WAR PROTOCOL"}

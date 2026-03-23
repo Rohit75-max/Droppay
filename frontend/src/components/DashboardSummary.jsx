@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Wallet, BarChart3, Target, TrendingUp, Loader2, Zap, Activity, Send, ShieldCheck, IndianRupee, MessageSquare, Sparkles,
+  Wallet, BarChart3, Target, TrendingUp, Loader2, Zap, Activity, Send, ShieldCheck, IndianRupee, Sparkles,
   CheckCircle, Trophy, User, Crown, Smile, Volume2, Lock, UserCircle, Gift
 } from 'lucide-react';
 import CyberGoalBar from './CyberGoalBar';
@@ -160,10 +160,10 @@ const DashboardSummary = ({
           ) : (
             <EliteCard
               whileHover={{ scale: 1.01, z: 10 }}
-              className={`md:col-span-4 flex flex-col items-stretch border relative overflow-hidden h-[320px] transition-all duration-700 ${nexusTheme === 'neon_relic' ? 'rounded-none relic-surface' : 'rounded-[2.5rem]'} ${theme === 'light' ? 'bg-white border-slate-200' : 'bg-[#070707] border-[var(--nexus-border)]'}`}
+              className={`md:col-span-4 flex flex-col items-stretch border relative overflow-hidden h-[240px] transition-all duration-700 ${nexusTheme === 'neon_relic' ? 'rounded-none relic-surface' : 'rounded-[var(--nexus-radius)]'} ${theme === 'light' ? 'bg-white border-slate-200' : 'bg-[#070707] border-[var(--nexus-border)]'}`}
             >
-              {/* Profile Image Section (Top 70%) */}
-              <div className="w-full h-[70%] relative overflow-hidden group/avatar flex-shrink-0">
+              {/* Profile Image Section (Top 72%) */}
+              <div className="w-full h-[72%] relative overflow-hidden group/avatar flex-shrink-0">
                 {user.avatar ? (
                   <img
                     src={user.avatar}
@@ -195,10 +195,10 @@ const DashboardSummary = ({
                 </div>
               </div>
 
-              {/* Identity Details Section (Bottom 30%) */}
-              <div className={`w-full h-[30%] p-4 flex flex-col justify-center items-center relative z-20 flex-shrink-0 ${theme === 'light' ? 'bg-white' : 'bg-[#070707]'}`}>
-                <div className="space-y-4 w-full text-center">
-                  <div className="space-y-1">
+              {/* Identity Details Section (Bottom 28%) */}
+              <div className={`w-full h-[28%] p-3 flex flex-col justify-center items-center relative z-20 flex-shrink-0 ${theme === 'light' ? 'bg-white' : 'bg-[#070707]'}`}>
+                <div className="space-y-1 w-full text-center">
+                  <div className="space-y-0.5">
                     <div className="flex items-center justify-center gap-2">
                       <h3 className={`text-xl font-black uppercase italic tracking-tighter leading-none ${nexusTheme === 'neon_relic' ? 'font-mono text-cyan-400 relic-text-glow' : 'text-[var(--nexus-text)]'}`}>
                         {user.fullName || user.username}
@@ -206,7 +206,7 @@ const DashboardSummary = ({
                       {user.tier === 'legend' && <Crown className="w-4 h-4 text-amber-500 drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]" />}
                     </div>
                     <p className="text-[9px] font-black uppercase tracking-[0.4em] text-[var(--nexus-accent)] block">
-                      {user.tier || 'Starter'} Unit
+                      {user.tier || 'Starter'}
                     </p>
                   </div>
                 </div>
@@ -217,33 +217,30 @@ const DashboardSummary = ({
           {/* WIDGET 2: WALLET BALANCE (REVENUE SUMMARY) */}
           {user?.activeRevenueWidget === 'wallet_balance' ? (
             <div className="md:col-span-8" style={{ perspective: '1000px' }}>
-              <div className="aero-widget border border-[var(--nexus-border)] w-full h-full min-h-[240px] relative overflow-hidden p-7 md:p-10 flex flex-col justify-between group"
-                style={{ backdropFilter: 'blur(35px) saturate(200%)', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '2.5rem' }}>
+              <div className="aero-widget border border-[var(--nexus-border)] w-full h-[240px] relative overflow-hidden p-6 md:p-8 flex flex-col justify-between group"
+                style={{ backdropFilter: 'blur(35px) saturate(200%)', background: 'rgba(255, 255, 255, 0.05)', borderRadius: 'var(--nexus-radius)' }}>
 
                 {/* Liquid Mesh Gradient */}
-                <div className="absolute inset-0 opacity-20 pointer-events-none transition-transform duration-[3s] group-hover:scale-125 group-hover:rotate-3" style={{ backgroundImage: 'radial-gradient(circle at 60% 40%, rgba(59, 130, 246, 0.6), transparent 70%), radial-gradient(circle at 80% 80%, rgba(16, 185, 129, 0.4), transparent 50%)' }}></div>
+                <div className="liquid-mesh-glow absolute inset-0 opacity-20 pointer-events-none transition-transform duration-[3s] group-hover:scale-125 group-hover:rotate-3" style={{ backgroundImage: 'radial-gradient(circle at 60% 40%, rgba(59, 130, 246, 0.6), transparent 70%), radial-gradient(circle at 80% 80%, rgba(16, 185, 129, 0.4), transparent 50%)' }}></div>
                 {/* Static Noise Overlay */}
                 <div className="absolute inset-0 pointer-events-none opacity-[0.03] mix-blend-overlay" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.65\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E")' }}></div>
 
                 <div className="relative z-10 flex items-center justify-between">
-                  <div className="flex items-center gap-2 bg-[#3b82f6]/10 px-3 py-1.5 rounded-full border border-[#3b82f6]/20 backdrop-blur-md">
-                    <Wallet className="w-4 h-4 text-[#3b82f6]" />
-                    <span className="text-[10px] uppercase font-black tracking-[0.3em] text-[#3b82f6]">Wallet Balance <Send className="w-3 h-3 inline ml-1" /></span>
+                  <div className="flex items-center gap-1 sm:gap-2 bg-[#3b82f6]/10 px-2 sm:px-3 py-1.5 rounded-full border border-[#3b82f6]/20 backdrop-blur-md shrink-0">
+                    <Wallet className="w-3 h-3 sm:w-4 sm:h-4 text-[#3b82f6]" />
+                    <span className="text-[8px] sm:text-[10px] uppercase font-black tracking-widest sm:tracking-[0.3em] text-[#3b82f6] whitespace-nowrap">Current Balance</span>
                   </div>
                   <button
                     onClick={() => setShowWithdrawModal(true)}
                     disabled={isProcessingWithdraw || (Number(user.walletBalance) || 0) < 1000}
-                    className={`px-6 py-2.5 text-[10px] uppercase font-black tracking-widest rounded-full transition-all duration-300 border backdrop-blur-lg ${(Number(user.walletBalance) || 0) >= 1000 ? 'bg-[#3b82f6]/20 border-[#3b82f6]/50 text-[#3b82f6] hover:bg-[#3b82f6] hover:text-white hover:shadow-[0_0_20px_rgba(59,130,246,0.6)] hover:scale-105' : 'bg-[var(--nexus-panel)] border-[var(--nexus-border)] text-[var(--nexus-text-muted)] cursor-not-allowed opacity-50'}`}
+                    className={`px-3 sm:px-6 py-2.5 text-[8px] sm:text-[10px] uppercase font-black tracking-widest rounded-full transition-all duration-300 border backdrop-blur-lg shrink-0 ${(Number(user.walletBalance) || 0) >= 1000 ? 'bg-[#3b82f6] border-[#3b82f6] text-white hover:brightness-110 shadow-[0_0_20px_rgba(59,130,246,0.5)] hover:scale-105' : 'bg-[var(--nexus-panel)] border-[var(--nexus-border)] text-[var(--nexus-text-muted)] cursor-not-allowed opacity-50'}`}
                   >
-                    {isProcessingWithdraw ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Withdraw'}
+                    {isProcessingWithdraw ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Withdraw <span className="hidden sm:inline">Funds</span> <Send className="w-3 h-3 inline ml-1 opacity-80" /></>}
                   </button>
                 </div>
 
-                <div className="relative z-10 mt-6 mb-2 flex items-center gap-4 group-hover:drop-shadow-[0_0_25px_rgba(59,130,246,0.5)] transition-all duration-500">
-                  <div style={{ perspective: '500px' }}>
-                    <span className="text-4xl md:text-5xl text-[#3b82f6] inline-block animate-[spin_3s_linear_infinite]" style={{ transformStyle: 'preserve-3d' }}>₹</span>
-                  </div>
-                  <div className="overflow-hidden h-[70px] relative w-full">
+                <div className="relative z-10 mt-1 mb-1 flex items-center gap-2 group-hover:drop-shadow-[0_0_25px_rgba(59,130,246,0.5)] transition-all duration-500">
+                  <div className="overflow-hidden h-[60px] relative w-full flex items-center">
                     <AnimatePresence mode="popLayout">
                       <motion.h2
                         key={user.walletBalance}
@@ -251,29 +248,24 @@ const DashboardSummary = ({
                         animate={{ y: 0, opacity: 1, rotateX: 0 }}
                         exit={{ y: -50, opacity: 0, rotateX: 90 }}
                         transition={{ type: "spring", stiffness: 200, damping: 20 }}
-                        className={`text-5xl md:text-7xl font-black italic tracking-tighter absolute ${nexusTheme === 'neon_relic' ? 'relic-text-glow' : 'text-[var(--nexus-text)]'}`}
+                        className={`text-4xl md:text-5xl font-black italic tracking-tighter absolute ${nexusTheme === 'neon_relic' ? 'relic-text-glow' : 'text-[var(--nexus-text)]'}`}
                       >
-                        {user.walletBalance?.toLocaleString('en-IN') || '0.00'}
+                        ₹{user.walletBalance?.toLocaleString('en-IN') || '0.00'}
                       </motion.h2>
                     </AnimatePresence>
                   </div>
                 </div>
 
-                <div className="relative z-10 flex gap-6 mt-auto origin-left transform transition-transform group-hover:scale-105">
-                  <div className="flex flex-col">
-                    <span className="text-[8px] uppercase font-black tracking-widest text-[#3b82f6] mb-1 opacity-80">Pending Payout</span>
-                    <span className="text-lg md:text-xl font-mono font-bold text-[var(--nexus-text)] drop-shadow-md">₹{user.financialMetrics?.pendingPayouts?.toLocaleString('en-IN') || '0'}</span>
-                  </div>
-                  <div className="w-px h-8 bg-[#3b82f6]/20 mx-2 hidden sm:block"></div>
-                  <div className="flex flex-col hidden sm:flex">
-                    <span className="text-[8px] uppercase font-black tracking-widest text-[var(--nexus-text-muted)] mb-1">Monthly Net <TrendingUp className="w-3 h-3 inline ml-1 text-[var(--nexus-accent)]" /></span>
-                    <span className="text-lg md:text-xl font-mono font-bold text-[var(--nexus-text-muted)]">₹{user.financialMetrics?.monthlyNetEarnings?.toLocaleString('en-IN') || '0'}</span>
+                <div className="relative z-10 flex justify-center items-end mt-auto origin-center transform transition-transform group-hover:scale-[1.02]">
+                  <div className="flex flex-col text-center">
+                    <span className="text-[7px] md:text-[8px] uppercase font-black tracking-widest text-[var(--nexus-text-muted)] mb-1">Monthly Net <TrendingUp className="w-3 h-3 inline ml-1 text-[var(--nexus-accent)]" /></span>
+                    <span className="text-base md:text-xl font-mono font-bold text-[var(--nexus-text)] drop-shadow-md">₹{user.financialMetrics?.monthlyNetEarnings?.toLocaleString('en-IN') || '0'}</span>
                   </div>
                 </div>
               </div>
             </div>
           ) : (
-            <EliteCard disableHover={true} className={`md:col-span-8 flex flex-col justify-center p-6 sm:p-8 rounded-[2.5rem] border relative overflow-hidden h-full min-h-[240px] transition-all duration-500 ${getCardStyle()}`}>
+            <EliteCard disableHover={true} className={`md:col-span-8 flex flex-col justify-center p-6 sm:p-8 rounded-[var(--nexus-radius)] border relative overflow-hidden h-[240px] transition-all duration-500 ${getCardStyle()}`}>
               {nexusTheme === 'neon_relic' && (
                 <>
                   <div className="plasma-leak-cyan top-0 right-0 -mt-2 -mr-2"></div>
@@ -286,70 +278,38 @@ const DashboardSummary = ({
               <div className="absolute -bottom-32 -right-32 w-64 h-64 bg-[var(--nexus-accent)]/10 rounded-full blur-[80px] opacity-30 pointer-events-none" />
               
               <div className="flex items-center justify-between mb-8 relative z-10">
-                <div className="flex items-center gap-3 bg-[var(--nexus-panel)]/40 px-3 py-1.5 rounded-full border border-[var(--nexus-accent)]/20 backdrop-blur-md">
-                  <Wallet className="w-4 h-4 text-[var(--nexus-accent)]" />
-                  <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--nexus-accent)]">Current Balance</h3>
+                <div className="flex items-center gap-2 bg-[var(--nexus-panel)]/40 px-2 sm:px-3 py-1.5 rounded-full border border-[var(--nexus-accent)]/20 backdrop-blur-md shrink-0">
+                  <Wallet className="w-3 h-3 sm:w-4 sm:h-4 text-[var(--nexus-accent)]" />
+                  <h3 className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest sm:tracking-[0.3em] text-[var(--nexus-accent)] whitespace-nowrap">Current Balance</h3>
                 </div>
                 <button
                   onClick={() => setShowWithdrawModal(true)}
                   disabled={isProcessingWithdraw || (Number(user.walletBalance) || 0) < 1000}
-                  className={`px-4 sm:px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2 border ${(Number(user.walletBalance) || 0) >= 1000 ? 'bg-[var(--nexus-accent)] text-[var(--nexus-panel)] border-[var(--nexus-accent)] hover:brightness-110 shadow-[0_0_15px_var(--nexus-accent-glow)]' : 'bg-[var(--nexus-panel)] border-[var(--nexus-border)] text-[var(--nexus-text-muted)] cursor-not-allowed opacity-50'}`}
+                  className={`px-3 sm:px-6 py-2.5 rounded-xl text-[8px] sm:text-[10px] font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2 border shrink-0 ${(Number(user.walletBalance) || 0) >= 1000 ? 'bg-[var(--nexus-accent)] text-[var(--nexus-panel)] border-[var(--nexus-accent)] hover:brightness-110 shadow-[0_0_20px_var(--nexus-accent-glow)] scale-105' : 'bg-[var(--nexus-panel)] border-[var(--nexus-border)] text-[var(--nexus-text-muted)] cursor-not-allowed opacity-50'}`}
                 >
-                  {isProcessingWithdraw ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Withdraw'}
+                  {isProcessingWithdraw ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Withdraw <span className="hidden sm:inline">Funds</span> <Send className="w-3 h-3 opacity-80" /></>}
                 </button>
               </div>
 
-              <div className="flex items-baseline gap-3 mb-8 relative z-10">
-                <div className="w-12 h-12 rounded-full bg-[var(--nexus-accent)]/10 border border-[var(--nexus-accent)]/20 flex items-center justify-center text-xl font-black italic text-[var(--nexus-accent)] shadow-[0_0_15px_rgba(16,185,129,0.15)]">₹</div>
-                <h2 className={`text-5xl sm:text-6xl lg:text-7xl font-black italic tracking-tighter ${nexusTheme === 'neon_relic' ? 'relic-text-glow' : 'text-[var(--nexus-text)]'}`}>
-                  {user.walletBalance?.toLocaleString('en-IN') || '0.00'}
+              <div className="flex items-baseline gap-3 mb-6 relative z-10">
+                <h2 className={`text-4xl sm:text-5xl lg:text-6xl font-black italic tracking-tighter ${nexusTheme === 'neon_relic' ? 'relic-text-glow' : 'text-[var(--nexus-text)]'}`}>
+                  ₹{user.walletBalance?.toLocaleString('en-IN') || '0.00'}
                 </h2>
               </div>
 
-              <div className="flex gap-6 mt-auto relative z-10">
-                <div className="flex flex-col">
-                  <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-[var(--nexus-text-muted)] opacity-60 mb-1">Monthly Net</span>
-                  <span className="text-sm sm:text-lg font-mono font-bold text-[var(--nexus-text-muted)]">₹{user.financialMetrics?.monthlyNetEarnings?.toLocaleString('en-IN') || '0'}</span>
+              <div className="flex justify-center items-end mt-auto relative z-10">
+                <div className="flex flex-col text-center">
+                  <span className="text-[7px] sm:text-[9px] font-black uppercase tracking-widest text-[var(--nexus-text-muted)] opacity-60 mb-1">Monthly Net <TrendingUp className="w-3 h-3 inline ml-1 text-[var(--nexus-accent)]" /></span>
+                  <span className="text-base sm:text-lg font-mono font-bold text-[var(--nexus-text)] drop-shadow-md">₹{user.financialMetrics?.monthlyNetEarnings?.toLocaleString('en-IN') || '0'}</span>
                 </div>
               </div>
             </EliteCard>
           )}
         </div>
 
-        {/* MISSION STATUS */}
-        {user.goalSettings?.isActive !== false && (
-          <div className="w-full flex justify-center items-center pt-2 pb-6 relative z-10">
-            {PREMIUM_GOAL_STYLES.includes(user.goalSettings?.stylePreference) ? (
-              <PremiumGoalOverlays
-                goal={{
-                  title: user.goalSettings?.title || "Active Goal",
-                  currentProgress: user.goalSettings?.currentProgress || 0,
-                  targetAmount: user.goalSettings?.targetAmount || 100,
-                  stylePreference: user.goalSettings?.stylePreference
-                }}
-                percentage={getProgressPercentage()}
-                isComplete={getProgressPercentage() >= 100}
-              />
-            ) : (
-              <CyberGoalBar
-                goal={{ title: user.goalSettings?.title || "Active Goal", currentProgress: user.goalSettings?.currentProgress || 0, targetAmount: user.goalSettings?.targetAmount || 100 }}
-                tier={user.tier || 'starter'}
-                runnerUrl={
-                  user.goalSettings?.runnerType === 'custom'
-                    ? user.goalSettings?.customRunnerUrl
-                    : (runnerMap[user.goalSettings?.runnerType] || runnerMap.star)
-                }
-                percentage={getProgressPercentage()}
-                isComplete={getProgressPercentage() >= 100}
-                goalStylePreference={user.goalSettings?.stylePreference || 'modern'}
-              />
-            )}
-          </div>
-        )}
-
-        {/* ANALYTICS DATA STREAM */}
+        {/* ANALYTICS DATA STREAM (Revenue Chart) */}
         <EliteCard
-          className={`group border relative transition-all duration-500 overflow-hidden ${nexusTheme === 'neon_relic' ? 'rounded-none relic-surface flex flex-col' : 'rounded-3xl flex flex-col'} ${getCardStyle()}`}
+          className={`group border relative transition-all duration-500 overflow-hidden ${nexusTheme === 'neon_relic' ? 'rounded-none relic-surface flex flex-col' : 'rounded-[var(--nexus-radius)] flex flex-col'} ${getCardStyle()}`}
         >
           {nexusTheme === 'neon_relic' && (
             <>
@@ -367,28 +327,62 @@ const DashboardSummary = ({
                 Total revenue
                 <Sparkles className="w-3 h-3 text-[var(--nexus-accent)] ml-1" />
               </h3>
-              <div className={`flex bg-[var(--nexus-panel)] rounded-xl border border-[var(--nexus-border)] shadow-sm p-1`}>
+              <div className="flex bg-[var(--nexus-panel)] rounded-xl border border-[var(--nexus-border)] shadow-sm p-1">
                 {['7D', '1M', '1Y'].map((range) => (
                   <button
                     key={range}
                     onClick={() => setTimeRange(range)}
-                    className={`px-3 py-1.5 rounded-lg text-[10px] md:text-xs font-bold transition-all duration-300 ${timeRange === range ? 'bg-[var(--nexus-bg)] text-[var(--nexus-text)] shadow-sm border border-[var(--nexus-border)]' : 'text-[var(--nexus-text-muted)] hover:text-[var(--nexus-text)]'}`}
+                    className={`relative px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-colors duration-300 ${
+                      timeRange === range ? 'text-[var(--nexus-accent)]' : 'text-[var(--nexus-text-muted)] hover:text-[var(--nexus-text)]'
+                    }`}
                   >
-                    {range === '7D' ? 'Weekly' : range === '1M' ? 'Monthly' : 'Yearly'}
+                    {timeRange === range && (
+                      <motion.div
+                        layoutId="activeTimeRange"
+                        className="absolute inset-0 bg-[var(--nexus-bg)] rounded-lg shadow-[0_0_15px_rgba(var(--nexus-accent-rgb),0.2)] border border-[var(--nexus-border)] z-0"
+                        transition={{ type: "spring", bounce: 0.15, duration: 0.5 }}
+                      />
+                    )}
+                    <span className="relative z-10">
+                      {range === '7D' ? 'Weekly' : range === '1M' ? 'Monthly' : 'Yearly'}
+                    </span>
                   </button>
                 ))}
               </div>
             </div>
 
             <div className="flex items-center gap-3 md:gap-4 mt-2 mb-1">
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-[var(--nexus-text)] flex items-center">
-                <IndianRupee className="w-7 h-7 md:w-8 md:h-8 -mr-1" strokeWidth={2.5} />
-                {periodTotal.toLocaleString('en-IN')}
-              </h2>
-              <div className={`px-2 py-1 rounded-full text-[10px] md:text-xs font-bold flex items-center gap-1 border ${isPositiveGain ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'}`}>
+              <div className="flex flex-col">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={timeRange}
+                    initial={{ opacity: 0, y: 10, filter: 'blur(5px)' }}
+                    animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                    exit={{ opacity: 0, y: -10, filter: 'blur(5px)' }}
+                    transition={{ duration: 0.3 }}
+                    className="flex items-center"
+                  >
+                    <h2 className="text-3xl md:text-4xl font-black tracking-tighter text-[var(--nexus-text)] flex items-center">
+                      <IndianRupee className="w-7 h-7 md:w-8 md:h-8 -mr-1 text-[var(--nexus-accent)]" strokeWidth={3} />
+                      {periodTotal.toLocaleString('en-IN')}
+                    </h2>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+
+              <motion.div 
+                key={`${timeRange}-gain`}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className={`px-3 py-1 rounded-full text-[10px] md:text-xs font-black flex items-center gap-1.5 border backdrop-blur-md shadow-lg ${
+                  isPositiveGain 
+                    ? 'bg-green-500/10 text-green-500 border-green-500/30 shadow-green-500/5' 
+                    : 'bg-red-500/10 text-red-500 border-red-500/20 border-red-500/30'
+                }`}
+              >
                 <TrendingUp className={`w-3 h-3 ${!isPositiveGain && 'rotate-180'}`} strokeWidth={3} />
                 {Math.abs(gainPercent).toFixed(2)}%
-              </div>
+              </motion.div>
             </div>
 
             <p className="text-[10px] md:text-xs text-[var(--nexus-text-muted)] font-medium">
@@ -397,7 +391,7 @@ const DashboardSummary = ({
           </div>
 
           {/* Recharts Area */}
-          <div className="w-full h-[250px] md:h-[300px] mt-auto relative z-10 px-2 sm:px-4 pb-4">
+          <div className="w-full h-[140px] md:h-[180px] mt-auto relative z-10 px-2 sm:px-4 pb-4">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={formattedChartData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
                 <defs>
@@ -450,6 +444,37 @@ const DashboardSummary = ({
           <BarChart3 className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 opacity-[0.03] pointer-events-none transition-colors text-[var(--nexus-accent)] z-0" />
         </EliteCard>
 
+        {/* MISSION STATUS (Goal Bar) */}
+        {user.goalSettings?.isActive !== false && (
+          <div className="w-full flex justify-center items-center pt-2 pb-6 relative z-10">
+            {PREMIUM_GOAL_STYLES.includes(user.goalSettings?.stylePreference) ? (
+              <PremiumGoalOverlays
+                goal={{
+                  title: user.goalSettings?.title || "Active Goal",
+                  currentProgress: user.goalSettings?.currentProgress || 0,
+                  targetAmount: user.goalSettings?.targetAmount || 100,
+                  stylePreference: user.goalSettings?.stylePreference
+                }}
+                percentage={getProgressPercentage()}
+                isComplete={getProgressPercentage() >= 100}
+              />
+            ) : (
+              <CyberGoalBar
+                goal={{ title: user.goalSettings?.title || "Active Goal", currentProgress: user.goalSettings?.currentProgress || 0, targetAmount: user.goalSettings?.targetAmount || 100 }}
+                tier={user.tier || 'starter'}
+                runnerUrl={
+                  user.goalSettings?.runnerType === 'custom'
+                    ? user.goalSettings?.customRunnerUrl
+                    : (runnerMap[user.goalSettings?.runnerType] || runnerMap.star)
+                }
+                percentage={getProgressPercentage()}
+                isComplete={getProgressPercentage() >= 100}
+                goalStylePreference={user.goalSettings?.stylePreference || 'modern'}
+              />
+            )}
+          </div>
+        )}
+
       </div>
 
       {/* RIGHT COLUMN: RECENT SIGNAL & HALL OF FAME */}
@@ -457,9 +482,9 @@ const DashboardSummary = ({
 
         {/* WIDGET 3: TOP SUPPORTERS (COMMUNITY HUB) */}
         {user?.ownedWidgets?.includes('elite_nexus') ? (
-          <div style={{ perspective: '1000px' }} className="mb-6">
-            <div className="aero-widget border border-[var(--nexus-border)] py-5 relative overflow-hidden"
-              style={{ backdropFilter: 'blur(35px) saturate(200%)', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '2rem' }}>
+          <div style={{ perspective: '1000px' }} className="mb-4">
+            <div className="aero-widget border border-[var(--nexus-border)] h-[330px] py-5 relative overflow-hidden"
+              style={{ backdropFilter: 'blur(35px) saturate(200%)', background: 'rgba(255, 255, 255, 0.05)', borderRadius: 'var(--nexus-radius)' }}>
               <h3 className="text-[10px] px-5 font-black uppercase tracking-widest text-[#3b82f6] mb-4 flex items-center gap-2 drop-shadow-[0_0_8px_rgba(59,130,246,0.6)]"><Crown className="w-3 h-3" /> <Trophy className="w-3 h-3" /> Top Supporters</h3>
 
               <div className="flex overflow-hidden relative w-full h-12">
@@ -505,7 +530,7 @@ const DashboardSummary = ({
 
         {/* ACTIVITY SIGNAL FEED */}
         <EliteCard
-          className={`group border p-7 transition-all duration-500 h-[385px] flex flex-col ${nexusTheme === 'neon_relic' ? 'rounded-none relic-surface' : 'rounded-[2.5rem]'} ${getCardStyle()}`}
+          className={`group border p-7 transition-all duration-500 h-[330px] flex flex-col ${nexusTheme === 'neon_relic' ? 'rounded-none relic-surface' : 'rounded-[var(--nexus-radius)]'} ${getCardStyle()}`}
         >
           {nexusTheme === 'neon_relic' && (
             <>
@@ -561,26 +586,25 @@ const DashboardSummary = ({
               <List
                 height={300} // Capped height for virtualization viewport
                 rowCount={recentDrops.length}
-                rowHeight={82} // Explicit average size per row item
+                rowHeight={68} // Explicit average size per row item
                 rowProps={{ recentDrops, LOTTIE_STICKER_MAP, stickerFallback, nexusTheme }}
                 rowComponent={({ index, style, recentDrops, LOTTIE_STICKER_MAP, stickerFallback, nexusTheme }) => {
                   const drop = recentDrops[index];
                   if (!drop) return null;
 
                   return (
-                    <div style={style} className="pr-2 pb-2">
+                    <div style={style} className="pr-2 pb-1.5">
                       <motion.div
                         initial={{ opacity: 0, x: -20, scale: 0.95 }}
                         animate={{ opacity: 1, x: 0, scale: 1 }}
                         transition={{ duration: 0.4 }}
                         whileHover={{ x: 4, scale: 1.02 }}
-                        className={`group/card relative overflow-hidden flex items-center justify-between p-4 rounded-[var(--nexus-radius)] border transition-all duration-300 bg-[var(--nexus-panel)] border-[var(--nexus-border)] hover:border-[var(--nexus-accent)]/60 nexus-card h-full`}
+                        className={`group/card relative overflow-hidden flex items-center justify-between px-6 py-3 rounded-[var(--nexus-radius)] border transition-all duration-300 bg-[var(--nexus-panel)] border-[var(--nexus-border)] hover:border-[var(--nexus-accent)]/60 nexus-card h-full`}
                       >
                         <div className={`absolute inset-0 opacity-0 group-hover/card:opacity-100 transition-opacity duration-500 bg-gradient-to-r from-[var(--nexus-accent)]/0 via-[var(--nexus-accent)]/10 to-[var(--nexus-accent)]/0 -translate-x-full group-hover/card:animate-[shimmer_2s_infinite]`} />
                         <div className="absolute left-0 top-0 bottom-0 w-1 bg-[var(--nexus-accent)] opacity-0 group-hover/card:opacity-100 transition-opacity" />
 
-                        <div className="flex items-center gap-4 relative z-10 w-full min-w-0">
-                          <div className="flex-shrink-0 w-10 h-10 group-hover/card:scale-110 transition-transform flex items-center justify-center drop-shadow-md overflow-hidden">
+                          <div className="flex-shrink-0 w-9 h-9 group-hover/card:scale-110 transition-transform flex items-center justify-center drop-shadow-md overflow-hidden">
                             {(LOTTIE_STICKER_MAP[drop.sticker] || (typeof drop.sticker === 'string' && drop.sticker.startsWith('http')) || drop.stickerUrl) ? (
                               <InView triggerOnce>
                                 {({ inView, ref }) => (
@@ -590,7 +614,7 @@ const DashboardSummary = ({
                                         autoplay
                                         loop
                                         src={LOTTIE_STICKER_MAP[drop.sticker] || drop.sticker || drop.stickerUrl}
-                                        style={{ width: '40px', height: '40px' }}
+                                        style={{ width: '36px', height: '36px' }}
                                       />
                                     ) : (
                                       <span className="text-2xl">{stickerFallback[drop.sticker] || '💎'}</span>
@@ -602,25 +626,24 @@ const DashboardSummary = ({
                               <span className="text-2xl">{stickerFallback[drop.sticker] || '💎'}</span>
                             )}
                           </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="font-black italic text-[11px] uppercase truncate group-hover/card:text-[var(--nexus-accent)] transition-colors flex items-center gap-1">
+                          <div className="flex-1 min-w-0 text-center flex flex-col items-center justify-center transform translate-x-3">
+                            <p className="font-black italic text-[11px] uppercase truncate group-hover/card:text-[var(--nexus-accent)] transition-colors flex items-center gap-1 justify-center">
                               <UserCircle className="w-2.5 h-2.5 opacity-50" /> {drop.donorName}
                               {drop.isTest && <span className="ml-2 px-1 py-0.5 bg-rose-500 text-white text-[6px] rounded uppercase font-bold">Test</span>}
                             </p>
-                            <p className="text-[9px] text-slate-500 truncate italic font-medium flex items-center gap-1">
-                              <MessageSquare className="w-2.5 h-2.5 opacity-30" /> "{drop.message}"
-                            </p>
                           </div>
-                        </div>
-                        <div className="flex flex-col items-end gap-1 shrink-0 ml-4">
-                          <p className="font-black text-[var(--nexus-accent)] italic text-xs shrink-0 tracking-tighter relative z-10 flex items-center gap-1">
+                        <div className="flex flex-col items-end gap-0.5 shrink-0 ml-4 text-right">
+                          <p className="font-black text-[var(--nexus-accent)] italic text-sm md:text-base shrink-0 tracking-tighter relative z-10 flex items-center gap-1">
                             <Gift className="w-2.5 h-2.5" /> ₹{drop.amount}
                           </p>
-                          <div className="flex items-center gap-1 opacity-0 group-hover/card:opacity-100 transition-opacity">
+                          <p className="text-[9px] text-slate-500 truncate italic font-bold opacity-60 flex items-center gap-1 max-w-[120px]">
+                             "{drop.message}"
+                          </p>
+                        </div>
+                          <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-0 group-hover/card:opacity-100 transition-opacity z-20">
                             <Smile className="w-2.5 h-2.5 text-[var(--nexus-accent)]" />
                             <Lock className="w-2.5 h-2.5 text-slate-600" />
                           </div>
-                        </div>
                       </motion.div>
                     </div>
                   );

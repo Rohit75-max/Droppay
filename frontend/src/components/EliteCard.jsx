@@ -25,7 +25,7 @@ const EliteCard = ({ children, className = '', glowColor = 'var(--nexus-accent-g
             {/* Dynamic Hover Glow Layer */}
             {!disableHover && (
                 <motion.div
-                    className="pointer-events-none absolute -inset-px opacity-0 group-hover:opacity-100 transition-opacity duration-700 z-0"
+                    className="cursor-glow-layer pointer-events-none absolute -inset-px opacity-0 group-hover:opacity-100 transition-opacity duration-700 z-0"
                 style={{
                     background: useMotionTemplate`
             radial-gradient(

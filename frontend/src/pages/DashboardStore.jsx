@@ -301,45 +301,45 @@ const DashboardStore = ({ theme, user, setUser }) => {
                     </>
                 )}
 
-                <div className="relative z-10 flex items-center gap-6">
-                    <div className="relative">
+                <div className="relative z-10 flex items-center gap-4 sm:gap-6 min-w-0">
+                    <div className="relative shrink-0">
                         <motion.div
                             whileHover={{ scale: 1.05, rotate: 5 }}
-                            className={`relative p-5 rounded-2xl border bg-[var(--nexus-accent)]/10 border-[var(--nexus-accent)]/30 shadow-[0_0_20px_rgba(16,185,129,0.1)] group-hover/header:border-[var(--nexus-accent)]/50 transition-all`}
+                            className={`relative p-3 sm:p-5 rounded-2xl border bg-[var(--nexus-accent)]/10 border-[var(--nexus-accent)]/30 shadow-[0_0_20px_rgba(16,185,129,0.1)] group-hover/header:border-[var(--nexus-accent)]/50 transition-all`}
                         >
-                            <ShoppingBag className={`w-8 h-8 relative z-10 text-[var(--nexus-accent)] drop-shadow-[0_0_10px_var(--nexus-accent-glow)]`} />
+                            <ShoppingBag className={`w-6 h-6 sm:w-8 sm:h-8 relative z-10 text-[var(--nexus-accent)] drop-shadow-[0_0_10px_var(--nexus-accent-glow)]`} />
                             <Hexagon className={`absolute inset-0 w-full h-full opacity-10 scale-150 animate-[spin_10s_linear_infinite] text-[var(--nexus-accent)]`} />
                         </motion.div>
-                        <Crown className={`absolute -top-3 -right-3 w-6 h-6 text-amber-500 drop-shadow-[0_0_15px_rgba(245,158,11,0.5)]`} />
+                        <Crown className={`absolute -top-2 -right-2 w-4 h-4 sm:w-6 sm:h-6 text-amber-500 drop-shadow-[0_0_15px_rgba(245,158,11,0.5)]`} />
                     </div>
-                    <div className="space-y-1">
-                        <div className="flex items-center gap-3">
-                            <h2 className={`text-3xl font-black uppercase tracking-tighter italic text-[var(--nexus-text)]`}>
+                    <div className="space-y-0.5 min-w-0">
+                        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+                            <h2 className={`text-xl sm:text-2xl md:text-3xl font-black uppercase tracking-tighter italic text-[var(--nexus-text)] truncate`}>
                                 Marketplace
                             </h2>
                             {theme === 'dark' && (
-                                <div className="flex items-center gap-1.5 px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
+                                <div className="hidden min-[400px]:flex items-center gap-1.5 px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full shrink-0">
                                     <div className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse" />
-                                    <span className="text-[8px] font-black uppercase tracking-widest text-emerald-400">Uplink Active</span>
+                                    <span className="text-[8px] font-black uppercase tracking-widest text-emerald-400">Uplink</span>
                                 </div>
                             )}
                         </div>
-                        <p className={`text-[11px] font-black uppercase tracking-[0.3em] opacity-50 flex items-center gap-2 text-[var(--nexus-text-muted)]`}>
-                            <Zap className="w-3.5 h-3.5 text-[var(--nexus-accent)]" /> Pro Dashboard Arsenal
+                        <p className={`text-[9px] sm:text-[11px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] opacity-50 flex items-center gap-2 text-[var(--nexus-text-muted)] truncate`}>
+                            <Zap className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[var(--nexus-accent)]" /> Pro Dashboard Arsenal
                         </p>
                     </div>
                 </div>
 
                 <motion.div 
                     whileHover={{ scale: 1.02 }}
-                    className={`border-2 px-8 py-5 rounded-[2rem] flex items-center gap-5 relative z-10 shrink-0 backdrop-blur-3xl group/balance transition-all hover:bg-white/[0.02] ${theme === 'light' ? 'bg-white border-emerald-100' : 'bg-[#020403]/60 border-white/5'}`}
+                    className={`border-2 px-5 py-3 sm:px-8 sm:py-5 rounded-2xl sm:rounded-[2rem] flex items-center gap-3 sm:gap-5 relative z-10 shrink-0 backdrop-blur-3xl group/balance transition-all hover:bg-white/[0.02] ${theme === 'light' ? 'bg-white border-emerald-100' : 'bg-[#020403]/60 border-white/5'}`}
                 >
                     <div className="absolute -left-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-emerald-500/20 blur-xl animate-pulse rounded-full" />
                     <div className="flex flex-col">
-                        <span className={`text-[9px] uppercase font-black tracking-[0.3em] opacity-40 text-[var(--nexus-text-muted)] mb-1`}>Available Credits</span>
-                        <div className="flex items-center gap-1.5">
-                            <span className="text-2xl font-black text-[var(--nexus-accent)] italic">₹</span>
-                            <span className={`text-4xl font-black tracking-tighter italic text-[var(--nexus-text)]`}>
+                        <span className={`text-[8px] sm:text-[9px] uppercase font-black tracking-[0.2em] sm:tracking-[0.3em] opacity-40 text-[var(--nexus-text-muted)] mb-0.5`}>Available Credits</span>
+                        <div className="flex items-center gap-1">
+                            <span className="text-xl sm:text-2xl font-black text-[var(--nexus-accent)] italic">₹</span>
+                            <span className={`text-2xl sm:text-4xl font-black tracking-tighter italic text-[var(--nexus-text)]`}>
                                 {(user?.walletBalance || 0).toLocaleString('en-IN')}
                             </span>
                         </div>

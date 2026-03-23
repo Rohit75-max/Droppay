@@ -61,9 +61,14 @@ const ControlCenter = ({
     <div className="w-full max-w-7xl mx-auto space-y-10 pb-20 pt-4 relative z-10">
 
       {/* --- ELITE NAVIGATION HUB --- */}
-      <div className="w-full flex justify-center mb-8 relative z-20 px-4 md:px-0">
+      <div className="w-full flex justify-center mb-12 relative z-20 px-4 md:px-0">
         <div
-          className="p-1.5 bg-white/[0.02] backdrop-blur-3xl border border-white/5 rounded-[2.5rem] shadow-2xl flex items-center justify-between md:justify-center gap-0.5 md:gap-1 w-full md:w-auto max-w-full overflow-hidden"
+          className={`
+            p-2 backdrop-blur-3xl border rounded-[3rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] flex items-center justify-center gap-1.5 w-full md:w-auto transition-all duration-500
+            ${theme === 'light' 
+              ? 'bg-white/40 border-slate-200/50 shadow-[0_10px_30px_rgba(0,0,0,0.05)]' 
+              : 'bg-black/20 border-[var(--nexus-border)]'}
+          `}
         >
           {['overlay', 'mission', 'nexus', 'stickers', 'widgets'].map((tab) => {
             const isActive = activeTab === tab;
@@ -71,42 +76,39 @@ const ControlCenter = ({
               <motion.button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                whileHover={{ y: -1 }}
-                whileTap={{ scale: 0.97 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 className={`
-                  relative flex items-center justify-center gap-1.5 md:gap-3 px-3.5 sm:px-6 md:px-8 py-3.5 rounded-[2rem] flex-1 md:flex-none
-                  text-[9px] md:text-[10px] font-black uppercase tracking-[0.1em] md:tracking-[0.2em] transition-all duration-500
-                  ${isActive ? 'text-[var(--nexus-bg)]' : 'text-[var(--nexus-text-muted)] hover:text-[var(--nexus-text)] hover:bg-white/[0.03]'}
+                  relative flex items-center justify-center gap-2.5 px-5 md:px-10 py-4 rounded-[2.5rem] transition-all duration-500 group
+                  text-[10px] font-black uppercase tracking-[0.2em]
+                  ${isActive 
+                    ? (theme === 'light' ? 'text-white' : 'text-white') 
+                    : (theme === 'light' ? 'text-slate-500 hover:text-slate-900' : 'text-slate-400 hover:text-white')}
                 `}
               >
                 {isActive && (
-                  <>
-                    <motion.div
-                      layoutId="activeSubTab"
-                      className="absolute inset-0 bg-[var(--nexus-accent)] rounded-[2rem] shadow-[0_0_30px_rgba(16,185,129,0.3)] z-0"
-                      transition={{ type: "spring", bounce: 0.25, duration: 0.6 }}
-                    />
-                    {/* Inner Pulse for active tab */}
-                    <motion.div
-                      animate={{ opacity: [0.1, 0.3, 0.1] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                      className="absolute inset-0 bg-white rounded-[2rem] z-0"
-                    />
-                  </>
+                  <motion.div
+                    layoutId="activeSubTab"
+                    className="absolute inset-0 z-0 rounded-[2.5rem] bg-[var(--nexus-accent)]"
+                    transition={{ type: "spring", bounce: 0.1, duration: 0.4 }}
+                  />
                 )}
 
-                <div className="relative z-10 flex items-center gap-2.5">
+                <div className="relative z-10 flex items-center gap-3">
                   <motion.div
-                    animate={isActive ? { rotate: [0, -10, 10, 0] } : {}}
-                    transition={{ duration: 0.5 }}
+                    animate={isActive ? { 
+                      scale: [1, 1.2, 1],
+                      rotate: [0, -5, 5, 0]
+                    } : {}}
+                    className={`${isActive ? 'opacity-100' : 'opacity-70 group-hover:opacity-100'}`}
                   >
-                    {tab === 'overlay' && <Layout className="w-4 h-4 shrink-0" />}
-                    {tab === 'mission' && <Target className="w-4 h-4 shrink-0" />}
-                    {tab === 'nexus' && <Sparkles className="w-4 h-4 shrink-0" />}
-                    {tab === 'stickers' && <Rocket className="w-4 h-4 shrink-0" />}
-                    {tab === 'widgets' && <Trophy className="w-4 h-4 shrink-0" />}
+                    {tab === 'overlay' && <Layout className="w-4 h-4" />}
+                    {tab === 'mission' && <Target className="w-4 h-4" />}
+                    {tab === 'nexus' && <Sparkles className="w-4 h-4" />}
+                    {tab === 'stickers' && <Rocket className="w-4 h-4" />}
+                    {tab === 'widgets' && <Trophy className="w-4 h-4" />}
                   </motion.div>
-                  <span className="hidden md:inline whitespace-nowrap italic">
+                  <span className={`hidden md:inline whitespace-nowrap italic transition-all duration-500 ${isActive ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-100'}`}>
                     {tab === 'overlay' && 'OVERLAY'}
                     {tab === 'mission' && 'GOALS'}
                     {tab === 'nexus' && 'THEMES'}
@@ -370,12 +372,12 @@ const ControlCenter = ({
                     <div className="relative z-10">
                       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-[var(--nexus-border)] pb-8">
                         <div className="flex items-center gap-4">
-                          <div className="p-3.5 bg-indigo-500/10 rounded-[1.5rem] border border-indigo-500/20 shadow-inner">
-                            <Target className="w-8 h-8 text-indigo-500" />
+                          <div className="p-3.5 bg-[var(--nexus-accent)]/10 rounded-[1.5rem] border border-[var(--nexus-accent)]/20 shadow-inner">
+                            <Target className="w-8 h-8 text-[var(--nexus-accent)]" />
                           </div>
                           <div className="flex flex-col">
                             <h2 className="text-xl font-black italic tracking-tighter text-[var(--nexus-text)]">DONATION GOALS</h2>
-                            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--nexus-text-muted)] opacity-50 mt-1">Configure your active donation goal</p>
+                            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--nexus-text-muted)] opacity-60 mt-1">Configure your active donation goal</p>
                           </div>
                         </div>
                       </div>
@@ -389,7 +391,7 @@ const ControlCenter = ({
                           <input
                             value={goalForm.title}
                             onChange={(e) => setGoalForm({ ...goalForm, title: e.target.value })}
-                            className={`w-full p-4 rounded-xl border outline-none font-black italic transition-all text-sm shadow-sm focus:border-amber-500 ${
+                            className={`w-full p-4 rounded-xl border outline-none font-black italic transition-all text-sm shadow-sm focus:border-[var(--nexus-accent)] ${
                               theme === 'light'
                                 ? 'bg-white border-slate-200 text-slate-900 focus:bg-slate-50'
                                 : 'bg-[#0a0a0a] border-white/10 text-white focus:bg-[#111]'
@@ -409,7 +411,7 @@ const ControlCenter = ({
                               type="number"
                               value={goalForm.targetAmount}
                               onChange={(e) => setGoalForm({ ...goalForm, targetAmount: e.target.value })}
-                              className={`w-full p-4 pl-10 rounded-xl border outline-none font-black italic transition-all text-base shadow-sm focus:border-amber-500 ${
+                              className={`w-full p-4 pl-10 rounded-xl border outline-none font-black italic transition-all text-base shadow-sm focus:border-[var(--nexus-accent)] ${
                                 theme === 'light'
                                   ? 'bg-white border-slate-200 text-slate-900 focus:bg-slate-50'
                                   : 'bg-[#0a0a0a] border-white/10 text-white focus:bg-[#111]'
@@ -422,15 +424,15 @@ const ControlCenter = ({
                         {/* VISIBILITY & SAVE */}
                         <div className="flex items-center gap-4">
                           <div
-                            className={`flex flex-col items-center justify-center p-3 rounded-xl border transition-all cursor-pointer min-w-[100px] h-[58px] shadow-sm ${theme === 'light' ? 'bg-white' : 'bg-[#0a0a0a]'} ${goalForm.isActive ? 'border-amber-500' : (theme === 'light' ? 'border-slate-200' : 'border-white/10')}`}
+                            className={`flex flex-col items-center justify-center p-3 rounded-xl border transition-all cursor-pointer min-w-[100px] h-[58px] shadow-sm ${theme === 'light' ? 'bg-white' : 'bg-[#0a0a0a]'} ${goalForm.isActive ? 'border-[var(--nexus-accent)]' : (theme === 'light' ? 'border-slate-200' : 'border-white/10')}`}
                             onClick={() => {
                               const updated = { ...goalForm, isActive: !goalForm.isActive };
                               setGoalForm(updated);
                               if (updateGoalSettings) updateGoalSettings(updated);
                             }}
                           >
-                            <span className={`text-[8px] font-black uppercase tracking-widest mb-1.5 ${goalForm.isActive ? 'text-amber-500' : (theme === 'light' ? 'text-slate-400' : 'text-gray-500')}`}>Visibility</span>
-                            <div className={`w-8 h-4 rounded-full relative transition-all duration-300 shadow-inner ${goalForm.isActive ? 'bg-amber-500' : (theme === 'light' ? 'bg-slate-200' : 'bg-gray-700')}`}>
+                            <span className={`text-[8px] font-black uppercase tracking-widest mb-1.5 ${goalForm.isActive ? 'text-[var(--nexus-accent)]' : (theme === 'light' ? 'text-slate-400' : 'text-gray-500')}`}>Visibility</span>
+                            <div className={`w-8 h-4 rounded-full relative transition-all duration-300 shadow-inner ${goalForm.isActive ? 'bg-[var(--nexus-accent)]' : (theme === 'light' ? 'bg-slate-200' : 'bg-gray-700')}`}>
                               <div className={`absolute top-[2px] w-3 h-3 bg-white rounded-full shadow-md transition-all duration-300 ${goalForm.isActive ? 'left-[18px]' : 'left-[2px]'}`} />
                             </div>
                           </div>
@@ -438,7 +440,7 @@ const ControlCenter = ({
                           <button
                             onClick={() => updateGoalSettings && updateGoalSettings({ ...goalForm, resetProgress: true })}
                             disabled={isUpdatingGoal}
-                            className="h-[58px] px-8 bg-gradient-to-r from-amber-400 to-orange-500 text-black rounded-xl font-black uppercase italic tracking-widest text-[10px] transition-all flex items-center gap-3 shadow-md hover:scale-[1.02] active:scale-[0.98] whitespace-nowrap"
+                            className="h-[58px] px-8 bg-[var(--nexus-accent)] text-black rounded-xl font-black uppercase italic tracking-widest text-[10px] transition-all flex items-center gap-3 shadow-lg shadow-[var(--nexus-accent)]/20 hover:scale-[1.02] active:scale-[0.98] whitespace-nowrap"
                           >
                             {isUpdatingGoal ? <Activity className="animate-spin w-4 h-4" /> : <Rocket className="w-4 h-4" />}
                             <span>Set Goal</span>
@@ -459,10 +461,10 @@ const ControlCenter = ({
                     <div>
                       <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-3">
-                          <Monitor className="w-4 h-4 text-amber-500" />
-                          <h3 className="text-xs font-black uppercase italic tracking-widest text-amber-500">Goal Bar Preview</h3>
+                          <Monitor className="w-4 h-4 text-[var(--nexus-accent)]" />
+                          <h3 className="text-xs font-black uppercase italic tracking-widest text-[var(--nexus-accent)]">Goal Bar Preview</h3>
                         </div>
-                        <div className="flex items-center gap-1.5 text-[9px] font-black text-amber-500 bg-amber-500/10 px-3 py-1 rounded-lg italic border border-amber-500/20">
+                        <div className="flex items-center gap-1.5 text-[9px] font-black text-[var(--nexus-accent)] bg-[var(--nexus-accent)]/10 px-3 py-1 rounded-lg italic border border-[var(--nexus-accent)]/20">
                           <Activity className="w-3 h-3 animate-pulse" /> LIVE SYNC
                         </div>
                       </div>
@@ -648,6 +650,7 @@ const ControlCenter = ({
                     { id: 'live_dragon', label: 'DRAGON HOARD', desc: 'Mystic Runes (Ember).', icon: <Gem className="w-6 h-6" />, color: '#fbbf24', premium: true },
 
                     { id: 'uplink', label: 'ELITE INTERFACE', desc: 'Modern Design. Multi-layer glass.', icon: <Zap className="w-6 h-6" />, color: '#10B981', premium: false },
+                    { id: 'monolith', label: 'SOLID MONOLITH', desc: 'Solid Block Design. Opaque & Curved.', icon: <Layout className="w-6 h-6" />, color: '#10B981', premium: false },
                     { id: 'neon_relic', label: 'NEON RELIC', desc: 'Retro Vapor Brutalism.', icon: <Layout className="w-6 h-6" />, color: '#00ffff', premium: true },
                   ].filter(t => !t.premium || (user?.unlockedNexusThemes || []).includes(t.id)).map((t) => {
                     const isSelected = nexusTheme === t.id;
@@ -752,8 +755,8 @@ const ControlCenter = ({
                         setTempStickerData({ ...sticker });
                       }}
                       className={`group relative p-8 rounded-[2rem] border-2 cursor-pointer transition-all duration-500 flex flex-col items-center justify-center gap-4 ${theme === 'dark'
-                        ? 'bg-[#0a0a0a] border-white/5 hover:border-indigo-500/40 shadow-xl'
-                        : 'bg-white border-slate-100 shadow-lg hover:border-indigo-500/40'
+                        ? 'bg-[#0a0a0a] border-white/5 hover:border-[var(--nexus-accent)]/40 shadow-xl'
+                        : 'bg-white border-slate-100 shadow-lg hover:border-[var(--nexus-accent)]/40'
                         }`}
                     >
                       <div className="w-20 h-20 flex items-center justify-center">
@@ -769,7 +772,7 @@ const ControlCenter = ({
                         )}
                       </div>
                       <div className="flex flex-col items-center gap-1">
-                        <span className="text-[10px] font-black uppercase italic tracking-widest text-indigo-500">₹{sticker.minAmount || 0}</span>
+                        <span className="text-[10px] font-black uppercase italic tracking-widest text-[var(--nexus-accent)]">₹{sticker.minAmount || 0}</span>
                         <span className="text-[8px] font-black uppercase tracking-tighter text-[var(--nexus-text-muted)] opacity-30">Threshold</span>
                       </div>
 
@@ -792,7 +795,7 @@ const ControlCenter = ({
                       setEditingStickerIdx(-1);
                       setTempStickerData({ emoji: '✨', lottieUrl: '', minAmount: 100 });
                     }}
-                    className="p-8 rounded-[2rem] border-2 border-dashed flex flex-col items-center justify-center gap-4 transition-all border-[var(--nexus-border)] text-[var(--nexus-text-muted)] hover:border-indigo-500 hover:text-indigo-400 hover:bg-indigo-500/5 min-h-[160px]"
+                    className="p-8 rounded-[2rem] border-2 border-dashed flex flex-col items-center justify-center gap-4 transition-all border-[var(--nexus-border)] text-[var(--nexus-text-muted)] hover:border-[var(--nexus-accent)] hover:text-[var(--nexus-accent)]/80 hover:bg-[var(--nexus-accent)]/5 min-h-[160px]"
                   >
                     <div className="w-12 h-12 rounded-full bg-[var(--nexus-border)]/5 flex items-center justify-center">
                       <Plus className="w-6 h-6" />
@@ -806,8 +809,8 @@ const ControlCenter = ({
                     onClick={savePartnerPack}
                     disabled={isSavingStickers || !isTierEligible}
                     className={`flex-1 py-5 rounded-[1.5rem] font-black uppercase italic tracking-[0.2em] text-[11px] shadow-2xl flex items-center justify-center gap-3 transition-all ${theme === 'dark'
-                      ? 'bg-indigo-500 text-white hover:bg-indigo-400 shadow-indigo-500/20'
-                      : 'bg-slate-900 text-white hover:bg-indigo-600'
+                      ? 'bg-[var(--nexus-accent)] text-black hover:brightness-110 shadow-[var(--nexus-accent)]/20'
+                      : 'bg-slate-900 text-white hover:bg-[var(--nexus-accent)]'
                       } disabled:opacity-30 hover:scale-[1.01]`}
                   >
                     {isSavingStickers ? <Activity className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
@@ -835,7 +838,7 @@ const ControlCenter = ({
                         }`}
                     >
                       <div className="flex items-center gap-4 mb-8">
-                        <div className="p-3 rounded-2xl bg-indigo-500/10 text-indigo-500">
+                        <div className="p-3 rounded-2xl bg-[var(--nexus-accent)]/10 text-[var(--nexus-accent)]">
                           <Rocket className="w-6 h-6" />
                         </div>
                         <div>
@@ -873,8 +876,8 @@ const ControlCenter = ({
                                 onChange={(e) => setTempStickerData({ ...tempStickerData, lottieUrl: e.target.value })}
                                 placeholder="https://lottie.host/..."
                                 className={`flex-1 p-4 rounded-2xl text-[11px] font-black tracking-wider transition-all border outline-none ${theme === 'dark'
-                                  ? 'bg-black/60 border-white/5 focus:border-indigo-500/50 text-white'
-                                  : 'bg-white border-slate-100 focus:border-indigo-500/50 text-slate-900'
+                                  ? 'bg-black/60 border-white/5 focus:border-[var(--nexus-accent)]/50 text-white'
+                                  : 'bg-white border-slate-100 focus:border-[var(--nexus-accent)]/50 text-slate-900'
                                   }`}
                               />
                               <input
@@ -901,7 +904,7 @@ const ControlCenter = ({
                               />
                               <button
                                 onClick={() => jsonInputRef.current?.click()}
-                                className={`px-4 rounded-2xl border transition-all flex items-center justify-center hover:bg-indigo-500 hover:text-white ${theme === 'dark' ? 'bg-white/5 border-white/5 text-white' : 'bg-slate-50 border-slate-100 text-slate-600'
+                                className={`px-4 rounded-2xl border transition-all flex items-center justify-center hover:bg-[var(--nexus-accent)] hover:text-black ${theme === 'dark' ? 'bg-white/5 border-white/5 text-white' : 'bg-slate-50 border-slate-100 text-slate-600'
                                   }`}
                               >
                                 <Plus className="w-5 h-5" />
@@ -959,7 +962,7 @@ const ControlCenter = ({
                               }
                               setEditingStickerIdx(null);
                             }}
-                            className="flex-1 py-4 bg-indigo-500 text-white rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-indigo-400 shadow-xl shadow-indigo-500/20 transition-all hover:scale-[1.02]"
+                            className="flex-1 py-4 bg-[var(--nexus-accent)] text-black rounded-2xl font-black uppercase text-[10px] tracking-widest hover:brightness-110 shadow-xl shadow-[var(--nexus-accent)]/20 transition-all hover:scale-[1.02]"
                           >
                             Save Config
                           </button>

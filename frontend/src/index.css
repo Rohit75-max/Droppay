@@ -10,7 +10,7 @@
     --dp-bg: #050505;
     --dp-surface: #0a0a0b;
     --dp-card: rgba(255, 255, 255, 0.04);
-    --dp-border: rgba(255, 255, 255, 0.08);
+    --dp-border: rgba(255, 255, 255, 0.15); /* Premium Thick Dark-White */
     --dp-text: #f1f5f9;
     --dp-muted: #94a3b8;
     --dp-accent: #10B981;
@@ -34,8 +34,8 @@ html.light {
     --nexus-accent: #10B981;
     --nexus-text: #ffffff;
     --nexus-text-muted: #94a3b8;
-    --nexus-border: rgba(255, 255, 255, 0.08);
-    --nexus-radius: 2rem;
+    --nexus-border: rgba(255, 255, 255, 0.15); /* Premium Thick Dark-White */
+    --nexus-radius: 1.5rem; /* Standardized to Revenue Card curve */
     --nexus-glow: 0 12px 40px rgba(16, 185, 129, 0.12);
     --nexus-accent-glow: rgba(16, 185, 129, 0.12);
     --nexus-sidebar-bg: rgba(10, 10, 10, 0.55);
@@ -43,6 +43,28 @@ html.light {
     --card-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
     --simulator-bg: #070d0a;
     --simulator-shadow: 0 0 50px rgba(16, 185, 129, 0.18), 0 0 120px rgba(16, 185, 129, 0.07), 0 0 200px rgba(59, 130, 246, 0.05), inset 0 0 80px rgba(16, 185, 129, 0.04);
+}
+
+/* SOLID MONOLITH THEME (The Sharp Identity) */
+.theme-monolith {
+    --nexus-bg: #000000;
+    --nexus-panel: #121214;
+    --nexus-accent: #10B981;
+    --nexus-text: #ffffff;
+    --nexus-text-muted: #64748b;
+    --nexus-border: rgba(255, 255, 255, 0.12); /* Visible Monolith Border */
+    --nexus-radius: 1.5rem;
+    --nexus-glow: none;
+    --nexus-accent-glow: 0 0 30px rgba(16, 185, 129, 0.15);
+    --nexus-sidebar-bg: #000000;
+    --nexus-sidebar-border: rgba(255, 255, 255, 0.1);
+}
+
+/* GLOBAL CURSOR & ATMOSPHERIC GLOW DISABLE (2026 Solid Identity) */
+.cursor-glow-layer,
+.liquid-mesh-glow,
+.theme-monolith .animate-pulse-slow {
+    display: none !important;
 }
 
 /* Scrollbar Hide Utility */
@@ -137,8 +159,8 @@ body.theme-aero {
     --nexus-accent: #38bdf8;
     --nexus-text: #f8fafc;
     --nexus-text-muted: #cbd5e1;
-    --nexus-border: rgba(255, 255, 255, 0.1);
-    --nexus-radius: 2.5rem;
+    --nexus-border: rgba(255, 255, 255, 0.15); /* Boosted Aero Border */
+    --nexus-radius: 1.5rem;
     --nexus-glow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
     --nexus-accent-glow: rgba(56, 189, 248, 0.15);
     --nexus-sidebar-bg: rgba(255, 255, 255, 0.03);
@@ -159,7 +181,7 @@ body.theme-kawaii {
     --nexus-text: #881337;
     --nexus-text-muted: #e11d48;
     --nexus-border: #fecdd3;
-    --nexus-radius: 3rem;
+    --nexus-radius: 1.5rem;
     --nexus-glow: 0 10px 20px rgba(251, 113, 133, 0.2);
     --nexus-accent-glow: rgba(251, 113, 133, 0.15);
 }
@@ -552,7 +574,7 @@ body.live_synthwave .nexus-card,
     --nexus-accent: #10B981;
     --nexus-glow: rgba(16, 185, 129, 0.2);
     --nexus-accent-glow: rgba(16, 185, 129, 0.25);
-    --nexus-radius: 3.5rem;
+    --nexus-radius: 1.5rem;
     --nexus-sidebar-bg: #050505;
     --nexus-sidebar-border: rgba(255, 255, 255, 0.05);
 }
@@ -676,7 +698,22 @@ body.theme-obsidian_monolith .text-\[var\(--nexus-accent\)\] {
     transform: scale(1.05) !important;
 }
 
-/* BASE OVERRIDES (Used to apply the variables) */
+/* --- PREMIUM THICK BORDER GLOBAL OVERRIDE --- */
+.nexus-card, 
+.EliteCard,
+.aero-widget {
+    border-width: 1.5px !important;
+    border-color: rgba(255, 255, 255, 0.2) !important; /* Premium High-Contrast Dark-White */
+    border-style: solid !important;
+    border-radius: var(--nexus-radius) !important;
+}
+
+/* Ensure detail items and FAQ categories also get the thick border */
+details summary,
+.faq-item {
+    border-width: 1.5px !important;
+}
+
 /* ------------------------------------------ */
 
 /* 2. THE DRAGON'S HOARD (Fantasy)            */
@@ -715,8 +752,8 @@ body.live_kawaii .nexus-card,
     background: rgba(255, 255, 255, 0.15) !important;
     border: 1px solid rgba(255, 255, 255, 0.4) !important;
     box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1) !important;
-    border-radius: 2rem !important;
-    /* Bubbly, soft corners */
+    border-radius: 1.5rem !important;
+    /* Clean radius */
 }
 
 /* ------------------------------------------ */

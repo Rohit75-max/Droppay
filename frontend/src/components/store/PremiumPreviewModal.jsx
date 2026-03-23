@@ -219,13 +219,6 @@ const PremiumPreviewModal = ({ isOpen, onClose, item, onUnlock, theme, user }) =
                         <div className="absolute -top-20 -right-20 w-40 h-40 bg-[var(--nexus-accent)]/5 blur-[80px] rounded-full pointer-events-none" />
                         <div className="flex-1 overflow-y-auto pr-1 scrollbar-hide">
                             <div className="flex items-center gap-2 mb-4">
-                                <span className={`px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.2em] border flex items-center gap-1 ${isLight ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-600' : 'border-[var(--nexus-accent)] bg-[var(--nexus-accent)]/10 text-[var(--nexus-accent)]'}`}>
-                                    <Sparkles className="w-3 h-3" /> Live Stream Asset
-                                </span>
-                                <span className={`px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.2em] border ${isLight ? 'border-emerald-100 bg-emerald-50 text-emerald-700/50' : 'border-[var(--nexus-border)] bg-black/20 text-white/50'
-                                    }`}>
-                                    SECURED
-                                </span>
                             </div>
 
                             <h2 className="text-3xl font-black uppercase italic tracking-tighter text-[var(--nexus-text)] leading-none mb-2 group-hover:text-[var(--nexus-accent)] transition-colors">
@@ -264,31 +257,29 @@ const PremiumPreviewModal = ({ isOpen, onClose, item, onUnlock, theme, user }) =
 
                         {/* UNIVERSAL RESPONSIVE FOOTER */}
                         <div className="mt-auto pt-8 border-t border-white/5">
-                            <div className="flex flex-row items-center justify-between mb-4 md:flex-col md:items-start md:gap-2 md:mb-8">
+                            <div className="flex items-center justify-between gap-4">
                                 <div className="flex flex-col">
-                                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500 mb-1">Purchase Price</span>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-2xl font-black text-[var(--nexus-accent)] italic">₹</span>
-                                        <span className="text-3xl md:text-5xl font-black text-white italic tracking-tighter">
+                                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500 mb-1 leading-none">Purchase Price</span>
+                                    <div className="flex items-center gap-1.5">
+                                        <span className="text-xl font-black text-[var(--nexus-accent)] italic">₹</span>
+                                        <span className="text-3xl md:text-4xl font-black text-white italic tracking-tighter">
                                             {item.isOwned ? 'SECURED' : (parseInt(item.price.replace(/[^0-9]/g, '')) || 0).toLocaleString('en-IN')}
                                         </span>
                                     </div>
                                 </div>
-                                <div className="hidden md:flex p-4 bg-emerald-500/5 rounded-2xl border border-emerald-500/10 shadow-inner">
-                                    <Wallet className="w-8 h-8 text-emerald-500/40" />
-                                </div>
+
+                                <button
+                                    onClick={() => {
+                                        onUnlock(item);
+                                        onClose();
+                                    }}
+                                    className="flex-1 max-w-[220px] py-4 bg-[var(--nexus-accent)] hover:brightness-110 text-black font-black text-xs md:text-sm uppercase tracking-[0.2em] italic flex items-center justify-center gap-3 shadow-[0_15px_30px_rgba(16,185,129,0.2)] transition-all active:scale-[0.98] group/buy"
+                                    style={{ clipPath: 'polygon(10% 0, 100% 0, 90% 100%, 0 100%)' }}
+                                >
+                                    <span>Unlock Now</span>
+                                    <Zap className="w-4 h-4" />
+                                </button>
                             </div>
-                            <button
-                                onClick={() => {
-                                    onUnlock(item);
-                                    onClose();
-                                }}
-                                className="w-full py-5 md:py-6 bg-[var(--nexus-accent)] hover:brightness-110 text-black font-black text-sm md:text-xl uppercase tracking-[0.3em] italic flex items-center justify-center gap-4 shadow-[0_20px_40px_rgba(16,185,129,0.2)] transition-all active:scale-[0.98] group/buy"
-                                style={{ clipPath: 'polygon(5% 0, 100% 0, 95% 100%, 0 100%)' }}
-                            >
-                                <span className="relative z-10">Unlock This Now</span>
-                                <Zap className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover/buy:animate-pulse" />
-                            </button>
                         </div>
                     </div>
                 </motion.div>

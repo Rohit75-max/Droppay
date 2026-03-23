@@ -17,15 +17,15 @@ const MobileBottomNav = ({ activeSection, setActiveSection, onLogout, user, them
     ];
 
     const quickActionItems = [
-        { id: 'growth', label: 'Growth', icon: Target, color: '#10B981' },
-        { id: 'help', label: 'Help', icon: HelpCircle, color: '#F59E0B' },
-        { id: 'feedback', label: 'Feedback', icon: Mailbox, color: '#EC4899' },
+        { id: 'growth', label: 'Growth', icon: Target, color: '#2DD4BF' },
+        { id: 'help', label: 'Help', icon: HelpCircle, color: '#60A5FA' },
+        { id: 'feedback', label: 'Feedback', icon: Mailbox, color: '#A78BFA' },
         ...(user?.role === 'admin' ? [{ id: 'admin', label: 'Admin', icon: Shield, color: '#8B5CF6' }] : []),
         { id: 'logout', label: 'Logout', icon: LogOut, color: '#F43F5E' },
     ];
 
     return (
-        <div className="fixed inset-x-0 bottom-6 z-[150] flex flex-col items-center pointer-events-none md:hidden">
+        <div className="fixed inset-x-0 bottom-4 z-[300] flex flex-col items-center pointer-events-none md:hidden">
             <div className="pointer-events-auto relative flex flex-col items-center w-[92%] max-w-md">
                 
                 {/* FLOATING QUICK ACTIONS MENU (The "Vertical Stack") */}
@@ -56,9 +56,14 @@ const MobileBottomNav = ({ activeSection, setActiveSection, onLogout, user, them
                                 className="fixed bottom-[4.8rem] left-1/2 -translate-x-1/2 bg-[#020403]/95 backdrop-blur-2xl rounded-[2.5rem] p-3 flex flex-col gap-2 shadow-[0_30px_60px_rgba(0,0,0,0.8)] border border-white/5 w-[240px] z-[200] ring-1 ring-white/10"
                             >
                                 {/* Immersive header */}
-                                <div className="px-4 py-2 border-b border-white/5 flex items-center justify-between opacity-50">
-                                    <span className="text-[10px] font-black uppercase tracking-[0.2em]">Quick Actions</span>
-                                    <Zap className="w-3 h-3 fill-current" />
+                                <div className="px-4 py-2 border-b border-white/5 flex items-center justify-between">
+                                    <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40">Quick Actions</span>
+                                    <button 
+                                        onClick={() => setIsMenuExpanded(false)}
+                                        className="p-1.5 -mr-1.5 rounded-lg hover:bg-white/5 text-white/40 hover:text-white transition-all active:scale-95"
+                                    >
+                                        <X className="w-3.5 h-3.5" />
+                                    </button>
                                 </div>
 
                                 {quickActionItems.map((item) => (

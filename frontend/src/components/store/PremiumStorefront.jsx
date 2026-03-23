@@ -86,11 +86,10 @@ const PremiumStoreCard = ({ item, theme, activeTab, onClick, onPurchase, isProce
             onMouseLeave={handleMouseLeave}
             style={{
                 rotateX, rotateY, transformStyle: "preserve-3d",
-                perspective: 1000,
-                clipPath: 'polygon(0 0, 92% 0, 100% 8%, 100% 100%, 8% 100%, 0 92%)'
+                perspective: 1000
             }}
             onClick={onClick}
-            className={`group relative bg-[var(--nexus-panel)] border flex flex-col justify-between overflow-hidden transition-all duration-300 hover:shadow-[0_20px_50px_rgba(0,0,0,0.2)] cursor-pointer ${item.isActive
+            className={`group relative bg-[var(--nexus-panel)] border rounded-3xl flex flex-col justify-between overflow-hidden transition-all duration-300 hover:shadow-[0_20px_50px_rgba(0,0,0,0.2)] cursor-pointer ${item.isActive
                 ? 'border-[var(--nexus-accent)] shadow-[0_0_20px_var(--nexus-accent-glow)]'
                 : 'border-[var(--nexus-border)] hover:border-[var(--nexus-accent)]/50'
                 }`}
@@ -279,11 +278,10 @@ const PremiumStoreCard = ({ item, theme, activeTab, onClick, onPurchase, isProce
                     <button
                         onClick={(e) => onPurchase(e, item)}
                         disabled={isProcessing}
-                        className={`font-black text-xs uppercase tracking-widest px-5 py-3 transition-all flex items-center gap-2 ${item.isOwned
+                        className={`font-black text-xs uppercase tracking-widest px-5 py-3 rounded-xl transition-all flex items-center gap-2 ${item.isOwned
                             ? (item.isActive ? (isLight ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-slate-800 text-slate-500 cursor-not-allowed') : 'bg-[var(--nexus-accent)] text-black hover:brightness-110 shadow-lg shadow-[var(--nexus-accent)]/20')
                             : 'bg-[var(--nexus-accent)] text-black hover:brightness-125 shadow-[0_0_15px_var(--nexus-accent)]'
                             }`}
-                        style={{ clipPath: 'polygon(15% 0, 100% 0, 100% 85%, 85% 100%, 0 100%, 0 15%)' }}
                     >
                         {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : (
                             <>

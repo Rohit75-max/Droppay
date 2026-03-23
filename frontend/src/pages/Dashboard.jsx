@@ -228,13 +228,31 @@ const Dashboard = () => {
     }
   }, [navigate, timeRange]);
 
+  // --- TARGETED ANALYTICS FETCH (Prevents Full-Page Flicker) ---
+  const fetchAnalyticsData = useCallback(async () => {
+    if (!user?.streamerId) return;
+    try {
+      const stats = await axios.get(`/api/payment/analytics/${user.streamerId}?range=${timeRange}`);
+      setChartData(stats.data?.points || []);
+    } catch (err) {
+      console.error("Analytics fetch failed", err);
+    }
+  }, [user?.streamerId, timeRange]);
+
   const handleLogoClick = () => {
     fetchProfileData(); // Standardized Refresh Handshake
   };
 
   useEffect(() => {
     fetchProfileData();
-  }, [fetchProfileData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only on initial mount
+
+  useEffect(() => {
+    if (user?.streamerId) {
+      fetchAnalyticsData();
+    }
+  }, [timeRange, fetchAnalyticsData, user?.streamerId]);
 
   // SOCKET LIVE DATA STREAM
   useEffect(() => {
@@ -661,16 +679,16 @@ const Dashboard = () => {
         </AnimatePresence>
 
         <main className="flex-1 flex flex-col relative overflow-hidden pt-0 bg-transparent">
-          <header className="px-6 py-3 md:px-12 md:py-4 flex justify-between items-center z-40 bg-[var(--nexus-panel)] backdrop-blur-3xl border-b border-[var(--nexus-border)]">
+          <header className="px-6 py-2 md:px-12 md:py-2.5 flex justify-between items-center z-40 bg-[var(--nexus-panel)] backdrop-blur-3xl border-b border-[var(--nexus-border)]">
             <div className="flex flex-col">
-                  <span className="text-[7px] font-black uppercase tracking-[0.4em] text-[var(--nexus-accent)] drop-shadow-[0_0_8px_var(--nexus-accent-glow)]">DropPay Analytics</span>
-                  <div className="flex items-center gap-4">
-                    <h1 className={`text-xl md:text-2xl font-black italic tracking-tighter ${nexusTheme === 'neon_relic' ? 'relic-text-glow' : 'text-[var(--nexus-text)]'}`}>
-                      {(navItems.find(item => item.id === activeSection)?.label || 'DASHBOARD').toUpperCase()}.
-                    </h1>
+              <span className="text-[7px] font-black uppercase tracking-[0.4em] text-[var(--nexus-accent)] drop-shadow-[0_0_8px_var(--nexus-accent-glow)]">DropPay</span>
+              <div className="flex items-center gap-4">
+                <h1 className={`text-xl md:text-2xl font-black italic tracking-tighter ${nexusTheme === 'neon_relic' ? 'relic-text-glow' : 'text-[var(--nexus-text)]'}`}>
+                  {(navItems.find(item => item.id === activeSection)?.label || 'DASHBOARD').toUpperCase()}.
+                </h1>
 
-                  </div>
-                </div>
+              </div>
+            </div>
 
             {/* Profile Pill & Quick Links */}
             <div className="relative">
@@ -700,37 +718,36 @@ const Dashboard = () => {
                       onClick={() => setIsQuickLinksOpen(false)}
                       className="fixed inset-0 z-40"
                     />
-                    
+
                     <motion.div
                       initial={{ opacity: 0, y: 10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      className={`absolute right-0 mt-4 w-72 md:w-80 border rounded-[2rem] z-50 overflow-hidden ${
-                        theme === 'light'
-                          ? 'bg-white border-slate-200 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.15)]'
-                          : 'bg-[var(--nexus-bg)] border-[var(--nexus-border)] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.6)]'
-                      }`}
+                      className={`absolute right-1 sm:right-6 mt-6 w-[92vw] max-w-[calc(100vw-32px)] sm:w-[450px] md:w-[800px] lg:w-[950px] border rounded-[2.5rem] z-50 overflow-hidden max-h-[90vh] flex flex-col ${theme === 'light'
+                        ? 'bg-white border-slate-200 shadow-[0_30px_70px_-10px_rgba(0,0,0,0.15)]'
+                        : 'bg-[var(--nexus-bg)] border-[var(--nexus-border)] shadow-[0_50px_100px_-15px_rgba(0,0,0,0.7)] backdrop-blur-3xl'
+                        }`}
                     >
-                      <div className="p-6 space-y-5">
-                        <div className="flex flex-col gap-1 border-b border-[var(--nexus-border)] pb-4">
-                          <h4 className="text-[11px] font-black uppercase tracking-[0.3em] text-[var(--nexus-accent)]">Share Profiles & Overlays</h4>
-                          <p className="text-[9px] font-bold text-[var(--nexus-text-muted)] italic">Manage your public payment and overlay URLs</p>
+                      <div className="p-4 sm:p-6 pb-4 space-y-4 overflow-y-hidden flex flex-col">
+                        <div className="flex border-b border-[var(--nexus-border)] pb-3 mb-1 items-center justify-between">
+                          <h4 className="text-[12px] font-black uppercase tracking-[0.4em] text-[var(--nexus-accent)]">Quick Links</h4>
+                          <span className="text-[8px] font-bold text-[var(--nexus-text-muted)] uppercase tracking-widest opacity-30 italic">Zero-Scroll Hub</span>
                         </div>
 
-                        <div className="space-y-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           {[
-                            { label: 'Payment Profile', icon: IndianRupee, value: `${BASE_URL}/pay/${user?.username}`, color: 'var(--nexus-accent)' },
-                            { label: 'Stream Alerts', icon: Bell, value: `${BASE_URL}/overlay/${user?.obsKey}`, color: '#f43f5e' },
-                            { label: 'Progress Goal', icon: Target, value: `${BASE_URL}/goal/${user?.username}`, color: '#f59e0b' },
-                            { label: 'Master Overlay', icon: Activity, value: `${BASE_URL}/overlay/master/${user?.obsKey}`, color: '#8b5cf6' }
+                            { label: 'Donation Page', icon: IndianRupee, value: `${BASE_URL}/pay/${user?.username}`, color: 'var(--nexus-accent)' },
+                            { label: 'Overlay Link', icon: Bell, value: `${BASE_URL}/overlay/${user?.obsKey}`, color: '#f43f5e' },
+                            { label: 'Goal Link', icon: Target, value: `${BASE_URL}/goal/${user?.username}`, color: '#f59e0b' },
+                            { label: 'Master Link', icon: Activity, value: `${BASE_URL}/overlay/master/${user?.obsKey}`, color: '#8b5cf6' }
                           ].map((item, idx) => (
-                            <div key={idx} className="group/item flex flex-col gap-2 p-3 rounded-2xl bg-[var(--nexus-panel)] border border-[var(--nexus-border)] hover:border-[var(--nexus-accent)]/30 transition-all">
+                            <div key={idx} className="group/item flex flex-col gap-2 p-3 sm:p-4 rounded-2xl bg-[var(--nexus-panel)] border border-[var(--nexus-border)] hover:border-[var(--nexus-accent)]/40 transition-all shadow-sm hover:shadow-[0_10px_30px_rgba(0,0,0,0.2)]">
                               <div className="flex justify-between items-center">
-                                <div className="flex items-center gap-2">
-                                  <div className={`p-1.5 rounded-lg ${theme === 'light' ? 'bg-slate-100' : 'bg-black/20'}`} style={{ color: item.color }}>
+                                <div className="flex items-center gap-3">
+                                  <div className={`p-1.5 rounded-lg ${theme === 'light' ? 'bg-slate-100' : 'bg-black/40'} border border-white/5`} style={{ color: item.color }}>
                                     <item.icon className="w-3.5 h-3.5" />
                                   </div>
-                                  <span className="text-[9px] font-black uppercase tracking-wider text-[var(--nexus-text)]">{item.label}</span>
+                                  <span className="text-[9px] font-black uppercase tracking-widest text-[var(--nexus-text)]">{item.label}</span>
                                 </div>
                                 <button
                                   onClick={() => {
@@ -742,14 +759,13 @@ const Dashboard = () => {
                                       theme: theme === 'dark' ? 'dark' : 'light'
                                     });
                                   }}
-                                  className="p-1.5 rounded-lg hover:bg-[var(--nexus-accent)]/10 text-[var(--nexus-text-muted)] hover:text-[var(--nexus-accent)] transition-all"
+                                  className="p-1 rounded-lg hover:bg-[var(--nexus-accent)]/10 text-[var(--nexus-text-muted)] hover:text-[var(--nexus-accent)] transition-all"
                                 >
-                                  <Copy className="w-3.5 h-3.5" />
+                                  <Copy className="w-3 h-3" />
                                 </button>
                               </div>
-                              <div className={`flex items-center gap-2 px-2 py-1.5 rounded-lg border ${
-                                theme === 'light' ? 'bg-slate-50 border-slate-200' : 'bg-black/20 border-white/5'
-                              }`}>
+                              <div className={`flex items-center gap-2 px-1.5 py-1 rounded-lg border ${theme === 'light' ? 'bg-slate-50 border-slate-200' : 'bg-black/20 border-white/5'
+                                }`}>
                                 <span className="text-[8px] font-mono text-[var(--nexus-text-muted)] truncate flex-1">{item.value}</span>
                                 <a href={item.value} target="_blank" rel="noopener noreferrer" className="shrink-0 opacity-40 hover:opacity-100 transition-opacity">
                                   <ExternalLink className="w-2.5 h-2.5" />
@@ -759,13 +775,12 @@ const Dashboard = () => {
                           ))}
                         </div>
 
-                        <button 
+                        <button
                           onClick={() => setIsQuickLinksOpen(false)}
-                          className={`w-full py-3 rounded-xl font-black uppercase text-[9px] tracking-[0.2em] transition-all hover:bg-[var(--nexus-accent)] hover:text-[var(--nexus-bg)] ${
-                            theme === 'light'
-                              ? 'bg-slate-100 text-slate-600 hover:text-white'
-                              : 'bg-[var(--nexus-border)] text-[var(--nexus-text)]'
-                          }`}
+                          className={`w-full py-3.5 rounded-2xl font-black uppercase text-[10px] tracking-[0.3em] mt-2 transition-all hover:scale-[1.01] active:scale-[0.99] shadow-xl ${theme === 'light'
+                            ? 'bg-slate-900 text-white shadow-slate-200'
+                            : 'bg-[var(--nexus-accent)] text-black shadow-[var(--nexus-accent)]/20 hover:brightness-110'
+                            }`}
                         >
                           Close Quick Links
                         </button>
@@ -777,7 +792,7 @@ const Dashboard = () => {
             </div>
           </header>
 
-          <div className={`flex-1 overflow-y-auto custom-scrollbar px-4 md:px-8 pb-24 md:pb-12 transition-all duration-300 ${isQuickLinksOpen ? 'blur-[8px] opacity-50 border-white/5 saturate-[0.5]' : ''}`}>
+          <div className={`flex-1 overflow-y-auto custom-scrollbar px-4 md:px-8 pb-32 md:pb-12 transition-all duration-300 ${isQuickLinksOpen ? 'blur-[8px] opacity-50 border-white/5 saturate-[0.5]' : ''}`}>
             <AnimatePresence mode="wait">
               <motion.div key={activeSection} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }} transition={{ duration: 0.2 }} className="max-w-7xl mx-auto w-full flex flex-col items-center">
                 <div className="w-full">
@@ -843,26 +858,25 @@ const Dashboard = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
+            className="fixed inset-0 z-[200] flex items-center justify-center pt-20 pb-24 px-4 md:p-8 bg-black/40"
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.95, opacity: 0, y: 20 }}
-              className={`w-full max-w-4xl rounded-3xl overflow-hidden shadow-2xl relative ${
-                theme === 'light' ? 'bg-white' : 'bg-[#121212] border border-white/5'
-              }`}
+              className={`w-full max-w-4xl max-h-full md:max-h-[85vh] rounded-3xl overflow-hidden shadow-2xl relative flex flex-col ${theme === 'light' ? 'bg-white' : 'bg-[#121212] border border-white/5'
+                }`}
             >
               {/* MODAL HEADER: BALANCE & TABS */}
-              <div className={`p-6 pb-0 ${theme === 'light' ? 'bg-slate-50/50' : 'bg-white/[0.02]'}`}>
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-3">
-                    <span className={`text-sm font-bold ${theme === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>Your Cash Balance:</span>
-                    <span className={`text-xl font-black ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>
-                      ₹{(Number(user.walletBalance) || 0).toLocaleString('en-IN')} <span className="text-xs font-bold opacity-60">INR</span>
+              <div className={`p-4 md:p-6 pb-0 ${theme === 'light' ? 'bg-slate-50/50' : 'bg-white/[0.02]'}`}>
+                <div className="flex items-start md:items-center justify-between mb-4 md:mb-6">
+                  <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-3">
+                    <span className={`text-[10px] md:text-sm font-bold uppercase tracking-widest md:normal-case md:tracking-normal ${theme === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>Current Balance:</span>
+                    <span className={`text-lg md:text-xl font-black ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>
+                      ₹{(Number(user.walletBalance) || 0).toLocaleString('en-IN')} <span className="text-[10px] font-bold opacity-60">INR</span>
                     </span>
                   </div>
-                  <button 
+                  <button
                     onClick={() => setShowWithdrawModal(false)}
                     className={`p-2 rounded-full transition-colors ${theme === 'light' ? 'hover:bg-slate-200 text-slate-400' : 'hover:bg-white/10 text-slate-500'}`}
                   >
@@ -871,26 +885,25 @@ const Dashboard = () => {
                 </div>
 
                 {/* TABS */}
-                <div className="flex items-center gap-8 border-b border-slate-200 dark:border-white/5">
-                  {['Withdraw', 'Transactions History'].map((tab) => {
+                <div className="flex items-center gap-4 md:gap-8 border-b border-slate-200 dark:border-white/5">
+                  {['Withdraw', 'History'].map((tab) => {
                     const isActive = activeModalTab === tab;
-                    const isHistory = tab === 'Transactions History';
+                    const isHistory = tab === 'History';
                     return (
                       <button
                         key={tab}
                         onClick={() => setActiveModalTab(tab)}
-                        className={`pb-4 text-xs font-black uppercase tracking-widest relative transition-all flex items-center gap-2 ${
-                          isActive 
-                            ? (theme === 'light' ? 'text-slate-900' : 'text-white') 
-                            : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
-                        }`}
+                        className={`pb-4 text-[10px] md:text-xs font-black uppercase tracking-widest relative transition-all flex items-center gap-2 ${isActive
+                          ? (theme === 'light' ? 'text-slate-900' : 'text-white')
+                          : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
+                          }`}
                       >
                         {isHistory && <History className="w-3.5 h-3.5" />}
                         {tab}
                         {isActive && (
-                          <motion.div 
-                            layoutId="activeTab" 
-                            className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--nexus-accent)]" 
+                          <motion.div
+                            layoutId="activeTab"
+                            className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--nexus-accent)]"
                           />
                         )}
                       </button>
@@ -900,9 +913,9 @@ const Dashboard = () => {
               </div>
 
               {/* MODAL CONTENT */}
-              <div className="p-8">
+              <div className="flex-1 overflow-y-auto custom-scrollbar p-5 md:p-8">
                 <AnimatePresence mode="wait">
-                  {activeModalTab === 'Transactions History' ? (
+                  {activeModalTab === 'History' ? (
                     <motion.div
                       key="history"
                       initial={{ opacity: 0, scale: 0.98 }}
@@ -936,13 +949,12 @@ const Dashboard = () => {
                             };
 
                             return (
-                              <div 
-                                key={wd._id} 
-                                className={`flex items-center justify-between p-4 rounded-xl border transition-all ${
-                                  theme === 'light' 
-                                    ? 'bg-slate-50 border-slate-100 hover:border-slate-200' 
-                                    : 'bg-white/[0.03] border-white/5 hover:border-white/10'
-                                }`}
+                              <div
+                                key={wd._id}
+                                className={`flex items-center justify-between p-4 rounded-xl border transition-all ${theme === 'light'
+                                  ? 'bg-slate-50 border-slate-100 hover:border-slate-200'
+                                  : 'bg-white/[0.03] border-white/5 hover:border-white/10'
+                                  }`}
                               >
                                 <div className="flex items-center gap-4">
                                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${theme === 'light' ? 'bg-white shadow-sm' : 'bg-white/5'}`}>
@@ -964,12 +976,11 @@ const Dashboard = () => {
                                     <button
                                       onClick={() => handleCancelWithdrawal(wd._id)}
                                       disabled={isCancellingId === wd._id}
-                                      className={`p-2 rounded-lg border transition-all ${
-                                        isCancellingId === wd._id ? 'opacity-50 cursor-not-allowed border-slate-700' :
+                                      className={`p-2 rounded-lg border transition-all ${isCancellingId === wd._id ? 'opacity-50 cursor-not-allowed border-slate-700' :
                                         theme === 'light'
                                           ? 'border-red-200 text-red-500 hover:bg-red-50'
                                           : 'border-red-500/20 text-red-400 hover:bg-red-500/10'
-                                      }`}
+                                        }`}
                                     >
                                       {isCancellingId === wd._id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                                     </button>
@@ -987,7 +998,7 @@ const Dashboard = () => {
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -20 }}
-                      className="grid grid-cols-1 md:grid-cols-2 gap-12"
+                      className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12"
                     >
                       {/* LEFT: ORDER DETAILS */}
                       <div className="space-y-8">
@@ -1000,15 +1011,14 @@ const Dashboard = () => {
                                 type="number"
                                 value={withdrawalAmount}
                                 onChange={(e) => setWithdrawalAmount(Number(e.target.value))}
-                                className={`w-full p-6 pr-24 rounded-2xl border text-2xl font-black transition-all outline-none ${
-                                  theme === 'light' 
-                                    ? 'bg-slate-50 border-slate-200 focus:border-slate-400 text-slate-900 group-hover:border-slate-300' 
-                                    : 'bg-white/5 border-white/10 focus:border-white/20 text-white group-hover:border-white/15'
-                                }`}
+                                className={`w-full p-4 md:p-6 pr-24 rounded-xl md:rounded-2xl border text-xl md:text-2xl font-black transition-all outline-none ${theme === 'light'
+                                  ? 'bg-slate-50 border-slate-200 focus:border-slate-400 text-slate-900 group-hover:border-slate-300'
+                                  : 'bg-white/5 border-white/10 focus:border-white/20 text-white group-hover:border-white/15'
+                                  }`}
                                 placeholder="1000"
                               />
-                              <div className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center gap-3">
-                                <button 
+                              <div className="absolute right-4 md:right-6 top-1/2 -translate-y-1/2 flex items-center gap-3">
+                                <button
                                   onClick={() => setWithdrawalAmount(Number(user.walletBalance) || 0)}
                                   className="text-[10px] font-black uppercase tracking-widest text-[var(--nexus-accent)] hover:brightness-110"
                                 >
@@ -1046,11 +1056,10 @@ const Dashboard = () => {
                         <span className={`text-[10px] font-black uppercase tracking-widest ${theme === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>Payment Details</span>
                         <div className="space-y-4">
                           {user.payoutSettings?.bankDetailsLinked ? (
-                            <div className={`p-5 rounded-2xl border transition-all flex items-center justify-between ${
-                              theme === 'light' 
-                                ? 'bg-slate-50 border-pink-100 shadow-[0_4px_20px_rgba(244,114,182,0.1)]' 
-                                : 'bg-white/[0.03] border-pink-500/30'
-                            }`}>
+                            <div className={`p-5 rounded-2xl border transition-all flex items-center justify-between ${theme === 'light'
+                              ? 'bg-slate-50 border-pink-100 shadow-[0_4px_20px_rgba(244,114,182,0.1)]'
+                              : 'bg-white/[0.03] border-pink-500/30'
+                              }`}>
                               <div className="flex items-center gap-4">
                                 <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center p-[1px]">
                                   <div className={`w-full h-full rounded-2xl flex items-center justify-center ${theme === 'light' ? 'bg-white' : 'bg-[#1a1a1a]'}`}>
@@ -1068,15 +1077,14 @@ const Dashboard = () => {
                               <Trash2 className="w-4 h-4 text-slate-400 hover:text-red-500 transition-colors cursor-pointer" />
                             </div>
                           ) : (
-                            <div className={`p-6 rounded-2xl border border-dashed flex flex-col items-center text-center gap-3 ${
-                              theme === 'light' ? 'bg-amber-50/30 border-amber-200' : 'bg-white/[0.02] border-white/10'
-                            }`}>
+                            <div className={`p-6 rounded-2xl border border-dashed flex flex-col items-center text-center gap-3 ${theme === 'light' ? 'bg-amber-50/30 border-amber-200' : 'bg-white/[0.02] border-white/10'
+                              }`}>
                               <AlertCircle className="w-8 h-8 text-amber-500 opacity-50" />
                               <div className="space-y-1">
                                 <h5 className={`text-xs font-black ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>No Bank Account Linked</h5>
                                 <p className="text-[9px] font-bold text-slate-500 uppercase tracking-tight">Complete onboarding to enable withdrawals</p>
                               </div>
-                              <button 
+                              <button
                                 onClick={() => {
                                   setShowWithdrawModal(false);
                                   setActiveSection('profile');
@@ -1088,12 +1096,11 @@ const Dashboard = () => {
                             </div>
                           )}
 
-                          <button 
+                          <button
                             disabled={!user.payoutSettings?.bankDetailsLinked}
                             onClick={handleBankLink}
-                            className={`w-full p-4 rounded-2xl border border-dashed flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-30 disabled:cursor-not-allowed ${
-                              theme === 'light' ? 'border-slate-200 text-slate-400 hover:border-slate-400 hover:text-slate-600' : 'border-white/10 text-slate-500 hover:border-white/20 hover:text-slate-300'
-                            }`}
+                            className={`w-full p-4 rounded-2xl border border-dashed flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-30 disabled:cursor-not-allowed ${theme === 'light' ? 'border-slate-200 text-slate-400 hover:border-slate-400 hover:text-slate-600' : 'border-white/10 text-slate-500 hover:border-white/20 hover:text-slate-300'
+                              }`}
                           >
                             <Plus className="w-4 h-4" />
                             Add New Payment Detail
@@ -1104,11 +1111,10 @@ const Dashboard = () => {
                           <button
                             disabled={!user.payoutSettings?.bankDetailsLinked || withdrawalAmount < 1000 || withdrawalAmount > (Number(user.walletBalance) || 0)}
                             onClick={() => setWithdrawalStep(1)}
-                            className={`w-full py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:grayscale ${
-                              theme === 'light'
-                                ? 'bg-slate-900 text-white hover:bg-black shadow-lg shadow-slate-200'
-                                : 'bg-[var(--nexus-accent)] text-black hover:brightness-110 shadow-lg shadow-[var(--nexus-accent)]/20'
-                            }`}
+                            className={`w-full py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:grayscale ${theme === 'light'
+                              ? 'bg-slate-900 text-white hover:bg-black shadow-lg shadow-slate-200'
+                              : 'bg-[var(--nexus-accent)] text-black hover:brightness-110 shadow-lg shadow-[var(--nexus-accent)]/20'
+                              }`}
                           >
                             {user.payoutSettings?.bankDetailsLinked ? 'Withdraw' : 'Account Required'}
                             <ArrowRight className="w-4 h-4" />
@@ -1122,12 +1128,12 @@ const Dashboard = () => {
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -20 }}
-                      className="grid grid-cols-1 md:grid-cols-2 gap-12"
+                      className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12"
                     >
                       {/* LEFT: WITHDRAWAL SUMMARY */}
                       <div className="space-y-8">
                         <div>
-                          <button 
+                          <button
                             onClick={() => setWithdrawalStep(0)}
                             className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest mb-4 transition-colors ${theme === 'light' ? 'text-slate-400 hover:text-slate-900' : 'text-slate-500 hover:text-white'}`}
                           >
@@ -1167,18 +1173,17 @@ const Dashboard = () => {
                           <p className={`text-[10px] font-medium leading-relaxed ${theme === 'light' ? 'text-slate-600' : 'text-slate-400'}`}>
                             We've sent you a SMS verification code to <span className="font-bold text-[var(--nexus-text)]">{user.phone ? `${user.phone.slice(0, 4)} XXX ${user.phone.slice(-2)}` : 'XXXX-XX-XX'}</span>. Please, enter this code here to verify.
                           </p>
-                          
+
                           <div className="space-y-4">
                             <label className={`text-[10px] font-black uppercase tracking-widest ${theme === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>Code</label>
                             <input
                               type="text"
                               value={mfaCode}
                               onChange={(e) => setMfaCode(e.target.value)}
-                              className={`w-full p-4 rounded-xl border text-xl font-black tracking-[1em] text-center transition-all outline-none ${
-                                theme === 'light' 
-                                  ? 'bg-slate-50 border-slate-200 focus:border-slate-400 text-slate-900' 
-                                  : 'bg-white/5 border-white/10 focus:border-white/20 text-white'
-                              }`}
+                              className={`w-full p-4 rounded-xl border text-xl font-black tracking-[1em] text-center transition-all outline-none ${theme === 'light'
+                                ? 'bg-slate-50 border-slate-200 focus:border-slate-400 text-slate-900'
+                                : 'bg-white/5 border-white/10 focus:border-white/20 text-white'
+                                }`}
                               placeholder="000000"
                               maxLength={6}
                             />
@@ -1195,20 +1200,18 @@ const Dashboard = () => {
                         <div className="flex gap-4 pt-4">
                           <button
                             onClick={() => setShowWithdrawModal(false)}
-                            className={`flex-1 py-4 rounded-xl font-black uppercase tracking-widest text-[10px] transition-colors ${
-                              theme === 'light' ? 'bg-slate-100 text-slate-500 hover:bg-slate-200' : 'bg-white/5 text-slate-400 hover:bg-white/10'
-                            }`}
+                            className={`flex-1 py-4 rounded-xl font-black uppercase tracking-widest text-[10px] transition-colors ${theme === 'light' ? 'bg-slate-100 text-slate-500 hover:bg-slate-200' : 'bg-white/5 text-slate-400 hover:bg-white/10'
+                              }`}
                           >
                             Cancel
                           </button>
                           <button
                             onClick={() => handleWithdrawRequest(withdrawalAmount)}
                             disabled={isProcessingWithdraw || mfaCode.length < 6}
-                            className={`flex-[2] py-4 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all flex items-center justify-center gap-2 shadow-lg ${
-                              theme === 'light'
-                                ? 'bg-slate-900 text-white hover:bg-black shadow-slate-200'
-                                : 'bg-[var(--nexus-accent)] text-black hover:brightness-110 shadow-[var(--nexus-accent)]/20'
-                            }`}
+                            className={`flex-[2] py-4 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all flex items-center justify-center gap-2 shadow-lg ${theme === 'light'
+                              ? 'bg-slate-900 text-white hover:bg-black shadow-slate-200'
+                              : 'bg-[var(--nexus-accent)] text-black hover:brightness-110 shadow-[var(--nexus-accent)]/20'
+                              }`}
                           >
                             {isProcessingWithdraw ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirm'}
                           </button>
@@ -1223,7 +1226,7 @@ const Dashboard = () => {
                       className="flex flex-col items-center justify-center py-12 text-center"
                     >
                       <div className="w-20 h-20 rounded-full bg-emerald-500/20 flex items-center justify-center mb-6 relative">
-                        <motion.div 
+                        <motion.div
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
                           transition={{ type: "spring", damping: 12, stiffness: 200, delay: 0.2 }}
@@ -1231,26 +1234,25 @@ const Dashboard = () => {
                         >
                           <Zap className="w-6 h-6 text-white" />
                         </motion.div>
-                        <motion.div 
+                        <motion.div
                           animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }}
                           transition={{ duration: 2, repeat: Infinity }}
                           className="absolute inset-0 border-2 border-emerald-500 rounded-full"
                         />
                       </div>
-                      
+
                       <h3 className={`text-xl font-black uppercase tracking-widest mb-2 ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>Request Transmission Successful</h3>
                       <p className={`text-xs font-bold uppercase tracking-tight mb-8 ${theme === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>₹{(withdrawalAmount * 0.98).toFixed(2)} INR will reach your node shortly</p>
-                      
+
                       <div className={`w-full max-w-sm p-4 rounded-xl border border-dashed mb-8 text-[10px] font-mono font-bold ${theme === 'light' ? 'border-slate-200 text-slate-500 bg-slate-50' : 'border-white/10 text-slate-400 bg-white/[0.01]'}`}>
-                        TRANSACTION_ID: {Math.random().toString(36).substring(2, 15).toUpperCase()} <br/>
+                        TRANSACTION_ID: {Math.random().toString(36).substring(2, 15).toUpperCase()} <br />
                         TIMESTAMP: {new Date().toISOString()}
                       </div>
 
-                      <button 
+                      <button
                         onClick={() => setShowWithdrawModal(false)}
-                        className={`px-12 py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-all ${
-                          theme === 'light' ? 'bg-slate-900 text-white' : 'bg-white text-black hover:bg-slate-200'
-                        }`}
+                        className={`px-12 py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-all ${theme === 'light' ? 'bg-slate-900 text-white' : 'bg-white text-black hover:bg-slate-200'
+                          }`}
                       >
                         Back to Command Center
                       </button>
@@ -1265,7 +1267,7 @@ const Dashboard = () => {
       {/* OTP SECURITY MODAL */}
       <AnimatePresence>
         {showOtpModal && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/40">
             <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} className={`w-full max-w-md p-8 rounded-[2.5rem] border shadow-2xl relative overflow-hidden ${theme === 'dark' ? 'bg-[#0a0a0a] border-white/10' : 'bg-white border-slate-200'}`}>
 
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#10B981] to-transparent" />

@@ -46,7 +46,10 @@ class ErrorBoundary extends React.Component {
     if (this.state.hasError) {
       return (
         <div style={{ minHeight: '100vh', background: '#050505', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', fontFamily: 'sans-serif' }}>
-          <div style={{ fontSize: 32, fontWeight: 900, color: '#10B981', letterSpacing: '-1px', fontStyle: 'italic' }}>DropPay</div>
+          <div style={{ fontSize: 32, fontWeight: 900, letterSpacing: '-1px', fontStyle: 'italic' }}>
+            <span style={{ color: '#fff' }}>Drop</span>
+            <span style={{ color: '#10B981' }}>Pay</span>
+          </div>
           <p style={{ color: '#64748b', fontSize: 14, margin: 0 }}>Something went wrong. Please refresh the page.</p>
           <button onClick={() => window.location.reload()} style={{ padding: '10px 28px', background: '#10B981', color: '#fff', border: 'none', borderRadius: 12, fontWeight: 700, cursor: 'pointer', fontSize: 13 }}>Refresh</button>
         </div>
