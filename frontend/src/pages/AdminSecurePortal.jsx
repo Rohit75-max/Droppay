@@ -385,14 +385,12 @@ const UserDetailDrawer = ({ userId, isOpen, onClose, context = 'directory' }) =>
                                                     return (
                                                         <List
                                                             height={Math.min(350, filteredTransactions.length * 85)}
-                                                            itemCount={filteredTransactions.length}
-                                                            itemSize={85}
-                                                            width="100%"
-                                                            itemData={filteredTransactions}
-                                                            className="custom-scrollbar"
-                                                        >
-                                                            {({ index, style }) => {
+                                                            rowCount={filteredTransactions.length}
+                                                            rowHeight={85}
+                                                            rowProps={{ filteredTransactions, formatDate, txTab }}
+                                                            rowComponent={({ index, style, filteredTransactions, formatDate, txTab }) => {
                                                                 const tx = filteredTransactions[index];
+                                                                if (!tx) return null;
                                                                 const isDebit = tx.amount < 0;
                                                                 const isStore = tx.donorName === 'SYSTEM_DEBIT';
                                                                 const isWithdrawal = tx.donorName === 'WITHDRAWAL' || tx.donorName === 'SETTLEMENT';
@@ -431,7 +429,8 @@ const UserDetailDrawer = ({ userId, isOpen, onClose, context = 'directory' }) =>
                                                                     </div>
                                                                 );
                                                             }}
-                                                        </List>
+                                                            className="custom-scrollbar"
+                                                        />
                                                     );
                                                 })()}
                                             </div>
@@ -1093,13 +1092,10 @@ const AdminSecurePortal = () => {
                                         ) : (
                                             <List
                                                 height={Math.min(500, nodes.length * 80)}
-                                                itemCount={nodes.length}
-                                                itemSize={80}
-                                                width="100%"
-                                                itemData={nodes}
-                                                className="custom-scrollbar"
-                                            >
-                                                {({ index, style }) => {
+                                                rowCount={nodes.length}
+                                                rowHeight={80}
+                                                rowProps={{ nodes, setSelectedUserId, setDrawerContext, Avatar, StatusDot }}
+                                                rowComponent={({ index, style, nodes, setSelectedUserId, setDrawerContext, Avatar, StatusDot }) => {
                                                     const node = nodes[index];
                                                     if (!node) return null;
                                                     const isBanned = node.security?.accountStatus?.isBanned;
@@ -1204,7 +1200,8 @@ const AdminSecurePortal = () => {
                                                         </div>
                                                     );
                                                 }}
-                                            </List>
+                                                className="custom-scrollbar"
+                                            />
                                         )}
                                     </div>
 

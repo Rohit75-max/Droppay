@@ -7,6 +7,7 @@ const PlatformMetrics = require('../models/PlatformMetrics');
 const { invalidateProfileCache } = require('../middleware/profileCache');
 const TugOfWarEvent = require('../models/TugOfWarEvent');
 const Transaction = require('../models/Transaction');
+const { invalidateStreamerCache } = require('../middleware/cache');
 
 const razorpay = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID,
@@ -65,6 +66,17 @@ exports.verifyPayment = async (req, res) => {
         if (expectedSignature !== razorpay_signature) {
             return res.status(400).json({ status: "failed", msg: "Invalid Security Token" });
         }
+        
+        // --- DONOR FINGERPRINTING ENGINE ---
+        let donorFingerprint = "anonymous_node";
+        try {
+            const paymentDetails = await razorpay.payments.fetch(razorpay_payment_id);
+            const fingerprintKey = paymentDetails.email || paymentDetails.contact || razorpay_payment_id;
+            donorFingerprint = crypto.createHash('sha256').update(fingerprintKey).digest('hex');
+        } catch (err) {
+            console.warn("-> [Fingerprint] Failed to fetch payment details, using fallback:", razorpay_payment_id);
+            donorFingerprint = crypto.createHash('sha256').update(razorpay_payment_id).digest('hex');
+        }
 
         const cleanStreamerId = streamerId ? streamerId.toLowerCase() : "";
         const safeStreamerId = escapeRegex(cleanStreamerId);
@@ -100,6 +112,7 @@ exports.verifyPayment = async (req, res) => {
         const amountInPaise = Number(amount); 
         const gatewayFee = Math.round(amountInPaise * 0.02);
         const platformCommission = Math.round(amountInPaise * platformCutPercent);
+        const balanceCredit = amountInPaise - platformCommission;
         const netAmountToCreator = amountInPaise - (gatewayFee + platformCommission);
 
         // 3. Atomically Credit Virtual Wallet
@@ -107,7 +120,7 @@ exports.verifyPayment = async (req, res) => {
             streamer._id,
             {
                 $inc: {
-                    "financialMetrics.pendingPayouts": netAmountToCreator,
+                    "walletBalance": balanceCredit,
                     "goalSettings.currentProgress": amountInPaise,
                     "financialMetrics.totalLifetimeEarnings": amountInPaise
                 }
@@ -122,7 +135,7 @@ exports.verifyPayment = async (req, res) => {
             amount: amountInPaise,
             gatewayFee: gatewayFee,
             platformFee: platformCommission,
-            netAmount: netAmountToCreator,
+            netAmount: balanceCredit, // Reflecting the balance change
             referenceId: razorpay_payment_id,
             status: 'success'
         });
@@ -134,9 +147,16 @@ exports.verifyPayment = async (req, res) => {
 
         await Drop.create({
             streamerId: streamer.streamerId, donorName: donorName || "Anonymous", amount: Number(amount),
+            donorFingerprint, // ADDED: Critical for Hall of Fame separation
             message: message || "", sticker: sticker || "zap", status: "completed",
             razorpayPaymentId: razorpay_payment_id, razorpayOrderId: razorpay_order_id
         });
+
+        // --- CACHE INVALIDATION ---
+        // 1. Invalidate Streamer's Payment APIs (Hall of Fame, Recent Drops, Analytics)
+        await invalidateStreamerCache(streamer.streamerId);
+        // 2. Invalidate Streamer's Profile (Wallet Balance update for Dashboard)
+        if (streamer._id) await invalidateProfileCache(streamer._id);
 
         // --- TUG-OF-WAR ENGINE UPDATE ---
         let towUpdate = null;
@@ -213,7 +233,8 @@ exports.getRecentDrops = async (req, res) => {
         const history = await Drop.find({
             streamerId: user.streamerId,
             status: 'completed',
-            isTest: { $ne: true }
+            isTest: { $ne: true },
+            amount: { $gt: 0 }
         }).sort({ createdAt: -1 }).limit(50);
         res.json(history);
     } catch (error) { res.status(500).send(); }
@@ -228,8 +249,22 @@ exports.getTopDonors = async (req, res) => {
         if (user.security?.accountStatus?.isBanned) return res.status(403).json({ msg: "Node Suspended" });
 
         const topDonors = await Drop.aggregate([
-            { $match: { streamerId: user.streamerId, status: 'completed', isTest: { $ne: true } } },
-            { $group: { _id: "$donorName", totalAmount: { $sum: "$amount" } } },
+            { $match: { streamerId: user.streamerId, status: 'completed', isTest: { $ne: true }, amount: { $gt: 0 } } },
+            { 
+                $group: { 
+                    _id: { 
+                        name: "$donorName", 
+                        fingerprint: "$donorFingerprint" 
+                    }, 
+                    totalAmount: { $sum: "$amount" } 
+                } 
+            },
+            { 
+                $project: {
+                    _id: "$_id.name", // Display the name as the ID for frontend compatibility
+                    totalAmount: 1
+                }
+            },
             { $sort: { totalAmount: -1 } },
             { $limit: 10 }
         ]);
@@ -259,6 +294,7 @@ exports.getAnalytics = async (req, res) => {
                 $match: {
                     streamerId: user.streamerId,
                     status: 'completed',
+                    amount: { $gt: 0 },
                     createdAt: { $gte: new Date(new Date().setDate(new Date().getDate() - (range === '1Y' ? 365 : daysToFetch))) }
                 }
             },

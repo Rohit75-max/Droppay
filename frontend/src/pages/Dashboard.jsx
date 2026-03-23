@@ -5,8 +5,9 @@ import { io } from 'socket.io-client';
 import {
   LayoutDashboard, Settings, Trophy, HelpCircle,
   MessageSquare, Zap, ChevronRight, LogOut,
-  ShieldAlert, Activity, X, Play, Loader2, IndianRupee, History, User,
-  Copy, ExternalLink, Bell, Target, ChevronDown, ShoppingBag
+  ShieldAlert, Activity, X, Play, Loader2, IndianRupee, User,
+  Copy, ExternalLink, Bell, Target, ChevronDown, ShoppingBag,
+  History, AlertCircle, Trash2, Plus, ArrowRight, ArrowLeft, RotateCw
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -94,10 +95,54 @@ const Dashboard = () => {
   const [isLinkingBank, setIsLinkingBank] = useState(false);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [withdrawalAmount, setWithdrawalAmount] = useState(1000);
+  const [withdrawalStep, setWithdrawalStep] = useState(0); // 0: Setup, 1: MFA
+  const [mfaCode, setMfaCode] = useState('');
+  const [activeModalTab, setActiveModalTab] = useState('Withdraw');
+
+  const [withdrawals, setWithdrawals] = useState([]);
+  const [isFetchingWithdrawals, setIsFetchingWithdrawals] = useState(false);
+
+  const fetchWithdrawals = useCallback(async () => {
+    try {
+      setIsFetchingWithdrawals(true);
+      const token = localStorage.getItem('token');
+      const res = await axios.get('/api/user/withdrawals', { headers: { Authorization: `Bearer ${token}` } });
+      setWithdrawals(res.data);
+    } catch (err) {
+      console.error("Failed to fetch withdrawals:", err);
+    } finally {
+      setIsFetchingWithdrawals(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (showWithdrawModal) {
+      fetchWithdrawals();
+      setWithdrawalStep(0);
+      setMfaCode('');
+      setActiveModalTab('Withdraw');
+    }
+  }, [showWithdrawModal, fetchWithdrawals]);
+
+  const handleCancelWithdrawal = async (id) => {
+    if (isCancellingId === id) return;
+    setIsCancellingId(id);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.post('/api/user/cancel-withdrawal', { withdrawalId: id }, { headers: { Authorization: `Bearer ${token}` } });
+      toast.success(res.data.msg || "Withdrawal Cancelled", { position: 'bottom-center', theme: 'dark' });
+      await Promise.all([fetchProfileData(), fetchWithdrawals()]);
+    } catch (err) {
+      toast.error(err.response?.data?.msg || "Failed to cancel withdrawal.", { position: 'bottom-center', theme: 'dark' });
+    } finally {
+      setIsCancellingId(null);
+    }
+  };
 
   // SHARED STATES FOR CONTROL & COPY
   const [isUpdatingGoal, setIsUpdatingGoal] = useState(false);
   const [copiedType, setCopiedType] = useState(null);
+  const [isCancellingId, setIsCancellingId] = useState(null);
 
   // NEW: FEEDBACK PROTOCOL STATES
   const [feedbackType, setFeedbackType] = useState('general');
@@ -144,7 +189,7 @@ const Dashboard = () => {
       setGoalForm({
         title: res.data.goalSettings?.title || "New Goal",
         targetAmount: res.data.goalSettings?.targetAmount || 0,
-        showOnDashboard: res.data.goalSettings?.showOnDashboard ?? true,
+        isActive: res.data.goalSettings?.isActive ?? true,
         stylePreference: res.data.goalSettings?.stylePreference || "glass_jar"
       });
 
@@ -152,14 +197,14 @@ const Dashboard = () => {
       if (res.data.partnerPack) setPartnerStickers(res.data.partnerPack);
 
       const [recent, top, stats] = await Promise.all([
-        axios.get(`/api/payment/recent/${res.data.streamerId}`),
-        axios.get(`/api/payment/top/${res.data.streamerId}`),
-        axios.get(`/api/payment/analytics/${res.data.streamerId}?range=${timeRange}`)
+        axios.get(`/api/payment/recent/${res.data.streamerId}`).catch(() => ({ data: [] })),
+        axios.get(`/api/payment/top/${res.data.streamerId}`).catch(() => ({ data: [] })),
+        axios.get(`/api/payment/analytics/${res.data.streamerId}?range=${timeRange}`).catch(() => ({ data: { points: [] } }))
       ]);
 
-      setRecentDrops(recent.data);
-      setTopDonors(top.data);
-      setChartData(stats.data.points);
+      setRecentDrops(recent.data || []);
+      setTopDonors(top.data || []);
+      setChartData(stats.data?.points || []);
       setError(null);
       setLoading(false);
     } catch (err) {
@@ -443,11 +488,10 @@ const Dashboard = () => {
     setIsProcessingWithdraw(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.post('/api/user/withdraw', { amount }, {
+      await axios.post('/api/user/withdraw', { amount }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      toast.success(res.data.msg || "Withdrawal requested.");
-      setShowWithdrawModal(false);
+      setWithdrawalStep(2); // SUCCESS SCREEN
       await fetchProfileData(); // Refresh wallet UI instantly
     } catch (err) {
       toast.error(err.response?.data?.msg || "Withdrawal failed.");
@@ -621,16 +665,10 @@ const Dashboard = () => {
             <div className="flex flex-col">
                   <span className="text-[7px] font-black uppercase tracking-[0.4em] text-[var(--nexus-accent)] drop-shadow-[0_0_8px_var(--nexus-accent-glow)]">DropPay Analytics</span>
                   <div className="flex items-center gap-4">
-                    <h1 className={`text-4xl md:text-5xl font-black italic tracking-tighter ${nexusTheme === 'neon_relic' ? 'relic-text-glow' : 'text-[var(--nexus-text)]'}`}>
+                    <h1 className={`text-xl md:text-2xl font-black italic tracking-tighter ${nexusTheme === 'neon_relic' ? 'relic-text-glow' : 'text-[var(--nexus-text)]'}`}>
                       {(navItems.find(item => item.id === activeSection)?.label || 'DASHBOARD').toUpperCase()}.
                     </h1>
-                    <div className="hidden sm:flex items-center gap-3">
-                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--nexus-bg)]/40 border border-[var(--nexus-border)]">
-                        <History className="w-3 h-3 text-emerald-500/60" />
-                        <span className="text-[9px] font-black uppercase tracking-widest text-[var(--nexus-text-muted)]">Status:</span>
-                        <span className="text-[9px] font-black uppercase tracking-widest text-emerald-500">Online</span>
-                      </div>
-                    </div>
+
                   </div>
                 </div>
 
@@ -646,8 +684,7 @@ const Dashboard = () => {
                   {user?.fullName?.charAt(0).toUpperCase() || user?.username?.charAt(0).toUpperCase() || 'U'}
                 </div>
                 <div className="flex flex-col items-start hidden sm:flex">
-                  <span className="text-[10px] font-black text-[var(--nexus-text)] tracking-wider">0x{user?.streamerId?.slice(-4).toUpperCase() || 'CORE'}</span>
-                  <span className="text-[8px] font-bold text-[var(--nexus-text-muted)] uppercase tracking-[0.2em]">{user?.username || 'Verified'}</span>
+                  <span className="text-[10px] font-black text-[var(--nexus-text)] tracking-wider">{user?.username || 'User'}</span>
                 </div>
                 <ChevronDown className={`w-4 h-4 text-[var(--nexus-text-muted)] transition-transform duration-300 ${isQuickLinksOpen ? 'rotate-180' : ''}`} />
               </motion.button>
@@ -661,14 +698,18 @@ const Dashboard = () => {
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                       onClick={() => setIsQuickLinksOpen(false)}
-                      className="fixed inset-0 z-40 bg-black/20"
+                      className="fixed inset-0 z-40"
                     />
                     
                     <motion.div
                       initial={{ opacity: 0, y: 10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      className="absolute right-0 mt-4 w-72 md:w-80 bg-[var(--nexus-bg)] border border-[var(--nexus-border)] rounded-[2rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.6)] z-50 overflow-hidden"
+                      className={`absolute right-0 mt-4 w-72 md:w-80 border rounded-[2rem] z-50 overflow-hidden ${
+                        theme === 'light'
+                          ? 'bg-white border-slate-200 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.15)]'
+                          : 'bg-[var(--nexus-bg)] border-[var(--nexus-border)] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.6)]'
+                      }`}
                     >
                       <div className="p-6 space-y-5">
                         <div className="flex flex-col gap-1 border-b border-[var(--nexus-border)] pb-4">
@@ -686,7 +727,7 @@ const Dashboard = () => {
                             <div key={idx} className="group/item flex flex-col gap-2 p-3 rounded-2xl bg-[var(--nexus-panel)] border border-[var(--nexus-border)] hover:border-[var(--nexus-accent)]/30 transition-all">
                               <div className="flex justify-between items-center">
                                 <div className="flex items-center gap-2">
-                                  <div className="p-1.5 rounded-lg bg-black/20" style={{ color: item.color }}>
+                                  <div className={`p-1.5 rounded-lg ${theme === 'light' ? 'bg-slate-100' : 'bg-black/20'}`} style={{ color: item.color }}>
                                     <item.icon className="w-3.5 h-3.5" />
                                   </div>
                                   <span className="text-[9px] font-black uppercase tracking-wider text-[var(--nexus-text)]">{item.label}</span>
@@ -706,7 +747,9 @@ const Dashboard = () => {
                                   <Copy className="w-3.5 h-3.5" />
                                 </button>
                               </div>
-                              <div className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-black/20 border border-white/5">
+                              <div className={`flex items-center gap-2 px-2 py-1.5 rounded-lg border ${
+                                theme === 'light' ? 'bg-slate-50 border-slate-200' : 'bg-black/20 border-white/5'
+                              }`}>
                                 <span className="text-[8px] font-mono text-[var(--nexus-text-muted)] truncate flex-1">{item.value}</span>
                                 <a href={item.value} target="_blank" rel="noopener noreferrer" className="shrink-0 opacity-40 hover:opacity-100 transition-opacity">
                                   <ExternalLink className="w-2.5 h-2.5" />
@@ -718,7 +761,11 @@ const Dashboard = () => {
 
                         <button 
                           onClick={() => setIsQuickLinksOpen(false)}
-                          className="w-full py-3 rounded-xl bg-[var(--nexus-border)] hover:bg-[var(--nexus-accent)] text-[var(--nexus-text)] hover:text-[var(--nexus-bg)] font-black uppercase text-[9px] tracking-[0.2em] transition-all"
+                          className={`w-full py-3 rounded-xl font-black uppercase text-[9px] tracking-[0.2em] transition-all hover:bg-[var(--nexus-accent)] hover:text-[var(--nexus-bg)] ${
+                            theme === 'light'
+                              ? 'bg-slate-100 text-slate-600 hover:text-white'
+                              : 'bg-[var(--nexus-border)] text-[var(--nexus-text)]'
+                          }`}
                         >
                           Close Quick Links
                         </button>
@@ -789,85 +836,427 @@ const Dashboard = () => {
       </div>
 
 
-      {/* WITHDRAWAL MODAL */}
+      {/* WITHDRAWAL MODAL (PROFESSIONAL REDESIGN) */}
       <AnimatePresence>
         {showWithdrawModal && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className={`fixed inset-0 z-[200] flex items-center justify-center p-4 ${nexusTheme === 'obsidian_monolith' ? 'bg-black/92 backdrop-blur-none' : 'bg-black/80 backdrop-blur-sm'}`}>
-            <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }}
-              className={`w-full max-w-md p-8 shadow-2xl relative ${nexusTheme === 'obsidian_monolith' ? 'obsidian-vault border-none' : 'rounded-[2.5rem] border overflow-hidden ' + (theme === 'dark' ? 'bg-[#0a0a0a] border-white/10' : 'bg-white border-slate-200')}`}>
-
-              {nexusTheme === 'obsidian_monolith' ? (
-                <>
-                  <div className="vault-bracket top-0 left-0 border-r-0 border-b-0" />
-                  <div className="vault-bracket top-0 right-0 border-l-0 border-b-0" />
-                  <div className="vault-bracket bottom-0 left-0 border-r-0 border-t-0" />
-                  <div className="vault-bracket bottom-0 right-0 border-l-0 border-t-0" />
-                </>
-              ) : (
-                <div className="absolute top-0 left-0 w-full h-1 bg-[var(--nexus-accent)]" />
-              )}
-
-              {/* SUCCESS STATE INTEGRATION */}
-              {isProcessingWithdraw && nexusTheme === 'obsidian_monolith' && (
-                <div className="success-ring"></div>
-              )}
-
-              <div className="flex flex-col items-center text-center space-y-6 relative z-10">
-                <div className={`w-16 h-16 rounded-full flex items-center justify-center ${nexusTheme === 'obsidian_monolith' ? 'bg-transparent filter drop-shadow-[0_0_8px_#3b82f6]' : 'bg-[var(--nexus-accent)]/10 border-2 border-[var(--nexus-accent)]/20 shadow-inner'}`}>
-                  <IndianRupee className="w-8 h-8 text-[#3b82f6]" />
-                </div>
-                <div>
-                  <h3 className={`text-2xl font-black uppercase ${nexusTheme === 'obsidian_monolith' ? 'tracking-[0.2em] text-white drop-shadow-[0_0_5px_#3b82f6]' : 'italic tracking-tighter ' + (theme === 'dark' ? 'text-white' : 'text-slate-900')}`}>Withdraw Funds</h3>
-                  <p className={`text-[10px] font-black uppercase tracking-widest mt-1 ${nexusTheme === 'obsidian_monolith' ? 'text-[#3b82f6]' : 'text-[var(--nexus-accent)]'}`}>Processing Withdrawal</p>
-                </div>
-                <div className="w-full space-y-4">
-                  <div className="flex flex-col gap-2">
-                    <div className="flex items-center justify-between px-2">
-                      <span className="text-[10px] uppercase font-black tracking-widest text-slate-500">Wallet Balance</span>
-                      <span className={`text-xs font-mono font-bold ${nexusTheme === 'obsidian_monolith' ? 'text-[#3b82f6] drop-shadow-[0_0_5px_#3b82f6]' : 'text-[var(--nexus-text)]'}`}>₹{(Number(user.walletBalance) || 0).toLocaleString('en-IN')}</span>
-                    </div>
-                    <div className="relative">
-                      <IndianRupee className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 ${nexusTheme === 'obsidian_monolith' ? 'text-[#3b82f6]' : 'text-[var(--nexus-accent)]'}`} />
-                      <input
-                        type="number"
-                        min={1000}
-                        max={Number(user.walletBalance) || 0}
-                        value={withdrawalAmount}
-                        onChange={(e) => setWithdrawalAmount(Number(e.target.value))}
-                        className={`w-full text-center text-2xl sm:text-3xl font-black p-4 sm:p-5 pl-10 transition-all ${nexusTheme === 'obsidian_monolith' ? 'vault-slot' : 'rounded-2xl outline-none border ' + (theme === 'dark' ? 'bg-black/40 border-white/5 text-white focus:border-[var(--nexus-accent)]' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-[var(--nexus-accent)]')}`}
-                      />
-                    </div>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              className={`w-full max-w-4xl rounded-3xl overflow-hidden shadow-2xl relative ${
+                theme === 'light' ? 'bg-white' : 'bg-[#121212] border border-white/5'
+              }`}
+            >
+              {/* MODAL HEADER: BALANCE & TABS */}
+              <div className={`p-6 pb-0 ${theme === 'light' ? 'bg-slate-50/50' : 'bg-white/[0.02]'}`}>
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <span className={`text-sm font-bold ${theme === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>Your Cash Balance:</span>
+                    <span className={`text-xl font-black ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>
+                      ₹{(Number(user.walletBalance) || 0).toLocaleString('en-IN')} <span className="text-xs font-bold opacity-60">INR</span>
+                    </span>
                   </div>
+                  <button 
+                    onClick={() => setShowWithdrawModal(false)}
+                    className={`p-2 rounded-full transition-colors ${theme === 'light' ? 'hover:bg-slate-200 text-slate-400' : 'hover:bg-white/10 text-slate-500'}`}
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
 
-                  <div className="flex items-center gap-2 overflow-x-auto py-2 scrollbar-hide">
-                    {[1000, 2500, 5000, Number(user.walletBalance) || 0].map(amt => (
+                {/* TABS */}
+                <div className="flex items-center gap-8 border-b border-slate-200 dark:border-white/5">
+                  {['Withdraw', 'Transactions History'].map((tab) => {
+                    const isActive = activeModalTab === tab;
+                    const isHistory = tab === 'Transactions History';
+                    return (
                       <button
-                        key={amt}
-                        onClick={() => setWithdrawalAmount(Math.floor(amt))}
-                        className={`px-4 py-2 text-[10px] font-black uppercase transition-all whitespace-nowrap ${nexusTheme === 'obsidian_monolith' ? 'rounded-none border border-[#3b82f6] text-[#3b82f6] hover:bg-[#3b82f6]/10' : 'rounded-xl border ' + (withdrawalAmount === Math.floor(amt) ? 'bg-[var(--nexus-accent)] text-black border-[var(--nexus-accent)]' : 'bg-white/5 text-[var(--nexus-text-muted)] border-[var(--nexus-border)] hover:border-[var(--nexus-accent)]/50')}`}
+                        key={tab}
+                        onClick={() => setActiveModalTab(tab)}
+                        className={`pb-4 text-xs font-black uppercase tracking-widest relative transition-all flex items-center gap-2 ${
+                          isActive 
+                            ? (theme === 'light' ? 'text-slate-900' : 'text-white') 
+                            : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
+                        }`}
                       >
-                        ₹{Math.floor(amt).toLocaleString()}
+                        {isHistory && <History className="w-3.5 h-3.5" />}
+                        {tab}
+                        {isActive && (
+                          <motion.div 
+                            layoutId="activeTab" 
+                            className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--nexus-accent)]" 
+                          />
+                        )}
                       </button>
-                    ))}
-                  </div>
-
-                  <div className="flex gap-3 pt-2">
-                    <button
-                      onClick={() => setShowWithdrawModal(false)}
-                      className={`flex-1 py-4 font-black uppercase text-[10px] tracking-widest transition-colors ${nexusTheme === 'obsidian_monolith' ? 'bg-transparent text-slate-500 border border-slate-800 hover:text-white hover:border-slate-500' : 'rounded-2xl border shadow-sm ' + (theme === 'dark' ? 'bg-white/5 text-slate-300 border-white/5 hover:bg-white/10' : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100')}`}
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={() => handleWithdrawRequest(withdrawalAmount)}
-                      disabled={isProcessingWithdraw || withdrawalAmount < 1000 || withdrawalAmount > (Number(user.walletBalance) || 0)}
-                      className={`flex-[2] py-4 font-black uppercase text-[10px] tracking-widest transition-all disabled:opacity-50 flex items-center justify-center gap-2 ${nexusTheme === 'obsidian_monolith' ? 'bg-[#3b82f6] text-black hover:bg-white hover:shadow-[0_0_20px_#3b82f6]' : 'rounded-2xl bg-[var(--nexus-accent)] text-black hover:brightness-110 shadow-lg shadow-[var(--nexus-accent)]/20'}`}
-                    >
-                      {isProcessingWithdraw ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirm Withdrawal'}
-                    </button>
-                  </div>
+                    );
+                  })}
                 </div>
+              </div>
+
+              {/* MODAL CONTENT */}
+              <div className="p-8">
+                <AnimatePresence mode="wait">
+                  {activeModalTab === 'Transactions History' ? (
+                    <motion.div
+                      key="history"
+                      initial={{ opacity: 0, scale: 0.98 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.98 }}
+                      className="space-y-6"
+                    >
+                      <div className="flex items-center justify-between">
+                        <h4 className={`text-sm font-black uppercase tracking-widest ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>Recent Node Disbursals</h4>
+                        <span className="text-[10px] font-mono text-slate-500 font-bold">NODE LOGS: 50</span>
+                      </div>
+
+                      {isFetchingWithdrawals ? (
+                        <div className="flex justify-center py-20">
+                          <Loader2 className="w-8 h-8 animate-spin text-[var(--nexus-accent)]" />
+                        </div>
+                      ) : withdrawals.length === 0 ? (
+                        <div className={`py-20 text-center rounded-2xl border border-dashed ${theme === 'light' ? 'bg-slate-50 border-slate-200' : 'bg-white/[0.02] border-white/10'}`}>
+                          <History className="w-8 h-8 mx-auto mb-4 opacity-20" />
+                          <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">No Recent Activity Found</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                          {withdrawals.map((wd) => {
+                            const amt = Math.abs(wd.amount);
+                            const statusColors = {
+                              pending: 'border-amber-500/30 text-amber-500 bg-amber-500/5',
+                              processing: 'border-blue-500/30 text-blue-400 bg-blue-500/5',
+                              completed: 'border-emerald-500/30 text-emerald-500 bg-emerald-500/5',
+                              cancelled: 'border-red-500/30 text-red-400 bg-red-500/5'
+                            };
+
+                            return (
+                              <div 
+                                key={wd._id} 
+                                className={`flex items-center justify-between p-4 rounded-xl border transition-all ${
+                                  theme === 'light' 
+                                    ? 'bg-slate-50 border-slate-100 hover:border-slate-200' 
+                                    : 'bg-white/[0.03] border-white/5 hover:border-white/10'
+                                }`}
+                              >
+                                <div className="flex items-center gap-4">
+                                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${theme === 'light' ? 'bg-white shadow-sm' : 'bg-white/5'}`}>
+                                    <IndianRupee className="w-4 h-4 text-[var(--nexus-accent)]" />
+                                  </div>
+                                  <div>
+                                    <h5 className={`text-xs font-black ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>Bank Withdrawal</h5>
+                                    <span className="text-[9px] font-mono font-bold text-slate-500 uppercase">{new Date(wd.createdAt).toLocaleString()}</span>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-4">
+                                  <div className="text-right">
+                                    <h5 className={`text-xs font-black ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>₹{amt.toLocaleString()}</h5>
+                                    <span className={`px-2 py-0.5 rounded-lg border text-[8px] font-black uppercase tracking-widest ${statusColors[wd.status] || 'border-slate-500 text-slate-400'}`}>
+                                      {wd.status}
+                                    </span>
+                                  </div>
+                                  {wd.status === 'pending' && (
+                                    <button
+                                      onClick={() => handleCancelWithdrawal(wd._id)}
+                                      disabled={isCancellingId === wd._id}
+                                      className={`p-2 rounded-lg border transition-all ${
+                                        isCancellingId === wd._id ? 'opacity-50 cursor-not-allowed border-slate-700' :
+                                        theme === 'light'
+                                          ? 'border-red-200 text-red-500 hover:bg-red-50'
+                                          : 'border-red-500/20 text-red-400 hover:bg-red-500/10'
+                                      }`}
+                                    >
+                                      {isCancellingId === wd._id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </motion.div>
+                  ) : withdrawalStep === 0 ? (
+                    <motion.div
+                      key="step0"
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      className="grid grid-cols-1 md:grid-cols-2 gap-12"
+                    >
+                      {/* LEFT: ORDER DETAILS */}
+                      <div className="space-y-8">
+                        <h4 className={`text-sm font-black uppercase tracking-widest ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>Bank Transfer</h4>
+                        <div className="space-y-6">
+                          <div className="space-y-2">
+                            <label className={`text-[10px] font-black uppercase tracking-widest ${theme === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>Withdrawal Amount</label>
+                            <div className="relative group">
+                              <input
+                                type="number"
+                                value={withdrawalAmount}
+                                onChange={(e) => setWithdrawalAmount(Number(e.target.value))}
+                                className={`w-full p-6 pr-24 rounded-2xl border text-2xl font-black transition-all outline-none ${
+                                  theme === 'light' 
+                                    ? 'bg-slate-50 border-slate-200 focus:border-slate-400 text-slate-900 group-hover:border-slate-300' 
+                                    : 'bg-white/5 border-white/10 focus:border-white/20 text-white group-hover:border-white/15'
+                                }`}
+                                placeholder="1000"
+                              />
+                              <div className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center gap-3">
+                                <button 
+                                  onClick={() => setWithdrawalAmount(Number(user.walletBalance) || 0)}
+                                  className="text-[10px] font-black uppercase tracking-widest text-[var(--nexus-accent)] hover:brightness-110"
+                                >
+                                  MAX
+                                </button>
+                                <span className="text-xs font-bold text-slate-500">INR</span>
+                              </div>
+                            </div>
+                            <p className="text-[10px] font-bold text-slate-500">Remaining Daily Withdrawal: ₹{(Number(user.walletBalance) || 0).toLocaleString('en-IN')}</p>
+                          </div>
+
+                          <div className="space-y-4">
+                            <span className={`text-[10px] font-black uppercase tracking-widest ${theme === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>Summary:</span>
+                            <div className="space-y-3">
+                              <div className="flex justify-between items-center text-xs font-bold">
+                                <span className="text-slate-500">Transaction Fee (Razorpay 2%)</span>
+                                <span className={theme === 'light' ? 'text-slate-900' : 'text-white'}>₹{(withdrawalAmount * 0.02).toFixed(2)} INR</span>
+                              </div>
+                              <div className="flex justify-between items-center text-xs font-bold">
+                                <span className="text-slate-500">You Will Get</span>
+                                <span className="text-[var(--nexus-accent)] font-black text-sm">₹{(withdrawalAmount * 0.98).toFixed(2)} INR</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className={`p-4 rounded-xl border flex gap-3 ${theme === 'light' ? 'bg-amber-50/50 border-amber-100' : 'bg-amber-500/5 border-amber-500/20'}`}>
+                            <AlertCircle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                            <p className="text-[10px] font-medium leading-relaxed text-amber-700 dark:text-amber-500/80">A processing log fee might be applicable for settlements below ₹1,000.00. Funds typically arrive in 1-2 business days.</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* RIGHT: PAYMENT DETAILS */}
+                      <div className="space-y-8">
+                        <span className={`text-[10px] font-black uppercase tracking-widest ${theme === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>Payment Details</span>
+                        <div className="space-y-4">
+                          {user.payoutSettings?.bankDetailsLinked ? (
+                            <div className={`p-5 rounded-2xl border transition-all flex items-center justify-between ${
+                              theme === 'light' 
+                                ? 'bg-slate-50 border-pink-100 shadow-[0_4px_20px_rgba(244,114,182,0.1)]' 
+                                : 'bg-white/[0.03] border-pink-500/30'
+                            }`}>
+                              <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center p-[1px]">
+                                  <div className={`w-full h-full rounded-2xl flex items-center justify-center ${theme === 'light' ? 'bg-white' : 'bg-[#1a1a1a]'}`}>
+                                    <div className="w-4 h-4 rounded-full bg-[var(--nexus-accent)] shadow-[0_0_10px_var(--nexus-accent)]" />
+                                  </div>
+                                </div>
+                                <div>
+                                  <h5 className={`text-sm font-black ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>Primary Bank Account</h5>
+                                  <div className="flex items-center gap-4 mt-1 text-[10px] font-mono font-bold text-slate-500">
+                                    <span>IFSC: {user.bankDetails?.ifsc || 'N/A'}</span>
+                                    <span>ACC: {user.bankDetails?.masked_account || '**** 0000'}</span>
+                                  </div>
+                                </div>
+                              </div>
+                              <Trash2 className="w-4 h-4 text-slate-400 hover:text-red-500 transition-colors cursor-pointer" />
+                            </div>
+                          ) : (
+                            <div className={`p-6 rounded-2xl border border-dashed flex flex-col items-center text-center gap-3 ${
+                              theme === 'light' ? 'bg-amber-50/30 border-amber-200' : 'bg-white/[0.02] border-white/10'
+                            }`}>
+                              <AlertCircle className="w-8 h-8 text-amber-500 opacity-50" />
+                              <div className="space-y-1">
+                                <h5 className={`text-xs font-black ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>No Bank Account Linked</h5>
+                                <p className="text-[9px] font-bold text-slate-500 uppercase tracking-tight">Complete onboarding to enable withdrawals</p>
+                              </div>
+                              <button 
+                                onClick={() => {
+                                  setShowWithdrawModal(false);
+                                  setActiveSection('profile');
+                                }}
+                                className="px-4 py-2 bg-amber-500 text-white rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-amber-600 transition-colors"
+                              >
+                                Link Bank Now
+                              </button>
+                            </div>
+                          )}
+
+                          <button 
+                            disabled={!user.payoutSettings?.bankDetailsLinked}
+                            onClick={handleBankLink}
+                            className={`w-full p-4 rounded-2xl border border-dashed flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-30 disabled:cursor-not-allowed ${
+                              theme === 'light' ? 'border-slate-200 text-slate-400 hover:border-slate-400 hover:text-slate-600' : 'border-white/10 text-slate-500 hover:border-white/20 hover:text-slate-300'
+                            }`}
+                          >
+                            <Plus className="w-4 h-4" />
+                            Add New Payment Detail
+                          </button>
+                        </div>
+
+                        <div className="pt-8">
+                          <button
+                            disabled={!user.payoutSettings?.bankDetailsLinked || withdrawalAmount < 1000 || withdrawalAmount > (Number(user.walletBalance) || 0)}
+                            onClick={() => setWithdrawalStep(1)}
+                            className={`w-full py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:grayscale ${
+                              theme === 'light'
+                                ? 'bg-slate-900 text-white hover:bg-black shadow-lg shadow-slate-200'
+                                : 'bg-[var(--nexus-accent)] text-black hover:brightness-110 shadow-lg shadow-[var(--nexus-accent)]/20'
+                            }`}
+                          >
+                            {user.payoutSettings?.bankDetailsLinked ? 'Withdraw' : 'Account Required'}
+                            <ArrowRight className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ) : withdrawalStep === 1 ? (
+                    <motion.div
+                      key="step1"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      className="grid grid-cols-1 md:grid-cols-2 gap-12"
+                    >
+                      {/* LEFT: WITHDRAWAL SUMMARY */}
+                      <div className="space-y-8">
+                        <div>
+                          <button 
+                            onClick={() => setWithdrawalStep(0)}
+                            className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest mb-4 transition-colors ${theme === 'light' ? 'text-slate-400 hover:text-slate-900' : 'text-slate-500 hover:text-white'}`}
+                          >
+                            <ArrowLeft className="w-3.5 h-3.5" />
+                            Back
+                          </button>
+                          <h4 className={`text-sm font-black uppercase tracking-widest mb-4 ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>Withdrawal Summary</h4>
+                          <p className="text-[10px] font-bold text-slate-500">{new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
+                        </div>
+
+                        <div className={`p-6 rounded-2xl border ${theme === 'light' ? 'bg-slate-50 border-slate-100' : 'bg-white/[0.02] border-white/5'}`}>
+                          <div className="space-y-4">
+                            {[
+                              { label: 'You Receive', value: `₹${(withdrawalAmount * 0.98).toFixed(2)} INR`, highlight: true },
+                              { label: 'Transaction Fee (Razorpay)', value: `₹${(withdrawalAmount * 0.02).toFixed(2)} INR` },
+                              { label: 'Acc Name', value: user.bankDetails?.account_holder_name || user.fullName || 'User' },
+                              { label: 'IFSC', value: user.bankDetails?.ifsc || 'N/A' },
+                              { label: 'Acc Number', value: user.bankDetails?.masked_account || '**** 0000' }
+                            ].map((item, i) => (
+                              <div key={i} className="flex justify-between items-center">
+                                <span className="text-[10px] font-bold text-slate-500">{item.label}</span>
+                                <span className={`text-[11px] font-black ${item.highlight ? 'text-[var(--nexus-accent)]' : (theme === 'light' ? 'text-slate-900' : 'text-white')}`}>
+                                  {item.value}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        <p className="text-[9px] font-medium leading-relaxed text-slate-400 italic">*Some banks might release funds with a delay for first-time payments. In this case, your deposit will be available between 1-2 business days.</p>
+                      </div>
+
+                      {/* RIGHT: MFA AUTHENTICATION */}
+                      <div className="space-y-8">
+                        <h4 className={`text-sm font-black uppercase tracking-widest ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>Multi-Factor Authentification</h4>
+                        <div className="space-y-6">
+                          <p className={`text-[10px] font-medium leading-relaxed ${theme === 'light' ? 'text-slate-600' : 'text-slate-400'}`}>
+                            We've sent you a SMS verification code to <span className="font-bold text-[var(--nexus-text)]">{user.phone ? `${user.phone.slice(0, 4)} XXX ${user.phone.slice(-2)}` : 'XXXX-XX-XX'}</span>. Please, enter this code here to verify.
+                          </p>
+                          
+                          <div className="space-y-4">
+                            <label className={`text-[10px] font-black uppercase tracking-widest ${theme === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>Code</label>
+                            <input
+                              type="text"
+                              value={mfaCode}
+                              onChange={(e) => setMfaCode(e.target.value)}
+                              className={`w-full p-4 rounded-xl border text-xl font-black tracking-[1em] text-center transition-all outline-none ${
+                                theme === 'light' 
+                                  ? 'bg-slate-50 border-slate-200 focus:border-slate-400 text-slate-900' 
+                                  : 'bg-white/5 border-white/10 focus:border-white/20 text-white'
+                              }`}
+                              placeholder="000000"
+                              maxLength={6}
+                            />
+                            <div className="flex items-center justify-between text-[10px] font-bold">
+                              <span className="text-slate-500">Resend available in 10 sec</span>
+                              <button className="text-[var(--nexus-accent)] flex items-center gap-1 opacity-50 cursor-not-allowed">
+                                <RotateCw className="w-3 h-3" />
+                                Resend
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-4 pt-4">
+                          <button
+                            onClick={() => setShowWithdrawModal(false)}
+                            className={`flex-1 py-4 rounded-xl font-black uppercase tracking-widest text-[10px] transition-colors ${
+                              theme === 'light' ? 'bg-slate-100 text-slate-500 hover:bg-slate-200' : 'bg-white/5 text-slate-400 hover:bg-white/10'
+                            }`}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={() => handleWithdrawRequest(withdrawalAmount)}
+                            disabled={isProcessingWithdraw || mfaCode.length < 6}
+                            className={`flex-[2] py-4 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all flex items-center justify-center gap-2 shadow-lg ${
+                              theme === 'light'
+                                ? 'bg-slate-900 text-white hover:bg-black shadow-slate-200'
+                                : 'bg-[var(--nexus-accent)] text-black hover:brightness-110 shadow-[var(--nexus-accent)]/20'
+                            }`}
+                          >
+                            {isProcessingWithdraw ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirm'}
+                          </button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="step2"
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="flex flex-col items-center justify-center py-12 text-center"
+                    >
+                      <div className="w-20 h-20 rounded-full bg-emerald-500/20 flex items-center justify-center mb-6 relative">
+                        <motion.div 
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ type: "spring", damping: 12, stiffness: 200, delay: 0.2 }}
+                          className="w-12 h-12 rounded-full bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/40"
+                        >
+                          <Zap className="w-6 h-6 text-white" />
+                        </motion.div>
+                        <motion.div 
+                          animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }}
+                          transition={{ duration: 2, repeat: Infinity }}
+                          className="absolute inset-0 border-2 border-emerald-500 rounded-full"
+                        />
+                      </div>
+                      
+                      <h3 className={`text-xl font-black uppercase tracking-widest mb-2 ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>Request Transmission Successful</h3>
+                      <p className={`text-xs font-bold uppercase tracking-tight mb-8 ${theme === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>₹{(withdrawalAmount * 0.98).toFixed(2)} INR will reach your node shortly</p>
+                      
+                      <div className={`w-full max-w-sm p-4 rounded-xl border border-dashed mb-8 text-[10px] font-mono font-bold ${theme === 'light' ? 'border-slate-200 text-slate-500 bg-slate-50' : 'border-white/10 text-slate-400 bg-white/[0.01]'}`}>
+                        TRANSACTION_ID: {Math.random().toString(36).substring(2, 15).toUpperCase()} <br/>
+                        TIMESTAMP: {new Date().toISOString()}
+                      </div>
+
+                      <button 
+                        onClick={() => setShowWithdrawModal(false)}
+                        className={`px-12 py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-all ${
+                          theme === 'light' ? 'bg-slate-900 text-white' : 'bg-white text-black hover:bg-slate-200'
+                        }`}
+                      >
+                        Back to Command Center
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </motion.div>
           </motion.div>

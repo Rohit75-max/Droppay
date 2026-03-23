@@ -11,7 +11,7 @@ const PREMIUM_GOAL_STYLES = [
     'alchemist_flask', 'redline_dash', 'loot_dispenser', 'mecha_lens'
 ];
 
-const PremiumPreviewModal = ({ isOpen, onClose, item, onUnlock, theme }) => {
+const PremiumPreviewModal = ({ isOpen, onClose, item, onUnlock, theme, user }) => {
     if (!isOpen || !item) return null;
 
     const isLight = theme === 'light' || document.documentElement.classList.contains('light');
@@ -41,13 +41,12 @@ const PremiumPreviewModal = ({ isOpen, onClose, item, onUnlock, theme }) => {
                         {/* Dynamic Scaling Wrapper: Ensures content always fits the available area */}
                         <div className="w-full h-full flex items-center justify-center relative overflow-hidden" style={{ containerType: 'size' }}>
                             <motion.div
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                className="w-full h-full flex items-center justify-center"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className="w-[800px] h-[800px] flex items-center justify-center shrink-0 origin-center"
                                 style={{
-                                    // Scale based on container size to ensure containment (Base size 450x600)
-                                    scale: 'min(1, min(calc(100cqw / 450), calc(100cqh / 600)))',
-                                    transformOrigin: 'center center'
+                                    // Scale based on parent's 100cqw/cqh to ensure containment
+                                    transform: 'scale(min(1, min(calc(100cqw / 800), calc(100cqh / 800))))',
                                 }}
                             >
                                 {item.category === 'themes' && (
@@ -66,7 +65,7 @@ const PremiumPreviewModal = ({ isOpen, onClose, item, onUnlock, theme }) => {
                                     <div className="w-full flex items-center justify-center">
                                         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(57,255,20,0.05)_0%,transparent_70%)] pointer-events-none" />
                                         <PremiumAlertPreview
-                                            donorName="Elite Donor"
+                                            donorName={user?.fullName || user?.username || 'Elite Donor'}
                                             amount={parseInt(item.price.replace('₹', '')) || 2000}
                                             message="This is a live preview of the asset in action!"
                                             stylePreference={item.id}
@@ -128,7 +127,7 @@ const PremiumPreviewModal = ({ isOpen, onClose, item, onUnlock, theme }) => {
                                                             className="h-full w-20 bg-gradient-to-r from-transparent via-blue-400 to-transparent"
                                                         />
                                                     </div>
-                                                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-400 opacity-60">Status: Verified Node</p>
+                                                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-400 opacity-60">Status: Verified Creator</p>
                                                 </div>
                                             </div>
                                         )}
@@ -203,7 +202,7 @@ const PremiumPreviewModal = ({ isOpen, onClose, item, onUnlock, theme }) => {
                                                         />
                                                     </div>
                                                     <div className="flex justify-between text-[10px] font-bold text-indigo-400/40 uppercase tracking-widest">
-                                                        <span>Syncing Activity...</span>
+                                                        <span>Live Activity...</span>
                                                         <span>8.4 GB/s</span>
                                                     </div>
                                                 </div>
@@ -221,7 +220,7 @@ const PremiumPreviewModal = ({ isOpen, onClose, item, onUnlock, theme }) => {
                         <div className="flex-1 overflow-y-auto pr-1 scrollbar-hide">
                             <div className="flex items-center gap-2 mb-4">
                                 <span className={`px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.2em] border flex items-center gap-1 ${isLight ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-600' : 'border-[var(--nexus-accent)] bg-[var(--nexus-accent)]/10 text-[var(--nexus-accent)]'}`}>
-                                    <Sparkles className="w-3 h-3" /> Broadcast Tech
+                                    <Sparkles className="w-3 h-3" /> Live Stream Asset
                                 </span>
                                 <span className={`px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.2em] border ${isLight ? 'border-emerald-100 bg-emerald-50 text-emerald-700/50' : 'border-[var(--nexus-border)] bg-black/20 text-white/50'
                                     }`}>
@@ -233,7 +232,11 @@ const PremiumPreviewModal = ({ isOpen, onClose, item, onUnlock, theme }) => {
                                 {item.name}
                             </h2>
                             <p className="text-[var(--nexus-text-muted)] text-[10px] font-black uppercase tracking-widest mb-8 opacity-40">
-                                Global Environment Module
+                                {item.category === 'themes' ? 'Premium Theme Skin'
+                                    : item.category === 'alerts' ? 'Live Alert Style'
+                                    : item.category === 'goals' ? 'Goal Tracker Design'
+                                    : item.category === 'widgets' ? 'Interactive Tool'
+                                    : 'Stream Asset'}
                             </p>
                             <p className="text-[var(--nexus-text-muted)] text-sm leading-relaxed mb-8 max-w-sm">
                                 {item.desc || item.description} Engineered with zero-lag CSS and Framer Motion for a seamless broadcast experience.
@@ -263,7 +266,7 @@ const PremiumPreviewModal = ({ isOpen, onClose, item, onUnlock, theme }) => {
                         <div className="mt-auto pt-8 border-t border-white/5">
                             <div className="flex flex-row items-center justify-between mb-4 md:flex-col md:items-start md:gap-2 md:mb-8">
                                 <div className="flex flex-col">
-                                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500 mb-1">Acquisition Cost</span>
+                                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500 mb-1">Purchase Price</span>
                                     <div className="flex items-center gap-2">
                                         <span className="text-2xl font-black text-[var(--nexus-accent)] italic">₹</span>
                                         <span className="text-3xl md:text-5xl font-black text-white italic tracking-tighter">
@@ -283,7 +286,7 @@ const PremiumPreviewModal = ({ isOpen, onClose, item, onUnlock, theme }) => {
                                 className="w-full py-5 md:py-6 bg-[var(--nexus-accent)] hover:brightness-110 text-black font-black text-sm md:text-xl uppercase tracking-[0.3em] italic flex items-center justify-center gap-4 shadow-[0_20px_40px_rgba(16,185,129,0.2)] transition-all active:scale-[0.98] group/buy"
                                 style={{ clipPath: 'polygon(5% 0, 100% 0, 95% 100%, 0 100%)' }}
                             >
-                                <span className="relative z-10">Initialize Acquisition</span>
+                                <span className="relative z-10">Unlock This Now</span>
                                 <Zap className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover/buy:animate-pulse" />
                             </button>
                         </div>

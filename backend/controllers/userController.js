@@ -64,6 +64,59 @@ exports.requestWithdrawal = async (req, res) => {
     }
 };
 
+exports.getWithdrawals = async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id);
+        if (!user) return res.status(404).json({ msg: "Node Not Found" });
+
+        const withdrawals = await Drop.find({
+            streamerId: user.streamerId,
+            donorName: "WITHDRAWAL",
+            amount: { $lt: 0 }
+        }).sort({ createdAt: -1 });
+
+        res.status(200).json(withdrawals);
+    } catch (err) {
+        console.error("Fetch Withdrawals Error:", err);
+        res.status(500).json({ msg: "System Error: Failed to fetch withdrawal history." });
+    }
+};
+
+exports.cancelWithdrawal = async (req, res) => {
+    try {
+        const { withdrawalId } = req.body;
+        if (!withdrawalId) return res.status(400).json({ msg: "Withdrawal ID required." });
+
+        const user = await User.findById(req.user.id);
+        if (!user) return res.status(404).json({ msg: "Node Not Found" });
+
+        const drop = await Drop.findOneAndUpdate(
+            { _id: withdrawalId, streamerId: user.streamerId, status: 'pending' },
+            { $set: { status: 'cancelled', message: "Withdrawal Cancelled by User" } },
+            { new: true }
+        );
+
+        if (!drop) {
+            return res.status(400).json({ msg: "Withdrawal not found or already processed/cancelled." });
+        }
+
+        const refundAmount = Math.abs(drop.amount);
+
+        // Atomic Rollback
+        await User.findByIdAndUpdate(user._id, {
+            $inc: { 
+                walletBalance: refundAmount,
+                "financialMetrics.pendingPayouts": -refundAmount
+            }
+        });
+
+        res.status(200).json({ msg: "Withdrawal cancelled successfully. Funds restored to Wallet." });
+    } catch (err) {
+        console.error("Cancel Withdrawal Error:", err);
+        res.status(500).json({ msg: "System Error: Failed to cancel withdrawal." });
+    }
+};
+
 exports.purchasePremiumStyle = async (req, res) => {
     try {
         const { styleId, targetAmount } = req.body;

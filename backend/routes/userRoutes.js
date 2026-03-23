@@ -3,7 +3,7 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const User = require('../models/User');
 const { addBankAccount } = require('../controllers/onboardingController');
-const { purchasePremiumStyle, purchasePremiumAlert, purchaseNexusTheme, purchaseWidget, equipWidget, equipAsset, createStoreOrder, verifyStorePayment } = require('../controllers/userController');
+const { purchasePremiumStyle, purchasePremiumAlert, purchaseNexusTheme, purchaseWidget, equipWidget, equipAsset, createStoreOrder, verifyStorePayment, getWithdrawals, cancelWithdrawal } = require('../controllers/userController');
 const { requestWithdrawal } = require('../controllers/withdrawController');
 const { cacheProfile, invalidateProfileCache } = require('../middleware/profileCache');
 // @route   GET api/user/status
@@ -24,6 +24,12 @@ router.post('/add-bank-account', auth, addBankAccount);
 // @route   POST api/user/withdraw
 // @desc    Process autonomous node payout requests
 router.post('/withdraw', auth, requestWithdrawal);
+
+// @route   GET api/user/withdrawals
+router.get('/withdrawals', auth, getWithdrawals);
+
+// @route   POST api/user/cancel-withdrawal
+router.post('/cancel-withdrawal', auth, cancelWithdrawal);
 
 // @route   POST api/user/buy-premium-style
 // @desc    Purchase Elite Goal overlay using Wallet Balance
@@ -63,13 +69,47 @@ router.post('/verify-store-payment', auth, verifyStorePayment);
 // private: user-specific data (no CDN caching).
 // max-age=30: browser reuses this for 30s without a new request.
 // stale-while-revalidate=60: serve stale cache while fetching fresh in background.
+const Drop = require('../models/Drop');
+
 router.get('/profile', auth, cacheProfile, async (req, res) => {
     try {
         const user = await User.findById(req.user.id).select('-password');
         if (!user) return res.status(401).json({ msg: 'Session invalid: user entry not found. Please log in again.' });
+        
+        // Calculate 30-day net earnings
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        
+        const monthlyStats = await Drop.aggregate([
+            {
+                $match: {
+                    streamerId: user.streamerId,
+                    status: 'completed',
+                    amount: { $gt: 0 },
+                    createdAt: { $gte: thirtyDaysAgo }
+                }
+            },
+            {
+                $group: {
+                    _id: null,
+                    totalGross: { $sum: "$amount" }
+                }
+            }
+        ]);
+        
+        const totalGrossMonth = monthlyStats.length > 0 ? monthlyStats[0].totalGross : 0;
+        const platformCut = user.tier === 'legend' ? 0.05 : user.tier === 'pro' ? 0.10 : 0.15;
+        const netMultiplier = 1 - 0.02 - platformCut;
+        const monthlyNetEarnings = Math.round(totalGrossMonth * netMultiplier);
+
+        const userObj = user.toObject();
+        userObj.financialMetrics = userObj.financialMetrics || {};
+        userObj.financialMetrics.monthlyNetEarnings = monthlyNetEarnings;
+
         res.set('Cache-Control', 'private, no-cache, no-store, must-revalidate');
-        res.json(user);
+        res.json(userObj);
     } catch (err) {
+        console.error("Profile Fetch Error:", err);
         res.status(500).json({ msg: 'Server Error' });
     }
 });
@@ -78,26 +118,35 @@ router.get('/profile', auth, cacheProfile, async (req, res) => {
 // @route   POST api/user/update-goal
 router.post('/update-goal', auth, async (req, res) => {
     try {
-        const { title, targetAmount, showOnDashboard, stylePreference } = req.body;
+        const { title, targetAmount, isActive, stylePreference, resetProgress } = req.body;
+        
+        const updateFields = {
+            "goalSettings.title": title,
+            "goalSettings.targetAmount": Number(targetAmount),
+            "goalSettings.isActive": isActive,
+            "goalSettings.stylePreference": stylePreference
+        };
+        
+        if (resetProgress) {
+            updateFields["goalSettings.currentProgress"] = 0;
+        }
+
         const user = await User.findByIdAndUpdate(
             req.user.id,
-            {
-                $set: {
-                    "goalSettings.title": title,
-                    "goalSettings.targetAmount": Number(targetAmount),
-                    "goalSettings.showOnDashboard": showOnDashboard,
-                    "goalSettings.stylePreference": stylePreference
-                }
-            },
-            { returnDocument: 'after' }
+            { $set: updateFields },
+            { new: true }
         ).select('-password');
+        
+        await invalidateProfileCache(req.user.id);
+
         const authIo = req.app.get('io');
-        if (authIo) {
+        if (authIo && user) {
             authIo.to(user.streamerId).emit('goal-update', user.goalSettings);
         }
 
-        res.json(user.goalSettings);
+        res.json(user ? user.goalSettings : {});
     } catch (err) {
+        console.error("Goal update error:", err);
         res.status(500).json({ msg: 'Server Error' });
     }
 });

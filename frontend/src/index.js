@@ -17,12 +17,13 @@ root.render(
   </React.StrictMode>
 );
 
-// 📡 Service Worker Registration (PWA Offline Cache)
+// 📡 Proactive Service Worker Unregistration (Prevents Caching Issues)
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js')
-      .then(reg => console.log('✅ [DropPay] Service Worker Registered'))
-      .catch(err => console.error('❌ [DropPay] Service Worker Registration Fail', err));
+  navigator.serviceWorker.getRegistrations().then(registrations => {
+    for (const registration of registrations) {
+      registration.unregister();
+      console.log('🗑️ [DropPay] Service Worker Unregistered');
+    }
   });
 }
 

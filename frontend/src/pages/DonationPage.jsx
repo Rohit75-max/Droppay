@@ -368,12 +368,11 @@ const DonationPage = () => {
             </div>
 
             {/* VERTICAL GOAL BAR */}
-            <div className="shrink-0 relative z-20 border-t border-[var(--nexus-border)] pt-6 mt-6">
-              <h3 className="text-xs font-black uppercase tracking-widest text-[var(--nexus-text-muted)] mb-4 flex items-center gap-2">
-                <Target className="w-4 h-4 text-[var(--nexus-accent)]" /> Active Goal
-              </h3>
-              {/* Fallback to CyberGoalBar if SquareGoalBar is too large or not built for vertical yet */}
-              {isGoalActive ? (
+            {isGoalActive && (
+              <div className="shrink-0 relative z-20 border-t border-[var(--nexus-border)] pt-6 mt-6">
+                <h3 className="text-xs font-black uppercase tracking-widest text-[var(--nexus-text-muted)] mb-4 flex items-center gap-2">
+                  <Target className="w-4 h-4 text-[var(--nexus-accent)]" /> Active Goal
+                </h3>
                 <div className="w-full transform scale-90 origin-top">
                   {PREMIUM_GOAL_STYLES.includes(goal.stylePreference) ? (
                     <PremiumGoalOverlays
@@ -392,13 +391,8 @@ const DonationPage = () => {
                     />
                   )}
                 </div>
-              ) : (
-                <div className="w-full h-24 border-2 border-dashed border-[var(--nexus-border)] rounded-2xl flex flex-col items-center justify-center opacity-40">
-                  <Target className="w-6 h-6 mb-2" />
-                  <span className="text-[10px] font-bold uppercase">No Active Goal</span>
-                </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </aside>
 

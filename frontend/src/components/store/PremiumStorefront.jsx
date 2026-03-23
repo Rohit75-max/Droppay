@@ -48,7 +48,7 @@ const STORE_CATEGORIES = [
 ];
 
 // --- PREMIUM STORE CARD COMPONENT ---
-const PremiumStoreCard = ({ item, theme, activeTab, onClick, onPurchase, isProcessing }) => {
+const PremiumStoreCard = ({ item, theme, activeTab, onClick, onPurchase, isProcessing, user }) => {
     const cardRef = useRef(null);
     const x = useMotionValue(0);
     const y = useMotionValue(0);
@@ -133,8 +133,21 @@ const PremiumStoreCard = ({ item, theme, activeTab, onClick, onPurchase, isProce
 
                 <motion.div
                     style={{ translateZ: 50 }}
-                    className="absolute inset-0 flex items-center justify-center pointer-events-none transform scale-[0.35] sm:scale-[0.4] md:scale-[0.45] transition-transform duration-500 group-hover:scale-[0.5]"
+                    className="absolute inset-x-0 inset-y-0 flex items-center justify-center pointer-events-none"
+                    initial={false}
                 >
+                    <motion.div 
+                        className="w-[600px] h-[450px] flex items-center justify-center shrink-0 origin-center"
+                        style={{
+                            scale: 0.35,
+                        }}
+                        animate={{
+                            scale: item.category === 'themes' ? 0.5 : 0.4
+                        }}
+                        whileHover={{
+                            scale: item.category === 'themes' ? 0.55 : 0.45
+                        }}
+                    >
                     {item.category === 'themes' && (
                         <div className="absolute inset-0 w-[400%] h-[400%] -translate-x-[37.5%] -translate-y-[37.5%] scale-[0.2] sm:scale-[0.25] transition-transform duration-700 group-hover:scale-[0.3]">
                             <LiveThemeEngine currentTheme={item.id} isPreview={true} />
@@ -215,7 +228,7 @@ const PremiumStoreCard = ({ item, theme, activeTab, onClick, onPurchase, isProce
 
                     {item.category === 'alerts' && (
                         <PremiumAlertPreview
-                            donorName="PREVIEW"
+                            donorName={user?.fullName || user?.username || 'Preview'}
                             amount={parseInt(item.price?.replace('₹', '')) || 2000}
                             stylePreference={item.id}
                         />
@@ -236,6 +249,7 @@ const PremiumStoreCard = ({ item, theme, activeTab, onClick, onPurchase, isProce
                         )
                     )}
                 </motion.div>
+            </motion.div>
 
                 {/* Cyber Scanner Overlay on Hover */}
                 <div className="absolute inset-x-0 top-0 h-0.5 bg-[var(--nexus-accent)] opacity-0 group-hover:opacity-100 group-hover:animate-[scan_2s_linear_infinite] shadow-[0_0_15px_var(--nexus-accent)]" />
@@ -256,7 +270,7 @@ const PremiumStoreCard = ({ item, theme, activeTab, onClick, onPurchase, isProce
 
                 <div className={`flex items-center justify-between mt-auto border-t pt-5 border-white/5 group-hover:border-[var(--nexus-accent)]/20 transition-colors`}>
                     <div className="flex flex-col">
-                        <span className="text-[10px] uppercase tracking-widest text-[var(--nexus-text-muted)] font-bold">Standard Fee</span>
+                        <span className="text-[10px] uppercase tracking-widest text-[var(--nexus-text-muted)] font-bold">Current Price</span>
                         <span className={`font-mono font-black text-xl ${isLight ? 'text-slate-900' : 'text-[var(--nexus-text)] drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]'}`}>
                             {item.isOwned ? 'SECURED' : item.price}
                         </span>
@@ -524,11 +538,12 @@ const PremiumStorefront = ({
                                 onClick={() => handlePreviewClick(item)}
                                 onPurchase={handleDirectBuy}
                                 isProcessing={isProcessing}
+                                user={user}
                             />
                         )) : (
                             <div className="col-span-full py-20 flex flex-col items-center justify-center text-center space-y-4">
                                 <LayoutTemplate className="w-12 h-12 text-[var(--nexus-text-muted)] opacity-20" />
-                                <h3 className="text-xl font-black uppercase italic text-[var(--nexus-text-muted)]">Arsenal Expansion in Progress</h3>
+                                <h3 className="text-xl font-black uppercase italic text-[var(--nexus-text-muted)]">New Gear Under Construction</h3>
                                 <p className="text-xs text-[var(--nexus-text-muted)] opacity-50 max-w-xs">New tech is being forged in the lab. Check back soon for more broadcast modules.</p>
                             </div>
                         )}
@@ -543,6 +558,7 @@ const PremiumStorefront = ({
                 onClose={() => setPreviewItem(null)}
                 onUnlock={(item) => handleDirectBuy(null, item)}
                 theme={theme}
+                user={user}
             />
 
             {/* Payment Choice Modal */}

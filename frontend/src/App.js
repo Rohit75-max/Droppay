@@ -13,6 +13,14 @@ import MaintenanceMode from './pages/MaintenanceMode';
 // ─── EAGER IMPORTS (critical path — must load instantly) ──────────────────────
 import LiveThemeEngine from './components/LiveThemeEngine';
 
+// 🚨 GLOBAL SAFETY: AUTO-RELOAD ON CHUNK LOAD FAILURE (Fixes Vercel/Vite code-split crashes)
+window.addEventListener('error', (e) => {
+  if (e.message?.includes('ChunkLoadError') || e.message?.includes('Loading chunk')) {
+    console.warn('⚡ [DropPay] ChunkLoadError detected. Triggering hard reload...');
+    window.location.reload();
+  }
+}, true);
+
 // ─── LAZY IMPORTS (code-split — only load when navigated to) ─────────────────
 const Home = lazy(() => import('./pages/Home'));
 const Login = lazy(() => import('./pages/Login'));

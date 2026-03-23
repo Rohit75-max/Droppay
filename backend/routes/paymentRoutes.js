@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const paymentController = require('../controllers/paymentController');
 const { globalLimiter, donationLimiter, strictLimiter } = require('../middleware/rateLimiter');
-const cacheData = require('../middleware/cache');
+const { cacheData } = require('../middleware/cache');
 
 // --- EXEMPT ROUTES (Bypass Limiters Entirely) ---
 router.post('/test-drop', paymentController.testDrop);
@@ -16,6 +16,8 @@ router.get('/goal/:streamerId', globalLimiter, cacheData(30), paymentController.
 router.get('/recent/:streamerId', globalLimiter, cacheData(30), paymentController.getRecentDrops);
 router.get('/top/:streamerId', globalLimiter, cacheData(60), paymentController.getTopDonors);
 router.get('/analytics/:streamerId', globalLimiter, cacheData(300), paymentController.getAnalytics); // Aggregations cached for 5 minutes
+router.get('/dashboard/:streamerId', globalLimiter, cacheData(300), paymentController.getAnalytics);
+router.get('/dashboard-data/:streamerId', globalLimiter, cacheData(300), paymentController.getAnalytics);
 router.get('/transactions/:streamerId', globalLimiter, cacheData(60), paymentController.getTransactions);
 
 const auth = require('../middleware/auth');

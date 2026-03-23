@@ -6,13 +6,13 @@ export const useTheme = () => useContext(ThemeContext);
 
 export const ThemeProvider = ({ children }) => {
     const [theme, setTheme] = useState(() => {
-        // Check if user has explicitly set a theme preference using the toggle
-        const userHasChosen = localStorage.getItem('dropPayThemeSet') === 'true';
-        if (!userHasChosen) {
-            // Reset to dark for all users who got 'light' from the old default
-            localStorage.setItem('dropPayTheme', 'dark');
-            return 'dark';
+        // Derive mode from the stored nexus theme (handles aero-light, kawaii, etc.)
+        const lightNexusThemes = ['aero-light', 'alabaster-pulse', 'kawaii', 'live_kawaii'];
+        const storedNexus = localStorage.getItem('nexusTheme');
+        if (storedNexus && lightNexusThemes.includes(storedNexus)) {
+            return 'light';
         }
+        // Fall back to explicitly stored dp theme
         return localStorage.getItem('dropPayTheme') || 'dark';
     });
 
@@ -28,6 +28,18 @@ export const ThemeProvider = ({ children }) => {
             new CustomEvent('dp-theme-change', { detail: { mode: theme } })
         );
     }, [theme]);
+
+    // Sync with nexus theme changes (e.g. when user picks aero-light/kawaii)
+    useEffect(() => {
+        const handleNexusChange = (e) => {
+            const newMode = e.detail?.mode;
+            if (newMode && (newMode === 'light' || newMode === 'dark')) {
+                setTheme(newMode);
+            }
+        };
+        window.addEventListener('nexus-theme-change', handleNexusChange);
+        return () => window.removeEventListener('nexus-theme-change', handleNexusChange);
+    }, []);
 
     const toggleTheme = useCallback(() => {
         localStorage.setItem('dropPayThemeSet', 'true'); // user explicitly chose

@@ -58,6 +58,11 @@ const UserSchema = new mongoose.Schema({
       banReason: { type: String }
     }
   },
+  walletBalance: {
+    type: Number,
+    default: 0,
+    index: true // ADDED: Critical for balance lookups and store purchases
+  },
   financialMetrics: {
     totalLifetimeEarnings: { type: Number, default: 0 },
     totalSettled: {

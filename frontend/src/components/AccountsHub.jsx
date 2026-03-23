@@ -13,6 +13,7 @@ import {
   Globe, Copy, Check
 } from 'lucide-react';
 import EliteCard from './EliteCard';
+import UpgradeModal from './UpgradeModal';
 
 const AccountsHub = React.memo(({
   theme, user, saveContactUpdate,
@@ -20,6 +21,7 @@ const AccountsHub = React.memo(({
   copyToClipboard, copiedType
 }) => {
   const fileInputRef = React.useRef(null);
+  const [showUpgradeModal, setShowUpgradeModal] = React.useState(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = React.useState(false);
   const BASE_URL = window.location.origin;
   const [isEditingEmail, setIsEditingEmail] = React.useState(false);
@@ -101,11 +103,15 @@ const AccountsHub = React.memo(({
   const status = calculateTierStatus(user?.tier || 'starter', user?.referralCount || 0);
 
   const cardStyle = useMemo(() =>
-    'bg-[#070707] border border-white/10 text-[var(--nexus-text)] shadow-[var(--nexus-glow)] nexus-card',
-    []);
+    theme === 'light'
+      ? 'bg-white border border-slate-200 text-[var(--nexus-text)] shadow-sm nexus-card'
+      : 'bg-[#070707] border border-white/10 text-[var(--nexus-text)] shadow-[var(--nexus-glow)] nexus-card',
+    [theme]);
   const inputStyle = useMemo(() =>
-    'bg-[var(--nexus-bg)]/40 border-[var(--nexus-border)] text-[var(--nexus-text)] focus:border-[var(--nexus-accent)] transition-all outline-none',
-    []);
+    theme === 'light'
+      ? 'bg-slate-50 border-slate-200 text-slate-900 focus:border-[var(--nexus-accent)] transition-all outline-none'
+      : 'bg-[var(--nexus-bg)]/40 border-[var(--nexus-border)] text-[var(--nexus-text)] focus:border-[var(--nexus-accent)] transition-all outline-none',
+    [theme]);
   const getCardStyle = () => cardStyle;
   const getInputStyle = () => inputStyle;
 
@@ -296,7 +302,11 @@ const AccountsHub = React.memo(({
                             onChange={(e) => setEmailInput(e.target.value)}
                             type="email"
                             autoComplete="email"
-                            className={`flex-1 min-w-0 rounded-xl p-3 text-xs font-bold text-white bg-black/40 border border-white/10 focus:border-[var(--nexus-accent)] outline-none transition-all placeholder:text-white/30`}
+                            className={`flex-1 min-w-0 rounded-xl p-3 text-xs font-bold border focus:border-[var(--nexus-accent)] outline-none transition-all ${
+                              theme === 'light'
+                                ? 'text-slate-900 bg-white border-slate-200 placeholder:text-slate-400'
+                                : 'text-white bg-black/40 border-white/10 placeholder:text-white/30'
+                            }`}
                             placeholder="official@email.com"
                           />
                           <button
@@ -319,7 +329,7 @@ const AccountsHub = React.memo(({
                         <button onClick={() => setIsEditingEmail(false)} className="text-[9px] text-slate-500 hover:text-slate-300 transition-colors font-semibold pl-1">Cancel</button>
                       </div>
                     ) : (
-                      <div className="p-3.5 rounded-xl border border-white/5 bg-white/[0.02] flex items-center justify-between">
+                      <div className={`p-3.5 rounded-xl border flex items-center justify-between ${theme === 'light' ? 'border-slate-200 bg-slate-50' : 'border-white/5 bg-white/[0.02]'}`}>
                         <span className="text-xs font-bold truncate opacity-80">{user.email}</span>
                         {user.isEmailVerified ? (
                           <CheckCircle2 className="w-3 h-3 text-emerald-500" />
@@ -350,7 +360,11 @@ const AccountsHub = React.memo(({
                             type="tel"
                             inputMode="numeric"
                             autoComplete="tel"
-                            className={`flex-1 min-w-0 rounded-xl p-3 text-xs font-bold text-white bg-black/40 border border-white/10 focus:border-[var(--nexus-accent)] outline-none transition-all placeholder:text-white/30`}
+                            className={`flex-1 min-w-0 rounded-xl p-3 text-xs font-bold border focus:border-[var(--nexus-accent)] outline-none transition-all ${
+                              theme === 'light'
+                                ? 'text-slate-900 bg-white border-slate-200 placeholder:text-slate-400'
+                                : 'text-white bg-black/40 border-white/10 placeholder:text-white/30'
+                            }`}
                             placeholder="10-digit mobile number"
                             maxLength={10}
                           />
@@ -373,7 +387,7 @@ const AccountsHub = React.memo(({
                         <button onClick={() => setIsEditingPhone(false)} className="text-[9px] text-slate-500 hover:text-slate-300 transition-colors font-semibold pl-1">Cancel</button>
                       </div>
                     ) : (
-                      <div className="p-3.5 rounded-xl border border-white/5 bg-white/[0.02] flex items-center justify-between">
+                      <div className={`p-3.5 rounded-xl border flex items-center justify-between ${theme === 'light' ? 'border-slate-200 bg-slate-50' : 'border-white/5 bg-white/[0.02]'}`}>
                         <span className="text-xs font-bold opacity-80">{user.phone || "No Link"}</span>
                         {user.isPhoneVerified ? (
                           <CheckCircle2 className="w-3 h-3 text-emerald-500" />
@@ -406,7 +420,7 @@ const AccountsHub = React.memo(({
                 </div>
               </div>
               
-              <div className="flex items-center gap-1.5 px-3 py-1 bg-white/5 border border-white/10 rounded-full">
+              <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full ${theme === 'light' ? 'bg-emerald-50 border border-emerald-200' : 'bg-white/5 border border-white/10'}`}>
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 <span className="text-[8px] font-black uppercase tracking-widest text-[var(--nexus-text-muted)]">Live Signal Ready</span>
               </div>
@@ -549,14 +563,27 @@ const AccountsHub = React.memo(({
             </div>
           </EliteCard>
 
-          {/* GROWTH LINK */}
-          <div onClick={() => setActiveSection('growth')} className={`w-full shrink-0 rounded-[2rem] p-6 flex items-center justify-between transition-all cursor-pointer group border bg-[#0a0a0a] border-[var(--nexus-border)] hover:border-indigo-500/30 shadow-[var(--nexus-glow)]`}>
-            <div className="flex items-center gap-5">
-              <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20 group-hover:bg-indigo-500 group-hover:text-white transition-all shadow-inner"><Trophy className="w-6 h-6" /></div>
-              <p className="text-[11px] font-black uppercase italic text-[var(--nexus-text-muted)] group-hover:text-indigo-500 transition-colors tracking-widest">Upgrade Tier</p>
+          {/* UPGRADE BUTTON — opens modal instead of navigating away */}
+          {user?.tier !== 'legend' && (
+            <div onClick={() => setShowUpgradeModal(true)} className={`w-full shrink-0 rounded-[2rem] p-6 flex items-center justify-between transition-all cursor-pointer group border border-[var(--nexus-border)] hover:border-indigo-500/30 shadow-[var(--nexus-glow)] ${theme === 'light' ? 'bg-white' : 'bg-[#0a0a0a]'}`}>
+              <div className="flex items-center gap-5">
+                <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20 group-hover:bg-indigo-500 group-hover:text-white transition-all shadow-inner"><Trophy className="w-6 h-6" /></div>
+                <p className="text-[11px] font-black uppercase italic text-[var(--nexus-text-muted)] group-hover:text-indigo-500 transition-colors tracking-widest">Upgrade Tier & Plans</p>
+              </div>
+              <ChevronRight className="w-5 h-5 text-indigo-500 group-hover:translate-x-2 transition-transform" />
             </div>
-            <ChevronRight className="w-5 h-5 text-indigo-500 group-hover:translate-x-2 transition-transform" />
-          </div>
+          )}
+          {user?.tier === 'legend' && (
+            <div className={`w-full shrink-0 rounded-[2rem] p-6 flex items-center justify-between border border-amber-500/20 shadow-[0_0_20px_rgba(251,191,36,0.05)] ${theme === 'light' ? 'bg-white' : 'bg-[#0a0a0a]'}`}>
+              <div className="flex items-center gap-5">
+                <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20 shadow-inner"><Trophy className="w-6 h-6 text-amber-400" /></div>
+                <div>
+                  <p className="text-[11px] font-black uppercase italic text-amber-400 tracking-widest">Legend Tier — Max Plan</p>
+                   <p className={`text-[8px] font-bold uppercase tracking-widest mt-0.5 ${theme === 'light' ? 'text-slate-400' : 'text-white/20'}`}>You're at the highest tier</p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -697,6 +724,13 @@ const AccountsHub = React.memo(({
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* UPGRADE MODAL */}
+      <UpgradeModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        user={user}
+      />
     </motion.div>
   );
 });

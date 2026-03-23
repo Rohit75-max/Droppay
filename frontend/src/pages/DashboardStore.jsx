@@ -283,7 +283,7 @@ const DashboardStore = ({ theme, user, setUser }) => {
     };
 
     return (
-        <div className="space-y-10 max-w-[1600px] pb-20 w-full px-4 mx-auto font-sans">
+        <div className="space-y-10 max-w-[1600px] pb-20 pt-6 w-full px-4 mx-auto font-sans">
 
             {/* HEADER ROW - INTEGRATED WITH WALLET BALANCE */}
             <div className={`flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border p-8 rounded-[2.5rem] relative overflow-hidden transition-all duration-700 group/header ${theme === 'light' ? 'bg-emerald-50 border-emerald-100 shadow-sm' : 'bg-[#020403]/40 border-white/10 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.3)]'}`}>

@@ -15,6 +15,10 @@ const DropSchema = new mongoose.Schema({
     default: 'Anonymous',
     trim: true
   },
+  donorFingerprint: {
+    type: String,
+    index: true // Key for identifying unique donors without storing PII
+  },
   amount: {
     type: Number,
     required: true

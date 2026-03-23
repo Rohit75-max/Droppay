@@ -11,6 +11,7 @@ import TopSupporterWidget from './widgets/TopSupporterWidget';
 import EliteCard from './EliteCard';
 import { List } from 'react-window';
 import { InView } from 'react-intersection-observer';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const PREMIUM_GOAL_STYLES = [
   'black_hole', 'hex_core', 'rune_monolith', 'hologram_glitch',
@@ -56,6 +57,53 @@ const DashboardSummary = ({
   isProcessingWithdraw, getProgressPercentage,
   nexusTheme, setShowWithdrawModal
 }) => {
+
+  const getChartDataWithDates = () => {
+    return chartData.map((val, index) => {
+      const daysAgo = chartData.length - 1 - index;
+      const d = new Date();
+      let label = '';
+      if (timeRange === '1Y') {
+        d.setMonth(d.getMonth() - daysAgo);
+        label = d.toLocaleString('en-US', { month: 'short' });
+      } else {
+        d.setDate(d.getDate() - daysAgo);
+        label = d.toLocaleString('en-US', { month: 'short', day: 'numeric' });
+      }
+      return {
+        name: label,
+        value: val,
+        fullDate: d.toLocaleString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })
+      };
+    });
+  };
+
+  const formattedChartData = getChartDataWithDates();
+  const periodTotal = chartData.reduce((a, b) => a + b, 0);
+  
+  const midPoint = Math.floor(chartData.length / 2);
+  const firstHalfTotal = chartData.slice(0, midPoint).reduce((a, b) => a + b, 0);
+  const secondHalfTotal = chartData.slice(midPoint).reduce((a, b) => a + b, 0);
+  
+  let gainPercent = 0;
+  if (firstHalfTotal === 0 && secondHalfTotal > 0) gainPercent = 100;
+  else if (firstHalfTotal > 0) gainPercent = ((secondHalfTotal - firstHalfTotal) / firstHalfTotal) * 100;
+  const isPositiveGain = gainPercent >= 0;
+
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-[#1e1e1e]/90 backdrop-blur-md text-white p-3 rounded-xl shadow-xl pointer-events-none z-50">
+          <p className="text-[10px] text-gray-400 mb-1 font-mono">{payload[0].payload.fullDate}</p>
+          <p className="text-sm font-bold flex items-center gap-1">
+            <IndianRupee className="w-3 h-3 text-[var(--nexus-accent)]" />
+            {payload[0].value.toLocaleString('en-IN')}
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
 
   const stickerFallback = {
     zap: '⚡', fire: '🔥', heart: '💖', crown: '👑', rocket: '🚀',
@@ -112,7 +160,7 @@ const DashboardSummary = ({
           ) : (
             <EliteCard
               whileHover={{ scale: 1.01, z: 10 }}
-              className={`md:col-span-4 flex flex-col items-stretch border relative overflow-hidden h-[320px] transition-all duration-700 ${nexusTheme === 'neon_relic' ? 'rounded-none relic-surface' : 'rounded-[2.5rem]'} bg-[#070707] border-[var(--nexus-border)]`}
+              className={`md:col-span-4 flex flex-col items-stretch border relative overflow-hidden h-[320px] transition-all duration-700 ${nexusTheme === 'neon_relic' ? 'rounded-none relic-surface' : 'rounded-[2.5rem]'} ${theme === 'light' ? 'bg-white border-slate-200' : 'bg-[#070707] border-[var(--nexus-border)]'}`}
             >
               {/* Profile Image Section (Top 70%) */}
               <div className="w-full h-[70%] relative overflow-hidden group/avatar flex-shrink-0">
@@ -129,7 +177,7 @@ const DashboardSummary = ({
                 )}
                 
                 {/* Visual Overlays */}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#070707] via-transparent to-transparent pointer-events-none z-10" />
+                <div className={`absolute inset-0 bg-gradient-to-t ${theme === 'light' ? 'from-white' : 'from-[#070707]'} via-transparent to-transparent pointer-events-none z-10`} />
                 
                 {nexusTheme === 'neon_relic' && (
                   <>
@@ -148,7 +196,7 @@ const DashboardSummary = ({
               </div>
 
               {/* Identity Details Section (Bottom 30%) */}
-              <div className="w-full h-[30%] p-4 flex flex-col justify-center items-center relative z-20 bg-[#070707] flex-shrink-0">
+              <div className={`w-full h-[30%] p-4 flex flex-col justify-center items-center relative z-20 flex-shrink-0 ${theme === 'light' ? 'bg-white' : 'bg-[#070707]'}`}>
                 <div className="space-y-4 w-full text-center">
                   <div className="space-y-1">
                     <div className="flex items-center justify-center gap-2">
@@ -218,14 +266,14 @@ const DashboardSummary = ({
                   </div>
                   <div className="w-px h-8 bg-[#3b82f6]/20 mx-2 hidden sm:block"></div>
                   <div className="flex flex-col hidden sm:flex">
-                    <span className="text-[8px] uppercase font-black tracking-widest text-[var(--nexus-text-muted)] mb-1">Total Earned <TrendingUp className="w-3 h-3 inline ml-1 text-[var(--nexus-accent)]" /></span>
-                    <span className="text-lg md:text-xl font-mono font-bold text-[var(--nexus-text-muted)]">₹{user.financialMetrics?.totalSettled?.toLocaleString('en-IN') || '0'}</span>
+                    <span className="text-[8px] uppercase font-black tracking-widest text-[var(--nexus-text-muted)] mb-1">Monthly Net <TrendingUp className="w-3 h-3 inline ml-1 text-[var(--nexus-accent)]" /></span>
+                    <span className="text-lg md:text-xl font-mono font-bold text-[var(--nexus-text-muted)]">₹{user.financialMetrics?.monthlyNetEarnings?.toLocaleString('en-IN') || '0'}</span>
                   </div>
                 </div>
               </div>
             </div>
           ) : (
-            <EliteCard className={`md:col-span-8 flex flex-col justify-center p-6 sm:p-8 rounded-[2.5rem] border relative overflow-hidden h-full min-h-[240px] transition-all duration-500 ${getCardStyle()}`}>
+            <EliteCard disableHover={true} className={`md:col-span-8 flex flex-col justify-center p-6 sm:p-8 rounded-[2.5rem] border relative overflow-hidden h-full min-h-[240px] transition-all duration-500 ${getCardStyle()}`}>
               {nexusTheme === 'neon_relic' && (
                 <>
                   <div className="plasma-leak-cyan top-0 right-0 -mt-2 -mr-2"></div>
@@ -233,36 +281,35 @@ const DashboardSummary = ({
                   <div className="holo-sticker top-6 right-8">ACCOUNT SECURE</div>
                 </>
               )}
+              {/* Visual Accent Backdrops */}
+              <div className="absolute -top-32 -left-32 w-64 h-64 bg-[var(--nexus-accent)]/20 rounded-full blur-[80px] opacity-40 pointer-events-none" />
+              <div className="absolute -bottom-32 -right-32 w-64 h-64 bg-[var(--nexus-accent)]/10 rounded-full blur-[80px] opacity-30 pointer-events-none" />
+              
               <div className="flex items-center justify-between mb-8 relative z-10">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 sm:p-3 rounded-[1rem] bg-[var(--nexus-accent)]/10 border border-[var(--nexus-accent)]/20">
-                    <Wallet className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--nexus-accent)]" />
-                  </div>
-                  <h3 className="text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-[var(--nexus-text-muted)] italic">Current Balance</h3>
+                <div className="flex items-center gap-3 bg-[var(--nexus-panel)]/40 px-3 py-1.5 rounded-full border border-[var(--nexus-accent)]/20 backdrop-blur-md">
+                  <Wallet className="w-4 h-4 text-[var(--nexus-accent)]" />
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--nexus-accent)]">Current Balance</h3>
                 </div>
                 <button
                   onClick={() => setShowWithdrawModal(true)}
                   disabled={isProcessingWithdraw || (Number(user.walletBalance) || 0) < 1000}
-                  className={`px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2 border ${(Number(user.walletBalance) || 0) >= 1000 ? 'bg-[var(--nexus-accent)] text-[var(--nexus-panel)] border-[var(--nexus-accent)] hover:brightness-110 shadow-[0_0_15px_var(--nexus-accent)]' : 'bg-[var(--nexus-panel)] border-[var(--nexus-border)] text-[var(--nexus-text-muted)] cursor-not-allowed opacity-50'}`}
+                  className={`px-4 sm:px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2 border ${(Number(user.walletBalance) || 0) >= 1000 ? 'bg-[var(--nexus-accent)] text-[var(--nexus-panel)] border-[var(--nexus-accent)] hover:brightness-110 shadow-[0_0_15px_var(--nexus-accent-glow)]' : 'bg-[var(--nexus-panel)] border-[var(--nexus-border)] text-[var(--nexus-text-muted)] cursor-not-allowed opacity-50'}`}
                 >
                   {isProcessingWithdraw ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Withdraw'}
                 </button>
               </div>
-              <div className="flex items-baseline gap-2 mb-8 relative z-10">
-                <span className="text-3xl sm:text-4xl lg:text-5xl font-black italic tracking-tighter text-[var(--nexus-accent)]">₹</span>
+
+              <div className="flex items-baseline gap-3 mb-8 relative z-10">
+                <div className="w-12 h-12 rounded-full bg-[var(--nexus-accent)]/10 border border-[var(--nexus-accent)]/20 flex items-center justify-center text-xl font-black italic text-[var(--nexus-accent)] shadow-[0_0_15px_rgba(16,185,129,0.15)]">₹</div>
                 <h2 className={`text-5xl sm:text-6xl lg:text-7xl font-black italic tracking-tighter ${nexusTheme === 'neon_relic' ? 'relic-text-glow' : 'text-[var(--nexus-text)]'}`}>
                   {user.walletBalance?.toLocaleString('en-IN') || '0.00'}
                 </h2>
               </div>
-              <div className="flex gap-4 sm:gap-6 mt-auto">
+
+              <div className="flex gap-6 mt-auto relative z-10">
                 <div className="flex flex-col">
-                  <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-[var(--nexus-text-muted)] opacity-60">Pending</span>
-                  <span className="text-sm sm:text-lg font-mono font-bold text-[var(--nexus-text)] mt-1">₹{user.financialMetrics?.pendingPayouts?.toLocaleString('en-IN') || '0'}</span>
-                </div>
-                <div className="w-px h-8 bg-[var(--nexus-border)] mx-1 sm:mx-2 hidden sm:block"></div>
-                <div className="flex flex-col hidden sm:flex">
-                  <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-[var(--nexus-text-muted)] opacity-60">Total Earned</span>
-                  <span className="text-sm sm:text-lg font-mono font-bold text-[var(--nexus-text-muted)] mt-1">₹{user.financialMetrics?.totalSettled?.toLocaleString('en-IN') || '0'}</span>
+                  <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-[var(--nexus-text-muted)] opacity-60 mb-1">Monthly Net</span>
+                  <span className="text-sm sm:text-lg font-mono font-bold text-[var(--nexus-text-muted)]">₹{user.financialMetrics?.monthlyNetEarnings?.toLocaleString('en-IN') || '0'}</span>
                 </div>
               </div>
             </EliteCard>
@@ -271,7 +318,7 @@ const DashboardSummary = ({
 
         {/* MISSION STATUS */}
         {user.goalSettings?.isActive !== false && (
-          <div className="flex justify-center w-full mt-2 mb-6">
+          <div className="w-full flex justify-center items-center pt-2 pb-6 relative z-10">
             {PREMIUM_GOAL_STYLES.includes(user.goalSettings?.stylePreference) ? (
               <PremiumGoalOverlays
                 goal={{
@@ -302,85 +349,105 @@ const DashboardSummary = ({
 
         {/* ANALYTICS DATA STREAM */}
         <EliteCard
-          className={`group border p-7 md:p-10 relative transition-all duration-500 overflow-hidden ${nexusTheme === 'neon_relic' ? 'rounded-none relic-surface' : 'rounded-[2.5rem]'} ${getCardStyle()}`}
+          className={`group border relative transition-all duration-500 overflow-hidden ${nexusTheme === 'neon_relic' ? 'rounded-none relic-surface flex flex-col' : 'rounded-3xl flex flex-col'} ${getCardStyle()}`}
         >
           {nexusTheme === 'neon_relic' && (
             <>
               <div className="plasma-leak-cyan top-0 right-0 -mt-2 -mr-2"></div>
               <div className="plasma-leak-magenta bottom-0 left-0 -mb-2 -ml-2"></div>
-              <div className="holo-sticker bottom-6 right-8 rotate-[5deg]">TELEMETRY</div>
+              <div className="holo-sticker bottom-6 right-8 rotate-[5deg] z-0">TELEMETRY</div>
             </>
           )}
-          {/* BGMI Specific HUD Elements */}
-          {nexusTheme === 'bgmi' && (
-            <div className="absolute top-0 left-0 w-1/3 h-1 bg-[var(--nexus-accent)] z-30" />
-          )}
 
-
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 md:mb-10 relative z-20">
-            <div className="flex items-center gap-4">
-              <div className={`p-3 rounded-[var(--nexus-radius)] border transition-colors bg-[var(--nexus-accent)]/10 border-[var(--nexus-accent)]/20`}>
-                <Zap className={`w-5 h-5 text-[var(--nexus-accent)]`} />
-              </div>
-              <div className="flex flex-col">
-                <h3 className="text-xs font-black uppercase tracking-widest text-[var(--nexus-text-muted)] italic flex items-center gap-2">DropPay Analytics <Sparkles className="w-3 h-3 text-[var(--nexus-accent)]" /></h3>
-                <span className="text-[7px] font-bold text-[var(--nexus-accent)] uppercase animate-pulse flex items-center gap-1"><CheckCircle className="w-2 h-2" /> Real-time Analytics</span>
+          {/* Top Info Area */}
+          <div className="p-6 md:p-8 relative z-20">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-2">
+              <h3 className="text-sm md:text-base font-black text-[var(--nexus-text)] tracking-tight flex items-center gap-2">
+                <Zap className="w-5 h-5 text-[var(--nexus-accent)] opacity-80" />
+                Total revenue
+                <Sparkles className="w-3 h-3 text-[var(--nexus-accent)] ml-1" />
+              </h3>
+              <div className={`flex bg-[var(--nexus-panel)] rounded-xl border border-[var(--nexus-border)] shadow-sm p-1`}>
+                {['7D', '1M', '1Y'].map((range) => (
+                  <button
+                    key={range}
+                    onClick={() => setTimeRange(range)}
+                    className={`px-3 py-1.5 rounded-lg text-[10px] md:text-xs font-bold transition-all duration-300 ${timeRange === range ? 'bg-[var(--nexus-bg)] text-[var(--nexus-text)] shadow-sm border border-[var(--nexus-border)]' : 'text-[var(--nexus-text-muted)] hover:text-[var(--nexus-text)]'}`}
+                  >
+                    {range === '7D' ? 'Weekly' : range === '1M' ? 'Monthly' : 'Yearly'}
+                  </button>
+                ))}
               </div>
             </div>
-            <div className={`w-full sm:w-auto flex p-1 rounded-[var(--nexus-radius)] border backdrop-blur-xl bg-[var(--nexus-panel)] border-[var(--nexus-border)] shadow-inner`}>
-              {['7D', '1M', '1Y'].map((range) => (
-                <button
-                  key={range}
-                  onClick={() => setTimeRange(range)}
-                  className={`flex-1 sm:flex-none px-4 md:px-6 py-2 rounded-[var(--nexus-radius)] text-[9px] md:text-[10px] font-black transition-all duration-300 nexus-btn ${timeRange === range ? 'bg-[var(--nexus-accent)] text-black shadow-lg' : 'text-[var(--nexus-text-muted)] hover:text-[var(--nexus-accent)]'}`}
-                >
-                  {range}
-                </button>
-              ))}
+
+            <div className="flex items-center gap-3 md:gap-4 mt-2 mb-1">
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-[var(--nexus-text)] flex items-center">
+                <IndianRupee className="w-7 h-7 md:w-8 md:h-8 -mr-1" strokeWidth={2.5} />
+                {periodTotal.toLocaleString('en-IN')}
+              </h2>
+              <div className={`px-2 py-1 rounded-full text-[10px] md:text-xs font-bold flex items-center gap-1 border ${isPositiveGain ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'}`}>
+                <TrendingUp className={`w-3 h-3 ${!isPositiveGain && 'rotate-180'}`} strokeWidth={3} />
+                {Math.abs(gainPercent).toFixed(2)}%
+              </div>
             </div>
+
+            <p className="text-[10px] md:text-xs text-[var(--nexus-text-muted)] font-medium">
+              {isPositiveGain ? 'Gained' : 'Lost'} <IndianRupee className="w-2.5 h-2.5 inline-block -mt-0.5"/>{Math.abs(secondHalfTotal - firstHalfTotal).toLocaleString('en-IN')} in the latter half of this period
+            </p>
           </div>
 
-          <div className="h-64 w-full flex items-end justify-between gap-1 md:gap-2 px-1 md:px-6 mt-8 relative z-10 bottom-0">
-            {chartData.map((val, i) => {
-              const maxVal = Math.max(...chartData) || 1;
-              const percentage = Math.max((val / maxVal) * 100, 4);
-              return (
-                <div key={i} className="flex-1 flex flex-col items-center justify-end gap-3 group/bar h-full">
-                  <div className="opacity-0 group-hover/bar:opacity-100 transition-opacity absolute -top-10 bg-[var(--nexus-bg)] text-[var(--nexus-text)] text-[10px] font-black px-3 py-1.5 rounded-lg border border-[var(--nexus-border)] pointer-events-none z-50 shadow-2xl backdrop-blur-lg flex items-center justify-center">
-                    <IndianRupee className="w-2.5 h-2.5 inline-block -mt-0.5" />{val.toLocaleString('en-IN')}
-                  </div>
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: `${percentage}%`, opacity: 1 }}
-                    transition={{ type: "spring", stiffness: 40, damping: 15, delay: i * 0.05 }}
-                    className="w-full max-w-[32px] md:max-w-[40px] rounded-t-[0.75rem] md:rounded-t-[1rem] transition-all duration-300 relative overflow-hidden flex flex-col justify-end group-hover/bar:scale-x-110 cursor-pointer shadow-[0_0_15px_rgba(16,185,129,0.1)]"
-                    style={{
-                      background: `linear-gradient(to top, var(--nexus-accent), transparent)`,
-                      opacity: percentage > 80 ? 0.8 : 0.4,
-                      border: `1px solid var(--nexus-accent)`,
-                      borderBottom: 'none'
-                    }}
-                  >
-                    <div className="absolute top-0 w-full h-[2px] bg-white/40" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-transparent to-white/10 opacity-0 group-hover/bar:opacity-100 transition-opacity duration-300" />
-                  </motion.div>
-                  <span className={`text-[8px] md:text-[9px] font-black uppercase tracking-widest transition-colors text-[var(--nexus-text-muted)] group-hover/bar:text-[var(--nexus-accent)]`}>
-                    {timeRange === '7D' ? `D${i + 1}` : `P${i + 1}`}
-                  </span>
-                </div>
-              );
-            })}
+          {/* Recharts Area */}
+          <div className="w-full h-[250px] md:h-[300px] mt-auto relative z-10 px-2 sm:px-4 pb-4">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={formattedChartData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="var(--nexus-accent)" stopOpacity={0.4}/>
+                    <stop offset="95%" stopColor="var(--nexus-accent)" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--nexus-border)" opacity={0.4} />
+                <XAxis 
+                  dataKey="name" 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fill: 'var(--nexus-text-muted)', fontSize: 10, fontWeight: 500 }}
+                  dy={10}
+                  minTickGap={20}
+                />
+                <YAxis 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fill: 'var(--nexus-text-muted)', fontSize: 10, fontWeight: 500 }}
+                  tickFormatter={(val) => val >= 1000 ? (val/1000).toFixed(0) + 'k' : val}
+                  dx={-10}
+                />
+                <Tooltip 
+                  content={<CustomTooltip />} 
+                  cursor={{ stroke: 'var(--nexus-accent)', strokeWidth: 1.5, strokeDasharray: '4 4' }} 
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="value" 
+                  stroke="var(--nexus-accent)" 
+                  strokeWidth={3} 
+                  fillOpacity={1} 
+                  fill="url(#colorRevenue)" 
+                  activeDot={{ r: 6, fill: "var(--nexus-panel)", stroke: "var(--nexus-accent)", strokeWidth: 2 }}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
 
           {/* BGMI Bottom tech-HUD details */}
           {nexusTheme === 'bgmi' && (
-            <div className="mt-8 pt-3 border-t border-[var(--nexus-border)] flex justify-between items-center relative z-20">
+            <div className="mt-auto px-6 pb-4 flex justify-between items-center relative z-20">
               <span className="bg-[var(--nexus-accent)] text-[var(--nexus-panel)] px-2 py-0.5 text-[8px] font-black uppercase tracking-widest">Analytics Node: Active</span>
               <span className="text-[var(--nexus-text-muted)] font-mono text-[10px]">SEC-77</span>
             </div>
           )}
 
-          <BarChart3 className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 opacity-[0.03] pointer-events-none transition-colors text-[var(--nexus-accent)]`} />
+          <BarChart3 className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 opacity-[0.03] pointer-events-none transition-colors text-[var(--nexus-accent)] z-0" />
         </EliteCard>
 
       </div>
@@ -493,13 +560,10 @@ const DashboardSummary = ({
             ) : (
               <List
                 height={300} // Capped height for virtualization viewport
-                itemCount={recentDrops.length}
-                itemSize={82} // Explicit average size per row item
-                width="100%"
-                itemData={recentDrops}
-                className="custom-scrollbar"
-              >
-                {({ index, style }) => {
+                rowCount={recentDrops.length}
+                rowHeight={82} // Explicit average size per row item
+                rowProps={{ recentDrops, LOTTIE_STICKER_MAP, stickerFallback, nexusTheme }}
+                rowComponent={({ index, style, recentDrops, LOTTIE_STICKER_MAP, stickerFallback, nexusTheme }) => {
                   const drop = recentDrops[index];
                   if (!drop) return null;
 
@@ -561,7 +625,8 @@ const DashboardSummary = ({
                     </div>
                   );
                 }}
-              </List>
+                className="custom-scrollbar"
+              />
             )}
           </div>
 

@@ -5,11 +5,12 @@ import { motion, useMotionValue, useMotionTemplate } from 'framer-motion';
  * EliteCard: A premium, mouse-tracking glow card component.
  * Inspired by the 2026 Elite Subscription design.
  */
-const EliteCard = ({ children, className = '', glowColor = 'var(--nexus-accent-glow)', ...props }) => {
+const EliteCard = ({ children, className = '', glowColor = 'var(--nexus-accent-glow)', disableHover = false, ...props }) => {
     const mouseX = useMotionValue(0);
     const mouseY = useMotionValue(0);
 
     function handleMouseMove({ currentTarget, clientX, clientY }) {
+        if (disableHover) return;
         const { left, top } = currentTarget.getBoundingClientRect();
         mouseX.set(clientX - left);
         mouseY.set(clientY - top);
@@ -22,8 +23,9 @@ const EliteCard = ({ children, className = '', glowColor = 'var(--nexus-accent-g
             {...props}
         >
             {/* Dynamic Hover Glow Layer */}
-            <motion.div
-                className="pointer-events-none absolute -inset-px opacity-0 group-hover:opacity-100 transition-opacity duration-700 z-0"
+            {!disableHover && (
+                <motion.div
+                    className="pointer-events-none absolute -inset-px opacity-0 group-hover:opacity-100 transition-opacity duration-700 z-0"
                 style={{
                     background: useMotionTemplate`
             radial-gradient(
@@ -33,7 +35,8 @@ const EliteCard = ({ children, className = '', glowColor = 'var(--nexus-accent-g
             )
           `,
                 }}
-            />
+                />
+            )}
 
             {/* Glossy Overlay */}
             <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent pointer-events-none z-0" />

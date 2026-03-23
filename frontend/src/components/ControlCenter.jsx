@@ -3,7 +3,7 @@ import { toast } from 'react-toastify';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Zap, Globe, Target, Save,
-  Trash2, Plus, Copy, Check, Rocket,
+  Trash2, Plus, Check, Rocket,
   Monitor, Volume2, Activity, Layout, Palette, Sparkles, Crown, Gamepad2, Heart,
   Flame, Leaf, Skull, Battery, Coins, Trophy, Star, Music, Cloud, Gem, ChevronLeft, ChevronRight
 } from 'lucide-react';
@@ -37,7 +37,6 @@ const ControlCenter = ({
   const goalScrollRef = useRef(null);
 
   // BASE URL for local environment
-  const BASE_URL = window.location.origin;
 
   const getStudioStyle = () => {
     return 'bg-[var(--nexus-panel)] border-[var(--nexus-border)] text-[var(--nexus-text)] shadow-[var(--nexus-glow)] theme-card';
@@ -112,7 +111,7 @@ const ControlCenter = ({
                     {tab === 'mission' && 'GOALS'}
                     {tab === 'nexus' && 'THEMES'}
                     {tab === 'stickers' && 'STICKERS'}
-                    {tab === 'widgets' && 'ADDONS'}
+                    {tab === 'widgets' && 'WIDGETS'}
                   </span>
                 </div>
               </motion.button>
@@ -364,9 +363,9 @@ const ControlCenter = ({
             >
               <div className="w-full">
                 {/* TOP ROW: Calibration + Preview (Stacked Vertical) */}
-                <div className="flex flex-col gap-8 mb-8">
+                <div className="flex flex-col lg:flex-row gap-8 mb-8 items-stretch">
                   {/* LEFT: MISSION CALIBRATION */}
-                  <div className={`w-full relative p-6 md:p-8 rounded-[2rem] border bg-[var(--nexus-panel)] overflow-hidden shadow-2xl transition-all ${getStudioStyle()}`}>
+                  <div className={`w-full lg:w-[45%] relative p-6 md:p-8 rounded-[2rem] border bg-[var(--nexus-panel)] overflow-hidden shadow-2xl transition-all ${getStudioStyle()}`}>
                     <div className="absolute -top-32 -left-32 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
                     <div className="relative z-10">
                       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-[var(--nexus-border)] pb-8">
@@ -375,56 +374,71 @@ const ControlCenter = ({
                             <Target className="w-8 h-8 text-indigo-500" />
                           </div>
                           <div className="flex flex-col">
-                            <h2 className="text-3xl font-black italic tracking-tighter text-[var(--nexus-text)]">DONATION GOALS</h2>
+                            <h2 className="text-xl font-black italic tracking-tighter text-[var(--nexus-text)]">DONATION GOALS</h2>
                             <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--nexus-text-muted)] opacity-50 mt-1">Configure your active donation goal</p>
                           </div>
                         </div>
                       </div>
 
-                      <div className="flex flex-col lg:flex-row lg:items-end gap-4">
-                        <div className="flex-1 space-y-2 group">
+                      <div className="flex flex-col gap-6 w-full">
+                        {/* ACTIVE TITLE */}
+                        <div className="w-full space-y-2 group">
                           <label className="text-[10px] font-black uppercase text-[var(--nexus-text-muted)] tracking-widest flex items-center gap-2 ml-1">
                             <Gamepad2 className="w-3.5 h-3.5" /> Active Title
                           </label>
                           <input
                             value={goalForm.title}
                             onChange={(e) => setGoalForm({ ...goalForm, title: e.target.value })}
-                            className="w-full p-4 rounded-xl border-2 outline-none font-black italic transition-all bg-[var(--nexus-panel)] border-[var(--nexus-border)] text-[var(--nexus-text)] focus:border-amber-500/50 focus:bg-amber-500/5 text-sm"
+                            className={`w-full p-4 rounded-xl border outline-none font-black italic transition-all text-sm shadow-sm focus:border-amber-500 ${
+                              theme === 'light'
+                                ? 'bg-white border-slate-200 text-slate-900 focus:bg-slate-50'
+                                : 'bg-[#0a0a0a] border-white/10 text-white focus:bg-[#111]'
+                            }`}
                             placeholder="e.g. PC Upgrade Fund"
                           />
                         </div>
 
-                        <div className="flex-1 space-y-2 group">
+                        {/* TARGET AMOUNT */}
+                        <div className="w-full space-y-2 group">
                           <label className="text-[10px] font-black uppercase text-[var(--nexus-text-muted)] tracking-widest flex items-center gap-2 ml-1">
                             <Coins className="w-3.5 h-3.5" /> Target (₹)
                           </label>
                           <div className="relative">
-                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg font-black text-[var(--nexus-text-muted)]">₹</span>
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg font-black text-gray-500 mt-0.5">₹</span>
                             <input
                               type="number"
                               value={goalForm.targetAmount}
                               onChange={(e) => setGoalForm({ ...goalForm, targetAmount: e.target.value })}
-                              className="w-full p-4 pl-10 rounded-xl border-2 outline-none font-black italic transition-all bg-[var(--nexus-panel)] border-[var(--nexus-border)] text-[var(--nexus-text)] focus:border-amber-500/50 focus:bg-amber-500/5 text-base"
-                              placeholder="10000"
+                              className={`w-full p-4 pl-10 rounded-xl border outline-none font-black italic transition-all text-base shadow-sm focus:border-amber-500 ${
+                                theme === 'light'
+                                  ? 'bg-white border-slate-200 text-slate-900 focus:bg-slate-50'
+                                  : 'bg-[#0a0a0a] border-white/10 text-white focus:bg-[#111]'
+                              }`}
+                              placeholder="5000"
                             />
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-4 h-[60px] lg:h-auto">
+                        {/* VISIBILITY & SAVE */}
+                        <div className="flex items-center gap-4">
                           <div
-                            className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all cursor-pointer min-w-[100px] h-[58px] ${goalForm.showOnDashboard ? 'bg-amber-500/10 border-amber-500/30' : 'bg-[var(--nexus-panel)] border-[var(--nexus-border)]'}`}
-                            onClick={() => setGoalForm({ ...goalForm, showOnDashboard: !goalForm.showOnDashboard })}
+                            className={`flex flex-col items-center justify-center p-3 rounded-xl border transition-all cursor-pointer min-w-[100px] h-[58px] shadow-sm ${theme === 'light' ? 'bg-white' : 'bg-[#0a0a0a]'} ${goalForm.isActive ? 'border-amber-500' : (theme === 'light' ? 'border-slate-200' : 'border-white/10')}`}
+                            onClick={() => {
+                              const updated = { ...goalForm, isActive: !goalForm.isActive };
+                              setGoalForm(updated);
+                              if (updateGoalSettings) updateGoalSettings(updated);
+                            }}
                           >
-                            <span className={`text-[8px] font-black uppercase tracking-tighter mb-1.5 ${goalForm.showOnDashboard ? 'text-amber-500' : 'text-[var(--nexus-text-muted)]'}`}>Visibility</span>
-                            <div className={`w-10 h-5 rounded-full relative transition-all duration-300 shadow-inner ${goalForm.showOnDashboard ? 'bg-amber-500' : 'bg-slate-700'}`}>
-                              <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow-md transition-all duration-300 ${goalForm.showOnDashboard ? 'left-5.5' : 'left-0.5'}`} />
+                            <span className={`text-[8px] font-black uppercase tracking-widest mb-1.5 ${goalForm.isActive ? 'text-amber-500' : (theme === 'light' ? 'text-slate-400' : 'text-gray-500')}`}>Visibility</span>
+                            <div className={`w-8 h-4 rounded-full relative transition-all duration-300 shadow-inner ${goalForm.isActive ? 'bg-amber-500' : (theme === 'light' ? 'bg-slate-200' : 'bg-gray-700')}`}>
+                              <div className={`absolute top-[2px] w-3 h-3 bg-white rounded-full shadow-md transition-all duration-300 ${goalForm.isActive ? 'left-[18px]' : 'left-[2px]'}`} />
                             </div>
                           </div>
 
                           <button
-                            onClick={() => updateGoalSettings && updateGoalSettings()}
+                            onClick={() => updateGoalSettings && updateGoalSettings({ ...goalForm, resetProgress: true })}
                             disabled={isUpdatingGoal}
-                            className="h-[58px] px-8 bg-gradient-to-r from-amber-400 to-orange-500 text-black rounded-xl font-black uppercase italic tracking-widest text-[10px] transition-all flex items-center gap-3 shadow-lg hover:scale-[1.02] active:scale-[0.98] whitespace-nowrap"
+                            className="h-[58px] px-8 bg-gradient-to-r from-amber-400 to-orange-500 text-black rounded-xl font-black uppercase italic tracking-widest text-[10px] transition-all flex items-center gap-3 shadow-md hover:scale-[1.02] active:scale-[0.98] whitespace-nowrap"
                           >
                             {isUpdatingGoal ? <Activity className="animate-spin w-4 h-4" /> : <Rocket className="w-4 h-4" />}
                             <span>Set Goal</span>
@@ -434,8 +448,14 @@ const ControlCenter = ({
                     </div>
                   </div>
 
-                  {/* RIGHT: STUDIO PREVIEW (FULL WIDTH) */}
-                  <div className={`w-full p-6 md:p-8 rounded-[2rem] border transition-all flex flex-col shadow-2xl justify-between ${getStudioStyle()}`}>
+                  {/* RIGHT: TUG-OF-WAR CONTROL CENTER INTEGRATION */}
+                  <div className="w-full lg:w-[55%]">
+                    <TugOfWarControl streamerId={user?.streamerId} theme={theme} nexusTheme={nexusTheme} />
+                  </div>
+                </div>
+
+                {/* BOTTOM: STUDIO PREVIEW (FULL WIDTH) */}
+                <div className={`w-full p-6 md:p-8 rounded-[2rem] border transition-all flex flex-col shadow-2xl justify-between mb-8 ${getStudioStyle()}`}>
                     <div>
                       <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-3">
@@ -485,11 +505,7 @@ const ControlCenter = ({
                       </div>
                     </div>
 
-                    <button onClick={() => copyToClipboard(`${BASE_URL}/goal/${user?.username}`, 'goal')} className={`w-full py-4 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all flex items-center justify-center gap-2 shadow-md ${theme === 'dark' ? 'bg-amber-500 text-black' : 'bg-slate-900 text-white'}`}>
-                      <Copy className="w-4 h-4 fill-current" /> GoalOverlay Source URL
-                    </button>
                   </div>
-                </div>
 
                 {/* BOTTOM: GOAL THEME BAR (Full Width) */}
                 <div className={`p-6 md:p-8 rounded-[2rem] border transition-all flex flex-col ${getStudioStyle()}`}>
@@ -630,7 +646,7 @@ const ControlCenter = ({
                     { id: 'live_synthwave', label: 'NEON OVERDRIVE', desc: '80s Retro (3D Grid).', icon: <Music className="w-6 h-6" />, color: '#ff00aa', premium: true },
                     { id: 'live_kawaii', label: 'SKY SANCTUARY', desc: 'Day/Night (Parallax).', icon: <Cloud className="w-6 h-6" />, color: '#a1c4fd', premium: true },
                     { id: 'live_dragon', label: 'DRAGON HOARD', desc: 'Mystic Runes (Ember).', icon: <Gem className="w-6 h-6" />, color: '#fbbf24', premium: true },
-                    { id: 'midnight-obsidian', label: 'KINETIC OBSIDIAN', desc: 'Liquid gold accents, dark drift.', icon: <Layout className="w-6 h-6" />, color: '#F59E0B', premium: false },
+
                     { id: 'uplink', label: 'ELITE INTERFACE', desc: 'Modern Design. Multi-layer glass.', icon: <Zap className="w-6 h-6" />, color: '#10B981', premium: false },
                     { id: 'neon_relic', label: 'NEON RELIC', desc: 'Retro Vapor Brutalism.', icon: <Layout className="w-6 h-6" />, color: '#00ffff', premium: true },
                   ].filter(t => !t.premium || (user?.unlockedNexusThemes || []).includes(t.id)).map((t) => {
@@ -991,19 +1007,19 @@ const ControlCenter = ({
                       whileHover={{ scale: 1.05, y: -5 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => handleStyleSwitch(style.id, 'leaderboardStyle')}
-                      className={`group relative flex flex-col p-6 rounded-[2rem] border-2 transition-all duration-500 shadow-lg
+                      className={`group relative flex flex-row items-center gap-4 p-4 rounded-2xl border-2 transition-all duration-500 shadow-lg
                   ${(alertConfig?.leaderboardStyle || 'royal_throne') === style.id
                           ? 'border-[var(--nexus-accent)] bg-[var(--nexus-panel)] shadow-[var(--nexus-glow)]'
                           : 'border-[var(--nexus-border)] bg-[var(--nexus-panel)] hover:border-[var(--nexus-accent)]/50 hover:shadow-xl'
                         }`}
                     >
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-all duration-500 ${(alertConfig?.leaderboardStyle || 'royal_throne') === style.id
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all duration-500 ${(alertConfig?.leaderboardStyle || 'royal_throne') === style.id
                         ? 'bg-[var(--nexus-accent)] text-black shadow-lg'
                         : 'bg-[var(--nexus-panel)] text-[var(--nexus-text-muted)] group-hover:bg-[var(--nexus-accent)]/20 group-hover:text-[var(--nexus-accent)]'
                         }`}>
                         {style.icon}
                       </div>
-                      <div className="flex flex-col text-left gap-1.5">
+                      <div className="flex flex-col text-left gap-0.5">
                         <span className={`text-[10px] font-black uppercase tracking-widest ${(alertConfig?.leaderboardStyle || 'royal_throne') === style.id
                           ? 'text-[var(--nexus-accent)]'
                           : 'text-[var(--nexus-text-muted)] group-hover:text-[var(--nexus-text)]'
@@ -1023,10 +1039,6 @@ const ControlCenter = ({
                   ))}
                 </div>
 
-                {/* TUG-OF-WAR CONTROL CENTER INTEGRATION */}
-                <div className="mt-12">
-                  <TugOfWarControl streamerId={user?.streamerId} theme={theme} nexusTheme={nexusTheme} />
-                </div>
               </div>
             </motion.div>
           )}

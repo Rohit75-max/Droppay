@@ -97,7 +97,7 @@ const TugOfWarControl = ({ user, nexusTheme, streamerId, theme }) => {
                         <Swords className="w-7 h-7" />
                     </div>
                     <div>
-                        <h3 className="text-2xl font-black uppercase italic tracking-tighter text-[var(--nexus-text)]">Tug-of-War Engine</h3>
+                        <h3 className="text-xl font-black uppercase italic tracking-tighter text-[var(--nexus-text)]">Live Tug-of-War Engine</h3>
                         <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--nexus-accent)]">Live Wallet Voting Protocol</p>
                     </div>
                 </div>
