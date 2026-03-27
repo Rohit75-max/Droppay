@@ -210,7 +210,7 @@ exports.getSystemMetrics = async (req, res) => {
         const totalUnsettledDebt = walletDebt + pendingDebt;
         const totalSettledDebt = tpvData.length > 0 ? tpvData[0].totalSettledDebt : 0;
 
-        // Dynamic Mathematical Deduction of DropPay's All-Time Retained Earnings (Historical Integrity)
+        // Dynamic Mathematical Deduction of Drope's All-Time Retained Earnings (Historical Integrity)
         // Platform Cut = Gross Volume - (Streamer Liabilities + Settled Streamer Debt)
         const dynamicCommission = totalVolume - (totalUnsettledDebt + totalSettledDebt);
 
@@ -371,7 +371,7 @@ exports.dispatchBroadcast = async (req, res) => {
                 message,
                 level,
                 timestamp: new Date(),
-                sender: 'DropPay Command Center'
+                sender: 'Drope Command Center'
             });
 
             // Update the global config with the last broadcast
@@ -481,7 +481,7 @@ exports.getSystemHealth = async (req, res) => {
         const redisClient = require('../config/redisClient');
 
         // Circuit Breaker Lookup
-        const isPaused = await redisClient.get('DROPPAY_GLOBAL_PAUSE');
+        const isPaused = await redisClient.get('DROPE_GLOBAL_PAUSE');
 
         // 1. Total Platform Revenue (Sum of platformFee)
         const platformRevenueResult = await Transaction.aggregate([
@@ -570,9 +570,22 @@ exports.getTransactionsLog = async (req, res) => {
         const Transaction = require('../models/Transaction');
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 50;
+        
+        // Advanced Filters
+        const { status, type, search } = req.query;
+        let query = {};
+        
+        if (status && status !== 'all') query.status = status;
+        if (type && type !== 'all') query.type = type;
+        if (search) {
+            query.$or = [
+                { donorName: { $regex: search, $options: 'i' } },
+                { message: { $regex: search, $options: 'i' } }
+            ];
+        }
 
-        const totalTransactions = await Transaction.countDocuments();
-        const stats = await Transaction.find()
+        const totalTransactions = await Transaction.countDocuments(query);
+        const stats = await Transaction.find(query)
             .sort({ createdAt: -1 })
             .skip((page - 1) * limit)
             .limit(limit);
@@ -592,10 +605,10 @@ exports.toggleGlobalPause = async (req, res) => {
     try {
         const redisClient = require('../config/redisClient');
         const { Queue } = require('bullmq');
-        const isPaused = await redisClient.get('DROPPAY_GLOBAL_PAUSE');
+        const isPaused = await redisClient.get('DROPE_GLOBAL_PAUSE');
         const newState = isPaused === 'true' ? 'false' : 'true';
         
-        await redisClient.set('DROPPAY_GLOBAL_PAUSE', newState);
+        await redisClient.set('DROPE_GLOBAL_PAUSE', newState);
 
         // Pause/Resume BullMQ order queue to handle backlog iteratively
         const connection = { url: process.env.REDIS_URI || 'redis://127.0.0.1:6379' };
@@ -625,5 +638,137 @@ exports.toggleGlobalPause = async (req, res) => {
         res.status(200).json({ status: 'success', isPaused: newState === 'true' });
     } catch (err) {
         res.status(500).json({ msg: "Failed to toggle system pause status." });
+    }
+};
+
+// --- 11. ANALYTICS TIME-SERIES ENGINE ---
+exports.getTimeSeriesMetrics = async (req, res) => {
+    try {
+        const Transaction = require('../models/Transaction');
+        
+        // 30 day lookback window
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+        // Group Successful Deposits (Gross TPV) by Day
+        const revenueTrends = await Transaction.aggregate([
+            { 
+                $match: { 
+                    type: 'deposit', 
+                    status: 'success', 
+                    createdAt: { $gte: thirtyDaysAgo } 
+                } 
+            },
+            {
+                $group: {
+                    _id: { $dateToString: { format: "%b %d", date: "$createdAt" } },
+                    revenue: { $sum: "$amount" }
+                }
+            },
+            { $sort: { _id: 1 } } // Note: String sort doesn't work perfectly for month names, better to sort by raw date if needed
+        ]);
+
+        // Group User Registrations by Day
+        const userGrowth = await User.aggregate([
+            { $match: { createdAt: { $gte: thirtyDaysAgo } } },
+            {
+                $group: {
+                    _id: { $dateToString: { format: "%b %d", date: "$createdAt" } },
+                    nodes: { $sum: 1 }
+                }
+            },
+            { $sort: { _id: 1 } }
+        ]);
+
+        // Fix sorting by mapping the data into a contiguous 30-day array on the server-side to ensure zero-day gaps are filled
+        const datesArray = [];
+        for(let i = 29; i >= 0; i--) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: '2-digit' });
+            datesArray.push(dateStr);
+        }
+
+        const formattedRevenue = datesArray.map(date => {
+            const match = revenueTrends.find(r => r._id === date);
+            return { date, revenue: match ? match.revenue : 0 };
+        });
+
+        const formattedGrowth = datesArray.map(date => {
+            const match = userGrowth.find(r => r._id === date);
+            return { date, nodes: match ? match.nodes : 0 };
+        });
+
+        res.status(200).json({
+            revenueTrends: formattedRevenue,
+            userGrowth: formattedGrowth
+        });
+
+    } catch (err) {
+        console.error("Time-Series Aggregation Error:", err);
+        res.status(500).json({ msg: "Failed to compile analytical trends." });
+    }
+};
+
+// --- MEDIATION & RESOLUTION CENTER ---
+
+exports.getDisputes = async (req, res) => {
+    try {
+        const Transaction = require('../models/Transaction');
+        const disputes = await Transaction.find({ "dispute.isDisputed": true })
+            .select('amount netAmount status dispute donorName createdAt')
+            .populate('userId', 'username email') // Attach Creator Info
+            .sort({ "dispute.timestamp": -1 });
+        
+        res.status(200).json(disputes);
+    } catch (err) {
+        console.error("Fetch Disputes Error:", err);
+        res.status(500).json({ msg: "Failed to fetch active disputes." });
+    }
+};
+
+exports.resolveDispute = async (req, res) => {
+    try {
+        const Transaction = require('../models/Transaction');
+        const User = require('../models/User');
+        const tx = await Transaction.findById(req.params.id);
+        
+        if (!tx || !tx.dispute?.isDisputed) return res.status(404).json({ msg: "Mediation case not found." });
+        if (tx.dispute.status !== 'open') return res.status(400).json({ msg: "Case already concluded." });
+
+        const user = await User.findById(tx.userId);
+        if (user) {
+            // Clawback funds securely
+            user.walletBalance = Math.max(0, user.walletBalance - tx.netAmount);
+            await user.save();
+        }
+
+        tx.status = 'refunded';
+        tx.dispute.status = 'resolved';
+        tx.dispute.resolvedAt = new Date();
+        await tx.save();
+
+        res.status(200).json({ msg: "Refund Processed & Case Resolved.", transaction: tx });
+    } catch (err) {
+        console.error("Resolve Dispute Error:", err);
+        res.status(500).json({ msg: "Mediation execution failed." });
+    }
+};
+
+exports.rejectDispute = async (req, res) => {
+    try {
+        const Transaction = require('../models/Transaction');
+        const tx = await Transaction.findById(req.params.id);
+        
+        if (!tx || !tx.dispute?.isDisputed) return res.status(404).json({ msg: "Mediation case not found." });
+        
+        tx.dispute.status = 'rejected';
+        tx.dispute.resolvedAt = new Date();
+        await tx.save();
+
+        res.status(200).json({ msg: "Dispute rejected. Funds remain secured.", transaction: tx });
+    } catch (err) {
+        console.error("Reject Dispute Error:", err);
+        res.status(500).json({ msg: "Mediation rejection failed." });
     }
 };

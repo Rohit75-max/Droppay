@@ -2,12 +2,12 @@ const express = require('express');
 const router = express.Router();
 const adminAuth = require('../middleware/adminAuth');
 const {
-    getUsers, getUserDetails, toggleBan, updateTier, getSystemMetrics,
+    getUsers, getUserDetails, toggleBan, updateTier, getSystemMetrics, getTimeSeriesMetrics,
     updateRole, getPayoutQueue, executeSettlement, rejectSettlement,
     getGlobalConfig, updateGlobalConfig, dispatchBroadcast,
     getAdminProfile, updateAdminProfile, uploadAdminAvatar,
     getAuditLogs, getSystemHealth, getFinancialStats, getTransactionsLog,
-    toggleGlobalPause
+    toggleGlobalPause, getDisputes, resolveDispute, rejectDispute
 } = require('../controllers/adminController');
 const upload = require('../middleware/uploadMiddleware');
 
@@ -37,6 +37,10 @@ router.patch('/users/:id/role', updateRole);
 // @route   GET api/admin/metrics
 // @desc    Global TPV and Node count Aggregator
 router.get('/metrics', getSystemMetrics);
+
+// @route   GET api/admin/metrics/timeseries
+// @desc    30-Day Aggregation for Data Visualizations
+router.get('/metrics/timeseries', getTimeSeriesMetrics);
 
 // @route   GET api/admin/payouts
 // @desc    Get nodes pending settlement
@@ -138,6 +142,20 @@ router.get('/stats', getFinancialStats);
 // @route   GET api/admin/transactions
 // @desc    Retrieve auditing snapshots with pagination bounds
 router.get('/transactions', getTransactionsLog);
+
+// --- 11. RESOLUTION CENTER ---
+
+// @route   GET api/admin/disputes
+// @desc    Retrieve all active mediation cases
+router.get('/disputes', getDisputes);
+
+// @route   POST api/admin/disputes/:id/resolve
+// @desc    Authorize a refund and clawback funds
+router.post('/disputes/:id/resolve', resolveDispute);
+
+// @route   POST api/admin/disputes/:id/reject
+// @desc    Close a dispute as invalid
+router.post('/disputes/:id/reject', rejectDispute);
 
 // @route   PUT api/admin/toggle-pause
 // @desc    System Panic Button (Circuit Breaker Switch)

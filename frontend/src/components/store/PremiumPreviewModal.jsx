@@ -160,7 +160,7 @@ const PremiumPreviewModal = ({ isOpen, onClose, item, onUnlock, theme, user }) =
                                                 <div className="flex items-center justify-between px-6 py-3 bg-indigo-500/10 border-l-4 border-indigo-500 shadow-inner">
                                                     <div className="flex items-center gap-3">
                                                         <Trophy className="w-5 h-5 text-indigo-400" />
-                                                        <span className="text-xs font-black uppercase tracking-[0.3em] text-indigo-400">Elite Supporter Node</span>
+                                                        <span className="text-xs font-black uppercase tracking-[0.3em] text-indigo-400">Elite Supporter Hub</span>
                                                     </div>
                                                     <Sparkles className="w-4 h-4 text-indigo-400/50 animate-pulse" />
                                                 </div>
@@ -240,7 +240,7 @@ const PremiumPreviewModal = ({ isOpen, onClose, item, onUnlock, theme, user }) =
                                     { icon: Activity, label: 'Live Synchronization', desc: 'Instant deployment to your stream environment.' },
                                     { icon: ShieldCheck, label: 'Elite Authorization', desc: 'Verified high-performance broadcast module.' },
                                     { icon: Target, label: 'Dynamic Targeting', desc: 'Optimized for high-engagement viewer interactions.' },
-                                    { icon: Lock, label: 'Secure Licensing', desc: 'Permanent unlock tied to your broadcast node.' }
+                                    { icon: Lock, label: 'Secure Licensing', desc: 'Permanent unlock tied to your broadcast network.' }
                                 ].map((feature, idx) => (
                                     <div key={idx} className="flex items-start gap-4">
                                         <div className={`p-3 rounded-xl ${isLight ? 'bg-emerald-100 text-emerald-600' : 'bg-[var(--nexus-accent)]/10 text-[var(--nexus-accent)]'}`}>

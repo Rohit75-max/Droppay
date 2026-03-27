@@ -98,7 +98,7 @@ const TugOfWarControl = ({ user, nexusTheme, streamerId, theme }) => {
                     </div>
                     <div>
                         <h3 className="text-xl font-black uppercase italic tracking-tighter text-[var(--nexus-text)]">Live Tug-of-War Engine</h3>
-                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--nexus-accent)]">Live Wallet Voting Protocol</p>
+                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--nexus-accent)]">Live Wallet Voting System</p>
                     </div>
                 </div>
 
@@ -177,7 +177,7 @@ const TugOfWarControl = ({ user, nexusTheme, streamerId, theme }) => {
                             className="w-full bg-[var(--nexus-accent)] text-black py-5 rounded-2xl font-black uppercase tracking-[0.2em] italic text-xs shadow-lg shadow-[var(--nexus-accent)]/30 hover:scale-[1.02] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                         >
                             {isStarting ? <Zap className="animate-spin w-4 h-4" /> : <Save className="w-4 h-4" />}
-                            {isStarting ? "Initializing War..." : "START WAR PROTOCOL"}
+                            {isStarting ? "Initializing Challenge..." : "START CHALLENGE"}
                         </motion.button>
                     </div>
                 </div>

@@ -301,7 +301,7 @@ const UpgradeModal = ({ isOpen, onClose, user }) => {
       const options = {
         key: 'rzp_test_SHrX3upgmJ6sGL',
         subscription_id: subRes.data.id,
-        name: 'DropPay Terminal',
+        name: 'Drope Terminal',
         description: `Upgrading to ${planId.toUpperCase()} Tier`,
         handler: async (response) => {
           try {

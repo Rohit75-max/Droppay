@@ -423,7 +423,7 @@ const PremiumStorefront = ({
                 key: orderData.keyId,
                 amount: orderData.amount,
                 currency: orderData.currency,
-                name: "DropPay Marketplace",
+                name: "Drope Marketplace",
                 description: `Unlock ${item.name}`,
                 order_id: orderData.orderId,
                 handler: async function (response) {

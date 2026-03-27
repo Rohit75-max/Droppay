@@ -1,8 +1,11 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import axios from '../api/axios';
+import { toast } from 'react-toastify';
+
 import {
   Wallet, BarChart3, Target, TrendingUp, Loader2, Zap, Activity, Send, ShieldCheck, IndianRupee, Sparkles,
-  CheckCircle, Trophy, User, Crown, Smile, Volume2, Lock, UserCircle, Gift
+  CheckCircle, Trophy, User, Crown, Smile, Volume2, Lock, UserCircle, Gift, AlertCircle
 } from 'lucide-react';
 import CyberGoalBar from './CyberGoalBar';
 import PremiumGoalOverlays from './PremiumGoalOverlays';
@@ -93,10 +96,10 @@ const DashboardSummary = ({
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-[#1e1e1e]/90 backdrop-blur-md text-white p-3 rounded-xl shadow-xl pointer-events-none z-50">
-          <p className="text-[10px] text-gray-400 mb-1 font-mono">{payload[0].payload.fullDate}</p>
-          <p className="text-sm font-bold flex items-center gap-1">
-            <IndianRupee className="w-3 h-3 text-[var(--nexus-accent)]" />
+        <div className="bg-white/95 backdrop-blur-md text-[#111111] p-3 rounded-xl shadow-2xl border border-black/5 pointer-events-none z-50">
+          <p className="text-[10px] text-slate-400 mb-1 font-mono uppercase tracking-widest">{payload[0].payload.fullDate}</p>
+          <p className="text-sm font-black flex items-center gap-1">
+            <IndianRupee className="w-3.5 h-3.5 text-emerald-600" />
             {payload[0].value.toLocaleString('en-IN')}
           </p>
         </div>
@@ -116,6 +119,24 @@ const DashboardSummary = ({
   const getCardStyle = () => {
     if (nexusTheme === 'neon_relic') return 'relic-surface font-mono text-white';
     return 'bg-[var(--nexus-panel)] border-[var(--nexus-border)] text-[var(--nexus-text)] shadow-[var(--nexus-glow)] nexus-card';
+  };
+
+  const handleReportIssue = async (drop) => {
+    if (drop.isTest) {
+        toast.info("Test protocol deposits cannot be mediated.", { style: { background: '#050505', color: '#3b82f6', border: '1px solid #3b82f620' }});
+        return;
+    }
+    const reason = window.prompt("State the reason for mediation (e.g., Suspicious Node, Chargeback Risk):");
+    if (!reason || !reason.trim()) return;
+    
+    try {
+        await axios.post(`/api/user/transactions/${drop._id}/dispute`, { reason }, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        toast.success("Flagged for Admin Mediation", { style: { background: '#050505', color: '#10b981', border: '1px solid #10b98120' }});
+    } catch (err) {
+        toast.error(err.response?.data?.msg || "Mediation protocol failed.");
+    }
   };
 
   return (
@@ -160,7 +181,7 @@ const DashboardSummary = ({
           ) : (
             <EliteCard
               whileHover={{ scale: 1.01, z: 10 }}
-              className={`md:col-span-4 flex flex-col items-stretch border relative overflow-hidden h-[240px] transition-all duration-700 ${nexusTheme === 'neon_relic' ? 'rounded-none relic-surface' : 'rounded-[var(--nexus-radius)]'} ${theme === 'light' ? 'bg-white border-slate-200' : 'bg-[#070707] border-[var(--nexus-border)]'}`}
+              className={`md:col-span-4 flex flex-col items-stretch border relative overflow-hidden h-[240px] transition-all duration-700 ${nexusTheme === 'neon_relic' ? 'rounded-none relic-surface' : 'rounded-[var(--nexus-radius)]'} bg-white border-black/5 shadow-sm hover:shadow-md`}
             >
               {/* Profile Image Section (Top 72%) */}
               <div className="w-full h-[72%] relative overflow-hidden group/avatar flex-shrink-0">
@@ -196,7 +217,7 @@ const DashboardSummary = ({
               </div>
 
               {/* Identity Details Section (Bottom 28%) */}
-              <div className={`w-full h-[28%] p-3 flex flex-col justify-center items-center relative z-20 flex-shrink-0 ${theme === 'light' ? 'bg-white' : 'bg-[#070707]'}`}>
+              <div className={`w-full h-[28%] p-3 flex flex-col justify-center items-center relative z-20 flex-shrink-0 bg-white border-t border-black/5`}>
                 <div className="space-y-1 w-full text-center">
                   <div className="space-y-0.5">
                     <div className="flex items-center justify-center gap-2">
@@ -265,7 +286,7 @@ const DashboardSummary = ({
               </div>
             </div>
           ) : (
-            <EliteCard disableHover={true} className={`md:col-span-8 flex flex-col justify-center p-6 sm:p-8 rounded-[var(--nexus-radius)] border relative overflow-hidden h-[240px] transition-all duration-500 ${getCardStyle()}`}>
+            <EliteCard disableHover={true} className={`md:col-span-8 flex flex-col justify-center p-6 sm:p-8 rounded-[var(--nexus-radius)] border relative overflow-hidden h-[240px] transition-all duration-500 bg-white border-black/5 shadow-sm`}>
               {nexusTheme === 'neon_relic' && (
                 <>
                   <div className="plasma-leak-cyan top-0 right-0 -mt-2 -mr-2"></div>
@@ -309,7 +330,7 @@ const DashboardSummary = ({
 
         {/* ANALYTICS DATA STREAM (Revenue Chart) */}
         <EliteCard
-          className={`group border relative transition-all duration-500 overflow-hidden ${nexusTheme === 'neon_relic' ? 'rounded-none relic-surface flex flex-col' : 'rounded-[var(--nexus-radius)] flex flex-col'} ${getCardStyle()}`}
+          className={`group border p-0 relative transition-all duration-500 overflow-hidden ${nexusTheme === 'neon_relic' ? 'rounded-none relic-surface flex flex-col' : 'rounded-[var(--nexus-radius)] flex flex-col'} bg-white border-black/5 shadow-sm`}
         >
           {nexusTheme === 'neon_relic' && (
             <>
@@ -423,11 +444,11 @@ const DashboardSummary = ({
                 <Area 
                   type="monotone" 
                   dataKey="value" 
-                  stroke="var(--nexus-accent)" 
+                  stroke="#111111" 
                   strokeWidth={3} 
                   fillOpacity={1} 
                   fill="url(#colorRevenue)" 
-                  activeDot={{ r: 6, fill: "var(--nexus-panel)", stroke: "var(--nexus-accent)", strokeWidth: 2 }}
+                  activeDot={{ r: 6, fill: "#ffffff", stroke: "#111111", strokeWidth: 2 }}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -560,7 +581,7 @@ const DashboardSummary = ({
                     <motion.div
                       animate={{ top: ['-20%', '120%'] }}
                       transition={{ duration: 2, ease: "linear", repeat: Infinity }}
-                      className="absolute left-0 right-0 h-1 bg-pink-500 shadow-[0_0_15px_#ff00ff] z-10"
+                      className="absolute left-0 right-0 h-1 bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.5)] z-10"
                       style={{ clipPath: 'polygon(0 0, 10% 100%, 20% 0, 30% 100%, 40% 0, 50% 100%, 60% 0, 70% 100%, 80% 0, 90% 100%, 100% 0)' }}
                     />
 
@@ -579,7 +600,7 @@ const DashboardSummary = ({
 
                 <div className="space-y-1 mt-2">
                   <p className={`text-xs font-black uppercase tracking-widest ${nexusTheme === 'neon_relic' ? 'text-pink-500 font-mono' : 'text-[var(--nexus-text-muted)]'}`}>Feed Offline</p>
-                  <p className={`text-[9px] font-bold italic tracking-tighter animate-pulse ${nexusTheme === 'neon_relic' ? 'text-cyan-400 font-mono drop-shadow-[0_0_5px_rgba(0,255,255,0.8)]' : 'text-[var(--nexus-accent)]/70'}`}>Waiting for contributions...</p>
+                  <p className={`text-[9px] font-bold italic tracking-tighter animate-pulse ${nexusTheme === 'neon_relic' ? 'text-emerald-500 font-mono drop-shadow-[0_0_5px_rgba(16,185,129,0.8)]' : 'text-emerald-600/70'}`}>Waiting for contributions...</p>
                 </div>
               </div>
             ) : (
@@ -641,8 +662,15 @@ const DashboardSummary = ({
                           </p>
                         </div>
                           <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-0 group-hover/card:opacity-100 transition-opacity z-20">
-                            <Smile className="w-2.5 h-2.5 text-[var(--nexus-accent)]" />
-                            <Lock className="w-2.5 h-2.5 text-slate-600" />
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleReportIssue(drop); }}
+                              title="Report Issue"
+                              className="p-1.5 rounded-full hover:bg-rose-500/20 text-slate-500 hover:text-rose-400 transition-colors hidden sm:block delay-75 duration-300"
+                            >
+                                <AlertCircle className="w-3 h-3" />
+                            </button>
+                            <Smile className="w-2.5 h-2.5 text-[var(--nexus-accent)] hidden sm:block" />
+                            <Lock className="w-2.5 h-2.5 text-slate-600 hidden sm:block" />
                           </div>
                       </motion.div>
                     </div>

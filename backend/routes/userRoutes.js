@@ -3,7 +3,7 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const User = require('../models/User');
 const { addBankAccount } = require('../controllers/onboardingController');
-const { purchasePremiumStyle, purchasePremiumAlert, purchaseNexusTheme, purchaseWidget, equipWidget, equipAsset, createStoreOrder, verifyStorePayment, getWithdrawals, cancelWithdrawal } = require('../controllers/userController');
+const { purchasePremiumStyle, purchasePremiumAlert, purchaseNexusTheme, purchaseWidget, equipWidget, equipAsset, createStoreOrder, verifyStorePayment, getWithdrawals, cancelWithdrawal, openDispute } = require('../controllers/userController');
 const { requestWithdrawal } = require('../controllers/withdrawController');
 const { cacheProfile, invalidateProfileCache } = require('../middleware/profileCache');
 // @route   GET api/user/status
@@ -11,7 +11,7 @@ const { cacheProfile, invalidateProfileCache } = require('../middleware/profileC
 router.get('/status', async (req, res) => {
     try {
         const redisClient = require('../config/redisClient');
-        const isPaused = await redisClient.get('DROPPAY_GLOBAL_PAUSE');
+        const isPaused = await redisClient.get('DROPE_GLOBAL_PAUSE');
         res.status(200).json({ isPaused: isPaused === 'true' });
     } catch (err) {
         res.status(500).json({ msg: "Failed to read system status." });
@@ -30,6 +30,13 @@ router.get('/withdrawals', auth, getWithdrawals);
 
 // @route   POST api/user/cancel-withdrawal
 router.post('/cancel-withdrawal', auth, cancelWithdrawal);
+
+// @route   POST api/user/transactions/:id/dispute
+// @desc    Flag a transaction for admin mediation
+router.post('/transactions/:id/dispute', auth, async (req, res) => {
+    req.body.transactionId = req.params.id; // Inject param into body
+    return openDispute(req, res);
+});
 
 // @route   POST api/user/buy-premium-style
 // @desc    Purchase Elite Goal overlay using Wallet Balance
@@ -241,12 +248,12 @@ router.post('/update-profile', auth, async (req, res) => {
             // Fire warning to CURRENT secure email
             const transporter = createTransporter();
             await transporter.sendMail({
-                from: `"DropPay Security" <${process.env.EMAIL_USER}>`,
+                from: `"Drope Security" <${process.env.EMAIL_USER}>`,
                 to: user.email,
                 subject: "Security Alert: Profile Migration",
                 html: `
                     <div style="background:#050505; color:white; padding:30px; border-radius:15px; font-family:sans-serif; border: 1px solid #10B981;">
-                        <h1 style="color:#10B981; font-style:italic;">DropPay Security</h1>
+                        <h1 style="color:#10B981; font-style:italic;">Drope Security</h1>
                         <p style="text-transform:uppercase; letter-spacing:2px; font-size:10px; color:#888;">Identity Migration Authorization Key:</p>
                         <h2 style="font-size:38px; letter-spacing:8px; color:#10B981; margin: 20px 0;">${otpCode}</h2>
                         <p style="font-size:10px; color:#444;">This key expires in 10 minutes. If you did not request this, secure your account immediately.</p>

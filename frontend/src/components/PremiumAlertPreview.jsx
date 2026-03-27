@@ -367,7 +367,7 @@ const PremiumAlertPreview = React.memo(({
 
                         <div className="mt-auto flex justify-between items-end border-t border-amber-600/30 pt-4">
                             <div className="flex flex-col">
-                                <span className="text-white/40 text-[7px] font-bold uppercase">Artist: DropPay Engine</span>
+                                <span className="text-white/40 text-[7px] font-bold uppercase">Artist: Drope Engine</span>
                                 <span className="text-white/40 text-[7px] font-bold uppercase">No. 042/1000 ★</span>
                             </div>
                             <div className="w-8 h-8 rounded-full border-2 border-amber-600/50 flex items-center justify-center">

@@ -9,7 +9,7 @@ const DeploymentAnimation = ({ onComplete, theme }) => {
     useEffect(() => {
         const stages = [
             { text: 'DECRYPTING ASSET...', time: 1000 },
-            { text: 'SYNCING TO NODE...', time: 2000 },
+            { text: 'SYNCING TO NETWORK...', time: 2000 },
             { text: 'DEPLOYMENT COMPLETE', time: 3000 }
         ];
 

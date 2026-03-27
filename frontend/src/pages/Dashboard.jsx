@@ -4,10 +4,11 @@ import axios from '../api/axios';
 import { io } from 'socket.io-client';
 import {
   LayoutDashboard, Settings, Trophy, HelpCircle,
-  MessageSquare, Zap, ChevronRight, LogOut,
+  MessageSquare, Zap, LogOut,
   ShieldAlert, Activity, X, Play, Loader2, IndianRupee, User,
-  Copy, ExternalLink, Bell, Target, ChevronDown, ShoppingBag,
-  History, AlertCircle, Trash2, Plus, ArrowRight, ArrowLeft, RotateCw
+  ShoppingBag, CheckCircle2,
+  History, AlertCircle, Trash2, Plus, ArrowRight, ArrowLeft, RotateCw,
+  Copy, ChevronDown, ChevronUp
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -28,7 +29,6 @@ const navItems = [
   { id: 'summary', icon: LayoutDashboard, label: 'Dashboard' },
   { id: 'control', icon: Settings, label: 'Settings' },
   { id: 'store', icon: ShoppingBag, label: 'Store' },
-  { id: 'profile', icon: User, label: 'Profile' },
   { id: 'growth', icon: Trophy, label: 'Growth' },
   { id: 'help', icon: HelpCircle, label: 'Help' },
   { id: 'feedback', icon: MessageSquare, label: 'Feedback' },
@@ -40,27 +40,26 @@ const navItems = [
 const Dashboard = () => {
   const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState(() => {
-    return localStorage.getItem('dropPayActiveSection') || 'summary';
+    return localStorage.getItem('dropeActiveSection') || 'summary';
   });
   const [user, setUser] = useState(null);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileMenuExpanded, setIsMobileMenuExpanded] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isQuickLinksExpanded, setIsQuickLinksExpanded] = useState(false);
   const socketRef = useRef(null);
 
   const { theme, setTheme } = useTheme();
-  const [isQuickLinksOpen, setIsQuickLinksOpen] = useState(false);
-  const BASE_URL = window.location.origin;
 
   const [nexusTheme, setNexusTheme] = useState(() => {
     return localStorage.getItem('nexusTheme') || 'void';
   });
 
   useEffect(() => {
-    localStorage.setItem('dropPayActiveSection', activeSection);
+    localStorage.setItem('dropeActiveSection', activeSection);
   }, [activeSection]);
 
   useEffect(() => {
-    localStorage.setItem('dropPayTheme', theme);
+    localStorage.setItem('dropeTheme', theme);
     document.documentElement.classList.remove('dark', 'light');
     document.documentElement.classList.add(theme);
 
@@ -124,6 +123,8 @@ const Dashboard = () => {
     }
   }, [showWithdrawModal, fetchWithdrawals]);
 
+  // --- Scroll Lock Protocol ---
+
   const handleCancelWithdrawal = async (id) => {
     if (isCancellingId === id) return;
     setIsCancellingId(id);
@@ -173,19 +174,9 @@ const Dashboard = () => {
         syncTheme(res.data);
       }
 
-      // --- FORCE DARK THEME MIGRATION (Streamer Preference) ---
-      const currentThemeMode = res.data.nexusThemeMode || 'light';
-      if (currentThemeMode === 'light') {
-        syncTheme({ ...res.data, nexusThemeMode: 'dark' });
-        // Update profile on server to persist dark mode
-        const token = localStorage.getItem('token');
-        axios.post(`/api/user/update-profile`,
-          { nexusThemeMode: 'dark' },
-          { headers: { Authorization: `Bearer ${token}` } }
-        ).catch(e => console.error("Failed to persist dark theme", e));
-      } else {
-        syncTheme(res.data);
-      }
+      // --- REMOVED: FORCED DARK MODE MIGRATION ---
+      // We are now using a High-Contrast Cream & Black Rebrand
+      syncTheme(res.data);
       setGoalForm({
         title: res.data.goalSettings?.title || "New Goal",
         targetAmount: res.data.goalSettings?.targetAmount || 0,
@@ -530,14 +521,51 @@ const Dashboard = () => {
   };
 
   if (loading) return (
-    <div className="h-screen bg-[var(--nexus-bg)] flex flex-col items-center justify-center gap-6">
-      <div className="relative">
-        <Loader2 className="w-12 h-12 text-[#10B981] animate-spin" />
-        <Activity className="w-6 h-6 text-[#10B981] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-50" />
+    <div className="h-screen bg-[#f5f4e2] flex flex-col items-center justify-center relative overflow-hidden font-sans">
+      {/* Background Elements */}
+      <div className="absolute inset-0 blueprint-grid opacity-[0.03]" />
+      <div className="scanning-line opacity-10" />
+      <div className="loader-scanline" />
+
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="relative z-10 flex flex-col items-center"
+      >
+        <div className="mb-8 relative">
+           <div className="w-16 h-16 border-2 border-black/5 rounded-full flex items-center justify-center">
+             <Loader2 className="w-8 h-8 text-[#111111] animate-spin opacity-20" />
+           </div>
+           <Activity className="w-6 h-6 text-emerald-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 shadow-[0_0_15px_rgba(16,185,129,0.3)]" />
+        </div>
+
+        <div className="flex flex-col items-center gap-2">
+          <span className="text-[10px] font-black uppercase tracking-[0.6em] text-[#111111] animate-pulse">
+            Synchronizing_Nexus_Dashboard
+          </span>
+          <div className="flex gap-1">
+            {[0, 1, 2].map(i => (
+              <motion.div 
+                key={i}
+                animate={{ opacity: [0.2, 1, 0.2] }}
+                transition={{ repeat: Infinity, duration: 1, delay: i * 0.2 }}
+                className="w-1 h-1 bg-emerald-500"
+              />
+            ))}
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Technical Metadata */}
+      <div className="absolute bottom-10 left-10 text-[8px] font-black uppercase tracking-[0.4em] text-black/20">
+        DASHBOARD_LIVE_RELAY_v4
       </div>
-      <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#10B981] animate-pulse">Loading Dashboard</span>
+      <div className="absolute top-10 right-10 text-[8px] font-black uppercase tracking-[0.4em] text-black/20">
+        SECURE_UPLINK_ESTABLISHED
+      </div>
     </div>
   );
+
 
   if (error) return (
     <div className="h-screen bg-[var(--nexus-bg)] flex flex-col items-center justify-center p-6 text-center">
@@ -550,57 +578,10 @@ const Dashboard = () => {
   );
 
   return (
-    <div className={`h-screen flex flex-col md:flex-row overflow-hidden transition-all duration-500 bg-transparent text-[var(--nexus-text)] relative`}>
+    <div className={`h-screen flex flex-col overflow-hidden transition-all duration-500 bg-[#f5f4e2] text-[#111111] relative`}>
       {/* Background layer is now handled globally by LiveThemeEngine in App.js */}
 
-      <div className="flex flex-col md:flex-row w-full h-full relative z-10 overflow-hidden">
-        {/* SIDEBAR — Theme-Aware Control Pillar */}
-        <aside className={`md:flex hidden w-20 hover:w-64 group transition-all duration-500 flex-col py-8 border-r basis-auto shrink-0 overflow-y-auto custom-scrollbar bg-[var(--nexus-panel)] backdrop-blur-3xl border-[var(--nexus-border)] z-[120] ${theme === 'dark' ? 'shadow-2xl shadow-black/50' : 'shadow-none'}`}>
-          <div
-            className="flex items-center px-6 mb-12 gap-4 cursor-pointer"
-            onClick={handleLogoClick}
-          >
-            <Zap className="w-8 h-8 text-[var(--nexus-accent)] flex-shrink-0" />
-            <span className="text-xl font-black italic tracking-tighter opacity-0 group-hover:opacity-100 transition-all whitespace-nowrap text-[var(--nexus-text)]">DropPay</span>
-          </div>
-          <nav className="flex-1 space-y-2 px-4">
-            {navItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => setActiveSection(item.id)}
-                className={`w-full flex items-center justify-between gap-4 p-3 rounded-[var(--nexus-radius)] transition-all theme-btn ${activeSection === item.id
-                  ? 'bg-[var(--nexus-accent)] text-[var(--nexus-bg)] shadow-lg'
-                  : 'text-[var(--nexus-text-muted)] hover:bg-[var(--nexus-accent)]/10'
-                  }`}
-              >
-                <div className="flex items-center gap-4">
-                  <item.icon className="w-6 h-6 flex-shrink-0" />
-                  <span className="font-black italic uppercase text-[10px] tracking-widest opacity-0 group-hover:opacity-100 transition-all whitespace-nowrap">{item.label}</span>
-                </div>
-                <ChevronRight className={`w-4 h-4 transition-all ${activeSection === item.id ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2'}`} />
-              </button>
-            ))}
-          </nav>
-
-          {/* SECURE ADMIN ENTRY */}
-          {user?.role === 'admin' && (
-            <button onClick={() => navigate('/admin/secure-portal')} className={`px-7 py-4 mt-auto mb-2 flex items-center gap-4 transition-colors border-t ${theme === 'light' ? 'text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-emerald-100' : 'text-rose-500 hover:text-rose-400 hover:bg-rose-500/10 border-rose-500/20'}`}>
-              <ShieldAlert className="w-6 h-6 flex-shrink-0 animate-pulse" />
-              <span className="font-black italic uppercase text-[10px] tracking-widest opacity-0 group-hover:opacity-100 transition-all whitespace-nowrap">Admin Portal</span>
-            </button>
-          )}
-
-          <button onClick={() => {
-            localStorage.removeItem('token');
-            localStorage.removeItem('nexusTheme');
-            localStorage.removeItem('dropPayTheme');
-            navigate('/login');
-          }} className={`px-7 py-4 flex items-center gap-4 transition-colors ${user?.role !== 'admin' ? 'mt-auto' : ''} text-rose-500 hover:text-rose-400 hover:bg-rose-500/10`}>
-            <LogOut className="w-6 h-6 flex-shrink-0" />
-            <span className="font-black italic uppercase text-[10px] tracking-widest opacity-0 group-hover:opacity-100 transition-all whitespace-nowrap">Logout</span>
-          </button>
-
-        </aside>
+      <div className="flex flex-col w-full h-full relative z-10 overflow-hidden">
 
 
         {/* PROTOCOL CONTROLS OVERLAY (Shared Mobile/Desktop) */}
@@ -610,7 +591,7 @@ const Dashboard = () => {
           onLogout={() => {
             localStorage.removeItem('token');
             localStorage.removeItem('nexusTheme');
-            localStorage.removeItem('dropPayTheme');
+            localStorage.removeItem('dropeTheme');
             navigate('/login');
           }}
           user={user}
@@ -620,179 +601,234 @@ const Dashboard = () => {
         />
 
         <AnimatePresence>
-          {isMobileMenuOpen && (
-            <motion.div
-              initial={{ x: '-100%', opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: '-100%', opacity: 0 }}
-              transition={{ type: 'tween', ease: 'easeOut', duration: 0.25 }}
-              className={`fixed inset-0 z-[150] p-6 flex flex-col lg:hidden bg-[var(--nexus-bg)] text-[var(--nexus-text)]`}
-            >
-              <div className="flex justify-between items-center mb-6">
-                <div className="flex items-center gap-2 cursor-pointer" onClick={() => { handleLogoClick(); setIsMobileMenuOpen(false); }}>
-                  <Zap className="w-8 h-8 text-[var(--nexus-accent)]" />
-                  <span className={`text-xl font-black italic tracking-tighter text-[var(--nexus-text)]`}>DropPay</span>
-                </div>
-                <button
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={`p-2 rounded-xl border border-[var(--nexus-border)] text-[var(--nexus-text)]`}
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-              <div className="space-y-2 flex-1 overflow-y-auto scrollbar-hide pr-2">
-                {navItems.map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => { setActiveSection(item.id); setIsMobileMenuOpen(false); }}
-                    className={`w-full flex items-center justify-between py-3 md:py-4 text-base md:text-lg font-black italic uppercase border-b transition-all ${activeSection === item.id
-                      ? (theme === 'light' ? 'text-emerald-700 bg-emerald-50 px-3 rounded-xl border-b-transparent shadow-sm' : 'text-[var(--nexus-accent)] border-[var(--nexus-border)]')
-                      : (theme === 'light' ? 'text-emerald-950/60 border-emerald-100' : 'text-[var(--nexus-text-muted)] border-[var(--nexus-border)]')
-                      }`}
-                  >
-                    <div className="flex items-center gap-4">
-                      <item.icon className={`w-5 h-5 md:w-6 md:h-6 ${activeSection === item.id && theme === 'light' ? 'text-emerald-600' : ''}`} />
-                      {item.label}
-                    </div>
-                    <ChevronRight className={`w-5 h-5 ${activeSection === item.id ? 'opacity-100 text-current' : 'opacity-0'}`} />
-                  </button>
-                ))}
-              </div>
-
-              <div className="pt-2 shrink-0 border-t border-[var(--nexus-border)] mt-2">
-                {/* MOBILE SECURE ADMIN ENTRY */}
-                {user?.role === 'admin' && (
-                  <button onClick={() => { navigate('/admin/secure-portal'); setIsMobileMenuOpen(false); }} className={`w-full mb-2 py-3 md:py-4 font-black italic uppercase text-base md:text-lg flex items-center gap-4 border-b ${theme === 'light' ? 'text-rose-600 border-emerald-100' : 'text-rose-500 border-rose-500/20'}`}>
-                    <ShieldAlert className="w-5 h-5 md:w-6 md:h-6 animate-pulse" /> Admin Portal
-                  </button>
-                )}
-
-                <button onClick={() => {
-                  localStorage.removeItem('token');
-                  localStorage.removeItem('nexusTheme');
-                  localStorage.removeItem('dropPayTheme');
-                  navigate('/login');
-                }} className={`w-full py-3 md:py-4 font-black italic uppercase text-base md:text-lg flex items-center gap-4 ${theme === 'light' ? 'text-rose-600' : 'text-rose-500'}`}><LogOut className="w-5 h-5 md:w-6 md:h-6" /> Logout</button>
-              </div>
-            </motion.div>
-          )}
         </AnimatePresence>
 
         <main className="flex-1 flex flex-col relative overflow-hidden pt-0 bg-transparent">
-          <header className="px-6 py-2 md:px-12 md:py-2.5 flex justify-between items-center z-40 bg-[var(--nexus-panel)] backdrop-blur-3xl border-b border-[var(--nexus-border)]">
-            <div className="flex flex-col">
-              <span className="text-[7px] font-black uppercase tracking-[0.4em] text-[var(--nexus-accent)] drop-shadow-[0_0_8px_var(--nexus-accent-glow)]">DropPay</span>
-              <div className="flex items-center gap-4">
-                <h1 className={`text-xl md:text-2xl font-black italic tracking-tighter ${nexusTheme === 'neon_relic' ? 'relic-text-glow' : 'text-[var(--nexus-text)]'}`}>
-                  {(navItems.find(item => item.id === activeSection)?.label || 'DASHBOARD').toUpperCase()}.
-                </h1>
-
+          <header className="px-6 py-2 md:px-12 md:py-2.5 flex justify-between items-center z-40 bg-white/40 backdrop-blur-3xl border-b border-black/5">
+            <div className="flex items-center gap-4 md:gap-8">
+              <div
+                className="flex items-center gap-2 cursor-pointer group"
+                onClick={handleLogoClick}
+              >
+                <span className="text-xl font-black tracking-tight" style={{ fontFamily: 'Georgia, serif', color: '#111111' }}>drope.in</span>
               </div>
+
+              <div className="h-4 w-px bg-black/10 hidden md:block" />
+
+              <nav className="hidden md:flex items-center gap-6">
+                {navItems.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveSection(item.id)}
+                    className={`text-[10px] font-black italic uppercase tracking-widest transition-all ${activeSection === item.id
+                      ? 'text-[#111111] underline underline-offset-8 decoration-2'
+                      : 'text-black/40 hover:text-black/60'
+                      }`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+                
+
+
+              </nav>
             </div>
 
-            {/* Profile Pill & Quick Links */}
-            <div className="relative">
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => setIsQuickLinksOpen(!isQuickLinksOpen)}
-                className="flex items-center gap-3 pl-2 pr-4 py-1.5 rounded-full bg-[var(--nexus-panel)] border border-[var(--nexus-border)] shadow-lg hover:shadow-[var(--nexus-glow)] transition-all group"
-              >
-                <div className="w-8 h-8 rounded-full bg-[var(--nexus-accent)] flex items-center justify-center text-[var(--nexus-bg)] font-black text-xs shadow-[0_0_10px_var(--nexus-accent-glow)]">
-                  {user?.fullName?.charAt(0).toUpperCase() || user?.username?.charAt(0).toUpperCase() || 'U'}
-                </div>
-                <div className="flex flex-col items-start hidden sm:flex">
-                  <span className="text-[10px] font-black text-[var(--nexus-text)] tracking-wider">{user?.username || 'User'}</span>
-                </div>
-                <ChevronDown className={`w-4 h-4 text-[var(--nexus-text-muted)] transition-transform duration-300 ${isQuickLinksOpen ? 'rotate-180' : ''}`} />
-              </motion.button>
+              {/* NEW PREMIUM PROFILE HUB TRIGGER */}
+              <div className="relative">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setIsProfileOpen(!isProfileOpen)}
+                  className="w-8 h-8 rounded-xl bg-white border border-black/5 shadow-sm flex items-center justify-center overflow-hidden group"
+                >
+                  {user?.avatar ? (
+                    <img src={user.avatar} alt="Profile" className="w-full h-full object-cover" />
+                  ) : (
+                    <User className="w-4 h-4 text-black/40 group-hover:text-black transition-colors" />
+                  )}
+                </motion.button>
 
-              <AnimatePresence>
-                {isQuickLinksOpen && (
-                  <>
-                    {/* Overlay Backdrop for closing on click outside */}
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      onClick={() => setIsQuickLinksOpen(false)}
-                      className="fixed inset-0 z-40"
-                    />
-
-                    <motion.div
-                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      className={`absolute right-1 sm:right-6 mt-6 w-[92vw] max-w-[calc(100vw-32px)] sm:w-[450px] md:w-[800px] lg:w-[950px] border rounded-[2.5rem] z-50 overflow-hidden max-h-[90vh] flex flex-col ${theme === 'light'
-                        ? 'bg-white border-slate-200 shadow-[0_30px_70px_-10px_rgba(0,0,0,0.15)]'
-                        : 'bg-[var(--nexus-bg)] border-[var(--nexus-border)] shadow-[0_50px_100px_-15px_rgba(0,0,0,0.7)] backdrop-blur-3xl'
-                        }`}
-                    >
-                      <div className="p-4 sm:p-6 pb-4 space-y-4 overflow-y-hidden flex flex-col">
-                        <div className="flex border-b border-[var(--nexus-border)] pb-3 mb-1 items-center justify-between">
-                          <h4 className="text-[12px] font-black uppercase tracking-[0.4em] text-[var(--nexus-accent)]">Quick Links</h4>
-                          <span className="text-[8px] font-bold text-[var(--nexus-text-muted)] uppercase tracking-widest opacity-30 italic">Zero-Scroll Hub</span>
+                <AnimatePresence>
+                  {isProfileOpen && (
+                    <>
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setIsProfileOpen(false)}
+                        className="fixed inset-0 z-40"
+                      />
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.98, y: 10 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.98, y: 10 }}
+                        className="absolute right-0 mt-4 w-72 bg-white border border-black/10 rounded-none shadow-[var(--nexus-glow)] z-50 overflow-hidden"
+                      >
+                        {/* Blyss Header: Centered Identity */}
+                        <div className="p-6 pb-4 flex flex-col items-center border-b border-[var(--nexus-border)]/50">
+                          <div className="w-20 h-20 rounded-full bg-black/5 p-1 border border-[var(--nexus-border)] shadow-sm relative group overflow-hidden mb-3">
+                            {user?.avatar ? (
+                              <img src={user.avatar} alt="Profile" className="w-full h-full object-cover rounded-full" />
+                            ) : (
+                              <div className="w-full h-full bg-[#111111] flex items-center justify-center text-white font-black text-2xl italic tracking-tighter rounded-full">
+                                {(user?.fullName || user?.username || 'U').charAt(0).toUpperCase()}
+                              </div>
+                            )}
+                            <div className="absolute inset-0 bg-transparent group-hover:bg-black/10 transition-colors pointer-events-none" />
+                          </div>
+                          
+                          <h4 className="text-[14px] font-black uppercase italic tracking-tighter text-[#111111] leading-none mb-1">
+                            {user?.fullName || user?.username || 'User Identity'}
+                          </h4>
+                          <span className="text-[9px] font-mono font-bold text-black/40 uppercase tracking-widest">
+                            ID: @{user?.username || 'SYSTEM_NODE'}
+                          </span>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                          {[
-                            { label: 'Donation Page', icon: IndianRupee, value: `${BASE_URL}/pay/${user?.username}`, color: 'var(--nexus-accent)' },
-                            { label: 'Overlay Link', icon: Bell, value: `${BASE_URL}/overlay/${user?.obsKey}`, color: '#f43f5e' },
-                            { label: 'Goal Link', icon: Target, value: `${BASE_URL}/goal/${user?.username}`, color: '#f59e0b' },
-                            { label: 'Master Link', icon: Activity, value: `${BASE_URL}/overlay/master/${user?.obsKey}`, color: '#8b5cf6' }
-                          ].map((item, idx) => (
-                            <div key={idx} className="group/item flex flex-col gap-2 p-3 sm:p-4 rounded-2xl bg-[var(--nexus-panel)] border border-[var(--nexus-border)] hover:border-[var(--nexus-accent)]/40 transition-all shadow-sm hover:shadow-[0_10px_30px_rgba(0,0,0,0.2)]">
-                              <div className="flex justify-between items-center">
-                                <div className="flex items-center gap-3">
-                                  <div className={`p-1.5 rounded-lg ${theme === 'light' ? 'bg-slate-100' : 'bg-black/40'} border border-white/5`} style={{ color: item.color }}>
-                                    <item.icon className="w-3.5 h-3.5" />
-                                  </div>
-                                  <span className="text-[9px] font-black uppercase tracking-widest text-[var(--nexus-text)]">{item.label}</span>
-                                </div>
-                                <button
-                                  onClick={() => {
-                                    navigator.clipboard.writeText(item.value);
-                                    toast.success(`${item.label} Copied!`, {
-                                      position: "top-center",
-                                      autoClose: 2000,
-                                      hideProgressBar: true,
-                                      theme: theme === 'dark' ? 'dark' : 'light'
-                                    });
-                                  }}
-                                  className="p-1 rounded-lg hover:bg-[var(--nexus-accent)]/10 text-[var(--nexus-text-muted)] hover:text-[var(--nexus-accent)] transition-all"
-                                >
-                                  <Copy className="w-3 h-3" />
-                                </button>
-                              </div>
-                              <div className={`flex items-center gap-2 px-1.5 py-1 rounded-lg border ${theme === 'light' ? 'bg-slate-50 border-slate-200' : 'bg-black/20 border-white/5'
-                                }`}>
-                                <span className="text-[8px] font-mono text-[var(--nexus-text-muted)] truncate flex-1">{item.value}</span>
-                                <a href={item.value} target="_blank" rel="noopener noreferrer" className="shrink-0 opacity-40 hover:opacity-100 transition-opacity">
-                                  <ExternalLink className="w-2.5 h-2.5" />
-                                </a>
-                              </div>
+                        {/* Quick Stats: Balance & Tier */}
+                        <div className="grid grid-cols-2 border-b border-[var(--nexus-border)]/50 divide-x divide-[var(--nexus-border)]/50">
+                          <div className="p-3 text-center flex flex-col items-center">
+                            <span className="text-[8px] font-black uppercase tracking-widest text-black/30 mb-0.5">Balance</span>
+                            <span className="text-[10px] font-mono font-black text-[#111111]">
+                              ₹{(Number(user?.walletBalance) || 0).toLocaleString('en-IN')}
+                            </span>
+                          </div>
+                          <div className="p-3 text-center flex flex-col items-center">
+                            <span className="text-[8px] font-black uppercase tracking-widest text-black/30 mb-0.5">Node_Tier</span>
+                            <div className="flex items-center gap-1">
+                              <Trophy className={`w-2.5 h-2.5 ${user?.tier === 'legend' ? 'text-amber-500' : user?.tier === 'pro' ? 'text-indigo-500' : 'text-emerald-500'}`} />
+                              <span className="text-[10px] font-black uppercase italic tracking-tighter text-[#111111]">
+                                {user?.tier || 'Starter'}
+                              </span>
                             </div>
+                          </div>
+                        </div>
+
+                        {/* Tactical Action Button (Expandable Toggle) */}
+                        <div className="p-4 border-b border-[var(--nexus-border)]/50">
+                          <button
+                            onClick={() => setIsQuickLinksExpanded(!isQuickLinksExpanded)}
+                            className="mx-auto block w-[85%] py-2.5 rounded-none bg-[#111111] text-white text-[10px] font-black uppercase italic tracking-[0.3em] flex items-center justify-center gap-2 hover:bg-black transition-all active:scale-[0.98] shadow-lg"
+                          >
+                            <Zap className={`w-3 h-3 ${isQuickLinksExpanded ? 'text-amber-500' : 'text-[var(--nexus-accent)]'}`} />
+                            {isQuickLinksExpanded ? 'Hide Links' : 'Quick Links'}
+                            {isQuickLinksExpanded ? <ChevronUp className="w-3 h-3 ml-auto" /> : <ChevronDown className="w-3 h-3 ml-auto" />}
+                          </button>
+
+                          <AnimatePresence>
+                            {isQuickLinksExpanded && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                className="overflow-hidden"
+                              >
+                                <div className="pt-4 space-y-2">
+                                  {[
+                                    { label: 'Donation Page', value: `${window.location.origin}/pay/${user?.username}` },
+                                    { label: 'Overlay Link', value: `${window.location.origin}/overlay/${user?.obsKey}` },
+                                    { label: 'Goal Link', value: `${window.location.origin}/goal/${user?.username}` },
+                                    { label: 'Master Link', value: `${window.location.origin}/overlay/master/${user?.obsKey}` }
+                                  ].map((link, idx) => (
+                                    <div key={idx} className="p-2 border border-black/5 bg-black/[0.02] flex items-center justify-between group">
+                                      <div className="flex flex-col min-w-0">
+                                        <span className="text-[8px] font-black uppercase tracking-widest text-black/30 mb-0.5">{link.label}</span>
+                                        <span className="text-[9px] font-mono font-bold text-black/60 truncate pr-2">
+                                          {link.value.replace(/^https?:\/\//, '')}
+                                        </span>
+                                      </div>
+                                      <button
+                                        onClick={() => {
+                                          navigator.clipboard.writeText(link.value);
+                                          toast.success(`${link.label} Copied!`);
+                                        }}
+                                        className="p-1.5 hover:bg-black hover:text-white transition-all border border-transparent hover:border-black active:scale-95"
+                                        title="Copy Link"
+                                      >
+                                        <Copy className="w-3 h-3" />
+                                      </button>
+                                    </div>
+                                  ))}
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+
+                        {/* Menu Navigation */}
+                        <div className="p-1 space-y-0.5">
+                          {[
+                            ...(user?.role === 'admin' ? [{ id: 'admin', label: 'Admin', icon: ShieldAlert, color: 'text-rose-500' }] : []),
+                            { id: 'profile', label: 'Profile', icon: User }
+                          ].map((item) => (
+                            <button
+                              key={item.id}
+                              onClick={() => { 
+                                if (item.id === 'admin') navigate('/admin/secure-portal');
+                                else setActiveSection(item.id); 
+                                setIsProfileOpen(false); 
+                              }}
+                              className="w-full p-2.5 rounded-none flex items-center justify-between group hover:bg-black/5 transition-all border border-transparent hover:border-black/5"
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className="p-1.5 rounded-none bg-black/5 border border-black/5 group-hover:border-black/10 transition-all">
+                                  <item.icon className="w-3 h-3 text-black/40 group-hover:text-black transition-colors" />
+                                </div>
+                                <span className={`text-[10px] font-black uppercase italic tracking-widest ${item.color || 'text-black/60'} group-hover:text-black transition-colors`}>
+                                  {item.label}
+                                </span>
+                              </div>
+                              <ArrowRight className="w-2.5 h-2.5 text-black/20 group-hover:text-black transition-all group-hover:translate-x-0.5" />
+                            </button>
                           ))}
                         </div>
 
-                        <button
-                          onClick={() => setIsQuickLinksOpen(false)}
-                          className={`w-full py-3.5 rounded-2xl font-black uppercase text-[10px] tracking-[0.3em] mt-2 transition-all hover:scale-[1.01] active:scale-[0.99] shadow-xl ${theme === 'light'
-                            ? 'bg-slate-900 text-white shadow-slate-200'
-                            : 'bg-[var(--nexus-accent)] text-black shadow-[var(--nexus-accent)]/20 hover:brightness-110'
-                            }`}
-                        >
-                          Close Quick Links
-                        </button>
-                      </div>
-                    </motion.div>
-                  </>
-                )}
-              </AnimatePresence>
-            </div>
+                        {/* Payout Status Indicator */}
+                        <div className="px-4 py-2 border-t border-[var(--nexus-border)]/50 flex items-center justify-between bg-black/5">
+                          <span className="text-[8px] font-black uppercase tracking-widest text-black/30">Payout_Node</span>
+                          <div className="flex items-center gap-1">
+                            {user?.payoutSettings?.bankVerificationStatus === 'verified' ? (
+                              <>
+                                <CheckCircle2 className="w-2.5 h-2.5 text-emerald-500" />
+                                <span className="text-[9px] font-black uppercase italic tracking-widest text-emerald-600">Active</span>
+                              </>
+                            ) : (
+                              <>
+                                <ShieldAlert className="w-2.5 h-2.5 text-amber-500" />
+                                <span className="text-[9px] font-black uppercase italic tracking-widest text-amber-600">Action</span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Sign Out (Final Bottom Action) */}
+                        <div className="p-1 border-t border-[var(--nexus-border)]/50 bg-rose-500/5">
+                          <button
+                            onClick={() => {
+                              localStorage.removeItem('token');
+                              localStorage.removeItem('nexusTheme');
+                              localStorage.removeItem('dropeTheme');
+                              navigate('/login');
+                            }}
+                            className="w-full p-2.5 rounded-none flex items-center gap-3 hover:bg-rose-500/10 transition-all text-rose-500 group border border-transparent hover:border-rose-500/20"
+                          >
+                            <div className="p-1.5 rounded-none bg-rose-500/10 border border-rose-500/10 group-hover:border-rose-500/20 transition-all">
+                              <LogOut className="w-3 h-3" />
+                            </div>
+                            <span className="text-[10px] font-black uppercase italic tracking-widest leading-none">
+                              Sign Out Node
+                            </span>
+                          </button>
+                        </div>
+                      </motion.div>
+                    </>
+                  )}
+                </AnimatePresence>
+              </div>
           </header>
 
-          <div className={`flex-1 overflow-y-auto custom-scrollbar px-4 md:px-8 pb-32 md:pb-12 transition-all duration-300 ${isQuickLinksOpen ? 'blur-[8px] opacity-50 border-white/5 saturate-[0.5]' : ''}`}>
+          <div className={`flex-1 overflow-y-auto custom-scrollbar px-4 md:px-8 pb-32 md:pb-12 transition-all duration-300`}>
             <AnimatePresence mode="wait">
               <motion.div key={activeSection} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }} transition={{ duration: 0.2 }} className="max-w-7xl mx-auto w-full flex flex-col items-center">
                 <div className="w-full">
@@ -1254,7 +1290,7 @@ const Dashboard = () => {
                         className={`px-12 py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-all ${theme === 'light' ? 'bg-slate-900 text-white' : 'bg-white text-black hover:bg-slate-200'
                           }`}
                       >
-                        Back to Command Center
+                        Back to Admin Panel
                       </button>
                     </motion.div>
                   )}

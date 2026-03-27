@@ -8,7 +8,16 @@ const TransactionSchema = new mongoose.Schema({
     platformFee: { type: Number, default: 0 }, // 5/10/15% Cut
     netAmount: { type: Number, required: true }, // Net balance increase/decrease
     referenceId: { type: String, required: true, unique: true, index: true }, // Razorpay pay_id or payout_id
-    status: { type: String, enum: ['success', 'failed', 'pending'], default: 'success' }
+    status: { type: String, enum: ['success', 'failed', 'pending', 'refunded'], default: 'success' },
+    donorName: { type: String, trim: true }, // Guest payer name
+    message: { type: String }, // Buyer message
+    metadata: { type: Object }, // Extensible tracking
+    dispute: {
+        isDisputed: { type: Boolean, default: false },
+        reason: { type: String },
+        status: { type: String, enum: ['open', 'resolved', 'rejected'] },
+        resolvedAt: { type: Date }
+    }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Transaction', TransactionSchema);

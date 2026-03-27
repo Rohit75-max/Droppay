@@ -94,7 +94,7 @@ const PaymentChoiceModal = ({ isOpen, onClose, onSelect, balance, price, itemNam
                                     {!canAfford && <span className="text-[9px] font-black uppercase bg-red-500/20 text-red-500 px-3 py-1.5 rounded-lg border border-red-500/20 tracking-widest">Insufficient</span>}
                                     {canAfford && (
                                         <div className="flex flex-col items-end gap-1">
-                                            <span className="text-[8px] font-black uppercase tracking-widest text-emerald-500 opacity-60">Authorize</span>
+                                            <span className="text-[8px] font-black uppercase tracking-widest text-emerald-500 opacity-60">Verify Payment</span>
                                             <div className="w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-black transition-all duration-300">
                                                 <Zap className="w-4 h-4" />
                                             </div>

@@ -33,7 +33,7 @@ const NeuralProfile = () => {
 
                 {/* Node Data */}
                 <h3 className="text-2xl font-black tracking-widest text-white mb-2 uppercase group-hover:text-[#3b82f6] transition-colors">
-                    Astra Node
+                    Astra Hub
                 </h3>
                 <p className="font-mono text-[10px] tracking-widest text-slate-400 mb-6">
                     CID: DROP-9X2F
@@ -42,7 +42,7 @@ const NeuralProfile = () => {
                 {/* Hidden Secure Status */}
                 <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 absolute bottom-6 text-center w-full">
                     <p className="font-mono text-[11px] tracking-widest text-[#3b82f6] drop-shadow-[0_0_8px_rgba(59,130,246,0.9)]">
-                        NODE STATUS: SECURE
+                        UNIT STATUS: SECURE
                     </p>
                 </div>
             </motion.div>

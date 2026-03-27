@@ -4,7 +4,7 @@ import { Crown, Play, CheckCircle2 } from 'lucide-react';
 
 /**
  * ELITE THEME STORE CARD
- * A premium product card for the DropPay Store that previews live animations.
+ * A premium product card for the Drope Store that previews live animations.
  */
 const EliteThemeStoreCard = ({
     title = "Neon Overdrive",

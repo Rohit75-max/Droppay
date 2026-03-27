@@ -3,7 +3,7 @@ import axios from 'axios';
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5001";
 
 if (!process.env.REACT_APP_API_URL && window.location.hostname !== 'localhost') {
-    console.warn("⚠️ [DropPay] REACT_APP_API_URL not set. Falling back to localhost. API calls will fail on live server.");
+    console.warn("⚠️ [Drope] REACT_APP_API_URL not set. Falling back to localhost. API calls will fail on live server.");
 }
 
 const API = axios.create({
@@ -23,7 +23,7 @@ API.interceptors.response.use(
             console.warn("🔐 Session invalidated by central authority. Clearing node identity.");
             localStorage.removeItem('token');
             localStorage.removeItem('nexusTheme');
-            localStorage.removeItem('dropPayTheme');
+            localStorage.removeItem('dropeTheme');
 
             // Force redirect to login if not already there
             if (!window.location.pathname.includes('/login')) {

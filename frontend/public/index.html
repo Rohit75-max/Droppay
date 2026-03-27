@@ -19,7 +19,7 @@
   </noscript>
   <!-- ──────────────────────────────── -->
 
-  <title>DropPay | The Ultimate Streamer Tool</title>
+  <title>Drope | The Ultimate Streamer Tool</title>
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
@@ -29,19 +29,19 @@
   <script>
     (function () {
       try {
-        var theme = localStorage.getItem('dropPayTheme');
+        var theme = localStorage.getItem('dropeTheme');
         // If empty or explicitly light (for legacy overrides), force it to dark initially as the standard
         // (Wait, if a user actually *chooses* light mode, we should let them. So only default to dark if not set)
         if (!theme) {
           theme = 'dark';
-          localStorage.setItem('dropPayTheme', 'dark');
+          localStorage.setItem('dropeTheme', 'dark');
         } else if (theme === 'light') {
            // If they actually had light mode saved from the old bad default, wipe it to dark
            // Since streamers requested dark mode only.
-           const userHasChosen = localStorage.getItem('dropPayThemeSet') === 'true';
+           const userHasChosen = localStorage.getItem('dropeThemeSet') === 'true';
            if (!userHasChosen) {
              theme = 'dark';
-             localStorage.setItem('dropPayTheme', 'dark');
+             localStorage.setItem('dropeTheme', 'dark');
            }
         }
         document.documentElement.classList.add(theme);

@@ -237,7 +237,7 @@ const DonationPage = () => {
       socketInstance.once('payment-order-ready', (payload) => {
         new window.Razorpay({
           key: process.env.REACT_APP_RAZORPAY_KEY_ID || "rzp_test_SHrX3upgmJ6sGL",
-          amount: payload.order.amount, currency: "INR", name: "DropPay Protocol", order_id: payload.order.id,
+          amount: payload.order.amount, currency: "INR", name: "Drope Protocol", order_id: payload.order.id,
           handler: async (res) => {
             try {
               await axios.post('/api/payment/verify', {
@@ -296,7 +296,7 @@ const DonationPage = () => {
         <header className="px-6 py-4 md:px-8 shrink-0 flex justify-between items-center bg-[var(--nexus-panel)] border-b border-[var(--nexus-border)] shadow-sm w-full">
           <div className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => navigate('/')}>
             <Zap className="w-6 h-6 text-[var(--nexus-accent)] fill-[var(--nexus-accent)]" />
-            <span className="text-xl md:text-2xl font-black italic text-[var(--nexus-text)] tracking-tighter">DropPay</span>
+            <span className="text-xl md:text-2xl font-black italic text-[var(--nexus-text)] tracking-tighter">Drope</span>
           </div>
           <h1 className="text-lg md:text-2xl font-black italic uppercase tracking-tighter leading-none text-[var(--nexus-text)]">
             Donation <span className="text-[var(--nexus-accent)]">Portal.</span>

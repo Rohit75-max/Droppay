@@ -632,3 +632,43 @@ exports.verifyStorePayment = async (req, res) => {
         res.status(500).json({ msg: "Payment Verification Failed." });
     }
 };
+
+exports.openDispute = async (req, res) => {
+    try {
+        const { transactionId, reason } = req.body;
+        const Transaction = require('../models/Transaction');
+        const Drop = require('../models/Drop');
+        
+        // Strategy: Check if it's a direct Transaction ID, else it's a Drop ID needing Razorpay correlation
+        let tx;
+        if (transactionId.length === 24) { // standard Mongo ObjectId
+            tx = await Transaction.findOne({ _id: transactionId, userId: req.user.id });
+        }
+        
+        if (!tx) {
+            const drop = await Drop.findById(transactionId);
+            if (drop && drop.razorpayPaymentId) {
+                tx = await Transaction.findOne({ referenceId: drop.razorpayPaymentId, userId: req.user.id });
+            }
+        }
+
+        if (!tx) return res.status(404).json({ msg: "Transaction not found or you lack ownership." });
+
+        if (tx.dispute?.isDisputed) {
+            return res.status(400).json({ msg: "Transaction is already in active mediation." });
+        }
+
+        tx.dispute = {
+            isDisputed: true,
+            reason: reason || 'Suspicious Activity flagged by Creator',
+            status: 'open',
+            resolvedAt: null
+        };
+        
+        await tx.save();
+        res.status(200).json({ msg: "Transaction flagged for Admin Mediation.", transaction: tx });
+    } catch (err) {
+        console.error("Open Dispute Error:", err);
+        res.status(500).json({ msg: "Failed to open dispute." });
+    }
+};

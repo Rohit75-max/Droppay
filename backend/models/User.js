@@ -197,7 +197,7 @@ const UserSchema = new mongoose.Schema({
 
   adminProfile: {
     title: { type: String, default: 'Protocol Administrator' },
-    bio: { type: String, default: 'Secure Authority over the DropPay Nexus.' },
+    bio: { type: String, default: 'Secure Authority over the Drope Nexus.' },
     department: { type: String, default: 'Security Operations' },
     accessLevel: { type: Number, default: 1 }, // 1: Standard Admin, 2: Super Admin
     avatar: { type: String, default: null }

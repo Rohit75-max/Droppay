@@ -32,7 +32,7 @@ module.exports = function(passport) {
                 }
                 return done(null, user);
             } else {
-                // New user: Create them in DropPay
+                // New user: Create them in Drope
                 user = await User.create(newUser);
                 return done(null, user);
             }

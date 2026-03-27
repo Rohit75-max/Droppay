@@ -9,7 +9,7 @@ async function test() {
       type: "route", 
       reference_id: "test_" + Date.now(),
       legal_business_name: "Test User",
-      customer_facing_business_name: `Test User on DropPay`,
+      customer_facing_business_name: `Test User on Drope`,
       profile: { 
           category: "entertainment", 
           subcategory: "video_streaming",

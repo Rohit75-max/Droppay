@@ -13,7 +13,7 @@ export const ThemeProvider = ({ children }) => {
             return 'light';
         }
         // Fall back to explicitly stored dp theme
-        return localStorage.getItem('dropPayTheme') || 'dark';
+        return localStorage.getItem('dropeTheme') || 'dark';
     });
 
     // Apply class to <html> on mount and on every change
@@ -21,7 +21,7 @@ export const ThemeProvider = ({ children }) => {
         const root = document.documentElement;
         root.classList.remove('dark', 'light');
         root.classList.add(theme);
-        localStorage.setItem('dropPayTheme', theme);
+        localStorage.setItem('dropeTheme', theme);
 
         // Notify the rest of the app (Home.jsx, etc.)
         window.dispatchEvent(
@@ -42,7 +42,7 @@ export const ThemeProvider = ({ children }) => {
     }, []);
 
     const toggleTheme = useCallback(() => {
-        localStorage.setItem('dropPayThemeSet', 'true'); // user explicitly chose
+        localStorage.setItem('dropeThemeSet', 'true'); // user explicitly chose
         setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
     }, []);
 

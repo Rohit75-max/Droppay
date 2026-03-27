@@ -1,6 +1,6 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -16,7 +16,7 @@ import LiveThemeEngine from './components/LiveThemeEngine';
 // 🚨 GLOBAL SAFETY: AUTO-RELOAD ON CHUNK LOAD FAILURE (Fixes Vercel/Vite code-split crashes)
 window.addEventListener('error', (e) => {
   if (e.message?.includes('ChunkLoadError') || e.message?.includes('Loading chunk')) {
-    console.warn('⚡ [DropPay] ChunkLoadError detected. Triggering hard reload...');
+    console.warn('⚡ [Drope] ChunkLoadError detected. Triggering hard reload...');
     window.location.reload();
   }
 }, true);
@@ -33,35 +33,140 @@ const TugOfWarOverlay = lazy(() => import('./pages/TugOfWarOverlay'));
 const MasterOverlay = lazy(() => import('./pages/MasterOverlay'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const AdminSecurePortal = lazy(() => import('./pages/AdminSecurePortal'));
-const SubscriptionPage = lazy(() => import('./pages/SubscriptionPage'));
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
+const Features = lazy(() => import('./pages/Features'));
+const Pricing = lazy(() => import('./pages/Pricing'));
+const Blog = lazy(() => import('./pages/Blog'));
 
 // ─── ERROR BOUNDARY — catches any render crash, shows recovery UI not blank page ─
 class ErrorBoundary extends React.Component {
   constructor(props) { super(props); this.state = { hasError: false }; }
   static getDerivedStateFromError() { return { hasError: true }; }
-  componentDidCatch(error, info) { console.error('[DropPay] Render crash:', error, info); }
+  componentDidCatch(error, info) { console.error('[Drope] Render crash:', error, info); }
   render() {
     if (this.state.hasError) {
       return (
-        <div style={{ minHeight: '100vh', background: '#050505', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', fontFamily: 'sans-serif' }}>
-          <div style={{ fontSize: 32, fontWeight: 900, letterSpacing: '-1px', fontStyle: 'italic' }}>
-            <span style={{ color: '#fff' }}>Drop</span>
-            <span style={{ color: '#10B981' }}>Pay</span>
+        <div className="min-h-screen bg-[#f5f4e2] flex flex-col items-center justify-center relative overflow-hidden font-sans">
+          {/* Background Elements */}
+          <div className="absolute inset-0 blueprint-grid opacity-[0.03]" />
+          <div className="scanning-line opacity-20" />
+          
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="relative z-10 flex flex-col items-center max-w-lg px-8 text-center"
+          >
+            <div className="mb-12 flex flex-col items-center">
+              <span className="text-7xl font-black tracking-tighter text-[#111111] mb-2" style={{ fontFamily: 'Georgia, serif' }}>drope.</span>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-rose-500 animate-pulse shadow-[0_0_10px_rgba(244,63,94,0.5)]" />
+                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-rose-500">CRITICAL_SYSTEM_FAILURE</span>
+              </div>
+            </div>
+
+            <h2 className="text-xl font-black text-[#111111] uppercase tracking-tighter mb-6 glitch-text" data-text="RECALIBRATING_MESH_NETWORK">
+              RECALIBRATING_MESH_NETWORK
+            </h2>
+            
+            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest leading-loose mb-10">
+              Our high-availability infrastructure has encountered a synchronization anomaly. Automated recovery protocols have been initiated to restore stability.
+            </p>
+
+            <motion.button 
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => window.location.reload()} 
+              className="px-12 py-5 bg-[#111111] text-white font-black uppercase tracking-[0.4em] text-[10px] shadow-[0_20px_40px_rgba(0,0,0,0.2)] hover:bg-[#222222] transition-all"
+            >
+              Force Reboot System
+            </motion.button>
+          </motion.div>
+
+          {/* Technical Metadata */}
+          <div className="absolute top-12 left-12 text-[9px] font-black uppercase tracking-[0.5em] text-black/20 vertical-rl">
+            RECOVERY_NODE_INIT_V2
           </div>
-          <p style={{ color: '#64748b', fontSize: 14, margin: 0 }}>Something went wrong. Please refresh the page.</p>
-          <button onClick={() => window.location.reload()} style={{ padding: '10px 28px', background: '#10B981', color: '#fff', border: 'none', borderRadius: 12, fontWeight: 700, cursor: 'pointer', fontSize: 13 }}>Refresh</button>
+          <div className="absolute bottom-12 right-12 flex flex-col items-end gap-2">
+            <div className="flex gap-4 text-[8px] font-black uppercase tracking-[0.3em] text-black/10">
+              <span>CLOUD_STABLE</span>
+              <span>UPLINK_SECURE</span>
+              <span className="text-rose-500/40">DROPE_CORE_ERR_402</span>
+            </div>
+            <span className="text-[8px] font-mono text-black/10">SESSION_ID: {Math.random().toString(36).substring(7).toUpperCase()}</span>
+          </div>
         </div>
       );
     }
+
     return this.props.children;
   }
 }
 // ─── MINIMAL BOOT SEQUENCE — Reusing Suspense fallback for seamless loading ───
-const BootSequence = () => (
-  <div className="fixed inset-0 bg-[#050505]" />
+const BootSequence = ({ status = "Initializing Infrastructure" }) => (
+  <div className="fixed inset-0 bg-[#f5f4e2] flex flex-col items-center justify-center z-[9999] overflow-hidden font-sans">
+    {/* Blueprint Background */}
+    <div className="absolute inset-0 blueprint-grid opacity-[0.03]" />
+    <div className="scanning-line opacity-10" />
+    <div className="loader-scanline" />
+
+    <div className="relative flex flex-col items-center">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="text-7xl md:text-9xl font-black tracking-tighter text-[#111111] mb-12 flex items-baseline gap-1"
+        style={{ fontFamily: 'Georgia, serif' }}
+      >
+        drope<span className="text-emerald-500 text-6xl">.</span>
+      </motion.div>
+      
+      <div className="w-80 max-w-[85vw] space-y-4">
+        <div className="h-[2px] w-full bg-black/5 relative overflow-hidden">
+          <motion.div 
+            initial={{ left: "-100%" }}
+            animate={{ left: "100%" }}
+            transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+            className="absolute top-0 w-1/2 h-full bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.5)]"
+          />
+        </div>
+        
+        <div className="flex justify-between items-center px-1">
+          <div className="flex items-center gap-3">
+             <div className="w-1.5 h-1.5 bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)] animate-pulse" />
+             <motion.span 
+               animate={{ opacity: [0.4, 1, 0.4] }} 
+               transition={{ repeat: Infinity, duration: 2 }}
+               className="text-[10px] font-black uppercase tracking-[0.4em] text-[#111111]"
+             >
+               {status}
+             </motion.span>
+          </div>
+          <span className="text-[9px] font-mono font-black text-black/20 tracking-wider">v4.1.26_STABLE</span>
+        </div>
+      </div>
+    </div>
+
+    {/* Technical Matrix Info */}
+    <div className="absolute top-12 left-12 flex flex-col gap-4">
+      <div className="text-[8px] font-black uppercase tracking-[0.5em] text-black/20 vertical-rl">
+        NEXUS_CORE_AUTHORIZATION
+      </div>
+      <div className="w-px h-12 bg-black/10 ml-1" />
+    </div>
+
+    <div className="absolute bottom-12 right-12 flex flex-col items-end gap-3 font-black uppercase">
+       <div className="flex gap-6 text-[8px] tracking-[0.4em] text-black/20">
+         <span>UPLINK_PENDING</span>
+         <span>AUTH_SYNC_04</span>
+       </div>
+       <div className="px-5 py-2 border border-black/5 bg-black/[0.02] text-[9px] tracking-[0.5em] text-black/30">
+         SECURE_ENCRYPTION_LAYER_ACTIVE
+       </div>
+    </div>
+  </div>
 );
+
 
 
 // --- DYNAMIC INFRASTRUCTURE (Fixes Mobile Persistence) ---
@@ -71,7 +176,6 @@ const BootSequence = () => (
 
 const MissionGate = ({ children }) => {
   const [status, setStatus] = useState('loading');
-  const [hasAccess, setHasAccess] = useState(false);
   const token = localStorage.getItem('token');
   const location = useLocation();
 
@@ -89,18 +193,11 @@ const MissionGate = ({ children }) => {
         // --- NEW: THEME SYNCHRONIZATION ---
         // Ensure backend theme preference is reflected in the frontend state
         syncTheme(res.data);
-
-        // Checks both the new tier system and the legacy subscription status
-        const isActiveTier = res.data.tier && res.data.tier !== 'none';
-        const isLegacyActive = res.data.subscription?.status === 'active';
-
-        setHasAccess(isActiveTier || isLegacyActive);
         setStatus('authorized');
       } catch (err) {
         if (err.response?.status === 429) {
           // If the rate limiter blocks the initialization check, assume the session is still active
           // rather than catastrophically logging the user out.
-          setHasAccess(true);
           setStatus('authorized');
         } else {
           setStatus('unauthorized');
@@ -112,9 +209,9 @@ const MissionGate = ({ children }) => {
 
   if (status === 'loading') return <BootSequence />;
 
-  // If unauthorized, kick to login. If authorized but no sub, kick to subscription.
+  // If unauthorized, kick to login.
   if (status === 'unauthorized') return <Navigate to="/login" state={{ from: location }} replace />;
-  return hasAccess ? children : <Navigate to="/subscription" replace />;
+  return children;
 };
 
 // --- ANIMATED ROUTE CONTROLLER ---
@@ -124,11 +221,8 @@ const AnimatedRoutes = () => {
   return (
     // Use a minimal fallback — BootSequence as route fallback caused full loading screen
     // on every lazy page navigation (Dashboard, Admin, etc.)
-    <Suspense fallback={
-      <div className="fixed inset-0 bg-[#050505] flex items-center justify-center z-50">
-        <div className="w-8 h-8 border-2 border-[#10B981] border-t-transparent rounded-full animate-spin" />
-      </div>
-    }>
+    <Suspense fallback={<BootSequence status="Synchronizing Network" />}>
+
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
           {/* 1. PUBLIC MARKETING & AUTH */}
@@ -137,6 +231,9 @@ const AnimatedRoutes = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
+          <Route path="/features" element={<Features />} />
+          <Route path="/pricing" element={<Pricing />} />
+          <Route path="/blog" element={<Blog />} />
 
           {/* 2. PUBLIC PROTOCOL LINKS */}
           <Route path="/pay/:streamerId" element={<DonationPage />} />
@@ -147,9 +244,7 @@ const AnimatedRoutes = () => {
           <Route path="/overlay/tug-of-war/:obsKey" element={<TugOfWarOverlay />} />
           <Route path="/overlay/master/:obsKey" element={<MasterOverlay />} />
 
-          {/* 4. USER ONBOARDING */}
-          <Route path="/subscription" element={<SubscriptionPage />} />
-          <Route path="/subscribe" element={<Navigate to="/subscription" replace />} />
+          {/* 4. USER ONBOARDING (REMOVED) */}
 
           {/* 5. ENTERPRISE ADMIN HUB */}
           <Route path="/admin/login" element={<AdminLogin />} />
@@ -228,7 +323,7 @@ function AppContent() {
 
       {!isOverlay && (
         <Helmet>
-          <title>DropPay | The Ultimate Streamer Protocol</title>
+          <title>Drope | The Ultimate Creator Platform</title>
           <meta name="description" content="Empower your stream with custom 3D alerts and optimized creator revenue." />
           <meta name="theme-color" content="#10B981" />
           <meta name="viewport" content="width=device-width, initial-scale=1" />

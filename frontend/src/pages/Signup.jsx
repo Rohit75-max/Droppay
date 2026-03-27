@@ -3,103 +3,72 @@ import { motion, AnimatePresence } from 'framer-motion';
 import axios from '../api/axios';
 import {
   User, Mail, Phone, Lock, ArrowRight, ArrowLeft, CheckCircle,
-  Eye, EyeOff, UserPlus, Zap, Shield, AlertCircle, Loader2, Hash,
-  Star, TrendingUp, Globe, Activity
+  Eye, UserPlus, Shield, AlertCircle, Loader2, Hash,
+  TrendingUp, Activity, Apple, Play, Instagram, Twitter
 } from 'lucide-react';
 import { useSearchParams, Link } from 'react-router-dom';
+import { ComicAuthSwitch } from '../components/ComicAuthSwitch';
 
-import { toast } from 'react-toastify';
-
-// API_BASE is now handled by the centralized axios configuration in src/api/axios.js
-
-// ─── Floating Orb ─────────────────────────────────────────────
-const Orb = ({ size, x, y, duration, color, delay }) => {
-  const [isMobile, setIsMobile] = useState(false);
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 1024);
-    check();
-    window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
-  }, []);
-
-  return (
-    <motion.div
-      className="absolute rounded-full pointer-events-none"
-      style={{
-        width: size,
-        height: size,
-        left: x,
-        top: y,
-        background: color,
-        filter: isMobile ? 'none' : 'blur(60px)',
-        opacity: isMobile ? 0.1 : 0.3
-      }}
-      animate={isMobile ? {} : { y: [0, -25, 0], x: [0, 12, 0], scale: [1, 1.07, 1], opacity: [0.3, 0.5, 0.3] }}
-      transition={{ duration, repeat: Infinity, ease: 'easeInOut', delay }}
-    />
-  );
-};
-
-// ─── Stat Card ────────────────────────────────────────────────
-const StatCard = ({ icon: Icon, label, value, color, delay, isDark }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 16 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ delay, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-    className={`flex items-center gap-3 px-3 py-2.5 rounded-2xl border ${isDark ? 'bg-white/[0.06] border-white/10' : 'bg-slate-900/[0.04] border-slate-900/10'}`}
-  >
-    <div className={`w-7 h-7 rounded-xl flex items-center justify-center shrink-0 ${color}`}>
-      <Icon className="w-3.5 h-3.5" />
+// ─── Stat Card (Blyss/Drope Style) ────────────────────────────
+const StatCard = ({ icon: Icon, label, value }) => (
+  <div className="flex flex-col gap-1">
+    <p className="text-[10px] uppercase tracking-[0.25em] font-black text-[#f5f4e2]/30">{label}</p>
+    <div className="flex items-center gap-2">
+      <Icon className="w-3.5 h-3.5 text-[#f5f4e2]/60" />
+      <p className="text-xl font-black text-[#f5f4e2] italic tracking-tighter">{value}</p>
     </div>
-    <div>
-      <p className={`text-[9px] uppercase tracking-widest font-bold leading-none mb-0.5 ${isDark ? 'text-white/40' : 'text-slate-500'}`}>{label}</p>
-      <p className={`text-sm font-black leading-none ${isDark ? 'text-white' : 'text-slate-900'}`}>{value}</p>
-    </div>
-  </motion.div>
+  </div>
 );
 
-// ─── Premium Input ────────────────────────────────────────────
-const PremiumInput = ({ icon: Icon, label, type, name, value, onChange, placeholder, required = true, rightEl, isDark, autoComplete }) => {
+// ─── Architectural Input (Drope/Blyss Style) ──────────────────
+const ArchitecturalInput = ({ icon: Icon, label, type, name, value, onChange, placeholder, required = true, rightEl, autoComplete, light = false }) => {
   const [focused, setFocused] = useState(false);
   const inputId = `signup-${name}`;
+
+  const labelColor = light 
+    ? (focused ? 'text-[#111111]' : 'text-[#111111]/40')
+    : (focused ? 'text-[#f5f4e2]' : 'text-[#f5f4e2]/40');
+  
+  const borderColor = light
+    ? (focused ? 'border-[#111111]' : 'border-[#111111]/10')
+    : (focused ? 'border-[#f5f4e2]' : 'border-[#f5f4e2]/10');
+    
+  const textColor = light ? 'text-[#111111]' : 'text-[#f5f4e2]';
+  const iconColor = light
+    ? (focused ? 'text-[#111111]' : 'text-[#111111]/20')
+    : (focused ? 'text-[#f5f4e2]' : 'text-[#f5f4e2]/20');
+
   return (
-    <div className="space-y-1.5">
-      <label htmlFor={inputId} className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em] transition-colors ${focused ? 'text-[#10B981]' : isDark ? 'text-white/40' : 'text-slate-400'}`}>
-        <Icon className="w-3 h-3" /> {label}
+    <div className="space-y-2">
+      <label htmlFor={inputId} className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] transition-colors ${labelColor}`}>
+        {label}
       </label>
       <div className="relative group">
-        <div className="relative">
-          <Icon className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors duration-200 ${focused ? 'text-[#10B981]' : isDark ? 'text-white/30' : 'text-slate-300'}`} />
-          <input
-            id={inputId}
-            type={type} name={name} value={value} onChange={onChange} required={required}
-            onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
-            placeholder={placeholder}
-            autoComplete={autoComplete}
-            className={`w-full rounded-2xl py-3 pl-11 pr-11 text-sm focus:outline-none transition-all ${isDark
-              ? `bg-white/[0.05] border ${focused ? 'border-[#10B981]' : 'border-white/10'} text-white placeholder:text-white/20`
-              : `bg-slate-50 border ${focused ? 'border-[#10B981]' : 'border-slate-200'} text-slate-800 placeholder:text-slate-300`
-              }`}
-          />
-          {rightEl && <div className="absolute right-3 top-1/2 -translate-y-1/2">{rightEl}</div>}
-        </div>
+        <Icon className={`absolute left-0 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors duration-200 ${iconColor}`} />
+        <input
+          id={inputId}
+          type={type} name={name} value={value} onChange={onChange} required={required}
+          onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
+          placeholder={placeholder}
+          autoComplete={autoComplete}
+          className={`w-full bg-transparent border-b-2 py-2.5 pl-8 pr-12 text-sm focus:outline-none transition-all ${borderColor} ${textColor} placeholder:text-[#111111]/10`}
+        />
+        {rightEl && <div className="absolute right-0 top-1/2 -translate-y-1/2">{rightEl}</div>}
       </div>
     </div>
   );
 };
 
-// ─── Password Strength ────────────────────────────────────────
+// ─── Password Strength Styles ─────────────────────────────────
 const strengthLabel = ['', 'Weak', 'Fair', 'Strong', 'Excellent'];
-const strengthColor = ['', 'bg-rose-400', 'bg-amber-400', 'bg-blue-400', 'bg-emerald-500'];
-const strengthText = ['', 'text-rose-400', 'text-amber-400', 'text-blue-400', 'text-emerald-500'];
+const strengthColor = ['', 'bg-rose-500', 'bg-amber-500', 'bg-blue-500', 'bg-emerald-500'];
+const strengthText = ['', 'text-rose-500', 'text-amber-500', 'text-blue-500', 'text-emerald-500'];
 
 // ─────────────────────────────────────────────────────────────
-// MAIN COMPONENT
+// MAIN COMPONENT (ARCHITECTURAL / 50-50 SPLIT SYMMETRY)
 // ─────────────────────────────────────────────────────────────
 const Signup = () => {
   const [searchParams] = useSearchParams();
-  const theme = 'dark';
-  const isDark = theme === 'dark';
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -113,15 +82,8 @@ const Signup = () => {
   const [strength, setStrength] = useState(0);
   const [resendTimer, setResendTimer] = useState(0);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
 
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 1024);
-    check();
-    window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
-  }, []);
-
+  // --- Logic Hooks (Preserved) ---
   useEffect(() => {
     let interval;
     if (resendTimer > 0) {
@@ -129,6 +91,7 @@ const Signup = () => {
     }
     return () => clearInterval(interval);
   }, [resendTimer]);
+
   useEffect(() => {
     let s = 0;
     if (formData.password.length > 7) s++;
@@ -138,6 +101,7 @@ const Signup = () => {
     setStrength(s);
   }, [formData.password]);
 
+  // --- Handlers (Preserved) ---
   const handleChange = (e) => {
     setError('');
     let value = e.target.value;
@@ -164,15 +128,15 @@ const Signup = () => {
 
   const handleSignup = async (e) => {
     e.preventDefault();
-    if (!acceptedTerms) { setError('Please acknowledge the Creator Protocol Terms.'); return; }
-    if (strength < 4) { setError('Security protocol rejected. Password too weak.'); return; }
+    if (!acceptedTerms) { setError('Please accept the Terms of Service.'); return; }
+    if (strength < 4) { setError('Password security rejected. Please use a stronger password.'); return; }
     setLoading(true);
     try {
       const res = await axios.post('/api/auth/signup', { ...formData, email: formData.email.trim().toLowerCase() });
       if (res.status === 201 || res.status === 206) {
         setStep(2); // Go to OTP Step
       }
-    } catch (err) { setError(err.response?.data?.msg || 'Identity node connection failed: Network protocol mismatch.'); }
+    } catch (err) { setError(err.response?.data?.msg || 'Registration failed. Please check your network connection.'); }
     finally { setLoading(false); }
   };
 
@@ -181,430 +145,279 @@ const Signup = () => {
     setLoading(true);
     try {
       await axios.post('/api/auth/signup', { ...formData, email: formData.email.trim().toLowerCase() });
-      setResendTimer(60);
-      setError('');
-    } catch (err) {
-      setError(err.response?.data?.msg || 'Retry protocol failed: Uplink unstable.');
-    } finally {
-      setLoading(false);
-    }
+      setResendTimer(60); setError('');
+    } catch (err) { setError(err.response?.data?.msg || 'Failed to resend verification code.'); }
+    finally { setLoading(false); }
   };
 
   const handleVerify = async () => {
-    // This is now legacy as verification happens at login, keeping for compatibility if routes exist
     const combined = otp.join('');
     if (combined.length < 6) return;
     setLoading(true); setError('');
     try {
       const res = await axios.post('/api/auth/verify-email', { email: formData.email.trim().toLowerCase(), otp: combined });
       if (res.status === 200) {
-        if (res.data.token) {
-          localStorage.setItem('token', res.data.token);
-        }
+        if (res.data.token) localStorage.setItem('token', res.data.token);
         setStep(3);
-        setTimeout(() => {
-          window.location.href = '/dashboard';
-        }, 3000);
+        setTimeout(() => { window.location.href = '/dashboard'; }, 3000);
       }
-    } catch (err) { setError(err.response?.data?.msg || 'Invalid Transmission Key.'); }
+    } catch (err) { setError(err.response?.data?.msg || 'Invalid verification code.'); }
     finally { setLoading(false); }
   };
 
+  // --- Styles ---
+  const georgiaFont = { fontFamily: "Georgia, serif" };
+  const interFont = { fontFamily: "'Inter', sans-serif" };
+
   return (
-    <div className={`relative min-h-screen w-full flex flex-col lg:flex-row font-sans overflow-hidden transition-colors duration-500 ${isDark ? 'bg-[#030a06]' : 'bg-slate-50'}`}>
+    <div className="flex flex-col lg:flex-row min-h-screen lg:h-screen w-full bg-[#f5f4e2] overflow-x-hidden overflow-y-auto lg:overflow-hidden font-sans arc-grain-bg">
+      <style dangerouslySetInnerHTML={{ __html: `
+        .arc-grain-bg::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          opacity: 0.1;
+          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+          background-size: 180px 180px;
+          z-index: 100;
+        }
+      `}} />
 
-      {/* FULL IMMERSIVE BACKGROUND */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        {isDark ? (
-          <>
-            <motion.div animate={{ scale: [1, 1.1, 1], rotate: [0, 10, 0] }} transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }} className="absolute top-[-20%] right-[-10%] w-[550px] h-[550px] rounded-full bg-emerald-900/40 blur-[120px]" />
-            <motion.div animate={{ scale: [1, 1.05, 1], rotate: [0, -5, 0] }} transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }} className="absolute bottom-[-20%] left-[-10%] w-[450px] h-[450px] rounded-full bg-cyan-900/30 blur-[100px]" />
-          </>
-        ) : (
-          <>
-            <motion.div animate={{ scale: [1, 1.1, 1], rotate: [0, 10, 0] }} transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }} className="absolute top-[-20%] right-[-10%] w-[550px] h-[550px] rounded-full bg-emerald-100/60 blur-[120px]" />
-            <motion.div animate={{ scale: [1, 1.05, 1], rotate: [0, -5, 0] }} transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }} className="absolute bottom-[-20%] left-[-10%] w-[450px] h-[450px] rounded-full bg-cyan-100/50 blur-[100px]" />
-          </>
-        )}
-
-        {/* Global Immersive Elements */}
-        {isDark && (
-          <div className="absolute inset-0">
-            {/* Holographic Moving Gradients */}
-            <Orb size={500} x="10%" y="-10%" color="rgba(16,185,129,0.15)" duration={9} delay={0} />
-            <Orb size={350} x="70%" y="50%" color="rgba(6,182,212,0.12)" duration={14} delay={2} />
-            <Orb size={300} x="20%" y="80%" color="rgba(244,114,182,0.1)" duration={11} delay={1} />
-
-            {/* Dynamic Cyber Grid - Static on Mobile for perf */}
-            <motion.div 
-               className="absolute inset-0 pointer-events-none opacity-[0.03]"
-               style={{ backgroundImage: 'linear-gradient(to right, #10B981 1px, transparent 1px), linear-gradient(to bottom, #10B981 1px, transparent 1px)', backgroundSize: '40px 40px' }}
-               animate={isMobile ? {} : { backgroundPosition: ['0px 0px', '40px 40px'] }}
-               transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
-            />
-
-            {/* Rotating Geometric Data Rings */}
-            <motion.div 
-              className="absolute top-[15%] right-[5%] w-[600px] h-[600px] rounded-full border border-[#10B981]/15 border-dashed pointer-events-none"
-              animate={{ rotate: 360 }}
-              transition={{ duration: 45, repeat: Infinity, ease: 'linear' }}
-            />
-            <motion.div 
-              className="absolute top-[25%] left-[5%] w-[350px] h-[350px] rounded-full border border-[#06b6d4]/15 pointer-events-none"
-              animate={{ rotate: -360 }}
-              transition={{ duration: 30, repeat: Infinity, ease: 'linear' }}
-            />
-
-            {/* Active Data Streams - Reduced count on mobile */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              {[...Array(isMobile ? 3 : 10)].map((_, i) => (
-                <motion.div
-                  key={i}
-                  className="absolute w-[1px] h-64 bg-gradient-to-b from-transparent via-[#10B981]/50 to-transparent"
-                  style={{ left: `${(i + 1) * (isMobile ? 30 : 10)}%` }}
-                  animate={{ top: ['-20%', '120%'] }}
-                  transition={{ duration: 3 + (i % 3), repeat: Infinity, ease: 'linear', delay: i * 0.5 }}
-                />
-              ))}
-            </div>
-
-            {/* Scan line sweep */}
-            <motion.div
-              className="absolute left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-400/50 to-transparent pointer-events-none blur-[1px]"
-              animate={{ top: ['-5%', '105%'] }}
-              transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', repeatDelay: 1 }}
-            />
-          </div>
-        )}
-      </div>
-
-      {/* ── LEFT — Holographic Branding Pillar ── */}
-      <motion.div
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        className="relative flex-1 lg:flex-[1.2] flex flex-col justify-center px-6 py-12 sm:px-12 sm:py-16 mx-auto lg:p-24 min-h-[50vh] lg:min-h-screen z-10 max-w-2xl lg:max-w-none"
+      {/* ── LEFT SECTION (50% Black) ── */}
+      <motion.div 
+        initial={{ x: -100 }}
+        animate={{ x: 0 }}
+        transition={{ type: 'spring', damping: 25, stiffness: 120 }}
+        className="w-full lg:w-1/2 bg-[#111111] relative flex flex-col justify-between p-8 sm:p-12 lg:p-16 z-20 min-h-[500px] lg:h-full"
       >
-        {/* Content */}
-        <div className="relative z-20">
-          {/* Back button */}
-          <motion.div initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}
-            className="mb-4">
-            <Link to="/" className={`group inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all text-[9px] font-black uppercase tracking-widest ${isDark ? 'border-white/10 bg-white/[0.06] hover:bg-white/10 text-white/50 hover:text-white' : 'border-slate-900/10 bg-slate-900/[0.04] hover:bg-slate-900/[0.08] text-slate-500 hover:text-slate-900'}`}>
-              <ArrowLeft className="w-3 h-3 group-hover:-translate-x-0.5 transition-transform" /> Back
+        <div>
+          {/* Back to Home */}
+          <div className="flex justify-between items-center mb-12 sm:mb-16">
+            <Link to="/" className="group flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em] text-[#f5f4e2]/40 hover:text-white transition-colors">
+              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Back to Home
             </Link>
-          </motion.div>
-
-          <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
-            className="flex items-center gap-3 mb-5">
-            <div className="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center">
-              <Zap className="w-4 h-4 text-emerald-400 fill-emerald-400" />
-            </div>
-            <div>
-              <span className={`font-black text-lg italic tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>Drop<span className="text-emerald-400">Pay</span></span>
-              <p className={`text-[9px] uppercase tracking-[0.25em] font-bold ${isDark ? 'text-white/30' : 'text-slate-400'}`}>Global Accounts</p>
-            </div>
-          </motion.div>
-
-          <motion.h2 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
-            className={`text-3xl lg:text-4xl font-black italic leading-[1] tracking-tighter mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-            Launch Your<br />
-            <span className="text-transparent bg-clip-text"
-              style={{ backgroundImage: 'linear-gradient(135deg, #10B981, #f472b6, #818cf8)', WebkitBackgroundClip: 'text' }}>
-              Global Business.
-            </span>
-          </motion.h2>
-
-          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.65 }}
-            className={`text-xs font-medium leading-relaxed max-w-xs mb-4 ${isDark ? 'text-white/40' : 'text-slate-500'}`}>
-            Join 48,000+ streamers earning on DropPay. Sub-ms drops, instant payouts, zero friction.
-          </motion.p>
-
-          <div className="grid grid-cols-2 gap-2 mb-4">
-            <StatCard icon={User} label="Creators" value="48,200+" color={isDark ? "bg-emerald-500/20 text-emerald-400" : "bg-emerald-500/10 text-emerald-600"} delay={0.7} isDark={isDark} />
-            <StatCard icon={TrendingUp} label="Paid Out" value="₹2.4Cr+" color={isDark ? "bg-pink-500/20 text-pink-400" : "bg-pink-500/10 text-pink-600"} delay={0.8} isDark={isDark} />
-            <StatCard icon={Globe} label="Regions" value="12 Live" color={isDark ? "bg-indigo-500/20 text-indigo-400" : "bg-indigo-500/10 text-indigo-600"} delay={0.9} isDark={isDark} />
-            <StatCard icon={Activity} label="Avg Latency" value="18ms" color={isDark ? "bg-cyan-500/20 text-cyan-400" : "bg-cyan-500/10 text-cyan-600"} delay={1.0} isDark={isDark} />
           </div>
         </div>
 
-        {/* Bottom chips */}
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.1 }}
-          className="relative z-10 flex flex-wrap gap-1.5 mt-3">
-          {[
-            { icon: Shield, text: 'Bank-grade SSL', darkColor: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20', lightColor: 'text-emerald-600 bg-emerald-50 border-emerald-200' },
-            { icon: Star, text: 'Instant Payouts', darkColor: 'text-pink-400 bg-pink-500/10 border-pink-500/20', lightColor: 'text-pink-600 bg-pink-50 border-pink-200' },
-            { icon: Zap, text: 'Sub-ms Drops', darkColor: 'text-amber-400 bg-amber-500/10 border-amber-500/20', lightColor: 'text-amber-600 bg-amber-50 border-amber-200' },
-          ].map(({ icon: Icon, text, darkColor, lightColor }) => (
-            <div key={text} className={`flex items-center gap-1.5 px-2 py-1 rounded-full border text-[9px] font-black uppercase tracking-widest ${isDark ? darkColor : lightColor}`}>
-              <Icon className="w-3 h-3" /> {text}
+        {/* Mega Anchored Text Area */}
+        <div className="relative">
+          {/* Relocated Description & Buttons */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1, duration: 1 }}
+            className="max-w-[440px] mb-8 sm:mb-12"
+          >
+             <p className="text-xs font-medium text-[#f5f4e2]/50 leading-relaxed mb-6">
+               Join 48,000+ creators scaling their networks on elite infrastructure. Automated drops, instant bank settlements, and zero friction.
+             </p>
+             <div className="flex flex-wrap gap-4">
+                <button className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-white/10 hover:bg-white/5 transition-all text-[9px] font-black uppercase tracking-widest text-white/50">
+                  <Apple className="w-3.5 h-3.5 text-[#f5f4e2]" /> <span className="text-[#f5f4e2]">App Store</span>
+                </button>
+                <button className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-white/10 hover:bg-white/5 transition-all text-[9px] font-black uppercase tracking-widest text-white/50">
+                  <Play className="w-3.5 h-3.5 fill-[#f5f4e2] text-[#f5f4e2]" /> <span className="text-[#f5f4e2]">Google Play</span>
+                </button>
+             </div>
+          </motion.div>
+
+          <h1 className="text-[clamp(4rem,12vw,12rem)] font-black text-[#f5f4e2] leading-[0.85] tracking-tighter" style={interFont}>
+            <span className="flex overflow-hidden whitespace-nowrap glitch-text" data-text="DROPE">
+              {"DROPE".split("").map((letter, i) => (
+                <motion.span
+                  key={i}
+                  initial={{ y: "100%" }}
+                  animate={{ y: 0 }}
+                  transition={{ duration: 1, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                  className="inline-block"
+                >
+                  {letter}
+                </motion.span>
+              ))}
+            </span>
+          </h1>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mt-8 gap-8 sm:gap-4">
+            <div className="flex gap-8 sm:gap-12">
+               <StatCard icon={TrendingUp} label="Paid Out" value="₹2.4Cr+" />
+               <StatCard icon={Activity} label="Latency" value="18ms" />
             </div>
-          ))}
-        </motion.div>
+            <div className="flex gap-4">
+              <Twitter className="w-5 h-5 text-white/20 hover:text-white transition-colors cursor-pointer" />
+              <Instagram className="w-5 h-5 text-white/20 hover:text-white transition-colors cursor-pointer" />
+            </div>
+          </div>
+        </div>
       </motion.div>
 
-      {/* ── RIGHT — Form ── */}
-      {/* ── RIGHT — Signup form ── */}
-      <motion.div 
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-        className={`relative flex-1 flex flex-col justify-center px-6 py-12 sm:px-12 sm:py-16 lg:px-24 lg:py-12 z-10 min-h-screen lg:border-l overflow-y-auto transition-all duration-500 ${isDark 
-          ? `border-white/5 ${isMobile ? 'bg-black/95' : 'bg-black/40 backdrop-blur-2xl'}` 
-          : `border-slate-200 ${isMobile ? 'bg-white' : 'bg-white/60 backdrop-blur-2xl'}`}`}
-      >
+      {/* ── RIGHT SECTION (50% Cream Canvas - Form side) ── */}
+      <div className="w-full lg:w-1/2 relative flex flex-col items-center justify-center p-6 sm:p-10 lg:p-14 z-30 py-10 lg:h-full overflow-y-visible">
+        
+        {/* SIGNUP FORM (Background Integrated) */}
+        <motion.div 
+          initial={{ x: 60, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ type: 'spring', damping: 25, stiffness: 120, delay: 0.2 }}
+          className="w-full max-w-[460px]"
+        >
           <AnimatePresence mode="wait">
             {step === 1 ? (
-              <motion.div key="signup" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, x: -20 }}>
-                {/* Header */}
-                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
-                  className="flex items-center justify-between mb-5">
+              <motion.div key="signup" initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -20, opacity: 0 }} className="relative">
+                {/* Floating Comic Switch on Left (Desktop) */}
+                <div className="hidden lg:block absolute left-[-340px] top-4 rotate-[-1deg]">
+                  <ComicAuthSwitch active="signup" brandColor="#111111" />
+                </div>
+
+                {/* Mobile Tablet Centered Switch */}
+                <div className="lg:hidden flex justify-center mb-10">
+                  <ComicAuthSwitch active="signup" brandColor="#111111" />
+                </div>
+
+                <div className="flex justify-between items-start mb-6 sm:mb-8">
                   <div>
-                    <p className={`text-[10px] font-black uppercase tracking-[0.3em] ${isDark ? 'text-white/40' : 'text-slate-400'}`}>Sign Up</p>
-                    <p className={`text-[10px] uppercase tracking-widest ${isDark ? 'text-white/20' : 'text-slate-300'}`}>Create your DropPay account</p>
+                    <h2 className="text-4xl font-bold text-[#111111] tracking-tighter mb-1 whitespace-nowrap" style={georgiaFont}>
+                      Create Account.
+                    </h2>
+                    <p className="text-[10px] uppercase tracking-[0.25em] font-black text-[#111111]/30">
+                      Step 1 of 2: Account Registration
+                    </p>
                   </div>
-                  <div className="flex items-center gap-2">
+                </div>
 
-                    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${isDark ? 'border-white/10 bg-white/[0.04]' : 'border-slate-100 bg-slate-50'}`}>
-                      <motion.div className="w-1.5 h-1.5 rounded-full bg-emerald-400"
-                        animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.5, repeat: Infinity }} />
-                      <span className={`text-[9px] font-black uppercase tracking-widest ${isDark ? 'text-white/40' : 'text-slate-400'}`}>Step 1 of 2</span>
-                    </div>
+                {error && (
+                  <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="mb-6 p-3.5 rounded-2xl bg-rose-500/5 border border-rose-500/10 text-rose-500 text-[10px] font-bold flex gap-3">
+                    <AlertCircle className="w-4 h-4 shrink-0" /> {error}
+                  </motion.div>
+                )}
+
+                <form onSubmit={handleSignup} className="space-y-4 sm:space-y-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                    <ArchitecturalInput icon={User} label="Full Name" type="text" name="fullName" value={formData.fullName} onChange={handleChange} placeholder="First Last" autoComplete="name" light />
+                    <ArchitecturalInput 
+                      icon={Hash} 
+                      label="Handle" 
+                      type="text" name="username" value={formData.username} 
+                      onChange={e => setFormData({ ...formData, username: e.target.value.toLowerCase().replace(/\s+/g, '') })} 
+                      placeholder="e.g. handle" autoComplete="username" 
+                      light
+                    />
                   </div>
-                </motion.div>
 
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.55 }}>
-                  <h3 className={`text-2xl font-black italic tracking-tighter mb-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>Create account.</h3>
-                  <p className={`text-sm font-medium mb-5 ${isDark ? 'text-white/30' : 'text-slate-400'}`}>Fill in your details below to get started.</p>
-                </motion.div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                    <ArchitecturalInput icon={Mail} label="Email Address" type="email" name="email" value={formData.email} onChange={handleChange} placeholder="creator@uplink.io" autoComplete="email" light />
+                    <ArchitecturalInput icon={Phone} label="Phone Number" type="text" name="phone" value={formData.phone} onChange={handleChange} placeholder="+91 00000 00000" autoComplete="tel" light />
+                  </div>
 
-                {/* Error */}
-                <AnimatePresence>
-                  {error && (
-                    <motion.div key="err"
-                      initial={{ opacity: 0, height: 0, marginBottom: 0 }}
-                      animate={{ opacity: 1, height: 'auto', marginBottom: 16 }}
-                      exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-                      className="bg-rose-50 border border-rose-200 rounded-2xl p-3 flex gap-2 overflow-hidden">
-                      <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
-                      <p className="text-[11px] text-rose-600 font-bold">{error}</p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                {/* Form grid — 2 cols on wider right panel */}
-                <form onSubmit={handleSignup} className="space-y-3">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
-                      <PremiumInput icon={User} label="Full Name" type="text" name="fullName"
-                        value={formData.fullName} onChange={handleChange} placeholder="Your full name" isDark={isDark} autoComplete="name" />
-                    </motion.div>
-                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.65 }}>
-                      <PremiumInput icon={Hash} label="Streamer ID" type="text" name="username"
-                        value={formData.username}
-                        onChange={e => setFormData({ ...formData, username: e.target.value.toLowerCase().replace(/\s+/g, '') })}
-                        placeholder="e.g. your_unique_handle" isDark={isDark} autoComplete="username"
-                        rightEl={<span className="text-[9px] font-black text-emerald-500 uppercase tracking-tight opacity-60 group-focus-within:opacity-100">Handle</span>}
-                      />
-                    </motion.div>
-                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}>
-                      <PremiumInput icon={Mail} label="Email" type="email" name="email"
-                        value={formData.email} onChange={handleChange} placeholder="official@email.com" isDark={isDark} autoComplete="email" />
-                    </motion.div>
-                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.75 }}>
-                      <PremiumInput icon={Phone} label="Phone" type="text" name="phone"
-                        value={formData.phone} onChange={handleChange} placeholder="Enter 10-digit number" isDark={isDark} autoComplete="tel" />
-                    </motion.div>
-                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.78 }}>
-                      <PremiumInput icon={UserPlus} label="Referral Code" type="text" name="referralCode"
-                        value={formData.referralCode} onChange={handleChange} placeholder="Optional" required={false} isDark={isDark} />
-                    </motion.div>
-                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.82 }}>
-                      <PremiumInput icon={Lock} label="Password" type={showPassword ? 'text' : 'password'} name="password"
-                        value={formData.password} onChange={handleChange} placeholder="Min 8 chars" isDark={isDark} autoComplete="new-password"
-                        rightEl={
-                          <button type="button" onClick={() => setShowPassword(v => !v)} tabIndex={-1}
-                            className={`transition-colors ${isDark ? 'text-white/30 hover:text-emerald-400' : 'text-slate-300 hover:text-emerald-500'}`}>
-                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                          </button>
-                        }
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 items-start">
+                    <ArchitecturalInput icon={UserPlus} label="Referral Code" type="text" name="referralCode" value={formData.referralCode} onChange={handleChange} placeholder="Optional" required={false} light />
+                    <div className="space-y-1">
+                      <ArchitecturalInput icon={Lock} label="Password" type={showPassword ? 'text' : 'password'} name="password" value={formData.password} onChange={handleChange} placeholder="Min 8 chars" autoComplete="new-password" light
+                        rightEl={<button type="button" onClick={() => setShowPassword(!showPassword)}><Eye className={`w-4 h-4 ${showPassword ? 'text-[#111111]' : 'text-[#111111]/20'}`} /></button>}
                       />
                       {formData.password && (
-                        <div className="mt-1.5">
-                          <div className="flex gap-1 mb-1">
-                            {[1, 2, 3, 4].map(i => (
-                              <div key={i} className={`h-0.5 flex-1 rounded-full transition-all duration-300 ${i <= strength ? strengthColor[strength] : isDark ? 'bg-white/10' : 'bg-slate-200'}`} />
+                        <div className="flex flex-col gap-1.5 pt-1">
+                          <div className="flex gap-1">
+                            {[1, 2, 3, 4].map(idx => (
+                              <div key={idx} className={`h-[2px] flex-1 rounded-full ${idx <= strength ? strengthColor[strength] : 'bg-[#111111]/5'}`} />
                             ))}
                           </div>
-                          <p className={`text-[9px] font-bold uppercase tracking-widest ${strengthText[strength]}`}>{strengthLabel[strength]} passphrase</p>
+                          <p className={`text-[9px] font-black uppercase tracking-widest ${strengthText[strength]}`}>{strengthLabel[strength]} Security</p>
                         </div>
                       )}
-                    </motion.div>
+                    </div>
                   </div>
 
-                  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.85 }}>
-                    <div className={`flex items-start gap-3 p-3 rounded-2xl border transition-all cursor-pointer group mb-1 ${isDark ? 'bg-white/[0.03] border-white/10 hover:border-emerald-500/30' : 'bg-slate-50 border-slate-100 hover:border-emerald-200'}`} onClick={() => setAcceptedTerms(!acceptedTerms)}>
-                      <div className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center shrink-0 transition-all ${acceptedTerms ? 'bg-emerald-500 border-emerald-500 shadow-lg shadow-emerald-500/20' : isDark ? 'border-white/20 group-hover:border-emerald-400' : 'border-slate-200 group-hover:border-emerald-400'}`}>
-                        {acceptedTerms && <CheckCircle className="w-3.5 h-3.5 text-white" />}
-                      </div>
-                      <p className={`text-[10px] font-medium leading-relaxed ${isDark ? 'text-white/50' : 'text-slate-500'}`}>
-                        I agree to the <span className="text-emerald-500 font-black cursor-help underline underline-offset-2">DropPay Terms of Service</span> and Privacy Policy.
-                      </p>
+                  <div 
+                    onClick={() => setAcceptedTerms(!acceptedTerms)}
+                    className={`p-4 rounded-[1.5rem] border-2 transition-all cursor-pointer flex gap-4 ${acceptedTerms ? 'bg-[#111111]/5 border-[#111111] shadow-lg shadow-black/5' : 'bg-transparent border-[#111111]/5 hover:border-[#111111]/10'}`}
+                  >
+                    <div className={`w-5 h-5 rounded-[0.5rem] flex items-center justify-center shrink-0 border-2 transition-all ${acceptedTerms ? 'bg-[#111111] border-[#111111]' : 'border-[#111111]/20'}`}>
+                      {acceptedTerms && <CheckCircle className="w-3.5 h-3.5 text-white" />}
                     </div>
-                  </motion.div>
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-[#111111] mb-0.5">Terms of Service</p>
+                      <p className="text-[9px] font-medium text-[#111111]/40 leading-relaxed">By creating an account, you acknowledge the Drope Terms and Privacy Policy.</p>
+                    </div>
+                  </div>
 
-                  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.88 }}>
-                    <motion.button type="submit" disabled={loading}
-                      whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.985 }}
-                      className="relative w-full overflow-hidden py-3.5 rounded-2xl font-black uppercase tracking-widest text-[13px] flex items-center justify-center gap-3 transition-all mt-1
-                                            bg-gradient-to-r from-emerald-600 to-emerald-500 text-white
-                                            disabled:from-slate-100 disabled:to-slate-100 disabled:text-slate-300 disabled:cursor-not-allowed">
-                      <motion.div className="absolute inset-0 -skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                        animate={{ x: ['-200%', '200%'] }}
-                        transition={{ duration: 2.5, repeat: Infinity, ease: 'linear', repeatDelay: 3 }} />
-                      {loading ? <><Loader2 className="w-5 h-5 animate-spin" /> Creating account...</>
-                        : <>Create Account <ArrowRight className="w-4 h-4" /></>}
-                    </motion.button>
-                  </motion.div>
+                  <button 
+                    type="submit" 
+                    disabled={loading}
+                    className="w-full bg-[#111111] text-white py-6 font-black uppercase tracking-[0.4em] text-[13px] italic flex items-center justify-center gap-4 transition-all hover:bg-emerald-600 hover:shadow-[8px_8px_0px_#000] disabled:opacity-50 group mt-4"
+                  >
+                    {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
+                      <>
+                        Create Account <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                      </>
+                    )}
+                  </button>
                 </form>
 
-                <div className="flex items-center gap-3 my-6">
-                  <div className={`flex-1 h-px ${isDark ? 'bg-white/10' : 'bg-slate-100'}`} />
-                  <span className={`text-[9px] uppercase tracking-widest ${isDark ? 'text-white/20' : 'text-slate-300'}`}>or continue with</span>
-                  <div className={`flex-1 h-px ${isDark ? 'bg-white/10' : 'bg-slate-100'}`} />
-                </div>
-
-                <div className="grid grid-cols-1 gap-3 mb-6">
-                  <motion.button
-                    type="button"
-                    whileHover={{ scale: 1.01 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => {
-                      toast.info(
-                        <div className="flex items-center gap-3">
-                          <svg viewBox="0 0 24 24" className="w-5 h-5"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" /><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" /><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05" /><path d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" /></svg>
-                          <div className="flex flex-col">
-                            <span className="text-[10px] font-black uppercase tracking-widest text-white">Google Auth Pending</span>
-                            <span className="text-[9px] font-bold text-white/50">Awaiting Client ID integration</span>
-                          </div>
-                        </div>,
-                        {
-                          position: "top-right", autoClose: 4000, theme: isDark ? "dark" : "light",
-                          style: { background: isDark ? '#061a12' : '#fff', border: isDark ? '1px solid rgba(16,185,129,0.2)' : '1px solid #e2e8f0', borderRadius: '16px' }
-                        }
-                      )
-                    }}
-                    className={`flex items-center justify-center gap-3 w-full py-4 rounded-2xl border transition-all shadow-sm group ${isDark ? 'border-white/10 bg-white/[0.02] hover:bg-white/[0.05] hover:border-emerald-500/30' : 'border-slate-200 bg-white hover:bg-slate-50 hover:border-emerald-200'}`}
-                  >
-                    <div className="w-5 h-5 flex items-center justify-center">
-                      <svg viewBox="0 0 24 24" className="w-full h-full"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" /><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" /><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05" /><path d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" /></svg>
-                    </div>
-                    <span className={`text-[12px] font-black uppercase tracking-widest ${isDark ? 'text-white/60 group-hover:text-white' : 'text-slate-600 group-hover:text-slate-900'}`}>Continue with Google</span>
-                  </motion.button>
-                </div>
-                <div className="text-center">
-                  <Link to="/login" className={`inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] transition-colors group hover:text-emerald-500 ${isDark ? 'text-white/30' : 'text-slate-400 hover:text-emerald-600'}`}>
-                    <span className="opacity-0 group-hover:opacity-100 transition-opacity text-emerald-500 font-mono">&gt;</span>
-                    Already have an account? Sign In
-                    <span className="opacity-0 group-hover:opacity-100 transition-opacity text-emerald-500 font-mono">&lt;</span>
-                  </Link>
+                <div className="mt-8 text-center pb-8 lg:pb-0">
                 </div>
               </motion.div>
             ) : step === 2 ? (
-              /* ── STEP 2: OTP ── */
-              <motion.div key="otp" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                className="flex flex-col items-center text-center">
+              <motion.div key="otp" initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -20, opacity: 0 }} className="text-center">
+                 <div className="w-20 h-20 rounded-[2rem] bg-[#111111]/5 border border-[#111111]/10 flex items-center justify-center mx-auto mb-8">
+                   <Shield className="w-10 h-10 text-[#111111] animate-pulse" />
+                 </div>
+                 <h2 className="text-4xl font-bold text-[#111111] tracking-tighter mb-2 whitespace-nowrap" style={georgiaFont}>Verify Email.</h2>
+                 <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#111111]/30 mb-12">Verification code sent to {formData.email}</p>
 
-                <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.4 }}
-                  className="w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center mb-5 border border-emerald-400/20">
-                  <Shield className="w-7 h-7 text-emerald-500 animate-pulse" />
-                </motion.div>
+                 {error && (
+                   <div className="mb-8 p-4 rounded-2xl bg-rose-500/5 border border-rose-500/10 text-rose-500 text-[10px] font-bold">
+                     {error}
+                   </div>
+                 )}
 
-                <h3 className={`text-2xl font-black italic tracking-tighter mb-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>Verify Email.</h3>
-                <p className={`text-sm font-medium mb-2 ${isDark ? 'text-white/40' : 'text-slate-400'}`}>We sent a 6-digit code to:</p>
-                <p className="text-emerald-600 font-black text-sm mb-8">{formData.email}</p>
+                 <div className="flex justify-center flex-wrap gap-3 mb-10">
+                   {otp.map((digit, idx) => (
+                     <input key={idx} id={`otp-${idx}`} type="text" maxLength="1" value={digit} onChange={e => handleOtpChange(e.target.value, idx)} onKeyDown={e => handleKeyDown(e, idx)}
+                       className="w-10 sm:w-12 h-14 sm:h-16 bg-[#111111]/5 border-2 border-[#111111]/10 rounded-2xl text-center text-3xl font-black text-[#111111] outline-none focus:border-[#111111] transition-all" />
+                   ))}
+                 </div>
 
-                <AnimatePresence>
-                  {error && (
-                    <motion.div key="err"
-                      initial={{ opacity: 0, height: 0, marginBottom: 0 }}
-                      animate={{ opacity: 1, height: 'auto', marginBottom: 20 }}
-                      exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-                      className="w-full bg-rose-50 border border-rose-200 rounded-2xl p-3 flex gap-2 overflow-hidden">
-                      <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
-                      <p className="text-[11px] text-rose-600 font-bold">{error}</p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                 <button onClick={handleVerify} disabled={loading || otp.join('').length < 6}
+                   className="w-full bg-[#111111] text-white py-6 font-black uppercase tracking-[0.4em] text-[13px] italic flex items-center justify-center gap-4 transition-all hover:bg-emerald-600 hover:shadow-[8px_8px_0px_#000] disabled:opacity-50 group">
+                   {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
+                     <>
+                       Verify & Continue <CheckCircle className="w-5 h-5 text-emerald-400 group-hover:scale-125 transition-transform" />
+                     </>
+                   )}
+                 </button>
 
-                {/* OTP boxes */}
-                <div className="flex justify-center gap-2 mb-8">
-                  {otp.map((digit, index) => (
-                    <input key={index} id={`otp-${index}`} name={`otp-${index}`}
-                      type="text" maxLength="1" value={digit}
-                      autoComplete="one-time-code"
-                      onChange={(e) => handleOtpChange(e.target.value, index)}
-                      onKeyDown={(e) => handleKeyDown(e, index)}
-                      className={`w-11 h-14 sm:w-13 sm:h-16 text-center text-2xl font-black rounded-2xl border-2 transition-all outline-none
-                                            bg-slate-50 text-slate-900
-                                            ${digit ? 'border-emerald-400 bg-emerald-50 shadow-[0_0_12px_rgba(16,185,129,0.15)]' : 'border-slate-200 focus:border-emerald-400 focus:bg-white'}`}
-                    />
-                  ))}
-                </div>
-
-                <motion.button onClick={handleVerify} disabled={loading || otp.join('').length < 6}
-                  whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.985 }}
-                  className={`relative w-full overflow-hidden py-4 rounded-2xl font-black uppercase tracking-widest text-[13px] flex items-center justify-center gap-3 transition-all
-                                    ${otp.join('').length === 6
-                      ? 'bg-gradient-to-r from-emerald-600 to-emerald-500 text-white'
-                      : 'bg-slate-100 text-slate-300 cursor-not-allowed'}`}>
-                  {loading ? <><Loader2 className="w-5 h-5 animate-spin" /> Verifying...</>
-                    : <><CheckCircle className="w-5 h-5" /> Verify & Continue</>}
-                </motion.button>
-
-                <button onClick={resendOtp} disabled={loading || resendTimer > 0}
-                  className={`mt-4 text-[10px] font-black uppercase transition-colors tracking-widest flex items-center gap-2 ${resendTimer > 0 ? 'text-slate-300 cursor-not-allowed' : 'text-emerald-600 hover:text-emerald-500'}`}>
-                  {resendTimer > 0 ? `Resend Code in ${resendTimer}s` : 'Resend Verification Code'}
-                </button>
-
-                <button onClick={() => setStep(1)}
-                  className="mt-6 text-[10px] font-black uppercase text-slate-400 hover:text-emerald-600 transition-colors tracking-widest">
-                  Edit Email Address
-                </button>
+                 <div className="mt-10 flex flex-col gap-5 pb-8 lg:pb-0">
+                   <button onClick={resendOtp} disabled={resendTimer > 0} className="text-[10px] font-black uppercase tracking-widest text-[#111111]/20 hover:text-[#111111] transition-colors">
+                     {resendTimer > 0 ? `Resend Code in ${resendTimer}s` : 'Resend Verification Code'}
+                   </button>
+                   <button onClick={() => setStep(1)} className="text-[10px] font-black uppercase tracking-widest text-[#111111]/10 hover:text-[#111111] transition-colors">
+                     Edit account details
+                   </button>
+                 </div>
               </motion.div>
             ) : (
-              /* ── STEP 3: SUCCESS REDIRECT ── */
-              <motion.div key="success" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-                className="flex flex-col items-center text-center">
-                <div className="w-20 h-20 bg-emerald-500/10 rounded-[2rem] flex items-center justify-center mb-8 border border-emerald-400/20 relative">
-                  <motion.div
-                    className="absolute inset-0 rounded-[2rem] border-2 border-emerald-500"
-                    initial={{ pathLength: 0, opacity: 0 }}
-                    animate={{ pathLength: 1, opacity: 1 }}
-                    transition={{ duration: 1.5, ease: "easeInOut" }}
-                  />
-                  <CheckCircle className="w-10 h-10 text-emerald-500" />
-                </div>
+                /* ── SUCCESS REDIRECT ── */
+                <motion.div key="success" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center text-center py-8">
+                  <div className="w-24 h-24 bg-emerald-500/5 rounded-[2.5rem] flex items-center justify-center mb-10 border border-emerald-400/10 relative">
+                    <motion.div className="absolute inset-0 rounded-[2.5rem] border-2 border-emerald-500/50" initial={{ pathLength: 0, opacity: 0 }} animate={{ pathLength: 1, opacity: 1 }} transition={{ duration: 1.5, ease: "easeInOut" }} />
+                    <CheckCircle className="w-12 h-12 text-emerald-500" />
+                  </div>
 
-                <h3 className={`text-3xl font-black italic tracking-tighter mb-2 leading-none uppercase ${isDark ? 'text-white' : 'text-slate-900'}`}>Account Created!</h3>
-                <p className={`text-sm font-medium mb-10 max-w-[280px] ${isDark ? 'text-white/40' : 'text-slate-400'}`}>
-                  Your email is verified. Redirecting you to the dashboard...
-                </p>
+                  <h3 className="text-5xl font-black italic tracking-tighter mb-4 uppercase text-[#111111] whitespace-nowrap" style={georgiaFont}>Account Ready.</h3>
+                  <p className="text-sm font-medium mb-12 max-w-[320px] text-[#111111]/40">
+                    Your account has been successfully created. Redirecting to your dashboard...
+                  </p>
 
-                <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden mb-2">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: '100%' }}
-                    transition={{ duration: 3, ease: "linear" }}
-                    className="h-full bg-emerald-500"
-                  />
-                </div>
-                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500 animate-pulse">Logging you in...</span>
-              </motion.div>
+                  <div className="w-full max-w-[300px] h-1 bg-[#111111]/5 rounded-full overflow-hidden mb-4">
+                    <motion.div initial={{ width: 0 }} animate={{ width: '100%' }} transition={{ duration: 3, ease: "linear" }} className="h-full bg-emerald-500" />
+                  </div>
+                  <span className="text-[10px] font-black uppercase tracking-[0.4em] text-emerald-500 animate-pulse">Finalizing setup...</span>
+                </motion.div>
             )}
           </AnimatePresence>
         </motion.div>
-    </div >
+      </div>
+    </div>
   );
 };
 

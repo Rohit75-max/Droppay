@@ -32,12 +32,12 @@ const createTransporter = () => {
 const sendOTPEmail = async (email, otpCode) => {
     const transporter = createTransporter();
     await transporter.sendMail({
-        from: `"DropPay Security" <${process.env.EMAIL_USER}>`,
+        from: `"Drope Security" <${process.env.EMAIL_USER}>`,
         to: email,
-        subject: "Verify your DropPay Account",
+        subject: "Verify your Drope Account",
         html: `
             <div style="background:#050505; color:white; padding:30px; border-radius:15px; font-family:sans-serif; border: 1px solid #10B981;">
-                <h1 style="color:#10B981; font-style:italic;">DropPay Activation</h1>
+                <h1 style="color:#10B981; font-style:italic;">Drope Activation</h1>
                 <p style="text-transform:uppercase; letter-spacing:2px; font-size:10px; color:#888;">Identity Verification Key:</p>
                 <h2 style="font-size:38px; letter-spacing:8px; color:#10B981; margin: 20px 0;">${otpCode}</h2>
                 <p style="font-size:10px; color:#444;">This key expires in 10 minutes.</p>
@@ -309,7 +309,7 @@ exports.forgotPassword = async (req, res) => {
 
         const transporter = createTransporter();
         await transporter.sendMail({
-            from: `"DropPay Security" <${process.env.EMAIL_USER}>`,
+            from: `"Drope Security" <${process.env.EMAIL_USER}>`,
             to: user.email,
             subject: "Reset Your Access Key",
             html: `<p>Access Recovery Initialized. Click <a href="${resetLink}">here</a> to reset your password.</p>`

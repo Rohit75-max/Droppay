@@ -14,7 +14,7 @@ export const syncTheme = (userData) => {
 
     // 1. Persist to Local Storage (Immediate frontend recovery)
     localStorage.setItem('nexusTheme', newTheme);
-    localStorage.setItem('dropPayTheme', newMode);
+    localStorage.setItem('dropeTheme', newMode);
 
     // 2. Update Global Document Classes (Visual application)
     document.documentElement.classList.remove('dark', 'light');

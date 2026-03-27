@@ -18,7 +18,7 @@ const globalLottieMap = {
 };
 
 /**
- * ALERT PREVIEW: The "DropPay" Visual Engine
+ * ALERT PREVIEW: The "Drope" Visual Engine
  * Optimized for multi-variant support and universal scaling.
  * NEW: Compact, tightened heights applied to all cards.
  */

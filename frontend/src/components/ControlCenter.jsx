@@ -281,7 +281,7 @@ const ControlCenter = ({
                             className="w-full h-full flex items-center justify-center origin-center transform transition-transform duration-500"
                           >
                             <AlertPreview
-                              donorName="DropPay Tester"
+                              donorName="Drope Tester"
                               amount={500}
                               message="Preview Status: Active"
                               sticker="zap"

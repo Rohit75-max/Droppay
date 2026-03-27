@@ -35,7 +35,7 @@ const Overlay = () => {
     };
     fetchSettings();
 
-    // 2. Connect to DropPay Engine
+    // 2. Connect to Drope Engine
     const socket = io(process.env.REACT_APP_API_URL || 'http://localhost:5001');
 
     socket.on('connect', () => {

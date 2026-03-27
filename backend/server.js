@@ -95,7 +95,7 @@ app.get('/health', (req, res) => res.json({
     status: 'ONLINE',
     uptime: Math.floor(process.uptime()),
     timestamp: new Date().toISOString(),
-    service: 'DropPay API'
+    service: 'Drope API'
 }));
 app.get('/ping', (req, res) => res.send('pong'));
 // ─────────────────────────────────────────────────────────────────────────────

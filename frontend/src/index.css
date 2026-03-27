@@ -2,6 +2,74 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================ */
+/* ARC.NET HOMEPAGE PALETTE                     */
+/* ============================================ */
+:root {
+  --arc-blue: #3D44F5;
+  --arc-blue-dark: #2d33d4;
+  --arc-cream: #F5F0E8;
+  --arc-cream-alt: #EDE8DF;
+  --arc-cream-dark: #DDD8CF;
+  --arc-text-dark: #1a1a2e;
+}
+
+/* Arc grain overlay — applied via .arc-grain class */
+.arc-grain::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.12;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  background-repeat: repeat;
+  z-index: 1;
+}
+
+/* Arc quote marquee animation */
+@keyframes arc-marquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.arc-marquee {
+  animation: arc-marquee 28s linear infinite;
+  display: flex;
+  width: max-content;
+}
+
+.arc-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* Arc scalloped wave: used as bottom mask on blue sections */
+.arc-wave-bottom {
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  overflow: hidden;
+  line-height: 0;
+  z-index: 5;
+}
+
+.arc-wave-bottom svg {
+  display: block;
+  width: 100%;
+  height: 60px;
+}
+
+@media (max-width: 768px) {
+  .arc-wave-bottom svg { height: 40px; }
+}
+
+/* Sticky mockup section */
+.arc-sticky-mockup {
+  position: sticky;
+  top: 50%;
+  transform: translateY(-50%);
+}
 
 /* GLOBAL DARK / LIGHT MODE VARIABLES           */
 
@@ -693,7 +761,7 @@ body.theme-obsidian_monolith .text-\[var\(--nexus-accent\)\] {
 
 .theme-btn-active {
     border: 2px solid #10B981 !important;
-    /* DropPay Emerald */
+    /* Drope Emerald */
     box-shadow: 0 0 15px rgba(16, 185, 129, 0.2) !important;
     transform: scale(1.05) !important;
 }
@@ -1213,3 +1281,171 @@ html:has(.overlay-content) {
     text-shadow: 2px 2px 0px #000, 0 0 10px rgba(0, 255, 255, 0.5) !important;
     font-family: 'Courier New', monospace;
 }
+/* ========================================== */
+/* CYBER GLITCH TEXT (FOR HERO SECTION)       */
+/* ========================================== */
+
+.glitch-text {
+  position: relative;
+  display: inline-block;
+  color: inherit;
+}
+
+.glitch-text::before,
+.glitch-text::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.8;
+}
+
+.glitch-text::before {
+  color: #00ff00; /* Neon Green */
+  z-index: -1;
+  animation: glitch-anim-1 2s infinite linear alternate-reverse;
+}
+
+.glitch-text::after {
+  color: #3d44f5; /* Arc Blue */
+  z-index: -2;
+  animation: glitch-anim-2 3s infinite linear alternate-reverse;
+}
+
+@keyframes glitch-anim-1 {
+  0% { clip-path: inset(20% 0 50% 0); transform: translate(-4px, -2px); }
+  20% { clip-path: inset(80% 0 10% 0); transform: translate(4px, 2px); }
+  40% { clip-path: inset(40% 0 40% 0); transform: translate(-4px, 2px); }
+  60% { clip-path: inset(10% 0 80% 0); transform: translate(4px, -2px); }
+  80% { clip-path: inset(50% 0 20% 0); transform: translate(-4px, -2px); }
+  100% { clip-path: inset(20% 0 50% 0); transform: translate(-4px, -2px); }
+}
+
+@keyframes glitch-anim-2 {
+  0% { clip-path: inset(10% 0 85% 0); transform: translate(4px, 2px); }
+  25% { clip-path: inset(60% 0 20% 0); transform: translate(-4px, -2px); }
+  50% { clip-path: inset(30% 0 30% 0); transform: translate(4px, 2px); }
+  75% { clip-path: inset(85% 0 10% 0); transform: translate(-4px, -2px); }
+  100% { clip-path: inset(10% 0 85% 0); transform: translate(4px, 2px); }
+}
+
+/* ========================================== */
+/* BLUEPRINT LOADER (FOR BOOT SEQUENCE)       */
+/* ========================================== */
+
+.drafting-line {
+  height: 1px;
+  background: rgba(0,0,0,0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.drafting-line::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background: #111111;
+  transform: translateX(-100%);
+  animation: draft-draw 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes draft-draw {
+  0% { transform: translateX(-100%); }
+  50% { transform: translateX(0%); }
+  100% { transform: translateX(100%); }
+}
+
+
+/* ========================================== */
+/* PREMIUM LOADER & BLUEPRINT UTILITIES       */
+/* ========================================== */
+
+.blueprint-grid {
+  background-image: 
+    linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.scanning-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--nexus-accent), transparent);
+  box-shadow: 0 0 15px var(--nexus-accent);
+  animation: scan-vertical 3s ease-in-out infinite;
+  z-index: 20;
+}
+
+@keyframes scan-vertical {
+  0% { top: 0%; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+.glitch-text {
+  position: relative;
+  display: inline-block;
+}
+
+.glitch-text::before,
+.glitch-text::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.8;
+}
+
+.glitch-text::before {
+  color: #ff3e3e;
+  z-index: -1;
+  animation: glitch-shift-1 2s infinite linear alternate-reverse;
+}
+
+.glitch-text::after {
+  color: #3b82f6;
+  z-index: -2;
+  animation: glitch-shift-2 2s infinite linear alternate-reverse;
+}
+
+@keyframes glitch-shift-1 {
+  0% { transform: translate(0); }
+  20% { transform: translate(-2px, 2px); }
+  40% { transform: translate(-2px, -2px); }
+  60% { transform: translate(2px, 2px); }
+  80% { transform: translate(2px, -2px); }
+  100% { transform: translate(0); }
+}
+
+@keyframes glitch-shift-2 {
+  0% { transform: translate(0); }
+  25% { transform: translate(2px, -2px); }
+  50% { transform: translate(-2px, 2px); }
+  75% { transform: translate(2px, 2px); }
+  100% { transform: translate(0); }
+}
+
+.loader-scanline {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.02) 50%, transparent);
+  background-size: 100% 4px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+

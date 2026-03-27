@@ -51,12 +51,12 @@ async function purge() {
         try {
             await redisClient.connect();
             if (redisClient.isOpen) {
-                await redisClient.del('DROPPAY_GLOBAL_PAUSE');
-                console.log("✅ Cleared DROPPAY_GLOBAL_PAUSE flag from Redis.");
+                await redisClient.del('DROPE_GLOBAL_PAUSE');
+                console.log("✅ Cleared DROPE_GLOBAL_PAUSE flag from Redis.");
                 await redisClient.quit();
             }
         } catch (rErr) {
-            console.log("⚠️ Redis connection failed. Flush manual if needed: `redis-cli del DROPPAY_GLOBAL_PAUSE`.");
+            console.log("⚠️ Redis connection failed. Flush manual if needed: `redis-cli del DROPE_GLOBAL_PAUSE`.");
         }
 
         console.log("\n💥 PROJECT FINANCIAL RESET COMPLETE.");

@@ -11,7 +11,7 @@ const razorpay = new Razorpay({
 exports.startPaymentWorker = (io) => {
     const worker = new Worker('RazorpayOrderQueue', async (job, token) => {
         const redisClient = require('../config/redisClient');
-        const isPaused = await redisClient.get('DROPPAY_GLOBAL_PAUSE');
+        const isPaused = await redisClient.get('DROPE_GLOBAL_PAUSE');
 
         if (isPaused === 'true') {
             console.log(`[Circuit Breaker] Job ${job.id} paused. Delaying 5min.`);

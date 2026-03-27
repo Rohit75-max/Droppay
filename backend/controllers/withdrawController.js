@@ -14,7 +14,7 @@ const rzpX = new Razorpay({
  */
 exports.requestWithdrawal = async (req, res) => {
     const redisClient = require('../config/redisClient');
-    const isPaused = await redisClient.get('DROPPAY_GLOBAL_PAUSE');
+    const isPaused = await redisClient.get('DROPE_GLOBAL_PAUSE');
 
     if (isPaused === 'true') {
         return res.status(503).json({ msg: "Service Temporarily Paused. Circuit Breaker is ACTIVE." });
