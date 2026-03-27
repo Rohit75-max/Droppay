@@ -1,6 +1,6 @@
 const { Worker } = require('bullmq');
 const Razorpay = require('razorpay');
-const FailedJob = require('../models/FailedJob');
+const FailedJob = require('../src/models/FailedJob');
 
 // Isolate Razorpay instance in the worker thread
 const razorpay = new Razorpay({
@@ -10,7 +10,7 @@ const razorpay = new Razorpay({
 
 exports.startPaymentWorker = (io) => {
     const worker = new Worker('RazorpayOrderQueue', async (job, token) => {
-        const redisClient = require('../config/redisClient');
+        const redisClient = require('../src/config/redisClient');
         const isPaused = await redisClient.get('DROPPAY_GLOBAL_PAUSE');
 
         if (isPaused === 'true') {

@@ -6,7 +6,7 @@ const { createClient } = require('redis');
 const { createAdapter } = require('@socket.io/redis-adapter');
 
 const { globalLimiter, strictLimiter } = require('./middleware/rateLimiter');
-const { startPaymentWorker } = require('./workers/paymentWorker');
+const { startPaymentWorker } = require('../workers/paymentWorker');
 const connectDB = require('./config/db');
 const cors = require('cors');
 const cron = require('node-cron');
