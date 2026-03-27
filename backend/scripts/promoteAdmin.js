@@ -1,7 +1,7 @@
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
 const mongoose = require('mongoose');
-const User = require('../src/models/User');
+const User = require('../models/User');
 
 const promoteAdmin = async () => {
     try {
