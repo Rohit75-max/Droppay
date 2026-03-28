@@ -87,6 +87,7 @@ app.use('/api/payment', require('./routes/paymentRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/tug-of-war', require('./routes/tugOfWarRoutes'));
 app.use('/api/newsletter', require('./routes/newsletterRoutes'));
+app.use('/api/inquiry', require('./routes/inquiryRoutes'));
 
 // ─── KEEP-ALIVE: Health + Ping endpoints ────────────────────────────────────
 // Ping these from cron-job.org every 5-10 min to prevent Render cold starts.

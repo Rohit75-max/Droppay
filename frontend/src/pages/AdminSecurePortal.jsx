@@ -1125,7 +1125,10 @@ const AdminSecurePortal = () => {
 
                 {/* Exit */}
                 <div className="p-4 border-t border-black/10 bg-black/5">
-                    <button onClick={() => navigate('/dashboard')}
+                    <button onClick={() => {
+                        localStorage.removeItem('token');
+                        navigate('/admin/login');
+                    }}
                         className="w-full flex items-center gap-4 px-6 py-4 text-rose-500/60 hover:text-rose-400 hover:bg-rose-500/5 transition-all group border border-transparent">
                         <LogOut className="w-4 h-4 shrink-0 group-hover:-translate-x-1 transition-transform" />
                         <span className="text-[10px] font-black uppercase tracking-[0.2em]">DE-AUTHORIZE</span>

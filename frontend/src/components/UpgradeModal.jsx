@@ -309,6 +309,7 @@ const UpgradeModal = ({ isOpen, onClose, user }) => {
               '/api/payment/verify-subscription',
               {
                 plan: planId,
+                billingCycle: billingCycle,
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_subscription_id: response.razorpay_subscription_id,
                 razorpay_signature: response.razorpay_signature,

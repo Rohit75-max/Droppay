@@ -1,5 +1,5 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { ToastContainer } from 'react-toastify';
@@ -37,6 +37,7 @@ const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 const Features = lazy(() => import('./pages/Features'));
 const Pricing = lazy(() => import('./pages/Pricing'));
+const Subscription = lazy(() => import('./pages/Subscription'));
 const Blog = lazy(() => import('./pages/Blog'));
 
 // ─── ERROR BOUNDARY — catches any render crash, shows recovery UI not blank page ─
@@ -178,6 +179,7 @@ const MissionGate = ({ children }) => {
   const [status, setStatus] = useState('loading');
   const token = localStorage.getItem('token');
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const checkAccess = async () => {
@@ -190,14 +192,18 @@ const MissionGate = ({ children }) => {
           headers: { Authorization: `Bearer ${token}` }
         });
 
-        // --- NEW: THEME SYNCHRONIZATION ---
-        // Ensure backend theme preference is reflected in the frontend state
+        // --- NEW: ROLE-BASED EXTRACTION ---
+        // If an admin accidentally tries to access a USER route (like DASHBOARD), 
+        // extract them to the Admin hub.
+        if (res.data.role === 'admin') {
+          navigate('/admin/secure-portal');
+          return;
+        }
+
         syncTheme(res.data);
         setStatus('authorized');
       } catch (err) {
         if (err.response?.status === 429) {
-          // If the rate limiter blocks the initialization check, assume the session is still active
-          // rather than catastrophically logging the user out.
           setStatus('authorized');
         } else {
           setStatus('unauthorized');
@@ -205,12 +211,45 @@ const MissionGate = ({ children }) => {
       }
     };
     checkAccess();
-  }, [token]);
+  }, [token, navigate]);
 
   if (status === 'loading') return <BootSequence />;
-
-  // If unauthorized, kick to login.
   if (status === 'unauthorized') return <Navigate to="/login" state={{ from: location }} replace />;
+  return children;
+};
+
+// --- MASTER GATE: SECURE ADMIN CLEARANCE ---
+const MasterGate = ({ children }) => {
+  const [status, setStatus] = useState('loading');
+  const token = localStorage.getItem('token');
+  const location = useLocation();
+
+  useEffect(() => {
+    const checkAdminAccess = async () => {
+      if (!token) {
+        setStatus('unauthorized');
+        return;
+      }
+      try {
+        const res = await axios.get('/api/user/profile', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        // Verify that the node has Admin Clearance
+        if (res.data.role === 'admin') {
+          setStatus('authorized');
+        } else {
+          setStatus('unauthorized');
+        }
+      } catch (err) {
+        setStatus('unauthorized');
+      }
+    };
+    checkAdminAccess();
+  }, [token]);
+
+  if (status === 'loading') return <BootSequence status="Verifying Clearance" />;
+  if (status === 'unauthorized') return <Navigate to="/admin/login" state={{ from: location }} replace />;
   return children;
 };
 
@@ -233,6 +272,11 @@ const AnimatedRoutes = () => {
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/features" element={<Features />} />
           <Route path="/pricing" element={<Pricing />} />
+          <Route path="/subscription" element={
+            <MissionGate>
+              <Subscription />
+            </MissionGate>
+          } />
           <Route path="/blog" element={<Blog />} />
 
           {/* 2. PUBLIC PROTOCOL LINKS */}
@@ -248,7 +292,14 @@ const AnimatedRoutes = () => {
 
           {/* 5. ENTERPRISE ADMIN HUB */}
           <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin/secure-portal" element={<AdminSecurePortal />} />
+          <Route 
+            path="/admin/secure-portal" 
+            element={
+              <MasterGate>
+                <AdminSecurePortal />
+              </MasterGate>
+            } 
+          />
 
           {/* 6. SECURE DASHBOARD NEXUS */}
           <Route

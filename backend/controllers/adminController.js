@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const os = require('os');
 const User = require('../models/User');
+const Admin = require('../models/Admin');
 const Drop = require('../models/Drop');
 const PlatformMetrics = require('../models/PlatformMetrics');
 const GlobalConfig = require('../models/GlobalConfig');
@@ -392,7 +393,7 @@ exports.dispatchBroadcast = async (req, res) => {
 
 exports.getAdminProfile = async (req, res) => {
     try {
-        const admin = await User.findById(req.user.id).select('username email fullName adminProfile role streamerId');
+        const admin = await Admin.findById(req.user.id).select('username email fullName avatar role');
         if (!admin) return res.status(404).json({ msg: "Admin Node Not Found." });
         res.status(200).json(admin);
     } catch (err) {
@@ -402,18 +403,12 @@ exports.getAdminProfile = async (req, res) => {
 
 exports.updateAdminProfile = async (req, res) => {
     try {
-        const { fullName, adminProfile } = req.body;
-        const admin = await User.findById(req.user.id);
+        const { fullName } = req.body;
+        const admin = await Admin.findById(req.user.id);
 
         if (!admin) return res.status(404).json({ msg: "Admin Node Not Found." });
 
         if (fullName !== undefined) admin.fullName = fullName;
-        if (adminProfile) {
-            admin.adminProfile = {
-                ...admin.adminProfile,
-                ...adminProfile
-            };
-        }
 
         await admin.save();
         res.status(200).json({ msg: "Admin Profile Synchronized.", admin });
@@ -427,19 +422,15 @@ exports.uploadAdminAvatar = async (req, res) => {
     try {
         if (!req.file) return res.status(400).json({ msg: "No identity packet found." });
 
-        const admin = await User.findById(req.user.id);
+        const admin = await Admin.findById(req.user.id);
         if (!admin) return res.status(404).json({ msg: "Admin Node Not Found." });
 
         // Generate the URL for the avatar
         const avatarUrl = `/uploads/avatars/${req.file.filename}`;
 
-        // Update the adminProfile.avatar field
-        admin.adminProfile = {
-            ...admin.adminProfile,
-            avatar: avatarUrl
-        };
-
+        admin.avatar = avatarUrl;
         await admin.save();
+        
         res.status(200).json({ msg: "Identity Matrix Avatar Updated.", avatarUrl });
     } catch (err) {
         console.error("Avatar Upload Error:", err);

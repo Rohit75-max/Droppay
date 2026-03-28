@@ -423,15 +423,21 @@ exports.createSubscription = async (req, res) => {
 
 exports.verifySubscription = async (req, res) => {
     try {
-        const { plan, razorpay_payment_id } = req.body;
-        const userId = req.user.id; // from auth middleware
+        const { plan, billingCycle } = req.body;
+        const userId = req.user.id; 
 
-        // Update the user's tier and subscription status
+        // Calculate Expiry: Today + billingCycle months (default to 1 month if not specified)
+        const cycleMonths = Number(billingCycle) || 1;
+        const expiryDate = new Date();
+        expiryDate.setMonth(expiryDate.getMonth() + cycleMonths);
+
+        // Update the user's tier, plan, status AND the critical expiry date
         await User.findByIdAndUpdate(userId, {
             $set: {
                 tier: plan,
                 "subscription.plan": plan,
-                "subscription.status": "active"
+                "subscription.status": "active",
+                "subscription.expiryDate": expiryDate
             }
         });
 

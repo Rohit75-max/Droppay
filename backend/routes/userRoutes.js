@@ -110,6 +110,29 @@ router.get('/profile', auth, cacheProfile, async (req, res) => {
         const monthlyNetEarnings = Math.round(totalGrossMonth * netMultiplier);
 
         const userObj = user.toObject();
+        
+        // --- IRONCLAD SUBSCRIPTION SENTINEL ---
+        const TRIAL_MS = 7 * 24 * 60 * 60 * 1000;
+        const now = new Date();
+        const accountAge = now - user.createdAt;
+        const isTrialActive = accountAge < TRIAL_MS;
+        
+        // Paid status: Must be 'active' AND not expired
+        const isPaidActive = user.subscription?.status === 'active' && 
+                           user.subscription?.expiryDate && 
+                           new Date(user.subscription.expiryDate) > now;
+
+        // Dynamic Status Override: Force 'inactive' if both trial and paid periods are over
+        if (!isTrialActive && !isPaidActive) {
+            userObj.subscription.status = 'inactive';
+        } else {
+            userObj.subscription.status = 'active';
+        }
+
+        // Add telemetry for the frontend countdown
+        userObj.subscription.trialRemainingMs = Math.max(0, TRIAL_MS - accountAge);
+        userObj.subscription.isTrial = isTrialActive && !isPaidActive;
+
         userObj.financialMetrics = userObj.financialMetrics || {};
         userObj.financialMetrics.monthlyNetEarnings = monthlyNetEarnings;
 

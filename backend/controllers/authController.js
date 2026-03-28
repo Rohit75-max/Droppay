@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const Admin = require('../models/Admin');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
@@ -180,11 +181,27 @@ exports.verifyEmail = async (req, res) => {
             maxAge: 24 * 60 * 60 * 1000
         });
 
+        // --- IRONCLAD SUBSCRIPTION SENTINEL (Handshake Upgrade) ---
+        const TRIAL_MS = 7 * 24 * 60 * 60 * 1000;
+        const now = new Date();
+        const accountAge = now - user.createdAt;
+        const isTrialActive = accountAge < TRIAL_MS;
+        const isPaidActive = user.subscription?.status === 'active' && 
+                           user.subscription?.expiryDate && 
+                           new Date(user.subscription.expiryDate) > now;
+
+        const dynamicStatus = (isTrialActive || isPaidActive) ? 'active' : 'inactive';
+
         res.status(200).json({
             token,
             user: {
                 username: user.username,
-                subscription: user.subscription
+                subscription: {
+                    ...user.subscription.toObject(),
+                    status: dynamicStatus,
+                    isTrial: isTrialActive && !isPaidActive,
+                    trialRemainingMs: Math.max(0, TRIAL_MS - accountAge)
+                }
             }
         });
     } catch (err) {
@@ -242,11 +259,27 @@ exports.login = async (req, res) => {
             sameSite: 'none',  // Required for cross-site communication
             maxAge: 24 * 60 * 60 * 1000
         });
+        // --- IRONCLAD SUBSCRIPTION SENTINEL (Handshake Upgrade) ---
+        const TRIAL_MS = 7 * 24 * 60 * 60 * 1000;
+        const now = new Date();
+        const accountAge = now - user.createdAt;
+        const isTrialActive = accountAge < TRIAL_MS;
+        const isPaidActive = user.subscription?.status === 'active' && 
+                           user.subscription?.expiryDate && 
+                           new Date(user.subscription.expiryDate) > now;
+
+        const dynamicStatus = (isTrialActive || isPaidActive) ? 'active' : 'inactive';
+
         res.json({
             token,
             user: {
                 username: user.username,
-                subscription: user.subscription
+                subscription: {
+                    ...user.subscription.toObject(),
+                    status: dynamicStatus,
+                    isTrial: isTrialActive && !isPaidActive,
+                    trialRemainingMs: Math.max(0, TRIAL_MS - accountAge)
+                }
             }
         });
     } catch (err) {
@@ -259,28 +292,25 @@ exports.login = async (req, res) => {
 exports.adminLogin = async (req, res) => {
     try {
         const email = req.body.email.trim().toLowerCase();
-        const { password, adminSecret } = req.body; // Optional layer: can require an extra secret key later
-        const user = await User.findOne({ email });
+        const { password } = req.body;
+        
+        // ENTERPRISE SEC: Target the dedicated ADMIN collection
+        const admin = await Admin.findOne({ email });
 
-        if (!user || !user.password) return res.status(400).json({ msg: "Admin Authentication Failed." });
-
-        if (user.role !== 'admin') {
-            return res.status(403).json({ msg: "Clearance Denied. Standard users cannot access this portal." });
+        if (!admin || !admin.isActive) {
+            return res.status(400).json({ msg: "Admin Authentication Failed. Node inactive or not found." });
         }
 
-        const isMatch = await bcrypt.compare(password, user.password);
+        const isMatch = await admin.comparePassword(password);
         if (!isMatch) return res.status(400).json({ msg: "Admin Authentication Failed. Invalid Key." });
-
-        if (!user.isEmailVerified) return res.status(401).json({ msg: "Node Identity not verified." });
 
         // Security Telemetry
         const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-        await User.findByIdAndUpdate(user._id, {
-            'security.lastLogin': new Date(),
-            'security.lastLoginIP': ip
-        });
+        admin.lastLogin = new Date();
+        admin.lastLoginIP = ip;
+        await admin.save();
 
-        const token = jwt.sign({ user: { id: user._id } }, process.env.JWT_SECRET, { expiresIn: '12h' });
+        const token = jwt.sign({ user: { id: admin._id } }, process.env.JWT_SECRET, { expiresIn: '12h' });
 
         // --- ADDED FOR LIVE PRODUCTION ---
         res.cookie('token', token, {
@@ -290,7 +320,7 @@ exports.adminLogin = async (req, res) => {
             maxAge: 12 * 60 * 60 * 1000
         });
 
-        res.json({ token, user: { username: user.username, role: user.role } });
+        res.json({ token, user: { username: admin.username, role: admin.role } });
     } catch (err) {
         console.error("ADMIN LOGIN CRASH LOG:", err);
         res.status(500).json({ msg: "Admin Portal Error.", error: err.message });

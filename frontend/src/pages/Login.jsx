@@ -130,7 +130,8 @@ const Login = () => {
       localStorage.setItem('token', res.data.token);
       syncTheme(res.data.user);
       setError(''); setLoginSuccess(true);
-      setTimeout(() => navigate('/dashboard'), 1000);
+      const landing = res.data.user.subscription?.status === 'active' ? '/dashboard' : '/subscription';
+      setTimeout(() => navigate(landing), 1000);
     } catch (err) {
       if (err.response?.status === 206) {
         setStep(2);
@@ -176,7 +177,8 @@ const Login = () => {
         localStorage.setItem('token', res.data.token);
         syncTheme(res.data.user);
         setLoginSuccess(true);
-        setTimeout(() => navigate('/dashboard'), 1000);
+        const landing = res.data.user.subscription?.status === 'active' ? '/dashboard' : '/subscription';
+        setTimeout(() => navigate(landing), 1000);
       }
     } catch (err) { setError(err.response?.data?.msg || 'Invalid verification code.'); }
     finally { setLoading(false); }

@@ -6,6 +6,24 @@
 /* ARC.NET HOMEPAGE PALETTE                     */
 /* ============================================ */
 :root {
+  --nav-height: 70px;
+}
+
+html {
+  /* scroll-behavior: smooth; /* Disabled due to frequent trackpad/framer-motion physics conflicts */
+  scroll-padding-top: var(--nav-height);
+}
+
+/* Global Viewport Fit Utilities */
+.min-h-screen-fit {
+  min-height: calc(100vh - var(--nav-height));
+}
+
+.h-screen-fit {
+  height: calc(100vh - var(--nav-height));
+}
+
+:root {
   --arc-blue: #3D44F5;
   --arc-blue-dark: #2d33d4;
   --arc-cream: #F5F0E8;
@@ -1448,4 +1466,162 @@ html:has(.overlay-content) {
   z-index: 10;
 }
 
+/* ── ARC.NET HOMEPAGE TOKENS ── */
+:root {
+  --arc-blue: #111111;
+  --arc-cream: #f5f4e2;
+  --arc-cream-alt: #f5f4e2;
+  --arc-text-dark: #111111;
+}
 
+.arc-grain-bg {
+  position: relative;
+  overflow: hidden;
+}
+.arc-grain-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.13;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  z-index: 2;
+}
+
+.arc-hero-text {
+  font-family: Georgia, 'Times New Roman', serif;
+  color: var(--arc-text-dark);
+}
+
+.arc-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.85rem 2rem;
+  border-radius: 9999px;
+  font-weight: 800;
+  font-size: 0.875rem;
+  letter-spacing: 0.04em;
+  transition: all 0.2s cubic-bezier(0.23,1,0.32,1);
+  cursor: pointer;
+}
+
+.arc-pill-btn-primary {
+  background: var(--arc-text-dark);
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+.arc-pill-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+}
+
+.arc-testimonial-card {
+  background: white;
+  border: 1px solid rgba(17,17,17,0.12);
+  border-radius: 1.5rem;
+  padding: 2rem;
+  transition: all 0.3s ease;
+}
+.arc-testimonial-card:hover {
+  border-color: rgba(17,17,17,0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(17,17,17,0.08);
+}
+
+.arc-nav-glass {
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+}
+
+.premium-footer-link {
+  position: relative;
+  color: rgba(17,17,17,0.7);
+  transition: color 0.3s ease;
+}
+.premium-footer-link:hover { color: #111111; }
+.premium-footer-link::after {
+  content: '';
+  position: absolute;
+  width: 0; height: 1px;
+  bottom: -2px; left: 0;
+  background: #111111;
+  transition: width 0.3s cubic-bezier(0.175,0.885,0.32,1.275);
+}
+.premium-footer-link:hover::after { width: 100%; }
+
+@keyframes arc-ticker-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.arc-ticker-track {
+  display: flex;
+  animation: arc-ticker-scroll 30s linear infinite;
+  width: max-content;
+}
+.input-glow:focus-within {
+  box-shadow: 0 0 20px rgba(17,17,17,0.15);
+  border-color: #111111 !important;
+}
+
+.nav-link-arc {
+  position: relative;
+  padding: 0.5rem 0;
+  color: rgba(255,255,255,0.8);
+  font-size: 0.65rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  transition: color 0.2s;
+}
+.nav-link-arc:hover { color: #fff; }
+.nav-link-arc::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 50%;
+  width: 0; height: 2px;
+  background: rgba(255,255,255,0.6);
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
+}
+.nav-link-arc:hover::after { width: 100%; }
+
+.ticker-sheen { position: relative; overflow: hidden; }
+.ticker-sheen::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 50%; height: 100%;
+  background: linear-gradient(to right, transparent, rgba(255,255,255,0.06), transparent);
+  transform: skewX(-25deg);
+  animation: sheen-swipe 8s infinite ease-in-out;
+}
+@keyframes sheen-swipe {
+  0%   { left: -100%; }
+  20%  { left: 200%; }
+  100% { left: 200%; }
+}
+
+.hollow-stream-text {
+  color: transparent;
+  -webkit-text-stroke: 2px #111111;
+  font-family: 'Inter', sans-serif;
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  text-transform: uppercase;
+  line-height: 0.9;
+  display: inline-block;
+  position: relative;
+}
+
+/* Doubling effect for 'BACKBONE' vibe */
+.hollow-stream-text::after {
+  content: attr(data-text);
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(17,17,17,0.3);
+  z-index: -1;
+}

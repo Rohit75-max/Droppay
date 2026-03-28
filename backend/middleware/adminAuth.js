@@ -1,9 +1,11 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const Admin = require('../models/Admin');
 
 module.exports = async function (req, res, next) {
     // Get token from header
-    const token = req.header('Authorization')?.replace('Bearer ', '');
+    const authHeader = req.header('Authorization');
+    const token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : authHeader;
+
     // Check if not token
     if (!token) {
         return res.status(401).json({ msg: 'No internal token, authorization denied' });
@@ -13,10 +15,11 @@ module.exports = async function (req, res, next) {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         req.user = decoded.user;
 
-        // ENTERPRISE SEC: Strict RBAC Lookup
-        const user = await User.findById(req.user.id).select('role');
-        if (!user || user.role !== 'admin') {
-            return res.status(403).json({ msg: 'Clearance Rejected: Node lacks Administrative Rights.' });
+        // ENTERPRISE SEC: Strict Admin Registry Lookup
+        // We now verify against the dedicated Admin collection
+        const admin = await Admin.findById(req.user.id).select('role isActive');
+        if (!admin || !admin.isActive) {
+            return res.status(403).json({ msg: 'Clearance Rejected: Node lacks Administrative Rights or is deactivated.' });
         }
 
         next();

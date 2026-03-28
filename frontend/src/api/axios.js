@@ -11,6 +11,18 @@ const API = axios.create({
     withCredentials: true // Fixes the cookie issue for ALL pages at once
 });
 
+// GLOBAL REQUEST INTERCEPTOR: Automatically attach session token
+API.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => Promise.reject(error)
+);
+
 // GLOBAL AUTH INTERCEPTOR: Handle stale/invalid sessions across the entire node network
 API.interceptors.response.use(
     (response) => response,
