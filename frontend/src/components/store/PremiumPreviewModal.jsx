@@ -1,10 +1,10 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ShieldCheck, Zap, Lock, Sparkles, Activity, Target, Wallet, User, Trophy, Crown, MessageSquare, Gift } from 'lucide-react';
-import PremiumAlertPreview from '../PremiumAlertPreview';
-import PremiumGoalOverlays from '../PremiumGoalOverlays';
-import CyberGoalBar from '../CyberGoalBar';
-import LiveThemeEngine from '../LiveThemeEngine';
+import PremiumAlertPreview from '../dashboard/AlertPreview';
+import PremiumGoalOverlays from '../widgets/GoalOverlays';
+import CyberGoalBar from '../widgets/GoalBar';
+import LiveThemeEngine from '../dashboard/ThemeEngine';
 
 const PREMIUM_GOAL_STYLES = [
     'black_hole', 'hex_core', 'rune_monolith', 'hologram_glitch',

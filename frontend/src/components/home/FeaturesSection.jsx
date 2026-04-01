@@ -50,7 +50,7 @@ const FeaturesSection = () => {
       id="features"
       animate={{ backgroundColor: featureStyles[activeFeature].bg }}
       transition={{ duration: 0.8 }}
-      className="relative min-h-[100svh] w-full flex flex-col py-10 px-6 overflow-hidden transition-colors arc-grain-bg"
+      className="relative h-full w-full flex flex-col py-10 px-6 overflow-hidden transition-colors arc-grain-bg"
     >
       <motion.div
         className="max-w-[1280px] mx-auto w-full flex-1 flex flex-col"
@@ -67,11 +67,11 @@ const FeaturesSection = () => {
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             className="max-w-4xl flex flex-col items-center"
           >
-            <h2 className="arc-hero-text text-3xl md:text-5xl font-black mb-2 leading-[1.1] tracking-tighter" style={{ color: 'var(--arc-text-dark)' }}>
+            <h2 className="arc-hero-text text-[clamp(2.5rem,5vw,4.5rem)] font-black mb-2 leading-[1.1] tracking-tighter" style={{ color: 'var(--arc-text-dark)' }}>
               Built for <br className="hidden md:block" />
               <span style={{ color: '#111111' }}>New Era.</span>
             </h2>
-            <p className="text-[#4a4a68] text-[9px] md:text-[10px] font-black uppercase tracking-[0.4em] opacity-60 mt-2">
+            <p className="text-[#4a4a68] text-[clamp(0.6rem,1.2vw,0.8rem)] font-black uppercase tracking-[0.4em] opacity-60 mt-2">
               Core Infrastructure & Intelligence
             </p>
           </motion.div>
@@ -80,7 +80,7 @@ const FeaturesSection = () => {
             --- YOUR CUSTOM MIDDLE SPACE ---
             Absorbing all room.
           */}
-          <div className="flex-1 w-full min-h-[300px] flex items-center justify-center relative mt-6 mb-8 text-black/10 text-sm font-bold border-2 border-dashed border-black/5 rounded-3xl">
+          <div className="flex-1 w-full max-w-[1000px] mx-auto min-h-[300px] flex items-center justify-center relative mt-6 mb-8 text-black/10 text-sm font-bold border-2 border-dashed border-black/5 rounded-3xl">
             [ Central Canvas Area for Graphic Content ]
           </div>
 
@@ -90,7 +90,7 @@ const FeaturesSection = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
             onClick={() => navigate('/features')}
-            className="group flex items-center gap-3 px-10 py-5 bg-[#111111] text-white rounded-full font-black uppercase tracking-widest text-[10px] md:text-xs hover:scale-105 transition-all shadow-2xl shadow-black/20"
+            className="group flex items-center gap-3 px-10 py-5 bg-[#111111] text-white rounded-full font-black uppercase tracking-widest text-[clamp(0.6rem,1.2vw,0.8rem)] hover:scale-105 transition-all shadow-2xl shadow-black/20"
           >
             Explore Full Suite <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </motion.button>

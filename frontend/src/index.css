@@ -1,6 +1,31 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ============================================ */
+/* DROPE HOMEPAGE — SECTION PANEL BASE          */
+/* ============================================ */
+
+/* Every sticky homepage section uses this class */
+.section-panel {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Scroll container for Navbar scroll detection */
+.scroll-container {
+  height: 100vh;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  scroll-behavior: auto;
+}
+
 
 /* ============================================ */
 /* ARC.NET HOMEPAGE PALETTE                     */
@@ -116,7 +141,7 @@ html.light {
 
 :root {
     --nexus-bg: #050505;
-    --nexus-panel: rgba(10, 10, 10, 0.55);
+    --nexus-panel: #0a0a0b; /* Solid Base instead of semi-transparent */
     --nexus-accent: #10B981;
     --nexus-text: #ffffff;
     --nexus-text-muted: #94a3b8;
@@ -124,7 +149,7 @@ html.light {
     --nexus-radius: 1.5rem; /* Standardized to Revenue Card curve */
     --nexus-glow: 0 12px 40px rgba(16, 185, 129, 0.12);
     --nexus-accent-glow: rgba(16, 185, 129, 0.12);
-    --nexus-sidebar-bg: rgba(10, 10, 10, 0.55);
+    --nexus-sidebar-bg: #0a0a0b;
     --nexus-sidebar-border: rgba(255, 255, 255, 0.08);
     --card-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
     --simulator-bg: #070d0a;
@@ -139,11 +164,292 @@ html.light {
     --nexus-text: #ffffff;
     --nexus-text-muted: #64748b;
     --nexus-border: rgba(255, 255, 255, 0.12); /* Visible Monolith Border */
-    --nexus-radius: 1.5rem;
+    --nexus-radius: 0.15rem; /* Monolith: The Sharpest Identity */
     --nexus-glow: none;
     --nexus-accent-glow: 0 0 30px rgba(16, 185, 129, 0.15);
     --nexus-sidebar-bg: #000000;
     --nexus-sidebar-border: rgba(255, 255, 255, 0.1);
+}
+
+/* ============================================================ */
+/* BASE COLOR SPECTRUM THEMES (Shadcn-style, 2026 Pro Edition)  */
+/* All of these cascade via --nexus-accent through every card.  */
+/* ============================================================ */
+
+/* ZINC (Charcoal Pro) */
+.theme-zinc {
+    --nexus-bg: #09090b;
+    --nexus-panel: #18181b;
+    --nexus-accent: #a1a1aa;
+    --nexus-text: #fafafa;
+    --nexus-text-muted: #71717a;
+    --nexus-border: rgba(161, 161, 170, 0.2);
+    --nexus-radius: 0.75rem; /* Zinc: Tactical Core */
+    --nexus-glow: 0 12px 40px rgba(161, 161, 170, 0.12);
+    --nexus-accent-glow: rgba(161, 161, 170, 0.1);
+    --nexus-sidebar-bg: rgba(24, 24, 27, 0.6);
+    --nexus-sidebar-border: rgba(161, 161, 170, 0.1);
+}
+.light .theme-zinc {
+    --nexus-bg: #f4f4f5; --nexus-panel: #ffffff;
+    --nexus-text: #09090b; --nexus-text-muted: #71717a;
+    --nexus-border: rgba(161,161,170,0.25);
+}
+
+/* ROSE (Creator Pink - Dark) */
+.theme-rose {
+    --nexus-bg: #0c0a0b;
+    --nexus-panel: #1c1114;
+    --nexus-accent: #f43f5e;
+    --nexus-text: #fff1f2;
+    --nexus-text-muted: #fb7185;
+    --nexus-border: rgba(244, 63, 94, 0.2);
+    --nexus-radius: 2rem; /* Rose: Modern and Soft */
+    --nexus-glow: 0 12px 40px rgba(244, 63, 94, 0.15);
+    --nexus-accent-glow: rgba(244, 63, 94, 0.15);
+    --nexus-sidebar-bg: rgba(28, 17, 20, 0.6);
+    --nexus-sidebar-border: rgba(244, 63, 94, 0.15);
+}
+.light .theme-rose {
+    --nexus-bg: #fff1f2; --nexus-panel: #ffffff;
+    --nexus-text: #0c0a0b; --nexus-text-muted: #9f1239;
+    --nexus-border: rgba(244,63,94,0.2);
+}
+
+/* SKY BLUE (Clarity Pro) */
+.theme-sky {
+    --nexus-bg: #050f18;
+    --nexus-panel: #0c1e2e;
+    --nexus-accent: #38bdf8;
+    --nexus-text: #f0f9ff;
+    --nexus-text-muted: #7dd3fc;
+    --nexus-border: rgba(56, 189, 248, 0.2);
+    --nexus-radius: 2rem; /* Sky: Modern and Soft */
+    --nexus-glow: 0 12px 40px rgba(56, 189, 248, 0.15);
+    --nexus-accent-glow: rgba(56, 189, 248, 0.15);
+    --nexus-sidebar-bg: rgba(12, 30, 46, 0.6);
+    --nexus-sidebar-border: rgba(56, 189, 248, 0.15);
+}
+.light .theme-sky {
+    --nexus-bg: #f0f9ff; --nexus-panel: #ffffff;
+    --nexus-text: #0c1e2e; --nexus-text-muted: #0369a1;
+    --nexus-border: rgba(56,189,248,0.25);
+}
+
+/* EMERALD (Signal Green - Dark) */
+.theme-emerald {
+    --nexus-bg: #050f0a;
+    --nexus-panel: #0a1c12;
+    --nexus-accent: #10b981;
+    --nexus-text: #ecfdf5;
+    --nexus-text-muted: #34d399;
+    --nexus-border: rgba(16, 185, 129, 0.2);
+    --nexus-radius: 2rem; /* Emerald: Modern and Soft */
+    --nexus-glow: 0 12px 40px rgba(16, 185, 129, 0.15);
+    --nexus-accent-glow: rgba(16, 185, 129, 0.15);
+    --nexus-sidebar-bg: rgba(10, 28, 18, 0.6);
+    --nexus-sidebar-border: rgba(16, 185, 129, 0.15);
+}
+.light .theme-emerald {
+    --nexus-bg: #ecfdf5; --nexus-panel: #ffffff;
+    --nexus-text: #050f0a; --nexus-text-muted: #065f46;
+    --nexus-border: rgba(16,185,129,0.2);
+}
+
+/* ORANGE (Ember OS) */
+.theme-orange {
+    --nexus-bg: #0c0800;
+    --nexus-panel: #1c1100;
+    --nexus-accent: #f97316;
+    --nexus-text: #fff7ed;
+    --nexus-text-muted: #fdba74;
+    --nexus-border: rgba(249, 115, 22, 0.2);
+    --nexus-radius: 1.5rem; /* Orange: Balanced Tech */
+    --nexus-glow: 0 12px 40px rgba(249, 115, 22, 0.15);
+    --nexus-accent-glow: rgba(249, 115, 22, 0.15);
+    --nexus-sidebar-bg: rgba(28, 17, 0, 0.6);
+    --nexus-sidebar-border: rgba(249, 115, 22, 0.15);
+}
+.light .theme-orange {
+    --nexus-bg: #fff7ed; --nexus-panel: #ffffff;
+    --nexus-text: #0c0800; --nexus-text-muted: #9a3412;
+    --nexus-border: rgba(249,115,22,0.2);
+}
+
+/* VIOLET (Phantom Protocol) */
+.theme-violet {
+    --nexus-bg: #0a080f;
+    --nexus-panel: #140d20;
+    --nexus-accent: #8b5cf6;
+    --nexus-text: #f5f3ff;
+    --nexus-text-muted: #a78bfa;
+    --nexus-border: rgba(139, 92, 246, 0.2);
+    --nexus-radius: 1.5rem; /* Violet: Balanced Tech */
+    --nexus-glow: 0 12px 40px rgba(139, 92, 246, 0.15);
+    --nexus-accent-glow: rgba(139, 92, 246, 0.15);
+    --nexus-sidebar-bg: rgba(20, 13, 32, 0.6);
+    --nexus-sidebar-border: rgba(139, 92, 246, 0.15);
+}
+.light .theme-violet {
+    --nexus-bg: #f5f3ff; --nexus-panel: #ffffff;
+    --nexus-text: #0a080f; --nexus-text-muted: #5b21b6;
+    --nexus-border: rgba(139,92,246,0.2);
+}
+
+/* AMBER (Gold Rush) */
+.theme-amber {
+    --nexus-bg: #0c0900;
+    --nexus-panel: #1c1500;
+    --nexus-accent: #f59e0b;
+    --nexus-text: #fffbeb;
+    --nexus-text-muted: #fcd34d;
+    --nexus-border: rgba(245, 158, 11, 0.2);
+    --nexus-radius: 1.5rem; /* Amber: Balanced Tech */
+    --nexus-glow: 0 12px 40px rgba(245, 158, 11, 0.15);
+    --nexus-accent-glow: rgba(245, 158, 11, 0.15);
+    --nexus-sidebar-bg: rgba(28, 21, 0, 0.6);
+    --nexus-sidebar-border: rgba(245, 158, 11, 0.15);
+}
+.light .theme-amber {
+    --nexus-bg: #fffbeb; --nexus-panel: #ffffff;
+    --nexus-text: #0c0900; --nexus-text-muted: #92400e;
+    --nexus-border: rgba(245,158,11,0.2);
+}
+
+/* CYAN (Terminal Ice) */
+.theme-cyan {
+    --nexus-bg: #030c0f;
+    --nexus-panel: #061820;
+    --nexus-accent: #06b6d4;
+    --nexus-text: #ecfeff;
+    --nexus-text-muted: #67e8f9;
+    --nexus-border: rgba(6, 182, 212, 0.2);
+    --nexus-radius: 0.75rem; /* Cyan: Technical Block */
+    --nexus-glow: 0 12px 40px rgba(6, 182, 212, 0.15);
+    --nexus-accent-glow: rgba(6, 182, 212, 0.15);
+    --nexus-sidebar-bg: rgba(6, 24, 32, 0.6);
+    --nexus-sidebar-border: rgba(6, 182, 212, 0.15);
+}
+.light .theme-cyan {
+    --nexus-bg: #ecfeff; --nexus-panel: #ffffff;
+    --nexus-text: #030c0f; --nexus-text-muted: #0e7490;
+    --nexus-border: rgba(6,182,212,0.2);
+}
+
+/* FUCHSIA (Neon Surge) */
+.theme-fuchsia {
+    --nexus-bg: #0c060f;
+    --nexus-panel: #1a0b20;
+    --nexus-accent: #d946ef;
+    --nexus-text: #fdf4ff;
+    --nexus-text-muted: #e879f9;
+    --nexus-border: rgba(217, 70, 239, 0.2);
+    --nexus-radius: 0.75rem; /* Fuchsia: Technical Block */
+    --nexus-glow: 0 12px 40px rgba(217, 70, 239, 0.15);
+    --nexus-accent-glow: rgba(217, 70, 239, 0.15);
+    --nexus-sidebar-bg: rgba(26, 11, 32, 0.6);
+    --nexus-sidebar-border: rgba(217, 70, 239, 0.15);
+}
+.light .theme-fuchsia {
+    --nexus-bg: #fdf4ff; --nexus-panel: #ffffff;
+    --nexus-text: #0c060f; --nexus-text-muted: #86198f;
+    --nexus-border: rgba(217,70,239,0.2);
+}
+
+/* ================================================ */
+/* VOID (DEFAULT) */
+.theme-void {
+    --nexus-radius: 1.5rem;
+}
+
+/* AERO (GLASS) */
+.theme-aero, .theme-aero-light {
+    --nexus-radius: 2.5rem;
+}
+
+/* NEBULA VOID */
+.theme-nebula-void {
+    --nexus-radius: 1.75rem;
+}
+
+/* ALABASTER PULSE */
+.theme-alabaster-pulse {
+    --nexus-radius: 1.25rem;
+}
+
+/* KAWAII DESK */
+.theme-kawaii, .theme-live_kawaii {
+    --nexus-radius: 3rem;
+}
+
+/* ARCADE */
+.theme-arcade {
+    --nexus-radius: 0.5rem;
+}
+
+/* BGMI / TACTICAL — Armored Identity */
+.theme-bgmi .nexus-card, 
+.theme-bgmi .theme-card,
+.theme-live_erangel .nexus-card,
+.theme-live_erangel .theme-card {
+    --nexus-radius: 4px;
+    border-top-left-radius: 20px !important;
+    border-bottom-right-radius: 20px !important;
+    clip-path: polygon(0 0, 100% 0, 100% 85%, 85% 100%, 0 100%); /* Tactical clip */
+}
+
+/* KAWAII DESK — Super Soft / Organic */
+.theme-kawaii .nexus-card,
+.theme-kawaii .theme-card,
+.theme-live_kawaii .nexus-card,
+.theme-live_kawaii .theme-card {
+    --nexus-radius: 3rem;
+    border-bottom-left-radius: 4rem !important;
+    border-top-right-radius: 4rem !important;
+}
+
+/* CYBER / HACKER */
+.theme-live_cyber {
+    --nexus-radius: 0;
+}
+
+/* SYNTHWAVE */
+.theme-live_synthwave {
+    --nexus-radius: 10px;
+}
+
+/* DRAGON HOARD */
+.theme-live_dragon {
+    --nexus-radius: 1.5rem;
+}
+
+/* UPLINK */
+.theme-uplink {
+    --nexus-radius: 2rem;
+}
+
+/* ZERO-GRAVITY */
+.theme-live_space {
+    --nexus-radius: 2.2rem;
+}
+
+/* NEON RELIC */
+.theme-neon_relic {
+    --nexus-radius: 0.75rem;
+}
+
+/* BASE NEXUS CARD RULE — Theme Cascade Foundation  */
+/* All dashboard cards inherit these from the theme */
+/* ================================================ */
+.nexus-card, .theme-card, .rounded-xl, .rounded-2xl, .rounded-3xl, .rounded-\[1\.5rem\], .rounded-\[1\.75rem\], .rounded-\[2rem\], .rounded-\[2\.5rem\], .rounded-\[3rem\] {
+    border-radius: var(--nexus-radius) !important;
+    transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease, border-radius 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nexus-card {
+    background: var(--nexus-panel);
+    border-color: var(--nexus-border);
+    box-shadow: var(--nexus-glow);
 }
 
 /* GLOBAL CURSOR & ATMOSPHERIC GLOW DISABLE (2026 Solid Identity) */
@@ -1625,3 +1931,73 @@ html:has(.overlay-content) {
   -webkit-text-stroke: 1px rgba(17,17,17,0.3);
   z-index: -1;
 }
+
+/* ============================================================ */
+/* ── DROPE HOMEPAGE STYLE ENGINE (SCOPED) ── */
+/* ============================================================ */
+
+.marketing-root {
+  --brand-accent: #FF2D00;
+  --theme-accent: 255 61 0;      /* #FF3D00 */
+
+  --theme-base-bg: 249 250 251;  /* #F9FAFB */
+  --theme-surface: 255 255 255;  /* white */
+  --theme-panel: 250 250 250;    /* zinc-50 */
+  --theme-border: 228 228 231;   /* zinc-200 */
+  --theme-radius: 2.5rem;        /* Backup */
+}
+
+.marketing-root.dark, .marketing-root .dark {
+  --theme-base-bg: 3 3 5;        /* Ultra matte jet black */
+  --theme-surface: 12 12 14;     /* Stealth frame */
+  --theme-panel: 20 20 23;       /* Stealth module */
+  --theme-border: 35 35 38;      /* Precise stroke */
+}
+
+/* ── TACTICAL ASYMMETRIC HUD OVERRIDES ── */
+.marketing-root[data-theme='tactical'] .hud-frame {
+  border-radius: 3rem 0px 3rem 0px !important;
+  border: 1px solid rgb(var(--theme-accent)) !important;
+}
+.marketing-root[data-theme='tactical'] .hud-panel {
+  border-radius: 0px 1.5rem 0px 1.5rem !important;
+  position: relative;
+}
+.marketing-root[data-theme='tactical'] .hud-panel::after {
+  content: '';
+  position: absolute;
+  bottom: 0px; right: 0px;
+  width: 24px; height: 24px;
+  border-bottom: 2px solid rgb(var(--theme-accent));
+  border-right: 2px solid rgb(var(--theme-accent));
+  pointer-events: none;
+}
+.marketing-root[data-theme='tactical'] .hud-card {
+  border-radius: 1.5rem 0px 1.5rem 0px !important;
+}
+
+/* ── SCROLL & PANEL CORE ── */
+.marketing-root .home-scroll-container {
+  height: 100dvh;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+}
+
+.marketing-root .home-section-panel {
+  height: 100dvh;
+  width: 100%;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Ensure the background doesn't bounce on mobile */
+.marketing-root-body-lock {
+  overscroll-behavior-y: none;
+}
+

@@ -117,7 +117,9 @@ const UserSchema = new mongoose.Schema({
       default: 'none'
     },
     status: { type: String, enum: ['active', 'inactive'], default: 'inactive' },
-    expiryDate: { type: Date }
+    expiryDate: { type: Date },
+    trialUsed: { type: Boolean, default: false },
+    trialEndsAt: { type: Date }
   },
 
   nexusTheme: { type: String, enum: ['void', 'cyber', 'aero', 'kawaii', 'arcade', 'bgmi', 'live_space', 'live_erangel', 'live_cyber', 'live_synthwave', 'live_kawaii', 'live_dragon', 'aero-light', 'nebula-void', 'alabaster-pulse', 'midnight-obsidian', 'kawaii-desk', 'bgmi-tactical', 'uplink'], default: 'void', index: true }, // ADDED: Fast bulk theme lookups at 50k+ scale

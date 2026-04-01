@@ -6,12 +6,14 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from './api/axios';
 import { ThemeProvider } from './context/ThemeContext';
+import { HUDProvider } from './context/HUDContext';
+import { TechnicalHUD } from './components/ui/TechnicalHUD';
 import { syncTheme } from './api/themeSync';
 import { io } from 'socket.io-client';
-import MaintenanceMode from './pages/MaintenanceMode';
+import MaintenanceMode from './pages/system/Maintenance';
 
 // ─── EAGER IMPORTS (critical path — must load instantly) ──────────────────────
-import LiveThemeEngine from './components/LiveThemeEngine';
+import LiveThemeEngine from './components/dashboard/ThemeEngine';
 
 // 🚨 GLOBAL SAFETY: AUTO-RELOAD ON CHUNK LOAD FAILURE (Fixes Vercel/Vite code-split crashes)
 window.addEventListener('error', (e) => {
@@ -22,23 +24,23 @@ window.addEventListener('error', (e) => {
 }, true);
 
 // ─── LAZY IMPORTS (code-split — only load when navigated to) ─────────────────
-const Home = lazy(() => import('./pages/Home'));
-const Login = lazy(() => import('./pages/Login'));
-const Signup = lazy(() => import('./pages/Signup'));
-const AdminLogin = lazy(() => import('./pages/AdminLogin'));
-const DonationPage = lazy(() => import('./pages/DonationPage'));
-const Overlay = lazy(() => import('./pages/Overlay'));
-const GoalOverlay = lazy(() => import('./pages/GoalOverlay'));
-const TugOfWarOverlay = lazy(() => import('./pages/TugOfWarOverlay'));
-const MasterOverlay = lazy(() => import('./pages/MasterOverlay'));
-const Dashboard = lazy(() => import('./pages/Dashboard'));
-const AdminSecurePortal = lazy(() => import('./pages/AdminSecurePortal'));
-const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
-const ResetPassword = lazy(() => import('./pages/ResetPassword'));
-const Features = lazy(() => import('./pages/Features'));
-const Pricing = lazy(() => import('./pages/Pricing'));
-const Subscription = lazy(() => import('./pages/Subscription'));
-const Blog = lazy(() => import('./pages/Blog'));
+const Home = lazy(() => import('./pages/public/Home'));
+const Login = lazy(() => import('./pages/public/Login'));
+const Signup = lazy(() => import('./pages/public/Signup'));
+const AdminLogin = lazy(() => import('./pages/admin/Login'));
+const DonationPage = lazy(() => import('./pages/public/DonationPage'));
+const Overlay = lazy(() => import('./pages/overlays/Overlay'));
+const GoalOverlay = lazy(() => import('./pages/overlays/Goal'));
+const TugOfWarOverlay = lazy(() => import('./pages/overlays/TugOfWar'));
+const MasterOverlay = lazy(() => import('./pages/overlays/Master'));
+const Dashboard = lazy(() => import('./pages/creator/Dashboard'));
+const AdminSecurePortal = lazy(() => import('./pages/admin/Dashboard'));
+const ForgotPassword = lazy(() => import('./pages/public/ForgotPassword'));
+const ResetPassword = lazy(() => import('./pages/public/ResetPassword'));
+const Features = lazy(() => import('./pages/public/Features'));
+const Pricing = lazy(() => import('./pages/public/Pricing'));
+const Subscription = lazy(() => import('./pages/creator/Billing'));
+const Blog = lazy(() => import('./pages/public/Blog'));
 
 // ─── ERROR BOUNDARY — catches any render crash, shows recovery UI not blank page ─
 class ErrorBoundary extends React.Component {
@@ -188,19 +190,26 @@ const MissionGate = ({ children }) => {
         return;
       }
       try {
-        const res = await axios.get('/api/user/profile', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await axios.get('/api/user/profile');
+        const user = res.data;
 
-        // --- NEW: ROLE-BASED EXTRACTION ---
-        // If an admin accidentally tries to access a USER route (like DASHBOARD), 
-        // extract them to the Admin hub.
-        if (res.data.role === 'admin') {
+        // 1. ROLE-BASED EXTRACTION
+        if (user.role === 'admin') {
           navigate('/admin/secure-portal');
           return;
         }
 
-        syncTheme(res.data);
+        syncTheme(user);
+
+        // 2. SUBSCRIPTION HARD-LOCK (SENSE CHECK)
+        // We only force a redirect if they are trying to access something OTHER than dashboard or subscription
+        const isEssentialPath = location.pathname === '/subscription' || location.pathname === '/dashboard';
+        
+        if (user.subscription?.status === 'inactive' && !isEssentialPath) {
+          navigate('/subscription');
+          return;
+        }
+
         setStatus('authorized');
       } catch (err) {
         if (err.response?.status === 429) {
@@ -211,7 +220,7 @@ const MissionGate = ({ children }) => {
       }
     };
     checkAccess();
-  }, [token, navigate]);
+  }, [token, navigate, location.pathname]);
 
   if (status === 'loading') return <BootSequence />;
   if (status === 'unauthorized') return <Navigate to="/login" state={{ from: location }} replace />;
@@ -263,7 +272,7 @@ const AnimatedRoutes = () => {
     <Suspense fallback={<BootSequence status="Synchronizing Network" />}>
 
       <AnimatePresence mode="wait">
-        <Routes location={location} key={location.pathname}>
+        <Routes location={location} key={location.pathname.split('/')[1] || 'root'}>
           {/* 1. PUBLIC MARKETING & AUTH */}
           <Route path="/" element={<Home />} />
           <Route path="/signup" element={<Signup />} />
@@ -303,7 +312,7 @@ const AnimatedRoutes = () => {
 
           {/* 6. SECURE DASHBOARD NEXUS */}
           <Route
-            path="/dashboard"
+            path="/dashboard/*"
             element={
               <MissionGate>
                 <Dashboard />
@@ -409,11 +418,14 @@ function AppContent() {
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider>
-        <Router>
-          <AppContent />
-        </Router>
-      </ThemeProvider>
+      <HUDProvider>
+        <ThemeProvider>
+          <Router>
+            <AppContent />
+            <TechnicalHUD />
+          </Router>
+        </ThemeProvider>
+      </HUDProvider>
     </ErrorBoundary>
   );
 }

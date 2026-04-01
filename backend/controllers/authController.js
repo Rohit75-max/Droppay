@@ -109,7 +109,11 @@ exports.signup = async (req, res) => {
                 fullName, username: cleanHandle, email, phone, streamerId: cleanStreamerId,
                 password: hashedPassword, isEmailVerified: false,
                 otp: { code: otpCode, expiresAt: Date.now() + 600000 },
-                referredBy: referrer ? referrer._id : undefined
+                referredBy: referrer ? referrer._id : undefined,
+                subscription: {
+                    trialEndsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+                    status: 'active'
+                }
             });
             await user.save();
         }
@@ -182,10 +186,8 @@ exports.verifyEmail = async (req, res) => {
         });
 
         // --- IRONCLAD SUBSCRIPTION SENTINEL (Handshake Upgrade) ---
-        const TRIAL_MS = 7 * 24 * 60 * 60 * 1000;
         const now = new Date();
-        const accountAge = now - user.createdAt;
-        const isTrialActive = accountAge < TRIAL_MS;
+        const isTrialActive = user.subscription?.trialEndsAt && new Date(user.subscription.trialEndsAt) > now;
         const isPaidActive = user.subscription?.status === 'active' && 
                            user.subscription?.expiryDate && 
                            new Date(user.subscription.expiryDate) > now;
@@ -200,7 +202,7 @@ exports.verifyEmail = async (req, res) => {
                     ...user.subscription.toObject(),
                     status: dynamicStatus,
                     isTrial: isTrialActive && !isPaidActive,
-                    trialRemainingMs: Math.max(0, TRIAL_MS - accountAge)
+                    trialRemainingMs: isTrialActive ? (new Date(user.subscription.trialEndsAt) - now) : 0
                 }
             }
         });
@@ -260,10 +262,8 @@ exports.login = async (req, res) => {
             maxAge: 24 * 60 * 60 * 1000
         });
         // --- IRONCLAD SUBSCRIPTION SENTINEL (Handshake Upgrade) ---
-        const TRIAL_MS = 7 * 24 * 60 * 60 * 1000;
         const now = new Date();
-        const accountAge = now - user.createdAt;
-        const isTrialActive = accountAge < TRIAL_MS;
+        const isTrialActive = user.subscription?.trialEndsAt && new Date(user.subscription.trialEndsAt) > now;
         const isPaidActive = user.subscription?.status === 'active' && 
                            user.subscription?.expiryDate && 
                            new Date(user.subscription.expiryDate) > now;
@@ -278,7 +278,7 @@ exports.login = async (req, res) => {
                     ...user.subscription.toObject(),
                     status: dynamicStatus,
                     isTrial: isTrialActive && !isPaidActive,
-                    trialRemainingMs: Math.max(0, TRIAL_MS - accountAge)
+                    trialRemainingMs: isTrialActive ? (new Date(user.subscription.trialEndsAt) - now) : 0
                 }
             }
         });

@@ -15,7 +15,7 @@ const PremiumFooter = () => {
   }, []);
 
   return (
-    <footer id="footer" className="relative min-h-[100svh] flex flex-col justify-between pb-12 pt-[calc(var(--nav-height)+2rem)]" style={{ background: 'var(--arc-cream)' }}>
+    <footer id="footer" className="relative h-full flex flex-col justify-between pb-12 pt-[calc(var(--nav-height)+2rem)]" style={{ background: 'var(--arc-cream)' }}>
       {/* Scalloped Grid Banner centered in remaining space */}
       <div className="flex-1 w-full flex flex-col justify-center">
         <div className="max-w-[1200px] w-full mx-auto px-6 mb-16 mt-8">
@@ -48,11 +48,11 @@ const PremiumFooter = () => {
                 type="email"
                 placeholder="Enter your email_"
                 required
-                className="w-full flex-1 bg-white var(--arc-text-dark) border-4 border-slate-900 px-6 py-4 rounded-3xl text-xl md:text-2xl font-bold placeholder:text-slate-400 focus:outline-none focus:translate-x-1 focus:translate-y-1 shadow-[8px_8px_0px_#000] focus:shadow-[4px_4px_0px_#000] transition-all"
+                className="w-full flex-1 bg-white var(--arc-text-dark) border-4 border-slate-900 px-6 py-4 rounded-3xl text-[clamp(1.2rem,2vw,1.5rem)] font-bold placeholder:text-slate-400 focus:outline-none focus:translate-x-1 focus:translate-y-1 shadow-[8px_8px_0px_#000] focus:shadow-[4px_4px_0px_#000] transition-all"
               />
               <button
                 type="submit"
-                className="whitespace-nowrap bg-[#FFCA28] var(--arc-text-dark) border-4 border-slate-900 px-6 py-3 rounded-3xl text-2xl md:text-3xl font-black italic shadow-[8px_8px_0px_#000] active:translate-x-2 active:translate-y-2 active:shadow-[0px_0px_0px_#000] hover:translate-x-1 hover:translate-y-1 hover:shadow-[4px_4px_0px_#000] transition-all flex items-center gap-3">
+                className="whitespace-nowrap bg-[#FFCA28] var(--arc-text-dark) border-4 border-slate-900 px-6 py-3 rounded-3xl text-[clamp(1.5rem,3vw,1.875rem)] font-black italic shadow-[8px_8px_0px_#000] active:translate-x-2 active:translate-y-2 active:shadow-[0px_0px_0px_#000] hover:translate-x-1 hover:translate-y-1 hover:shadow-[4px_4px_0px_#000] transition-all flex items-center gap-3">
                 <span className="uppercase tracking-tighter">JOIN</span> <ChevronRight className="w-6 h-6 stroke-[3]" />
               </button>
             </form>
@@ -76,7 +76,7 @@ const PremiumFooter = () => {
         >
           {Array(8).fill("LET'S TALK").map((text, i) => (
             <div key={i} className="flex items-center">
-              <span className="text-[70px] sm:text-[90px] md:text-[100px] lg:text-[120px] xl:text-[140px] font-black uppercase tracking-tighter text-[#131318] leading-[0.8]">
+              <span className="text-[clamp(4rem,10vw,8.75rem)] font-black uppercase tracking-tighter text-[#131318] leading-[0.8]">
                 {text}
               </span>
               <div className="w-[3vw] h-[3vw] max-w-[24px] max-h-[24px] bg-[#131318] rounded-full mx-8 md:mx-12" />
@@ -89,7 +89,7 @@ const PremiumFooter = () => {
       <div className="w-full px-6 md:px-12 lg:px-16 flex flex-col md:flex-row justify-between items-center sm:items-end gap-6 text-center md:text-left z-20 relative">
         <div className="flex flex-col gap-1 items-center md:items-start h-[1.2em]">
           <div className="flex items-center">
-            <span className="text-4xl md:text-6xl font-black tracking-tight var(--arc-text-dark)" style={{ fontFamily: 'Georgia, serif' }}>drope.</span>
+            <span className="text-[clamp(2.2rem,5vw,3.75rem)] font-black tracking-tight var(--arc-text-dark)" style={{ fontFamily: 'Georgia, serif' }}>drope.</span>
             <div className="relative inline-flex items-center text-left min-w-[1.5em] md:min-w-[2em]">
               <AnimatePresence mode="wait">
                 <motion.span
@@ -98,7 +98,7 @@ const PremiumFooter = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.5, ease: "easeInOut" }}
-                  className="text-4xl md:text-6xl font-black tracking-tight var(--arc-text-dark)"
+                  className="text-[clamp(2.2rem,5vw,3.75rem)] font-black tracking-tight var(--arc-text-dark)"
                   style={{ fontFamily: 'Georgia, serif' }}
                 >
                   {footerWords[footerWordIdx]}
@@ -109,7 +109,7 @@ const PremiumFooter = () => {
         </div>
 
         <div className="flex flex-col items-center md:items-end gap-3 max-w-sm">
-          <p className="text-slate-600 font-bold text-xs md:text-sm leading-relaxed text-center md:text-right">
+          <p className="text-slate-600 font-bold text-[clamp(0.75rem,2vw,0.875rem)] leading-relaxed text-center md:text-right">
             From continuous streaming at Shake Shack to enterprise units. There’s something for everyone.
           </p>
           <div className="flex items-center gap-3">

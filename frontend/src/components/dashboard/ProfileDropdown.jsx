@@ -36,7 +36,12 @@ const ProfileDropdown = ({ user, setIsProfileOpen, setActiveSection }) => {
         initial={{ opacity: 0, scale: 0.98, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.98, y: 10 }}
-        className="absolute right-0 mt-4 w-72 bg-white border border-black/10 rounded-none shadow-[var(--nexus-glow)] z-50 overflow-hidden"
+        className="absolute right-0 mt-4 w-72 border z-50 overflow-hidden shadow-2xl"
+        style={{ 
+          background: 'var(--nexus-panel)', 
+          borderColor: 'var(--nexus-border)',
+          borderRadius: '0px'
+        }}
       >
         {/* Blyss Header: Centered Identity */}
         <div className="p-6 pb-4 flex flex-col items-center border-b border-[var(--nexus-border)]/50">
@@ -44,17 +49,17 @@ const ProfileDropdown = ({ user, setIsProfileOpen, setActiveSection }) => {
             {user?.avatar ? (
               <img src={user.avatar} alt="Profile" className="w-full h-full object-cover rounded-full" />
             ) : (
-              <div className="w-full h-full bg-[#111111] flex items-center justify-center text-white font-black text-2xl italic tracking-tighter rounded-full">
+              <div className="w-full h-full flex items-center justify-center font-black text-2xl italic tracking-tighter rounded-full" style={{ background: 'var(--nexus-panel)', color: 'var(--nexus-text)' }}>
                 {(user?.fullName || user?.username || 'U').charAt(0).toUpperCase()}
               </div>
             )}
             <div className="absolute inset-0 bg-transparent group-hover:bg-black/10 transition-colors pointer-events-none" />
           </div>
 
-          <h4 className="text-[14px] font-black uppercase italic tracking-tighter text-[#111111] leading-none mb-1">
+          <h4 className="text-[14px] font-black uppercase italic tracking-tighter leading-none mb-1" style={{ color: 'var(--nexus-text)' }}>
             {user?.fullName || user?.username || 'User Identity'}
           </h4>
-          <span className="text-[9px] font-mono font-bold text-black/40 uppercase tracking-widest">
+          <span className="text-[9px] font-mono font-bold uppercase tracking-widest" style={{ color: 'var(--nexus-text-muted)' }}>
             ID: @{user?.username || 'SYSTEM_NODE'}
           </span>
         </div>
@@ -62,16 +67,16 @@ const ProfileDropdown = ({ user, setIsProfileOpen, setActiveSection }) => {
         {/* Quick Stats: Balance & Tier */}
         <div className="grid grid-cols-2 border-b border-[var(--nexus-border)]/50 divide-x divide-[var(--nexus-border)]/50">
           <div className="p-3 text-center flex flex-col items-center">
-            <span className="text-[8px] font-black uppercase tracking-widest text-black/30 mb-0.5">Balance</span>
-            <span className="text-[10px] font-mono font-black text-[#111111]">
+            <span className="text-[8px] font-black uppercase tracking-widest mb-0.5" style={{ color: 'var(--nexus-text-muted)' }}>Balance</span>
+            <span className="text-[10px] font-mono font-black" style={{ color: 'var(--nexus-text)' }}>
               ₹{(Number(user?.walletBalance) || 0).toLocaleString('en-IN')}
             </span>
           </div>
           <div className="p-3 text-center flex flex-col items-center">
-            <span className="text-[8px] font-black uppercase tracking-widest text-black/30 mb-0.5">Node_Tier</span>
+            <span className="text-[8px] font-black uppercase tracking-widest mb-0.5" style={{ color: 'var(--nexus-text-muted)' }}>Node_Tier</span>
             <div className="flex items-center gap-1">
               <Trophy className={`w-2.5 h-2.5 ${user?.tier === 'legend' ? 'text-amber-500' : user?.tier === 'pro' ? 'text-indigo-500' : 'text-emerald-500'}`} />
-              <span className="text-[10px] font-black uppercase italic tracking-tighter text-[#111111]">
+              <span className="text-[10px] font-black uppercase italic tracking-tighter" style={{ color: 'var(--nexus-text)' }}>
                 {user?.tier || 'Starter'}
               </span>
             </div>
@@ -104,10 +109,10 @@ const ProfileDropdown = ({ user, setIsProfileOpen, setActiveSection }) => {
                     { label: 'Goal Link', value: `${window.location.origin}/goal/${user?.username}` },
                     { label: 'Master Link', value: `${window.location.origin}/overlay/master/${user?.obsKey}` }
                   ].map((link, idx) => (
-                    <div key={idx} className="p-2 border border-black/5 bg-black/[0.02] flex items-center justify-between group">
+                    <div key={idx} className="p-2 border border-[var(--nexus-border)]/50 bg-black/[0.02] flex items-center justify-between group">
                       <div className="flex flex-col min-w-0">
-                        <span className="text-[8px] font-black uppercase tracking-widest text-black/30 mb-0.5">{link.label}</span>
-                        <span className="text-[9px] font-mono font-bold text-black/60 truncate pr-2">
+                        <span className="text-[8px] font-black uppercase tracking-widest mb-0.5" style={{ color: 'var(--nexus-text-muted)' }}>{link.label}</span>
+                        <span className="text-[9px] font-mono font-bold truncate pr-2" style={{ color: 'var(--nexus-text)', opacity: 0.8 }}>
                           {link.value.replace(/^https?:\/\//, '')}
                         </span>
                       </div>
@@ -142,10 +147,10 @@ const ProfileDropdown = ({ user, setIsProfileOpen, setActiveSection }) => {
               className="w-full p-2.5 rounded-none flex items-center justify-between group hover:bg-black/5 transition-all border border-transparent hover:border-black/5"
             >
               <div className="flex items-center gap-3">
-                <div className="p-1.5 rounded-none bg-black/5 border border-black/5 group-hover:border-black/10 transition-all">
-                  <item.icon className="w-3 h-3 text-black/40 group-hover:text-black transition-colors" />
+                <div className="p-1.5 rounded-none border transition-all" style={{ background: 'var(--nexus-panel)', borderColor: 'var(--nexus-border)' }}>
+                  <item.icon className="w-3 h-3 group-hover:text-[var(--nexus-accent)] transition-colors" style={{ color: 'var(--nexus-text-muted)' }} />
                 </div>
-                <span className={`text-[10px] font-black uppercase italic tracking-widest ${item.color || 'text-black/60'} group-hover:text-black transition-colors`}>
+                <span className={`text-[10px] font-black uppercase italic tracking-widest ${item.color || ''} group-hover:text-[var(--nexus-accent)] transition-colors`} style={{ color: item.color ? undefined : 'var(--nexus-text-muted)' }}>
                   {item.label}
                 </span>
               </div>
@@ -156,7 +161,7 @@ const ProfileDropdown = ({ user, setIsProfileOpen, setActiveSection }) => {
 
         {/* Payout Status Indicator */}
         <div className="px-4 py-2 border-t border-[var(--nexus-border)]/50 flex items-center justify-between bg-black/5">
-          <span className="text-[8px] font-black uppercase tracking-widest text-black/30">Payout_Node</span>
+          <span className="text-[8px] font-black uppercase tracking-widest" style={{ color: 'var(--nexus-text-muted)' }}>Payout_Node</span>
           <div className="flex items-center gap-1">
             {user?.payoutSettings?.bankVerificationStatus === 'verified' ? (
               <>

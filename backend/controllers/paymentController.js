@@ -425,10 +425,22 @@ exports.verifySubscription = async (req, res) => {
     try {
         const { plan, billingCycle } = req.body;
         const userId = req.user.id; 
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ msg: "Node Not Found" });
 
-        // Calculate Expiry: Today + billingCycle months (default to 1 month if not specified)
+        // Calculate Expiry: Add to CURRENT expiry if active, else start from NOW
         const cycleMonths = Number(billingCycle) || 1;
-        const expiryDate = new Date();
+        const now = new Date();
+        let baseDate = now;
+
+        // If current subscription is still active, stack the new duration
+        if (user.subscription?.status === 'active' && 
+            user.subscription?.expiryDate && 
+            new Date(user.subscription.expiryDate) > now) {
+            baseDate = new Date(user.subscription.expiryDate);
+        }
+
+        const expiryDate = new Date(baseDate);
         expiryDate.setMonth(expiryDate.getMonth() + cycleMonths);
 
         // Update the user's tier, plan, status AND the critical expiry date
@@ -437,7 +449,8 @@ exports.verifySubscription = async (req, res) => {
                 tier: plan,
                 "subscription.plan": plan,
                 "subscription.status": "active",
-                "subscription.expiryDate": expiryDate
+                "subscription.expiryDate": expiryDate,
+                "subscription.trialUsed": true // Transition node from trial to paid
             }
         });
 

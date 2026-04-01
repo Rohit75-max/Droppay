@@ -82,7 +82,7 @@ const MarqueeRow = ({ items, reverse = false, offset = 0 }) => {
         {duplicatedItems.map((testimonial, idx) => (
           <div
             key={`${testimonial.id}-${idx}`}
-            className="w-[320px] h-[148px] shrink-0 p-4 border-r border-b border-black/10 bg-white/60 backdrop-blur-md relative overflow-hidden transition-all duration-300 hover:bg-white/90 hover:z-20 flex flex-col justify-between"
+            className="w-[clamp(280px,80vw,340px)] h-[148px] shrink-0 p-4 border-r border-b border-black/10 bg-white/60 backdrop-blur-md relative overflow-hidden transition-all duration-300 hover:bg-white/90 hover:z-20 flex flex-col justify-between"
           >
             <div
               className="absolute inset-x-0 bottom-0 h-10 opacity-10 blur-xl pointer-events-none"
@@ -113,7 +113,7 @@ const MarqueeRow = ({ items, reverse = false, offset = 0 }) => {
 
 const TestimonialsWall = () => {
   return (
-    <section id="customers" className="relative min-h-[100svh] w-full flex flex-col px-0 overflow-hidden pt-[calc(var(--nav-height)+1rem)] pb-0" style={{ background: 'var(--arc-cream-alt)' }}>
+    <section id="customers" className="relative h-full w-full flex flex-col px-0 overflow-hidden pt-[calc(var(--nav-height)+1rem)] pb-0" style={{ background: 'var(--arc-cream-alt)' }}>
       <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[var(--arc-cream-alt)] to-transparent z-40 pointer-events-none" />
       <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-[var(--arc-cream-alt)] to-transparent z-40 pointer-events-none" />
 
@@ -126,10 +126,10 @@ const TestimonialsWall = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
-            <h2 className="arc-hero-text text-5xl md:text-7xl font-black mb-4" style={{ color: 'var(--arc-text-dark)' }}>
+            <h2 className="arc-hero-text text-[clamp(2.8rem,7vw,5.5rem)] font-black mb-4" style={{ color: 'var(--arc-text-dark)' }}>
               Wall of Love
             </h2>
-            <p className="text-[#4a4a68] text-[9px] md:text-xs font-black uppercase tracking-[0.5em] opacity-40">
+            <p className="text-[#4a4a68] text-[clamp(0.6rem,1.2vw,0.85rem)] font-black uppercase tracking-[0.5em] opacity-40">
               Trusted by <span style={{ color: '#111111' }}>Industry Leaders.</span>
             </p>
           </motion.div>

@@ -393,7 +393,7 @@ exports.dispatchBroadcast = async (req, res) => {
 
 exports.getAdminProfile = async (req, res) => {
     try {
-        const admin = await Admin.findById(req.user.id).select('username email fullName avatar role');
+        const admin = await Admin.findById(req.user.id).select('username email fullName avatar role adminProfile');
         if (!admin) return res.status(404).json({ msg: "Admin Node Not Found." });
         res.status(200).json(admin);
     } catch (err) {
@@ -403,12 +403,18 @@ exports.getAdminProfile = async (req, res) => {
 
 exports.updateAdminProfile = async (req, res) => {
     try {
-        const { fullName } = req.body;
+        const { fullName, adminProfile } = req.body;
         const admin = await Admin.findById(req.user.id);
 
         if (!admin) return res.status(404).json({ msg: "Admin Node Not Found." });
 
         if (fullName !== undefined) admin.fullName = fullName;
+        if (adminProfile !== undefined) {
+            admin.adminProfile = {
+                ...admin.adminProfile,
+                ...adminProfile
+            };
+        }
 
         await admin.save();
         res.status(200).json({ msg: "Admin Profile Synchronized.", admin });

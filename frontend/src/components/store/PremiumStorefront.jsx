@@ -5,11 +5,11 @@ import {
     ArrowUpRight, ShoppingCart, Zap, ShieldCheck, Package,
     Wallet, User, Trophy, Crown, MessageSquare, Gift
 } from 'lucide-react';
-import LiveThemeEngine from '../LiveThemeEngine';
+import LiveThemeEngine from '../dashboard/ThemeEngine';
 import PremiumPreviewModal from './PremiumPreviewModal';
-import PremiumAlertPreview from '../PremiumAlertPreview';
-import PremiumGoalOverlays from '../PremiumGoalOverlays';
-import CyberGoalBar from '../CyberGoalBar';
+import PremiumAlertPreview from '../dashboard/AlertPreview';
+import PremiumGoalOverlays from '../widgets/GoalOverlays';
+import CyberGoalBar from '../widgets/GoalBar';
 import PaymentChoiceModal from './PaymentChoiceModal';
 import DeploymentAnimation from './DeploymentAnimation';
 
