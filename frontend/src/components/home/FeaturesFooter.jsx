@@ -8,10 +8,9 @@ const FeaturesFooter = () => {
 
     return (
         <footer 
-            className="bg-[#1a1a2e] text-white pt-[80px] md:pt-24 pb-0 px-0 flex flex-col border-t border-white/5 overflow-hidden min-h-screen md:h-screen justify-between shrink-0 snap-start"
-            style={{ scrollSnapStop: 'always' }}
+            className="bg-[#1a1a2e] text-white pt-28 md:pt-24 pb-0 px-0 flex flex-col border-t border-white/5 overflow-hidden min-h-[100dvh] md:h-screen justify-between shrink-0 relative"
         >
-            <div className="px-6 md:px-12 lg:px-16 w-full flex flex-col lg:flex-row justify-between items-start gap-10 md:gap-16 mb-4 md:mb-12 flex-1">
+            <div className="px-6 md:px-12 lg:px-16 w-full flex flex-col lg:flex-row justify-between items-start gap-6 md:gap-16 mb-4 md:mb-12">
                 <div className="max-w-md flex flex-col items-start">
                     <div className="flex items-center gap-3 mb-4 md:mb-6">
                         <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-[#afff00] flex items-center justify-center">
@@ -36,11 +35,10 @@ const FeaturesFooter = () => {
                     </button>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 md:gap-x-12 gap-y-6 md:gap-y-8 w-full mt-8 lg:mt-0">
+                <div className="grid grid-cols-3 md:grid-cols-3 gap-x-4 md:gap-x-12 gap-y-6 md:gap-y-8 w-full mt-8 lg:mt-0 text-left">
                     {[
                         { label: "Core", links: ["Features", "Network", "Nodes"] },
                         { label: "Security", links: ["TLS 1.3", "AES-256", "VPC"] },
-                        { label: "Developer", links: ["API Docs", "Webhooks", "SDKs"] },
                         { label: "Legal", links: ["Privacy", "Terms", "SLA"] }
                     ].map((group, i) => (
                         <div key={i} className="space-y-3 md:space-y-4">
@@ -59,18 +57,18 @@ const FeaturesFooter = () => {
             <div className="flex flex-col w-full">
 
                 {/* Massive Brand Marquee */}
-                <div className="w-full overflow-hidden flex relative pt-0 pb-0">
+                <div className="w-full overflow-hidden flex relative mt-auto">
                     <motion.div
                         animate={{ x: ["0%", "-50%"] }}
-                        transition={{ repeat: Infinity, ease: "linear", duration: 22 }}
+                        transition={{ repeat: Infinity, ease: "linear", duration: 25 }}
                         className="flex whitespace-nowrap items-center w-fit"
                     >
                         {Array(6).fill("drope.in").map((text, i) => (
                             <div key={i} className="flex items-center">
-                                <span className="text-[100px] md:text-[180px] font-black uppercase tracking-tighter text-white leading-none" style={{ fontFamily: 'Georgia, serif' }}>
+                                <span className="text-[70px] md:text-[180px] font-black uppercase tracking-tighter text-white leading-none" style={{ fontFamily: 'Georgia, serif' }}>
                                     {text}
                                 </span>
-                                <div className="w-[3vw] h-[3vw] max-w-[20px] max-h-[20px] bg-white rounded-full mx-8 md:mx-12" />
+                                <div className="w-[2vw] h-[2vw] max-w-[15px] max-h-[15px] bg-white rounded-full mx-6 md:mx-12" />
                             </div>
                         ))}
                     </motion.div>

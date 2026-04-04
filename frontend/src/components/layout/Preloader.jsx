@@ -134,8 +134,12 @@ export const Preloader = ({ onComplete }) => {
             </motion.div>
 
             {/* ── LOGO LAYER (FIXED COORDINATES) ── */}
-            {/* This layer DOES NOT slide with the background, so its unmount/hand-off is stable */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            {/* This layer MUST stay in the DOM during exit so framer-motion can hand off the layoutId */}
+            <motion.div 
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.1 }}
+                className="absolute inset-0 flex items-center justify-center pointer-events-none"
+            >
                 <div className="relative">
                     <Logo
                         size="clamp(2.5rem,15vw,10rem)"
@@ -201,7 +205,7 @@ export const Preloader = ({ onComplete }) => {
                         </motion.div>
                     </motion.div>
                 </div>
-            </div>
+            </motion.div>
 
         </div>
     );

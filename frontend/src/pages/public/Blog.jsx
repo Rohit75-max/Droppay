@@ -1,9 +1,11 @@
 import React, { useEffect } from 'react';
-import { motion, useScroll, useSpring } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { ArrowUpRight, User } from 'lucide-react';
-import HomeNavbar from '../../components/home/HomeNavbar';
 import BlogFooter from '../../components/home/BlogFooter';
+import ReadingRing from '../../components/ui/ReadingRing';
+import { PatchNotesHub } from '../../components/features/PatchNotesHub';
+import { RepellingText } from '../../components/ui/RepellingText';
 
 const BLOG_POSTS = [
     {
@@ -40,128 +42,145 @@ const BLOG_POSTS = [
 
 const BlogPage = () => {
     const navigate = useNavigate();
-    const { scrollYProgress } = useScroll();
-    
-    const scaleX = useSpring(scrollYProgress, {
-        stiffness: 100,
-        damping: 30,
-        restDelta: 0.001
-    });
 
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
 
     return (
-        <motion.main 
+        <motion.main
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="bg-[#f5f0e8] text-[#1a1a2e] selection:bg-[#3d44f5] selection:text-white"
+            className="bg-white text-black selection:bg-[#afff00] selection:text-black home-scroll-container"
         >
-            <HomeNavbar scaleX={scaleX} />
 
-            {/* --- BLOG HERO: FULL-BLEED EDITORIAL --- */}
-            <section className="min-h-screen relative flex flex-col justify-end overflow-hidden snap-start">
-                <div className="absolute inset-0 z-0">
-                    <motion.img 
-                        initial={{ scale: 1.1 }}
-                        animate={{ scale: 1 }}
-                        transition={{ duration: 1.5 }}
-                        src={BLOG_POSTS[0].image} 
+            {/* --- SECTION 01: STREAM HERO --- */}
+            <section data-navbar-theme="dark" className="min-h-screen relative flex flex-col justify-center items-center overflow-hidden snap-start bg-black">
+                {/* DYNAMIC BACKGROUND */}
+                <div className="absolute inset-0 z-0 opacity-40">
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[#afff00]/20 via-transparent to-transparent" />
+                    <img
+                        src={BLOG_POSTS[0].image}
                         className="w-full h-full object-cover grayscale brightness-50"
-                        alt="Featured Post" 
+                        alt="Featured"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#1a1a2e] via-transparent to-transparent" />
+                    {/* SCANLINES OVERLAY */}
+                    <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_4px,3px_100%]" />
                 </div>
 
-                <div className="relative z-10 w-full px-6 md:px-12 lg:px-16 pb-24">
-                   <motion.div
-                       initial={{ y: 50, opacity: 0 }}
-                       animate={{ y: 0, opacity: 1 }}
-                       transition={{ delay: 0.5, duration: 1 }}
-                   >
-                       <span className="inline-block px-4 py-1.5 bg-[#afff00] text-black text-[10px] font-black uppercase tracking-widest rounded-full mb-8">
-                           Featured Journal 01
-                       </span>
-                       <h1 className="text-[10vw] md:text-[8vw] font-black tracking-tighter uppercase leading-[0.8] text-white max-w-5xl mb-12">
-                           Monetization <br />
-                           <span className="font-serif italic normal-case tracking-tight text-[#afff00]">Strategies.</span>
-                       </h1>
-                       
-                       <div className="flex flex-col md:flex-row justify-between items-end gap-12">
-                            <p className="text-white/60 text-lg md:text-xl max-w-xl leading-relaxed">
-                                {BLOG_POSTS[0].excerpt}
-                            </p>
-                            <button 
-                                onClick={() => navigate(`/blog/${BLOG_POSTS[0].id}`)}
-                                className="group flex items-center gap-4 px-10 py-5 bg-white text-black rounded-full font-black uppercase tracking-widest text-xs hover:scale-105 transition-all shadow-2xl"
-                            >
-                                Read Entry <ArrowUpRight className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                            </button>
-                       </div>
-                   </motion.div>
+                {/* LIVE STATUS BAR */}
+                <div className="absolute top-24 left-6 md:left-12 lg:left-16 flex items-center gap-4 z-20">
+                    <div className="flex items-center gap-2 px-3 py-1 bg-red-600 rounded-sm text-[10px] font-black uppercase tracking-widest text-white">
+                        <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                        LIVE
+                    </div>
                 </div>
+
+                <div className="relative z-10 w-full px-6 md:px-12 lg:px-16 text-center">
+                    <motion.div
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        whileInView={{ scale: 1, opacity: 1 }}
+                        transition={{ duration: 0.8 }}
+                    >
+                        <h1 className="text-[14vw] md:text-[10vw] font-black tracking-tighter uppercase leading-[0.8] text-white flex flex-col items-center">
+                            <RepellingText text="Alert" className="text-white" />
+                            <RepellingText text="Center" className="text-[#afff00] -mt-[0.2em]" />
+                        </h1>
+                    </motion.div>
+                </div>
+
+                {/* FEATURED ALERT CARD */}
+                <motion.div
+                    initial={{ y: 100, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.8 }}
+                    className="absolute bottom-12 right-6 md:right-12 lg:right-16 max-w-sm w-[90%] bg-white p-1 border-2 border-[#afff00] shadow-[10px_10px_0px_#afff00] hidden md:block"
+                >
+                    <div className="bg-black p-4 space-y-4">
+                        <div className="flex justify-between items-center text-[8px] font-black uppercase tracking-widest">
+                            <span className="text-[#afff00]">New_Notification</span>
+                            <span className="text-white/20">Ref: 01-X</span>
+                        </div>
+                        <h2 className="text-lg font-black text-white uppercase leading-none tracking-tight">
+                            {BLOG_POSTS[0].title}
+                        </h2>
+                        <button
+                            onClick={() => navigate(`/blog/${BLOG_POSTS[0].id}`)}
+                            className="w-full py-2 bg-[#afff00] text-black text-[9px] font-black uppercase tracking-widest hover:bg-white transition-colors"
+                        >
+                            Open_Payload
+                        </button>
+                    </div>
+                </motion.div>
             </section>
 
-            {/* --- JOURNAL FEED: ALTERNATING 50/50 --- */}
-            <section className="py-48 px-6 md:px-12 lg:px-16 space-y-48">
-                {BLOG_POSTS.slice(1).map((post, i) => (
-                    <motion.article 
-                        key={post.id}
-                        initial={{ opacity: 0, y: 100 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true, margin: "-100px" }}
-                        className={`flex flex-col ${i % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'} gap-12 lg:gap-32 items-center`}
-                    >
-                        <div className="flex-1 w-full box-border border border-black/5 rounded-[4rem] overflow-hidden group">
-                            <div className="aspect-[4/3] overflow-hidden">
-                                <img 
-                                    src={post.image} 
-                                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-1000"
+            {/* --- SECTION 01.5: PATCH NOTES HUB (NEW) --- */}
+            <PatchNotesHub />
+
+            {/* --- SECTION 02: CONSOLIDATED ALERTS + FOOTER --- */}
+            <div data-navbar-theme="light" className="min-h-[100dvh] flex flex-col justify-between snap-start bg-white">
+                {/* --- ALERT FEED: OBS STYLE --- */}
+                <section className="py-24 px-6 md:px-12 lg:px-16 grid grid-cols-1 md:grid-cols-2 gap-12">
+                    {BLOG_POSTS.slice(1).map((post, i) => (
+                        <motion.article
+                            key={post.id}
+                            initial={{ opacity: 0, x: i % 2 === 0 ? -30 : 30 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            className="group relative flex flex-col bg-white border-2 border-black hover:border-[#afff00] transition-colors p-1"
+                        >
+                            <div className="relative aspect-video overflow-hidden bg-black">
+                                <img
+                                    src={post.image}
+                                    className="w-full h-full object-cover grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700"
                                     alt={post.title}
                                 />
+                                {/* RECT DOT OVERLAY */}
+                                <div className="absolute top-4 right-4 flex items-center gap-2 px-2 py-1 bg-black/80 border border-white/10 text-[8px] font-black text-white uppercase">
+                                    <div className="w-1 h-1 rounded-full bg-red-600 animate-pulse" />
+                                    REC
+                                  </div>
+                                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
                             </div>
-                        </div>
 
-                        <div className="flex-1 space-y-8">
-                            <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.4em] opacity-40">
-                                <span>{post.category}</span>
-                                <div className="w-1.5 h-1.5 rounded-full bg-[#3d44f5]" />
-                                <span>{post.readTime}</span>
-                            </div>
-                            
-                            <h2 className="text-5xl md:text-6xl font-black tracking-tighter uppercase leading-[0.9]">
-                                {post.title}
-                            </h2>
-
-                            <p className="text-xl opacity-60 leading-relaxed max-w-lg">
-                                {post.excerpt}
-                            </p>
-
-                            <div className="pt-12 flex items-center justify-between border-t border-black/5">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 bg-black/5 rounded-full flex items-center justify-center">
-                                        <User className="w-6 h-6 opacity-20" />
+                            <div className="p-4 bg-white flex-1 flex flex-col justify-between space-y-4">
+                                <div className="space-y-2">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-[8px] font-black uppercase tracking-widest text-black/40">Category: {post.category}</span>
+                                        <span className="text-[8px] font-black uppercase tracking-widest text-red-600 font-mono">[Status: Hot]</span>
                                     </div>
-                                    <div className="flex flex-col">
-                                        <span className="text-[10px] font-black uppercase tracking-widest">{post.author}</span>
-                                        <span className="text-[10px] font-serif italic opacity-40">{post.date}</span>
-                                    </div>
+                                    <h2 className="text-xl md:text-2xl font-black tracking-tighter uppercase leading-[0.9]">
+                                        {post.title}
+                                    </h2>
                                 </div>
-                                
-                                <button 
-                                    onClick={() => navigate(`/blog/${post.id}`)}
-                                    className="w-16 h-16 border-2 border-black/10 rounded-full flex items-center justify-center hover:bg-[#3d44f5] hover:border-[#3d44f5] hover:text-white transition-all group"
-                                >
-                                    <ArrowUpRight className="w-6 h-6 group-hover:scale-125 transition-transform" />
-                                </button>
-                            </div>
-                        </div>
-                    </motion.article>
-                ))}
-            </section>
 
-            <BlogFooter />
+                                <div className="pt-4 flex items-center justify-between border-t border-black/10">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 bg-[#afff00] border border-black flex items-center justify-center">
+                                            <User className="w-4 h-4 text-black" />
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-[8px] font-black uppercase tracking-widest">{post.author}</span>
+                                            <span className="text-[8px] font-mono uppercase opacity-40">{post.date}</span>
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        onClick={() => navigate(`/blog/${post.id}`)}
+                                        className="w-10 h-10 border-2 border-black flex items-center justify-center hover:bg-[#afff00] transition-all group"
+                                    >
+                                        <ArrowUpRight className="w-4 h-4 group-hover:scale-125 transition-transform" />
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.article>
+                    ))}
+                </section>
+
+                <BlogFooter />
+            </div>
+
+            <ReadingRing />
         </motion.main>
     );
 };

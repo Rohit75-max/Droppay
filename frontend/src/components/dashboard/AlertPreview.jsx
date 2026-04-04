@@ -13,7 +13,8 @@ const PremiumAlertPreview = React.memo(({
     amount = 0,
     message = "Supporting the stream!",
     customAvatar,
-    stylePreference = 'subway_dash'
+    stylePreference = 'subway_dash',
+    isSandbox = false
 }) => {
 
     // ==========================================
@@ -21,7 +22,7 @@ const PremiumAlertPreview = React.memo(({
     // ==========================================
     if (stylePreference === 'subway_dash') {
         return (
-            <div className="relative w-full max-w-xl mx-auto h-[420px] flex flex-col items-center justify-center overflow-hidden bg-[#1e293b] rounded-3xl border-8 border-slate-900 shadow-[0_20px_50px_rgba(0,0,0,0.8)] group">
+            <div className={`relative w-full max-w-xl mx-auto h-[420px] flex flex-col items-center justify-center overflow-hidden group ${isSandbox ? 'bg-transparent' : 'bg-[#1e293b] rounded-3xl border-8 border-slate-900 shadow-[0_20px_50px_rgba(0,0,0,0.8)]'}`}>
                 <style>{`
                   @keyframes rush-wall { 0% { background-position: 0 0; } 100% { background-position: -1000px 0; } }
                   @keyframes coin-spin { 0% { transform: rotateY(0deg); } 100% { transform: rotateY(360deg); } }
@@ -82,7 +83,7 @@ const PremiumAlertPreview = React.memo(({
         return (
             <div className="relative w-full max-w-lg mx-auto h-[400px] flex items-center justify-center overflow-visible">
                 <motion.div initial={{ height: 0, opacity: 1 }} animate={{ height: ['0%', '150%', '0%'], opacity: [1, 1, 0] }} transition={{ duration: 1.5, ease: "easeIn" }} className="absolute top-[-200px] w-8 bg-cyan-300 shadow-[0_0_60px_#22d3ee,0_0_100px_#fff] z-0 blur-[2px]" />
-                <motion.div initial={{ scale: 0, rotate: -90 }} animate={{ scale: 1, rotate: 0 }} transition={{ delay: 0.5, type: "spring", stiffness: 100 }} className="relative z-10 bg-[#020817]/90 border border-cyan-500/50 p-8 rounded-full shadow-[0_0_50px_rgba(6,182,212,0.3)] backdrop-blur-xl flex flex-col items-center justify-center w-[320px] h-[320px]">
+                <motion.div initial={{ scale: 0, rotate: -90 }} animate={{ scale: 1, rotate: 0 }} transition={{ delay: 0.5, type: "spring", stiffness: 100 }} className={`relative z-10 border border-cyan-500/50 p-8 rounded-full flex flex-col items-center justify-center w-[320px] h-[320px] ${isSandbox ? 'bg-transparent shadow-none backdrop-blur-none' : 'bg-[#020817]/90 shadow-[0_0_50px_rgba(6,182,212,0.3)] backdrop-blur-xl'}`}>
                     <div className="absolute inset-2 rounded-full border-[3px] border-cyan-400/30 border-dashed animate-[spin_6s_linear_infinite]" />
                     <div className="absolute inset-6 rounded-full border border-cyan-300/20 animate-[spin_4s_linear_infinite_reverse]" />
                     <Target className="w-10 h-10 text-cyan-400 mb-2 animate-pulse drop-shadow-[0_0_10px_#22d3ee]" />
@@ -426,9 +427,9 @@ const PremiumAlertPreview = React.memo(({
     // ==========================================
     // 11. MAINFRAME BREACH
     // ==========================================
-    if (stylePreference === 'mainframe_breach') {
+        if (stylePreference === 'mainframe_breach') {
         return (
-            <div className="relative w-full max-w-lg mx-auto h-[400px] flex flex-col items-center justify-center overflow-hidden bg-[#000800] rounded-xl border-2 border-green-500/30">
+            <div className="relative w-full max-w-lg mx-auto h-[400px] flex flex-col items-center justify-center overflow-hidden">
                 <style>{`
           @keyframes matrix-rain { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
           @keyframes cursor-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
@@ -444,7 +445,7 @@ const PremiumAlertPreview = React.memo(({
                 </div>
 
                 <div className="relative z-10 w-full px-12 font-mono">
-                    <div className="bg-black/80 border border-green-500/50 p-6 shadow-[0_0_30px_rgba(34,197,94,0.2)] animate-[border-glitch_2s_infinite]">
+                    <div className={`border border-green-500/50 p-6 animate-[border-glitch_2s_infinite] ${isSandbox ? 'bg-transparent shadow-none' : 'bg-black/80 shadow-[0_0_30px_rgba(34,197,94,0.2)]'}`}>
                         <div className="flex items-center gap-2 mb-4">
                             <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                             <span className="text-green-500 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
@@ -473,9 +474,7 @@ const PremiumAlertPreview = React.memo(({
                     </div>
                 </div>
 
-                <div className="absolute bottom-2 w-full text-center">
-                    <span className="text-green-900 font-mono text-[8px] uppercase tracking-[1em]">SYSTEM_STABLE_V4.2.0</span>
-                </div>
+
             </div>
         );
     }
@@ -485,7 +484,7 @@ const PremiumAlertPreview = React.memo(({
     // ==========================================
     if (stylePreference === 'dragon_hoard') {
         return (
-            <div className="relative w-full max-w-2xl mx-auto h-[450px] flex items-center justify-center overflow-hidden bg-[#050101] rounded-xl border border-red-900/30 shadow-[0_20px_60px_rgba(0,0,0,0.9)]">
+            <div className={`relative w-full max-w-2xl mx-auto h-[450px] flex items-center justify-center overflow-hidden border border-red-900/30 ${isSandbox ? 'bg-transparent shadow-none' : 'bg-[#050101] rounded-xl shadow-[0_20px_60px_rgba(0,0,0,0.9)]'}`}>
                 <style>{`
                   @keyframes fire-breath { 0% { transform: translateX(-100%) scale(1); opacity: 0; } 50% { opacity: 1; transform: translateX(0) scale(1.5); } 100% { transform: translateX(100%) scale(2); opacity: 0; } }
                   @keyframes eye-glow { 0%, 100% { box-shadow: 0 0 40px #f97316, inset 0 0 40px #f97316; } 50% { box-shadow: 0 0 80px #ef4444, inset 0 0 80px #ef4444; } }
@@ -808,117 +807,68 @@ const PremiumAlertPreview = React.memo(({
     }
 
     // ==========================================
-    // 21. PLINKO DROP (Elite Triangle Arcade) - [₹12,000 TIER]
+    // 22. RESPECT PLUS (GTA San Andreas)
     // ==========================================
-    if (stylePreference === 'plinko_drop') {
-        // --- 1. CONFIGURATION (Edit prizes here) ---
-        const buckets = [
-            { label: 'Pushups x10', color: 'text-slate-500' },
-            { label: 'VIP BADGE', color: 'text-emerald-400' },
-            { label: 'JACKPOT x2', color: 'text-yellow-400', glow: true }, // The winning bucket
-            { label: 'Sing a Song', color: 'text-cyan-400' },
-            { label: 'No Prize', color: 'text-red-500' }
-        ];
-
-        // --- 2. ADVANCED PHYSICS SIMULATION KEYFRAMES ---
-        // Suspenseful, chaotic path bouncing off pegs, then hitting Jackpot
-        const coinPathX = [0, -40, 60, -80, 20, -100, 30, -50, 0, 0];
-        const coinPathY = [0, 40, 80, 120, 160, 200, 240, 280, 320, 340];
-        const coinRotate = [0, 180, -180, 360, -360, 720, -720, 1080, 1440, 0];
-
-        // Pegs layout (Pyramid/Triangle formation)
-        const totalRows = 8;
-
+    if (stylePreference === 'respect_plus') {
         return (
-            <div className="relative w-full max-w-lg mx-auto h-[400px] flex items-center justify-center overflow-hidden bg-[#020617] rounded-b-3xl shadow-[0_30px_60px_rgba(0,0,0,1)] perspective-1000">
-
-                {/* GLOBAL KEYFRAMES & STYLES (Scope to this style only) */}
+            <div className={`relative w-full max-w-xl mx-auto h-[300px] flex flex-col items-center justify-center overflow-visible group ${isSandbox ? 'bg-transparent' : 'bg-black/60 backdrop-blur-md rounded-2xl border-4 border-white/10 shadow-2xl'}`}>
                 <style>{`
-                  @keyframes neon-peg { 0%, 100% { box-shadow: 0 0 5px #facc15; } 50% { box-shadow: 0 0 15px #facc15, 0 0 20px #fff; } }
-                  @keyframes laser-grid { 0% { background-position: 0 0; } 100% { background-position: 0 1000px; } }
+                  @keyframes stamp-in { 0% { transform: scale(3); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+                  @keyframes respect-plus { 0% { transform: translateY(20px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
                 `}</style>
+                
+                <div className="relative z-10 flex flex-col items-center">
+                    <motion.div initial={{ scale: 3, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", damping: 12, stiffness: 200, duration: 0.6 }} className="text-center">
+                        <h2 className="text-white font-serif font-black text-6xl italic uppercase tracking-tighter drop-shadow-[0_4px_0_#1e40af] mb-1" style={{ WebkitTextStroke: '1px #1e40af', textShadow: '4px 4px 0px #1e40af' }}>MISSION PASSED!</h2>
+                        <div className="h-1 w-full bg-blue-500 shadow-[0_0_15px_#3b82f6] mb-4" />
+                    </motion.div>
 
-                {/* Background Atmosphere: Scrolling Laser Grid */}
-                <div className="absolute inset-0 bg-[#020617] bg-[linear-gradient(rgba(34,211,238,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,0.1)_1px,transparent_1px)] bg-[size:30px_30px] opacity-30 animate-[laser-grid_10s_linear_infinite]" />
-
-                {/* 1. Main Triangle Container (The Plinko Board) */}
-                <div className="relative w-full h-[350px] bg-slate-900 border-[10px] border-slate-800" style={{ clipPath: 'polygon(50% 0%, 100% 100%, 0% 100%)' }}>
-                    <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-black/80" />
-
-                    {/* Interior Glowing Edges */}
-                    <div className="absolute inset-0 shadow-[inset_0_0_50px_rgba(34,211,238,0.3)] pointer-events-none z-10" />
-
-                    {/* Pegs Generation (Pyramid shape) */}
-                    <div className="absolute inset-0 flex flex-col pt-16 z-10 px-6">
-                        {Array.from({ length: totalRows }).map((_, rowIndex) => {
-                            const pegsInRow = rowIndex + 2; // Rows increase by 1 peg
-                            const stagger = rowIndex % 2 === 0;
-
-                            return (
-                                <div key={rowIndex} className={`flex justify-center gap-6 ${stagger ? 'pl-8' : 'pr-8'} mb-6`}>
-                                    {Array.from({ length: pegsInRow }).map((_, pegIndex) => (
-                                        <motion.div
-                                            key={`${rowIndex}-${pegIndex}`}
-                                            animate={{ scale: [1, 1.3, 1] }}
-                                            transition={{ repeat: Infinity, duration: 2 + Math.random(), delay: Math.random() }}
-                                            className="w-3 h-3 bg-yellow-400 rounded-full border-2 border-white animate-[neon-peg_2s_infinite]"
-                                        />
-                                    ))}
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-
-                {/* 2. Top Spawner Hook */}
-                <div className="absolute top-0 w-40 h-10 bg-slate-800 border-b-4 border-cyan-500 rounded-b-xl z-20 flex items-center justify-center shadow-lg transform translate-y-[-50%]">
-                    <span className="text-cyan-300 font-mono font-black text-[10px] tracking-widest uppercase flex gap-1 items-center">
-                        <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" /> INCOMING COIN
-                    </span>
-                </div>
-
-                {/* 3. The Dropping Coin ( suspenseful physics ) */}
-                <motion.div
-                    initial={{ y: 0, x: 0 }}
-                    animate={{ y: coinPathY, x: coinPathX, rotate: coinRotate }}
-                    transition={{ duration: 3.5, ease: "linear" }} // Increased duration for suspense
-                    className="absolute top-[-10px] z-30 w-16 h-16 rounded-full overflow-hidden flex items-center justify-center border-[6px] border-yellow-400 bg-slate-950 shadow-[0_0_50px_rgba(250,204,21,0.6)] backdrop-blur-sm transform-style-3d"
-                >
-                    <div className="absolute inset-0 border-[6px] border-dashed border-white opacity-40 rounded-full animate-[spin_5s_linear_infinite]" />
-                    {customAvatar ? (
-                        <img src={getOptimizedImage(customAvatar, 200)} alt="Donor" className="w-full h-full object-cover" />
-                    ) : (
-                        <span className="text-yellow-400 font-black text-3xl font-mono">₹</span>
-                    )}
-                </motion.div>
-
-                {/* 4. Bottom Prize Buckets (Aligned to triangle base) */}
-                <div className="absolute bottom-0 w-[96%] h-24 flex z-20 rounded-t-xl overflow-hidden border-t-8 border-slate-700">
-                    {buckets.map((bucket, index) => (
-                        <div key={index} className={`flex-1 border-r-2 border-slate-800 last:border-r-0 flex flex-col items-center justify-end pb-3 text-center px-1 ${bucket.glow ? 'bg-yellow-950/40 shadow-[inset_0_-30px_60px_rgba(234,179,8,0.5)]' : 'bg-slate-950'}`}>
-                            <span className={`font-black text-[9px] uppercase tracking-widest ${bucket.color}`}>{bucket.label}</span>
-                            {bucket.glow && <div className="absolute bottom-1 w-12 h-1 bg-yellow-400 rounded-full blur-[4px] animate-pulse" />}
+                    <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 1, duration: 0.5 }} className="flex flex-col items-center">
+                        <span className="text-green-500 font-serif font-black text-4xl uppercase tracking-widest drop-shadow-[2px_2px_0_#000]">Respect +</span>
+                        <div className="mt-2 bg-black px-6 py-1 border-2 border-white transform -rotate-1">
+                            <span className="text-white font-black text-lg uppercase tracking-wider">{donorName}</span>
                         </div>
-                    ))}
+                    </motion.div>
                 </div>
+            </div>
+        );
+    }
 
-                {/* 5. Winner Reveal Banner (Appears with delay) */}
-                <motion.div
-                    initial={{ y: 200, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 3.8, type: "spring", bounce: 0.6 }}
-                    className="absolute bottom-28 w-[90%] bg-black/90 p-4 rounded-2xl border-4 border-yellow-400 shadow-[0_0_50px_rgba(250,204,21,0.6)] z-40 text-center"
-                >
-                    <Sparkles className="absolute top-2 right-2 w-5 h-5 text-yellow-400 opacity-50" />
-                    <h4 className="text-slate-400 text-[10px] uppercase font-mono tracking-widest mb-1 flex items-center gap-1 justify-center">
-                        <Trophy className="w-3 h-3 text-yellow-500" /> SUPPORTER DEPOSIT ACCEPTED
-                    </h4>
-                    <h2 className="text-white font-serif font-black text-4xl uppercase tracking-tighter drop-shadow-[0_0_10px_#fff] leading-tight">{donorName}</h2>
-                    <div className="bg-yellow-950 px-8 py-2 border-y-2 border-yellow-500 my-2 shadow-inner">
-                        <span className="text-yellow-300 font-black text-4xl font-mono">₹{amount.toLocaleString('en-IN')}</span>
-                    </div>
-                    <p className="text-yellow-100 italic text-sm line-clamp-2 px-6">"{message}"</p>
-                </motion.div>
+    // ==========================================
+    // 23. BGMI TACTICAL (Battlegrounds Mobile)
+    // ==========================================
+    if (stylePreference === 'bgmi_tactical') {
+        return (
+            <div className={`relative w-full max-w-lg mx-auto h-[280px] flex items-center justify-center overflow-hidden border-4 border-[#f87217]/40 ${isSandbox ? 'bg-transparent shadow-none' : 'bg-[#0f172a] rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.8)]'}`}>
+                <style>{`
+                  @keyframes tactical-slide { 0% { transform: translateX(-100%); opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }
+                  @keyframes metal-shine { 0% { transform: translateX(-100%) skewX(-15deg); } 100% { transform: translateX(200%) skewX(-15deg); } }
+                `}</style>
+                
+                <div className="absolute inset-0 bg-[linear-gradient(45deg,#1e293b_25%,transparent_25%),linear-gradient(-45deg,#1e293b_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#1e293b_75%),linear-gradient(-45deg,transparent_75%,#1e293b_75%)] bg-[size:20px_20px] opacity-10" />
+                <div className="absolute inset-0 bg-gradient-to-r from-[#f87217]/10 via-transparent to-[#f87217]/10" />
+
+                <div className="relative z-10 w-full flex flex-col items-center px-10">
+                    <motion.div initial={{ x: -100, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ type: "spring", damping: 15 }} className="w-full flex items-center gap-4 mb-4">
+                        <div className="w-16 h-16 bg-[#f87217] flex items-center justify-center rotate-45 border-4 border-white shadow-[4px_4px_0_#000]">
+                            <Target className="w-8 h-8 text-white -rotate-45" />
+                        </div>
+                        <div className="flex flex-col">
+                            <span className="text-[#f87217] font-black text-xs tracking-[0.3em] uppercase mb-1">Level Up Detected</span>
+                            <h2 className="text-white font-black text-4xl uppercase tracking-tighter italic drop-shadow-[2px_2px_0_#f87217]">{donorName}</h2>
+                        </div>
+                    </motion.div>
+
+                    <motion.div initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.6, type: "spring" }} className="w-full bg-[#f87217] p-1 relative overflow-hidden shadow-xl transform skew-x-[-10deg]">
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-[metal-shine_3s_infinite]" />
+                        <div className="bg-black py-2 px-6 flex justify-between items-center transform skew-x-[10deg]">
+                            <span className="text-[#f87217] font-black text-3xl font-mono">₹{amount.toLocaleString('en-IN')}</span>
+                            <Trophy className="w-6 h-6 text-[#f87217] animate-pulse" />
+                        </div>
+                    </motion.div>
+                    
+                    <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }} className="mt-4 text-white font-bold italic tracking-wider text-sm opacity-60">"Winner Winner Chicken Dinner!"</motion.p>
+                </div>
             </div>
         );
     }

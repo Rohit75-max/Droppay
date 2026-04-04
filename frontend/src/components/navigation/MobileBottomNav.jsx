@@ -33,7 +33,7 @@ export function MobileBottomNav() {
                 style={{ maskImage: "linear-gradient(to bottom, transparent 0%, black 70%)", WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 70%)" }}
             />
             
-            <div className="px-4 pb-6 relative z-10">
+            <div className="px-4 pb-2 relative z-10" style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}>
                 <div className="backdrop-blur-[40px] border flex items-center justify-between px-6 py-4 rounded-[2rem] shadow-[0_15px_35px_rgba(0,0,0,0.2)] relative overflow-hidden pointer-events-auto"
                       style={{ background: 'var(--nexus-panel)', borderColor: 'var(--nexus-border)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)' }}>
 

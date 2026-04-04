@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import axios from '../api/axios';
 
 const ThemeContext = createContext({ theme: 'dark', toggleTheme: () => { } });
 
@@ -41,10 +42,25 @@ export const ThemeProvider = ({ children }) => {
         return () => window.removeEventListener('nexus-theme-change', handleNexusChange);
     }, []);
 
-    const toggleTheme = useCallback(() => {
-        localStorage.setItem('dropeThemeSet', 'true'); // user explicitly chose
-        setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
-    }, []);
+    const toggleTheme = useCallback(async () => {
+        const next = theme === 'dark' ? 'light' : 'dark';
+        localStorage.setItem('dropeThemeSet', 'true');
+        localStorage.setItem('dropeTheme', next); // Write immediately — prevents syncTheme race condition
+        setTheme(next);
+
+        // Background sync to database so preferences track across devices
+        const token = localStorage.getItem('token');
+        if (token) {
+            try {
+                await axios.post('/api/user/update-profile', 
+                    { nexusThemeMode: next }, 
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+            } catch (error) {
+                console.error("Failed to sync theme mode to database:", error);
+            }
+        }
+    }, [theme]);
 
     return (
         <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>

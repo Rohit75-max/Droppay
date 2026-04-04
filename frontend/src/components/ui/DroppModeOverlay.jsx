@@ -22,6 +22,14 @@ export const DroppModeOverlay = ({ isOpen, onClose }) => {
     const mouseRef = useRef({ x: -999, y: -999 });
     const isRunningRef = useRef(false);
 
+    const getScrollOffset = useCallback(() => {
+        const container = document.querySelector('.home-scroll-container');
+        if (container) {
+            return { x: container.scrollLeft, y: container.scrollTop };
+        }
+        return { x: window.scrollX, y: window.scrollY };
+    }, []);
+
     const drawBlob = useCallback(
         (ctx, x, y, r, color, alpha) => {
             ctx.save();
@@ -88,9 +96,11 @@ export const DroppModeOverlay = ({ isOpen, onClose }) => {
         // Clear
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+        const offset = getScrollOffset();
+
         // Draw settled blobs (permanent)
         for (const blob of settledBlobsRef.current) {
-            drawBlob(ctx, blob.x, blob.y, blob.radius, blob.color, 0.9);
+            drawBlob(ctx, blob.x - offset.x, blob.y - offset.y, blob.radius, blob.color, 0.9);
         }
 
         // Update + draw live particles
@@ -101,7 +111,7 @@ export const DroppModeOverlay = ({ isOpen, onClose }) => {
             p.vy += p.gravity;
             p.vx *= 0.97;
             p.alpha -= p.decay;
-            drawBlob(ctx, p.x, p.y, p.radius, p.color, Math.max(0, p.alpha));
+            drawBlob(ctx, p.x - offset.x, p.y - offset.y, p.radius, p.color, Math.max(0, p.alpha));
         }
 
         // Draw + update splash emojis
@@ -111,15 +121,15 @@ export const DroppModeOverlay = ({ isOpen, onClose }) => {
             ctx.globalAlpha = t.alpha;
             ctx.font = "22px serif";
             ctx.textAlign = "center";
-            ctx.fillText("💧", t.x, t.y);
+            ctx.fillText("💧", t.x - offset.x, t.y - offset.y);
             ctx.restore();
             t.y += t.vy;
             t.alpha -= 0.018;
         }
 
-        // Draw custom crosshair dot at mouse
+        // Draw custom crosshair dot at mouse (screen-space)
         const { x: mx, y: my } = mouseRef.current;
-        if (mx > 0) {
+        if (mx > -100) {
             ctx.save();
             ctx.strokeStyle = "#FF2D00";
             ctx.lineWidth = 1.5;
@@ -144,7 +154,7 @@ export const DroppModeOverlay = ({ isOpen, onClose }) => {
         }
 
         animFrameRef.current = requestAnimationFrame(loop);
-    }, [drawBlob]);
+    }, [drawBlob, getScrollOffset]);
 
     // Start / stop loop on open
     useEffect(() => {
@@ -181,25 +191,34 @@ export const DroppModeOverlay = ({ isOpen, onClose }) => {
         }
     }, [isOpen, loop, onClose]);
 
-    const handleMouseMove = useCallback((e) => {
-        mouseRef.current = { x: e.clientX, y: e.clientY };
-    }, []);
+    useEffect(() => {
+        if (!isOpen) return;
+        
+        const handleMouseMove = (e) => {
+            mouseRef.current = { x: e.clientX, y: e.clientY };
+        };
+        const handleMouseLeave = () => {
+            mouseRef.current = { x: -999, y: -999 };
+        };
+        const handleGlobalClick = (e) => {
+            // Prevent spawning if clicking the exit/clear buttons
+            if (e.target.tagName === 'BUTTON') return;
+            const offset = getScrollOffset();
+            spawnSplash(e.clientX + offset.x, e.clientY + offset.y);
+        };
 
-    const handleMouseLeave = useCallback(() => {
-        mouseRef.current = { x: -999, y: -999 };
-    }, []);
+        // Attach globally so it works while pointer-events are none on the overlay
+        window.addEventListener('mousemove', handleMouseMove, { passive: true });
+        document.documentElement.addEventListener('mouseleave', handleMouseLeave);
+        window.addEventListener('click', handleGlobalClick);
 
-    const handleClick = useCallback((e) => {
-        spawnSplash(e.clientX, e.clientY);
-    }, [spawnSplash]);
-
-    const handleClear = useCallback(() => {
-        particlesRef.current = [];
-        settledBlobsRef.current = [];
-        splashTextsRef.current = [];
-        dropCountRef.current = 0;
-        if (dropCountDisplayRef.current) dropCountDisplayRef.current.textContent = "000";
-    }, []);
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove);
+            document.documentElement.removeEventListener('mouseleave', handleMouseLeave);
+            window.removeEventListener('click', handleGlobalClick);
+            mouseRef.current = { x: -999, y: -999 };
+        };
+    }, [isOpen, spawnSplash, getScrollOffset]);
 
     return (
         <AnimatePresence>
@@ -209,16 +228,14 @@ export const DroppModeOverlay = ({ isOpen, onClose }) => {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.35, ease: [0.76, 0, 0.24, 1] }}
-                    className="fixed inset-0 z-[999]"
+                    className="fixed inset-0 z-[999] pointer-events-none"
                     style={{
-                        background: "rgba(0,0,0,0.88)",
-                        backdropFilter: "blur(3px)",
-                        cursor: "none",
+                        background: "transparent",
                     }}
-                    onMouseMove={handleMouseMove}
-                    onMouseLeave={handleMouseLeave}
-                    onClick={handleClick}
                 >
+                    {/* Hide default cursor globally when active */}
+                    <style>{`body { cursor: crosshair !important; }`}</style>
+
                     {/* Canvas */}
                     <canvas
                         ref={canvasRef}
@@ -246,10 +263,10 @@ export const DroppModeOverlay = ({ isOpen, onClose }) => {
                     {/* Bottom-right — Controls: CLEAR + EXIT */}
                     <div className="absolute bottom-8 right-[clamp(1.5rem,5vw,4rem)] flex items-center gap-4 pointer-events-auto z-10">
                         <motion.button
-                            onClick={(e) => { e.stopPropagation(); handleClear(); }}
+                            onClick={(e) => { e.stopPropagation(); particlesRef.current = []; settledBlobsRef.current = []; splashTextsRef.current = []; dropCountRef.current = 0; if(dropCountDisplayRef.current) dropCountDisplayRef.current.textContent = "000"; }}
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
-                            className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-600 hover:text-zinc-300 transition-colors duration-200"
+                            className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-600 hover:text-zinc-300 transition-colors duration-200 pointer-events-auto bg-black/50 backdrop-blur-sm px-3 py-1.5"
                         >
                             [ CLEAR ]
                         </motion.button>
@@ -257,7 +274,7 @@ export const DroppModeOverlay = ({ isOpen, onClose }) => {
                             onClick={(e) => { e.stopPropagation(); onClose(); }}
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
-                            className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#FF2D00] hover:text-white transition-colors duration-200 border border-[#FF2D00]/40 hover:border-white/40 px-3 py-1.5"
+                            className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#FF2D00] hover:text-white transition-colors duration-200 border border-[#FF2D00]/40 hover:border-white/40 px-3 py-1.5 pointer-events-auto bg-black/50 backdrop-blur-sm"
                         >
                             [ × EXIT ]
                         </motion.button>

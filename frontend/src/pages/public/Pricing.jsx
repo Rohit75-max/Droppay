@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
-import { Plus, Minus, ArrowRight, Shield, Zap, Globe, Cpu } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Plus, ArrowRight, Shield, Zap, Globe, Cpu } from 'lucide-react';
 
-import HomeNavbar from '../../components/home/HomeNavbar';
 import PricingFooter from '../../components/home/PricingFooter';
+import { RevenueMatrix } from '../../components/features/RevenueMatrix';
 
 // --- DATA: SUBSCRIPTION LAYERS ---
 const TIERS = [
@@ -68,36 +68,46 @@ const StaggerText = ({ text, className, style }) => {
 };
 
 
-const FAQItem = ({ question, answer, isOpen, onClick }) => (
-    <div className="border-b border-black/10 py-10 last:border-none">
-        <button
-            onClick={onClick}
-            className="w-full flex items-center justify-between text-left group"
-        >
-            <span className="text-2xl md:text-3xl font-black uppercase tracking-tighter leading-none group-hover:text-[#3d44f5] transition-colors font-serif">
-                {question}
-            </span>
-            <div className={`transition-transform duration-500 w-12 h-12 rounded-full border border-black/10 flex items-center justify-center ${isOpen ? 'rotate-180 bg-[#0b2e2b] text-white' : ''}`}>
-                {isOpen ? <Minus className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
-            </div>
-        </button>
-        <AnimatePresence>
-            {isOpen && (
-                <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                    className="overflow-hidden"
+const FAQItem = ({ question, answer, isOpen, onClick, theme = 'dark' }) => {
+    return (
+        <div className="border-b border-white/5 py-10 last:border-none relative z-10 transition-all duration-300">
+            <button
+                onClick={onClick}
+                className="w-full flex items-center justify-between text-left group gap-8"
+            >
+                <span
+                    className={`text-2xl md:text-4xl font-black uppercase tracking-tighter leading-[0.8] transition-all duration-500
+                        ${isOpen ? 'text-[#afff00]' : 'text-white/60 group-hover:text-white'}`}
                 >
-                    <p className="pt-8 text-xl opacity-60 leading-relaxed max-w-2xl">
-                        {answer}
-                    </p>
+                    {question}
+                </span>
+                <motion.div
+                    animate={{ rotate: isOpen ? 45 : 0 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                    className={`w-12 h-12 rounded-full border flex items-center justify-center transition-all duration-300
+                        ${isOpen ? 'bg-[#afff00] border-[#afff00] text-black' : 'border-white/20 text-white group-hover:border-[#afff00] group-hover:text-[#afff00]'}`}
+                >
+                    <Plus className="w-6 h-6" />
                 </motion.div>
-            )}
-        </AnimatePresence>
-    </div>
-);
+            </button>
+            <AnimatePresence initial={false}>
+                {isOpen && (
+                    <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                        className="overflow-hidden"
+                    >
+                        <p className="pt-8 text-xl font-medium text-white/40 leading-relaxed max-w-2xl">
+                            {answer}
+                        </p>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+};
 
 // --- COMPONENT: LOCAL BENTO ENGINE (1:1 MIRROR OF HOMEPAGE) ---
 const LocalPricingBento = () => {
@@ -121,17 +131,17 @@ const LocalPricingBento = () => {
         }
     };
 
-    const UNIT = 70;
+    const UNIT = 60;
     const boxConfigs = [
         {
             tier: "Starter",
             width: 3 * UNIT,
-            expandedWidth: 450,
+            expandedWidth: 400,
             priceMonthly: 999,
             price6Month: 5095,
             priceYearly: 9590,
-            top: 180,
-            left: 0,
+            top: 110, // Raised significantly
+            left: 50,
             fixedCorner: "TL",
             activeBg: "#e5e5e5",
             activeText: "text-black",
@@ -149,14 +159,14 @@ const LocalPricingBento = () => {
         {
             tier: "Pro",
             width: 4 * UNIT,
-            expandedWidth: 500,
+            expandedWidth: 440,
             priceMonthly: 1999,
             price6Month: 10195,
             priceYearly: 19190,
-            top: 40,
-            left: 3 * UNIT,
+            top: 0, // Snapped to the very top of container
+            left: 50 + (3.3 * UNIT), // Shifted right
             fixedCorner: "TL",
-            activeBg: "#3139fb",
+            activeBg: "#0b2e2b",
             activeText: "text-white",
             fee: "10%",
             commission: "2.0%",
@@ -170,12 +180,12 @@ const LocalPricingBento = () => {
         {
             tier: "Legend",
             width: 5 * UNIT,
-            expandedWidth: 550,
+            expandedWidth: 480,
             priceMonthly: 2999,
             price6Month: 15295,
             priceYearly: 28790,
-            top: 170,
-            left: 7 * UNIT,
+            top: 60, // Raised from 80
+            left: 50 + (7.7 * UNIT), // Shifted right
             fixedCorner: "TR",
             activeBg: "#fbbf24",
             activeText: "text-black",
@@ -186,26 +196,22 @@ const LocalPricingBento = () => {
                 { side: 'right', type: 'v', prop: 'top', base: -20, grow: -100 },
                 { side: 'right', type: 'v', prop: 'bottom', base: -60, grow: -150 },
                 { side: 'bottom', type: 'h', prop: 'right', base: -60, grow: -120 },
-                { side: 'bottom', type: 'h', prop: 'left', base: -20, grow: -40 }
+                { side: 'bottom', type: 'left', prop: 'left', base: -20, grow: -40 }
             ]
         }
     ];
 
     const getSectionBg = () => {
-        if (selectedIdx === null) return 'var(--arc-cream)';
-        if (selectedIdx === 1) return '#4a51fb';
-        if (selectedIdx === 2) return '#fef3c7';
-        return boxConfigs[selectedIdx].activeBg;
+        return '#0A0A0A'; // Lock to theme dark
     };
 
-    const isDarkSection = selectedIdx === 1;
-    const textColor = isDarkSection ? 'text-white' : 'text-[#111111]';
+    const textColor = 'text-white';
 
     return (
         <motion.section
             animate={{ backgroundColor: getSectionBg() }}
             transition={{ duration: 0.8 }}
-            className="relative w-full flex flex-col items-center overflow-hidden select-none transition-colors px-6 py-8"
+            className="relative w-full h-[100dvh] flex flex-col items-center justify-start pt-20 md:pt-24 overflow-hidden select-none transition-colors px-6"
             onClick={() => setSelectedIdx(null)}
         >
             <motion.div
@@ -213,26 +219,33 @@ const LocalPricingBento = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-                className="max-w-[1280px] mx-auto text-center mb-8 relative z-20"
+                className="max-w-[1280px] mx-auto text-center mb-0 relative z-20"
             >
-                <div className="mt-10 flex flex-wrap justify-center items-center gap-4 md:gap-8">
+                <div className="mb-2 md:mb-4">
+                    <h2 className="text-white text-5xl md:text-[6vw] font-black tracking-tighter uppercase leading-[0.85] md:leading-[0.8] mb-2">
+                        Choose Your <br />
+                        <span className="text-[#afff00] italic font-serif normal-case tracking-tight">Subscription.</span>
+                    </h2>
+                </div>
+
+                <div className="mt-8 flex flex-wrap justify-center items-center gap-4 md:gap-10">
                     <button
                         onClick={(e) => { e.stopPropagation(); setBilling('monthly'); }}
-                        className={`text-[10px] font-black uppercase tracking-widest transition-all ${textColor} ${billing === 'monthly' ? 'underline underline-offset-8 text-[#10b981]' : 'opacity-60 hover:opacity-100'}`}
+                        className={`text-[11px] font-black uppercase tracking-[0.2em] transition-all cursor-pointer ${textColor} ${billing === 'monthly' ? 'text-[#afff00]' : 'opacity-40 hover:opacity-100'}`}
                     >
                         Monthly
                     </button>
-                    <div className={`hidden md:block w-1 h-1 rounded-full ${isDarkSection ? 'bg-white/20' : 'bg-black/20'}`} />
+                    <div className="hidden md:block w-1.5 h-1.5 rounded-full bg-white/10" />
                     <button
                         onClick={(e) => { e.stopPropagation(); setBilling('6month'); }}
-                        className={`text-[10px] font-black uppercase tracking-widest transition-all ${textColor} ${billing === '6month' ? 'underline underline-offset-8 text-[#10b981]' : 'opacity-60 hover:opacity-100'}`}
+                        className={`text-[11px] font-black uppercase tracking-[0.2em] transition-all cursor-pointer ${textColor} ${billing === '6month' ? 'text-[#afff00]' : 'opacity-40 hover:opacity-100'}`}
                     >
                         6 Months
                     </button>
-                    <div className={`hidden md:block w-1 h-1 rounded-full ${isDarkSection ? 'bg-white/20' : 'bg-black/20'}`} />
+                    <div className="hidden md:block w-1.5 h-1.5 rounded-full bg-white/10" />
                     <button
                         onClick={(e) => { e.stopPropagation(); setBilling('yearly'); }}
-                        className={`text-[10px] font-black uppercase tracking-widest transition-all ${textColor} ${billing === 'yearly' ? 'underline underline-offset-8 text-[#10b981]' : 'opacity-60 hover:opacity-100'}`}
+                        className={`text-[11px] font-black uppercase tracking-[0.2em] transition-all cursor-pointer ${textColor} ${billing === 'yearly' ? 'text-[#afff00]' : 'opacity-40 hover:opacity-100'}`}
                     >
                         Yearly
                     </button>
@@ -255,22 +268,22 @@ const LocalPricingBento = () => {
             <div className="absolute inset-0 pointer-events-none overflow-hidden h-full w-full">
                 <motion.div
                     animate={{
-                        opacity: selectedIdx !== null ? 0.4 : 0.15,
+                        opacity: selectedIdx !== null ? 0.1 : 0.05,
                         scale: selectedIdx !== null ? 1.5 : 1,
                         background: selectedIdx === 1
-                            ? 'radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 70%)'
+                            ? 'radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%)'
                             : selectedIdx === 2
-                                ? 'radial-gradient(circle, rgba(251,191,36,0.3) 0%, transparent 70%)'
-                                : 'radial-gradient(circle, rgba(16,185,129,0.15) 0%, transparent 70%)'
+                                ? 'radial-gradient(circle, rgba(251,191,36,0.1) 0%, transparent 70%)'
+                                : 'radial-gradient(circle, rgba(16,185,129,0.05) 0%, transparent 70%)'
                     }}
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[1000px] z-0 blur-[100px]"
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[1000px] z-0 blur-[120px]"
                 />
                 {/* Technical Blueprint Grid Pattern (Reactive) */}
                 <motion.div
                     animate={{
-                        opacity: selectedIdx === 1 ? 0.08 : 0.04,
-                        backgroundImage: selectedIdx === 1
-                            ? `linear-gradient(#fff 1.5px, transparent 1.5px), linear-gradient(90deg, #fff 1.5px, transparent 1.5px)`
+                        opacity: selectedIdx === 1 ? 0.04 : 0.02,
+                        backgroundImage: (selectedIdx === 1 || selectedIdx === null)
+                            ? `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`
                             : `linear-gradient(#000 1.5px, transparent 1.5px), linear-gradient(90deg, #000 1.5px, transparent 1.5px)`
                     }}
                     className="absolute inset-0 z-0"
@@ -288,10 +301,10 @@ const LocalPricingBento = () => {
                         key={i}
                         initial={{ opacity: 0 }}
                         animate={{
-                            opacity: selectedIdx === 1 ? 0.12 : 0.08,
+                            opacity: (selectedIdx === 1 || selectedIdx === null) ? 0.08 : 0.08,
                             y: [0, -40, 0],
                             rotate: asset.rotate,
-                            color: selectedIdx === 1 ? '#ffffff' : '#000000'
+                            color: (selectedIdx === 1 || selectedIdx === null) ? '#ffffff' : '#000000'
                         }}
                         transition={{
                             y: { duration: 8 + i * 2, repeat: Infinity, ease: "easeInOut", delay: asset.delay },
@@ -321,9 +334,9 @@ const LocalPricingBento = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                className={`relative max-w-full mx-auto z-10 mt-4 outline-none ${isMobile
-                    ? `w-[360px] ${selectedIdx !== null ? 'h-[460px]' : 'h-[380px]'} scale-[0.90] origin-top transition-all duration-300`
-                    : 'w-[840px] h-[640px] scale-[0.60] sm:scale-[0.80] md:scale-[0.90] lg:scale-100 origin-top lg:origin-center md:mt-2'
+                className={`relative max-w-full mx-auto z-10 mt-2 md:mt-4 outline-none ${isMobile
+                    ? `w-[360px] ${selectedIdx !== null ? 'h-[420px]' : 'h-[380px]'} origin-top transition-all duration-300`
+                    : 'w-[860px] h-[640px] scale-[0.82] lg:scale-100 origin-center'
                     }`}
             >
                 {TIERS.map((tier, idx) => {
@@ -335,16 +348,16 @@ const LocalPricingBento = () => {
                     let unselectedHeight = config.width;
 
                     if (isMobile) {
-                        unselectedHeight = 160;
-                        if (idx === 0) { currentWidth = 160; leftPos = 10; currentTop = 100; }
-                        else if (idx === 1) { currentWidth = 160; leftPos = 180; currentTop = 0; }
-                        else if (idx === 2) { currentWidth = 160; leftPos = 180; currentTop = 170; }
-                        if (isSelected) { currentWidth = 340; leftPos = 10; currentTop = -20; }
+                        unselectedHeight = 150;
+                        if (idx === 0) { currentWidth = 150; leftPos = 10; currentTop = 135; }
+                        else if (idx === 1) { currentWidth = 150; leftPos = 175; currentTop = 35; }
+                        else if (idx === 2) { currentWidth = 150; leftPos = 175; currentTop = 200; }
+                        if (isSelected) { currentWidth = 325; leftPos = 10; currentTop = 15; }
                     } else if (isSelected) {
+                        // Hero Snap Centering (Desktop)
                         currentWidth = config.expandedWidth;
-                        if (config.fixedCorner === "TR") {
-                            leftPos = config.left - (config.expandedWidth - config.width);
-                        }
+                        leftPos = (860 - currentWidth) / 2;
+                        currentTop = 20;
                     }
 
                     return (
@@ -356,9 +369,9 @@ const LocalPricingBento = () => {
                                 left: leftPos,
                                 top: currentTop,
                                 zIndex: isSelected ? 50 : 10,
-                                height: isSelected ? (isMobile ? 460 : 420) : unselectedHeight,
+                                height: isSelected ? (isMobile ? 400 : 420) : unselectedHeight,
                                 backgroundColor: isSelected ? config.activeBg : 'var(--arc-cream-alt)',
-                                borderColor: isSelected ? (config.tier === 'Pro' ? '#fff' : '#000') : config.activeBg
+                                borderColor: isSelected ? (config.tier === 'Pro' ? '#afff00' : '#000') : config.activeBg
                             }}
                             transition={{ type: "spring", stiffness: 300, damping: isMobile ? 25 : 30 }}
                             onClick={(e) => handleCardClick(e, idx)}
@@ -393,7 +406,7 @@ const LocalPricingBento = () => {
                                         ${config.tier === 'Pro' ? 'border-white text-white' : 'border-black text-black'}`}>
                                                     Fee
                                                 </div>
-                                                <span className={`text-4xl font-bold italic tracking-tighter ${config.tier === 'Pro' ? 'text-white' : 'text-black'}`} style={comicFont}>
+                                                <span className={`text-2xl md:text-4xl font-bold italic tracking-tighter ${config.tier === 'Pro' ? 'text-white' : 'text-black'}`} style={comicFont}>
                                                     {config.fee}
                                                 </span>
                                             </div>
@@ -430,11 +443,11 @@ const LocalPricingBento = () => {
 
                             <div className="flex justify-between items-end pointer-events-none">
                                 <div className="flex flex-col">
-                                    <motion.h3 layout className={`${isSelected ? 'text-6xl' : 'text-xl'} font-bold tracking-tighter ${isSelected ? config.activeText : 'text-black'} leading-none mb-2`} style={comicFont}>
+                                    <motion.h3 layout className={`${isSelected ? 'text-6xl' : 'text-3xl'} font-bold tracking-tighter ${isSelected ? config.activeText : 'text-black'} leading-none mb-2`} style={comicFont}>
                                         {tier.tier}.
                                     </motion.h3>
                                     <div className="flex items-baseline gap-2">
-                                        <span className={`${isSelected ? 'text-4xl md:text-5xl' : 'text-xl'} font-bold tracking-tight ${isSelected ? config.activeText : 'text-black'} italic transition-all`} style={comicFont}>
+                                        <span className={`${isSelected ? 'text-4xl md:text-5xl' : 'text-2xl'} font-bold tracking-tight ${isSelected ? config.activeText : 'text-black'} italic transition-all`} style={comicFont}>
                                             ₹{isSelected ? (billing === 'monthly' ? config.priceMonthly : billing === '6month' ? config.price6Month : config.priceYearly) : config.priceMonthly}
                                         </span>
                                     </div>
@@ -444,7 +457,7 @@ const LocalPricingBento = () => {
                                     {isSelected && (
                                         <motion.div
                                             initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.5 }}
-                                            className={`w-20 h-20 rounded-full flex items-center justify-center p-4 shadow-xl pointer-events-auto cursor-pointer hover:scale-110 active:scale-95 transition-all ${config.tier === 'Pro' ? 'bg-white text-[#3139fb]' : 'bg-black text-white'}`}
+                                            className={`w-20 h-20 rounded-full flex items-center justify-center p-4 shadow-xl pointer-events-auto cursor-pointer hover:scale-110 active:scale-95 transition-all ${config.tier === 'Pro' ? 'bg-white text-black' : 'bg-black text-white'}`}
                                         >
                                             <ArrowRight className="w-10 h-10" />
                                         </motion.div>
@@ -462,23 +475,25 @@ const LocalPricingBento = () => {
 const Pricing = () => {
     const [openFaq, setOpenFaq] = useState(null);
     const containerRef = useRef(null);
+    const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
-    const { scrollYProgress } = useScroll({
-        target: containerRef,
-        offset: ["start start", "end end"]
-    });
-
-    const heroScale = useTransform(scrollYProgress, [0, 0.2], [1, 0.95]);
-    const heroOpacity = useTransform(scrollYProgress, [0, 0.15], [1, 0]);
+    const handleMouseMove = (e) => {
+        if (!containerRef.current) return;
+        const rect = containerRef.current.getBoundingClientRect();
+        setMousePos({
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top
+        });
+    };
 
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
 
     const faqs = [
-        { q: "Revenue Splits?", a: "Droppay takes zero platform fees. Only standard 1-3.5% transaction fees apply depending on your tier. We settle directly to your connected bank/wallet." },
-        { q: "Can I Scale Up?", a: "Upgrade anytime. Our edge network automatically adjusts your priority routing to ensure zero latency as your audience grows." },
-        { q: "What about VAT?", a: "Tax handling is automated. We calculate region-specific obligations at checkout so you don't have to manage international compliance." }
+        { q: "ARE THERE ANY HIDDEN PAYOUT FEES?", a: "Zero. You pay your flat monthly tier, and standard payment processor fees (like Razorpay). Drope takes absolutely nothing else from your tips." },
+        { q: "DO MY VIEWERS NEED A DROPE ACCOUNT?", a: "Never. Your viewers can tip instantly using Apple Pay, Google Pay, or any major card directly from your stream page in seconds." },
+        { q: "HOW DO YOU HANDLE CHARGEBACKS?", a: "We utilize bank-grade 3D Secure routing to block fraudulent tips before they hit your screen, keeping your revenue protected." }
     ];
 
     return (
@@ -486,30 +501,35 @@ const Pricing = () => {
             ref={containerRef}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="bg-[#0b2e2b] text-[#1a1a2e] selection:bg-[#afff00] selection:text-black relative"
+            onMouseMove={handleMouseMove}
+            className="bg-[#0A0A0A] text-[#1a1a2e] selection:bg-[#afff00] selection:text-black relative h-screen overflow-y-auto home-scroll-container"
             style={{ fontFamily: 'Inter, sans-serif' }}
         >
-            <HomeNavbar />
 
-            {/* --- HERO: STICKY TOP LAYER --- */}
-            <section className="sticky top-[var(--nav-height)] h-screen-fit bg-[#f2f0e8] z-30 flex flex-col justify-center px-6 md:px-12 lg:px-16 overflow-hidden">
-                
-                {/* --- TECHNICAL BACKGROUND FX layer --- */}
-                <div className="absolute inset-0 pointer-events-none opacity-[0.03]">
-                    <div className="absolute inset-0 bg-[radial-gradient(#000_1px,transparent_1px)] [background-size:20px_20px]" />
-                    <div className="absolute top-0 left-[10%] w-px h-full bg-black" />
-                    <div className="absolute top-[20%] left-0 w-full h-px bg-black" />
+            {/* --- HERO: DISCRETE SNAP LAYER --- */}
+            <section data-navbar-theme="dark" className="min-h-[100dvh] md:h-screen snap-start bg-[#0A0A0A] z-30 flex flex-col justify-center px-6 md:px-12 lg:px-16 overflow-hidden relative group">
+
+                {/* --- Nitrogen Spotlight (Reactive Layer) --- */}
+                <motion.div
+                    className="absolute inset-0 pointer-events-none z-0 opacity-25"
+                    animate={{
+                        background: `radial-gradient(circle at ${mousePos.x}px ${mousePos.y}px, rgba(175,255,0,0.15) 0%, transparent 40%)`
+                    }}
+                />
+
+                {/* --- NEON EDITION BACKGROUND FX layer --- */}
+                <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                    {/* Pulsing Nitrogen Grid */}
+                    <motion.div
+                        animate={{ opacity: [0.03, 0.08, 0.03] }}
+                        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                        className="absolute inset-0 bg-[radial-gradient(#afff00_1px,transparent_1px)] [background-size:24px_24px]"
+                    />
+                    <div className="absolute top-0 left-[15%] w-px h-full bg-white/5" />
+                    <div className="absolute top-[25%] left-0 w-full h-px bg-white/5" />
                 </div>
 
-                {/* --- CORNER TECHNICAL STAMPS --- */}
-                <div className="absolute top-12 left-12 hidden lg:block pointer-events-none">
-                    <span className="text-[10px] font-black uppercase tracking-[0.5em] opacity-20">DR / 8.2.1-75</span>
-                </div>
-                <div className="absolute bottom-12 right-12 hidden lg:block pointer-events-none">
-                    <span className="text-[10px] font-black uppercase tracking-[0.5em] opacity-20">SETTLEMENT_LAYER_V.2</span>
-                </div>
-
-                <motion.div style={{ scale: heroScale, opacity: heroOpacity }} className="max-w-[90vw] mx-auto text-center md:text-left relative z-10">
+                <motion.div className="max-w-[1240px] mx-auto text-center md:text-left relative z-10 w-full">
                     <motion.div
                         initial={{ opacity: 0, x: -40 }}
                         animate={{ opacity: 1, x: 0 }}
@@ -517,12 +537,12 @@ const Pricing = () => {
                         className="cursor-default"
                     >
                         <StaggerText
-                            text="SIMPLE."
-                            className="text-[15vw] md:text-[12vw] font-black tracking-tighter uppercase leading-[0.8] mb-4"
+                            text="SIMPLE"
+                            className="text-[12vw] md:text-[8vw] font-black tracking-tighter uppercase leading-[0.75] mb-2 text-white justify-center md:justify-start"
                         />
                     </motion.div>
-                    
-                    <div className="flex flex-col md:flex-row items-baseline gap-4 mb-16">
+
+                    <div className="flex flex-col md:flex-row items-center md:items-baseline gap-4 mb-16 relative">
                         <motion.div
                             initial={{ opacity: 0, x: -40 }}
                             animate={{ opacity: 1, x: 0 }}
@@ -530,69 +550,76 @@ const Pricing = () => {
                             className="cursor-default"
                         >
                             <StaggerText
-                                text="TRANSPARENT."
-                                className="text-[13vw] md:text-[10.5vw] font-black tracking-tighter uppercase leading-[0.8] whitespace-nowrap"
+                                text="TRANSPARENT"
+                                className="text-[10vw] md:text-[7.2vw] font-black tracking-tighter uppercase leading-[0.8] whitespace-nowrap text-[#afff00] justify-center md:justify-start w-full"
                             />
                         </motion.div>
-                        <motion.span 
+                        <motion.span
                             initial={{ opacity: 0, scale: 0.8, rotate: -5 }}
                             animate={{ opacity: 1, scale: 1, rotate: 0 }}
                             transition={{ duration: 1, delay: 0.6, type: "spring" }}
-                            className="text-4xl md:text-6xl font-serif italic text-[#10b981] tracking-tight"
+                            className="text-4xl md:text-6xl font-black italic text-white/10 tracking-tighter uppercase w-full text-center md:text-left"
                         >
-                            Choice.
+                            Leverage
                         </motion.span>
                     </div>
 
-                    <div className="flex flex-col md:flex-row justify-between items-end gap-12">
-                        <motion.p 
+                    <div className="flex flex-col md:flex-row justify-between items-center md:items-end gap-12 relative">
+                        <motion.p
                             initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 0.7, y: 0 }}
+                            animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 1, delay: 0.8 }}
-                            className="max-w-xl text-xl md:text-2xl font-medium leading-tight tracking-[-0.02em]"
+                            className="max-w-xl text-xl md:text-2xl font-black leading-[0.9] tracking-tighter uppercase text-white/60 text-center md:text-left"
                         >
-                            Professional infrastructure for digital architects.
+                            High-Performance infrastructure for digital architects.
                             Choose your settlement layer and scale with precision.
                         </motion.p>
-                        
-                        <motion.div 
+
+                        <motion.div
                             initial={{ opacity: 0, scale: 0.5 }}
                             animate={{ opacity: 1, scale: 1 }}
+                            whileHover={{ scale: 1.1, rotate: 5 }}
                             transition={{ duration: 1, delay: 1 }}
-                            className="hidden md:block"
+                            className="hidden md:block group cursor-pointer relative"
                         >
-                            <div className="w-24 h-24 rounded-full border-2 border-dashed border-black/10 flex items-center justify-center animate-spin-slow">
-                                <span className="text-[10px] font-black text-black/20 uppercase tracking-widest px-4 text-center">Scroll To Discover</span>
+                            <div className="w-24 h-24 rounded-full border-2 border-dashed border-[#afff00]/20 flex flex-col items-center justify-center animate-spin-slow group-hover:border-[#afff00] transition-colors bg-white/5 backdrop-blur-sm">
+                                <span className="text-[9px] font-black text-[#afff00] uppercase tracking-widest px-4 text-center">NAVIGATE_VAULT</span>
                             </div>
                         </motion.div>
                     </div>
                 </motion.div>
             </section>
 
-            {/* --- BENTO: THE REVEALED LAYER --- */}
-            <section className="relative z-10 pt-32 pb-10 bg-[#065f46]">
-                <div className="text-center mb-10">
-                    <h2 className="text-white text-[8vw] md:text-[4vw] font-black tracking-tighter uppercase leading-[0.9]">
-                        Choose your Subscription
-                    </h2>
-                </div>
+            {/* --- SECTION 02: THE INTERACTIVE REVENUE MATRIX --- */}
+            <div className="snap-start min-h-screen">
+                <RevenueMatrix scrollContainerRef={containerRef} />
+            </div>
 
-                <div className="relative z-10 w-full overflow-hidden">
-                    <LocalPricingBento />
-                </div>
+            {/* --- BENTO: THE UNIFIED PURCHASING PANEL --- */}
+            <section data-navbar-theme="dark" className="min-h-[100dvh] md:h-screen snap-start relative z-10 bg-[#0A0A0A]">
+                <LocalPricingBento />
             </section>
 
 
-            {/* --- FAQ: TORN REVEAL BACK TO LIGHT --- */}
-            <section className="relative z-20 py-20 bg-[#f2f0e8] px-6 md:px-12 lg:px-16 overflow-hidden">
+            {/* --- FAQ: HOLOGRAPHIC VAULT --- */}
+            <section data-navbar-theme="dark" className="min-h-[100dvh] md:h-screen snap-start relative z-20 pt-20 pb-10 md:py-20 bg-[#0A0A0A] px-6 md:px-12 lg:px-16 overflow-hidden flex flex-col justify-center">
 
-                <div className="max-w-4xl mx-auto">
-                    <div className="flex items-center gap-8 mb-32">
-                        <h2 className="text-5xl md:text-7xl font-black tracking-tighter uppercase">Clarification.</h2>
-                        <div className="flex-1 h-px bg-black/10" />
+                {/* --- Background HUD Pattern --- */}
+                <div className="absolute inset-0 pointer-events-none opacity-20">
+                    <div className="absolute top-0 right-0 w-px h-full bg-[#afff00]/5" />
+                    <div className="absolute bottom-1/4 left-0 w-full h-px bg-[#afff00]/5" />
+                </div>
+
+                <div className="max-w-4xl mx-auto w-full relative z-10">
+                    <div className="flex flex-col md:flex-row items-center gap-8 mb-12 md:mb-24">
+                        <h2 className="text-white text-5xl md:text-7xl font-black tracking-tighter uppercase leading-[0.8] text-center md:text-left">
+                            No BS. <br />
+                            <span className="text-[#afff00] italic font-serif normal-case tracking-tight">Just Answers.</span>
+                        </h2>
+                        <div className="flex-1 h-[1px] bg-white/10 hidden md:block" />
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="space-y-0 md:space-y-2">
                         {faqs.map((faq, i) => (
                             <FAQItem
                                 key={i}
@@ -600,14 +627,15 @@ const Pricing = () => {
                                 answer={faq.a}
                                 isOpen={openFaq === i}
                                 onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                                theme="dark"
                             />
                         ))}
                     </div>
                 </div>
+            </section>
 
-                <div className="w-full mt-32">
-                    <PricingFooter />
-                </div>
+            <section className="snap-start bg-[#f2f0e8]">
+                <PricingFooter />
             </section>
         </motion.main>
     );

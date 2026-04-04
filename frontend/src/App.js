@@ -14,6 +14,9 @@ import MaintenanceMode from './pages/system/Maintenance';
 
 // ─── EAGER IMPORTS (critical path — must load instantly) ──────────────────────
 import LiveThemeEngine from './components/dashboard/ThemeEngine';
+import { DashboardPreloader } from './components/ui/DashboardPreloader';
+import { Navbar } from './components/layout/Navbar';
+import Home from './pages/public/Home';
 
 // 🚨 GLOBAL SAFETY: AUTO-RELOAD ON CHUNK LOAD FAILURE (Fixes Vercel/Vite code-split crashes)
 window.addEventListener('error', (e) => {
@@ -24,7 +27,6 @@ window.addEventListener('error', (e) => {
 }, true);
 
 // ─── LAZY IMPORTS (code-split — only load when navigated to) ─────────────────
-const Home = lazy(() => import('./pages/public/Home'));
 const Login = lazy(() => import('./pages/public/Login'));
 const Signup = lazy(() => import('./pages/public/Signup'));
 const AdminLogin = lazy(() => import('./pages/admin/Login'));
@@ -105,75 +107,16 @@ class ErrorBoundary extends React.Component {
     return this.props.children;
   }
 }
-// ─── MINIMAL BOOT SEQUENCE — Reusing Suspense fallback for seamless loading ───
-const BootSequence = ({ status = "Initializing Infrastructure" }) => (
-  <div className="fixed inset-0 bg-[#f5f4e2] flex flex-col items-center justify-center z-[9999] overflow-hidden font-sans">
-    {/* Blueprint Background */}
-    <div className="absolute inset-0 blueprint-grid opacity-[0.03]" />
-    <div className="scanning-line opacity-10" />
-    <div className="loader-scanline" />
 
-    <div className="relative flex flex-col items-center">
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-        className="text-7xl md:text-9xl font-black tracking-tighter text-[#111111] mb-12 flex items-baseline gap-1"
-        style={{ fontFamily: 'Georgia, serif' }}
-      >
-        drope<span className="text-emerald-500 text-6xl">.</span>
-      </motion.div>
-      
-      <div className="w-80 max-w-[85vw] space-y-4">
-        <div className="h-[2px] w-full bg-black/5 relative overflow-hidden">
-          <motion.div 
-            initial={{ left: "-100%" }}
-            animate={{ left: "100%" }}
-            transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
-            className="absolute top-0 w-1/2 h-full bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.5)]"
-          />
-        </div>
-        
-        <div className="flex justify-between items-center px-1">
-          <div className="flex items-center gap-3">
-             <div className="w-1.5 h-1.5 bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)] animate-pulse" />
-             <motion.span 
-               animate={{ opacity: [0.4, 1, 0.4] }} 
-               transition={{ repeat: Infinity, duration: 2 }}
-               className="text-[10px] font-black uppercase tracking-[0.4em] text-[#111111]"
-             >
-               {status}
-             </motion.span>
-          </div>
-          <span className="text-[9px] font-mono font-black text-black/20 tracking-wider">v4.1.26_STABLE</span>
-        </div>
-      </div>
-    </div>
 
-    {/* Technical Matrix Info */}
-    <div className="absolute top-12 left-12 flex flex-col gap-4">
-      <div className="text-[8px] font-black uppercase tracking-[0.5em] text-black/20 vertical-rl">
-        NEXUS_CORE_AUTHORIZATION
-      </div>
-      <div className="w-px h-12 bg-black/10 ml-1" />
-    </div>
-
-    <div className="absolute bottom-12 right-12 flex flex-col items-end gap-3 font-black uppercase">
-       <div className="flex gap-6 text-[8px] tracking-[0.4em] text-black/20">
-         <span>UPLINK_PENDING</span>
-         <span>AUTH_SYNC_04</span>
-       </div>
-       <div className="px-5 py-2 border border-black/5 bg-black/[0.02] text-[9px] tracking-[0.5em] text-black/30">
-         SECURE_ENCRYPTION_LAYER_ACTIVE
-       </div>
+// ─── SIMPLE LOADER — Minimal fallback for admin gate & lazy route loads ───────
+const SimpleLoader = () => (
+  <div className="fixed inset-0 bg-[#050505] flex items-center justify-center z-[9999]">
+    <div className="flex items-baseline gap-[2px]" style={{ fontFamily: 'Georgia, serif', fontSize: '2rem', fontWeight: 900, letterSpacing: '-0.04em', color: '#ffffff', opacity: 0.15 }}>
+      drope
     </div>
   </div>
 );
-
-
-
-// --- DYNAMIC INFRASTRUCTURE (Fixes Mobile Persistence) ---
-// API_BASE is now handled by the centralized axios configuration in src/api/axios.js
 
 // --- PROFESSIONAL GATE: SECURE UPLINK ---
 
@@ -182,6 +125,10 @@ const MissionGate = ({ children }) => {
   const token = localStorage.getItem('token');
   const location = useLocation();
   const navigate = useNavigate();
+  // Ref: always holds the latest pathname without making it a reactive dep.
+  // This lets checkAccess read the current path without re-running on every section switch.
+  const pathnameRef = React.useRef(location.pathname);
+  pathnameRef.current = location.pathname; // update synchronously on every render
 
   useEffect(() => {
     const checkAccess = async () => {
@@ -202,8 +149,8 @@ const MissionGate = ({ children }) => {
         syncTheme(user);
 
         // 2. SUBSCRIPTION HARD-LOCK (SENSE CHECK)
-        // We only force a redirect if they are trying to access something OTHER than dashboard or subscription
-        const isEssentialPath = location.pathname === '/subscription' || location.pathname === '/dashboard';
+        // Read pathname from ref — avoids making location.pathname a reactive dependency
+        const isEssentialPath = pathnameRef.current === '/subscription' || pathnameRef.current === '/dashboard';
         
         if (user.subscription?.status === 'inactive' && !isEssentialPath) {
           navigate('/subscription');
@@ -220,9 +167,9 @@ const MissionGate = ({ children }) => {
       }
     };
     checkAccess();
-  }, [token, navigate, location.pathname]);
+  }, [token, navigate]); // pathnameRef is a ref — not reactive, no ESLint warning
 
-  if (status === 'loading') return <BootSequence />;
+  if (status === 'loading') return <DashboardPreloader />;
   if (status === 'unauthorized') return <Navigate to="/login" state={{ from: location }} replace />;
   return children;
 };
@@ -257,7 +204,7 @@ const MasterGate = ({ children }) => {
     checkAdminAccess();
   }, [token]);
 
-  if (status === 'loading') return <BootSequence status="Verifying Clearance" />;
+  if (status === 'loading') return <SimpleLoader />;
   if (status === 'unauthorized') return <Navigate to="/admin/login" state={{ from: location }} replace />;
   return children;
 };
@@ -269,7 +216,7 @@ const AnimatedRoutes = () => {
   return (
     // Use a minimal fallback — BootSequence as route fallback caused full loading screen
     // on every lazy page navigation (Dashboard, Admin, etc.)
-    <Suspense fallback={<BootSequence status="Synchronizing Network" />}>
+    <Suspense fallback={<SimpleLoader />}>
 
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname.split('/')[1] || 'root'}>
@@ -377,13 +324,25 @@ function AppContent() {
     return () => window.removeEventListener('nexus-theme-change', handleThemeSync);
   }, [nexusTheme]);
 
+  // Logic to hide Navbar on specific flows (Auth, Dashboard, Admin, Subscription & Overlays)
+  const hideNavbarPaths = ['/login', '/signup', '/forgot-password', '/reset-password', '/dashboard', '/admin', '/subscription'];
+  const shouldHideNavbar = hideNavbarPaths.some(path => location.pathname.startsWith(path));
+
+  // --- GLOBAL PRELOADER SYNCHRONIZATION ---
+  const [isPreloading, setIsPreloading] = useState(location.pathname === '/');
+  useEffect(() => {
+    const handleBootComplete = () => setIsPreloading(false);
+    window.addEventListener('drope-boot-complete', handleBootComplete);
+    return () => window.removeEventListener('drope-boot-complete', handleBootComplete);
+  }, []);
+
   return (
     <div className={`min-h-screen relative overflow-hidden text-[var(--nexus-text)] selection:bg-emerald-500/30 bg-transparent`}>
       {isPaused && !location.pathname.startsWith('/admin') && <MaintenanceMode />}
 
       {!isOverlay && (
         <Helmet>
-          <title>Drope | The Ultimate Creator Platform</title>
+          <title>DROPE | Supercharge Your Stream</title>
           <meta name="description" content="Empower your stream with custom 3D alerts and optimized creator revenue." />
           <meta name="theme-color" content="#10B981" />
           <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -392,6 +351,9 @@ function AppContent() {
 
       {/* GLOBAL LIVE THEME ENGINE */}
       {!isOverlay && <LiveThemeEngine currentTheme={nexusTheme} />}
+
+      {/* GLOBAL NAVIGATION CONTROL */}
+      {!isOverlay && !shouldHideNavbar && !isPreloading && <Navbar />}
 
       {/* MAIN APPLICATION CONTENT */}
       <div className="relative z-10 min-h-screen">

@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Target, Trophy, Sparkles, Crosshair, Crown, Star, Flame, Leaf, Activity, Skull } from 'lucide-react';
 
-const CyberGoalBar = ({ goal, tier, runnerUrl, percentage, isComplete, goalStylePreference = 'modern' }) => {
+const CyberGoalBar = ({ goal, tier, runnerUrl, percentage, isComplete, goalStylePreference = 'modern', isSandbox = false }) => {
 
   // ==========================================
   // 1. PREMIUM STYLE: 3D GLASS JAR
@@ -49,7 +49,7 @@ const CyberGoalBar = ({ goal, tier, runnerUrl, percentage, isComplete, goalStyle
     const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
     return (
-      <div className="relative w-full max-w-sm mx-auto py-4 flex items-center justify-center gap-6 bg-[#050505]/90 p-6 rounded-[3rem] border-2 border-cyan-500/30 shadow-[0_0_40px_rgba(6,182,212,0.15)] backdrop-blur-2xl">
+      <div className={`relative w-full max-w-sm mx-auto py-4 flex items-center justify-center gap-6 p-6 rounded-[3rem] border-2 border-cyan-500/30 backdrop-blur-2xl ${isSandbox ? 'bg-transparent shadow-none' : 'bg-[#050505]/90 shadow-[0_0_40px_rgba(6,182,212,0.15)]'}`}>
         <div className="relative w-32 h-32 shrink-0 flex items-center justify-center">
           <svg className="transform -rotate-90 w-32 h-32 absolute inset-0">
             <circle cx="64" cy="64" r={radius} stroke="rgba(6, 182, 212, 0.1)" strokeWidth="8" fill="none" />
@@ -110,7 +110,7 @@ const CyberGoalBar = ({ goal, tier, runnerUrl, percentage, isComplete, goalStyle
 
     return (
       <motion.div animate={!isComplete ? { x: [-2, 2, -2, 2, 0], y: [-1, 1, -1, 1, 0] } : {}} transition={{ repeat: Infinity, duration: 3, ease: "linear" }} className="relative w-full max-w-[760px] mx-auto py-6">
-        <div className="bg-[#1a0505] p-5 border-[6px] border-[#3f0f0f] shadow-[8px_8px_0_rgba(0,0,0,1)] relative overflow-hidden">
+        <div className={`p-5 border-[6px] border-[#3f0f0f] relative overflow-hidden ${isSandbox ? 'bg-transparent' : 'bg-[#1a0505] shadow-[8px_8px_0_rgba(0,0,0,1)]'}`}>
           <div className="flex justify-between items-end mb-3 relative z-10">
             <div className="flex items-center gap-3">
               <Skull className={`w-8 h-8 ${isComplete ? 'text-slate-700' : 'text-red-500 animate-pulse drop-shadow-[0_0_10px_red]'}`} />

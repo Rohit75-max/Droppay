@@ -4,7 +4,7 @@ import axios from '../../api/axios';
 import { useLiveSocket } from '../../hooks/useLiveSocket';
 import {
   Zap,
-  ShieldAlert, Activity, X, Play, Loader2, IndianRupee,
+  ShieldAlert, X, Play, Loader2, IndianRupee,
   Clock, ShieldCheck, ArrowUpRight,
   History, AlertCircle, Trash2, ArrowRight, ArrowLeft
 } from 'lucide-react';
@@ -129,21 +129,7 @@ const Dashboard = () => {
     localStorage.setItem('dropeActiveSection', activeSection);
   }, [activeSection]);
 
-  useEffect(() => {
-    localStorage.setItem('dropeTheme', theme);
-    document.documentElement.classList.remove('dark', 'light');
-    document.documentElement.classList.add(theme);
-
-    // Apply Nexus Theme
-    const body = document.body;
-    body.className = body.className.replace(/theme-\S+/g, '').trim();
-    if (nexusTheme !== 'void') {
-      body.classList.add(`theme-${nexusTheme}`);
-    }
-
-    // Sync with global engine in App.js
-    window.dispatchEvent(new CustomEvent('nexus-theme-change', { detail: { theme: nexusTheme } }));
-  }, [theme, nexusTheme]);
+  // Removed duplicate theme DOM manipulation. Let ThemeContext handle this.
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -507,49 +493,11 @@ const Dashboard = () => {
     return Math.min((user.goalSettings.currentProgress / user.goalSettings.targetAmount) * 100, 100);
   };
 
-  if (loading && !user) return (
-    <div className="h-screen bg-[#f5f4e2] flex flex-col items-center justify-center relative overflow-hidden font-sans">
-      <div className="absolute inset-0 blueprint-grid opacity-[0.03]" />
-      <div className="scanning-line opacity-10" />
-      <div className="loader-scanline" />
 
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="relative z-10 flex flex-col items-center"
-      >
-        <div className="mb-8 relative">
-           <div className="w-16 h-16 border-2 border-black/5 rounded-full flex items-center justify-center">
-             <Loader2 className="w-8 h-8 text-[#111111] animate-spin opacity-20" />
-           </div>
-           <Activity className="w-6 h-6 text-emerald-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 shadow-[0_0_15px_rgba(16,185,129,0.3)]" />
-        </div>
-
-        <div className="flex flex-col items-center gap-2">
-          <span className="text-[10px] font-black uppercase tracking-[0.6em] text-[#111111] animate-pulse">
-            Synchronizing_Nexus_Dashboard
-          </span>
-          <div className="flex gap-1">
-            {[0, 1, 2].map(i => (
-              <motion.div 
-                key={i}
-                animate={{ opacity: [0.2, 1, 0.2] }}
-                transition={{ repeat: Infinity, duration: 1, delay: i * 0.2 }}
-                className="w-1 h-1 bg-emerald-500"
-              />
-            ))}
-          </div>
-        </div>
-      </motion.div>
-
-      <div className="absolute bottom-10 left-10 text-[8px] font-black uppercase tracking-[0.4em] text-black/20">
-        DASHBOARD_LIVE_RELAY_v4
-      </div>
-      <div className="absolute top-10 right-10 text-[8px] font-black uppercase tracking-[0.4em] text-black/20">
-        SECURE_UPLINK_ESTABLISHED
-      </div>
-    </div>
-  );
+  // MissionGate in App.js already verified auth and showed the BootSequence loader.
+  // This guard is kept as a silent null to prevent a flash of broken UI during
+  // the brief moment between mount and first data fetch — no second loader needed.
+  if (loading && !user) return null;
 
   if (error) return (
     <div className="h-screen bg-[var(--nexus-bg)] flex flex-col items-center justify-center p-6 text-center">

@@ -14,8 +14,16 @@ export const syncTheme = (userData) => {
     const lightThemes = ['aero-light', 'alabaster-pulse', 'kawaii', 'live_kawaii'];
     const recommendedMode = lightThemes.includes(newTheme) ? 'light' : 'dark';
 
-    // SOURCE OF TRUTH: Prioritize manual toggle IF the user has explicitly set it
-    const newMode = (isExplicitlySet && storedMode) ? storedMode : recommendedMode;
+    // SOURCE OF TRUTH: 
+    // 1. If explicit explicitly toggled on this browser (localStorage)
+    // 2. Else use the DB's true state (userData.nexusThemeMode)
+    // 3. Fallback to recommended
+    let newMode = recommendedMode;
+    if (isExplicitlySet && storedMode) {
+        newMode = storedMode;
+    } else if (userData.nexusThemeMode) {
+        newMode = userData.nexusThemeMode;
+    }
 
     // 1. Persist to Local Storage
     localStorage.setItem('nexusTheme', newTheme);

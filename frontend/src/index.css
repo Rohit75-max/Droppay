@@ -2001,3 +2001,54 @@ html:has(.overlay-content) {
   overscroll-behavior-y: none;
 }
 
+/* Feature Pillars: Snap on all screens, scrolls on mobile, locks on desktop */
+.marketing-root .features-pillars-section {
+  width: 100%;
+  min-height: 100dvh;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  scroll-snap-align: start;   /* ← registers as snap point on mobile too */
+}
+
+@media (min-width: 768px) {
+  .marketing-root .features-pillars-section {
+    height: 100dvh;
+    min-height: unset;
+    scroll-snap-stop: always;
+    overflow: hidden;
+  }
+}
+
+/* --- SNAP OVERRIDES (FOR FEATURES & NARRATIVE FLOWS) --- */
+.no-snap-container {
+  scroll-snap-type: none !important;
+}
+
+.no-snap-section {
+  scroll-snap-align: none !important;
+  scroll-snap-stop: normal !important;
+}
+
+/* ── VOID CORE THEATER ── */
+/* Each panel inside the theater registers as its own snap stop */
+.void-core-theater {
+  display: contents; /* Transparent to the snap container — children snap directly */
+}
+
+.void-snap-panel {
+  height: 100dvh;
+  width: 100%;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: #000;
+  overflow: hidden;
+}
+
+.void-header-panel {
+  background: radial-gradient(ellipse 80% 50% at 50% 0%, #afff000a 0%, #000 70%);
+}
+

@@ -27,7 +27,7 @@ export const SimplePricingBento = () => {
   };
 
   // 3:4:5 ratio constants
-  const UNIT = 70;
+  const UNIT = 55;
   
   const boxConfigs = [
     { 
@@ -37,10 +37,10 @@ export const SimplePricingBento = () => {
       priceMonthly: 999,
       price6Month: 5095,
       priceYearly: 9590,
-      top: 180,
+      top: 120,
       left: 0,
       fixedCorner: "TL",
-      activeBg: "#e5e5e5",
+      activeBg: "#1e1e1e",
       activeText: "text-black",
       fee: "15%",
       commission: "2.0%",
@@ -61,7 +61,7 @@ export const SimplePricingBento = () => {
       priceMonthly: 1999,
       price6Month: 10195,
       priceYearly: 19190,
-      top: 40,
+      top: 20,
       left: 3 * UNIT,
       fixedCorner: "TL",
       activeBg: "#3139fb",
@@ -82,7 +82,7 @@ export const SimplePricingBento = () => {
       priceMonthly: 2999,
       price6Month: 15295,
       priceYearly: 28790,
-      top: 170,
+      top: 110,
       left: 7 * UNIT,
       fixedCorner: "TR",
       activeBg: "#fbbf24",
@@ -99,22 +99,14 @@ export const SimplePricingBento = () => {
     }
   ];
 
-  const getSectionBg = () => {
-    if (selectedIdx === null) return 'var(--arc-cream)';
-    if (selectedIdx === 1) return '#4a51fb'; // Dark Blue for section
-    if (selectedIdx === 2) return '#fef3c7'; // Light Gold for section
-    return boxConfigs[selectedIdx].activeBg;
-  };
-
-  const isDarkSection = selectedIdx === 1;
-  const textColor = isDarkSection ? 'text-white' : 'text-[#111111]';
+  const isDarkSection = true;
+  const textColor = 'text-white';
 
   return (
     <motion.section 
       id="pricing"
-      animate={{ backgroundColor: getSectionBg() }}
-      transition={{ duration: 0.8 }}
-      className="relative w-full h-full flex flex-col items-center overflow-hidden select-none transition-colors px-6 pt-[calc(var(--nav-height)+2rem)] pb-8"
+      style={{ backgroundColor: '#0A0A0A' }}
+      className="relative w-full h-full flex flex-col items-center overflow-hidden select-none transition-colors px-6 pt-[calc(var(--nav-height)+1rem)] pb-4 lg:min-h-screen lg:justify-center"
       onClick={() => setSelectedIdx(null)}
     >
       {/* Header Integrated for Full-Section Color Shift */}
@@ -125,34 +117,34 @@ export const SimplePricingBento = () => {
         transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
         className="max-w-[1280px] mx-auto text-center mb-8 relative z-20"
       >
-        <h2 className={`text-[clamp(2.5rem,6vw,5rem)] font-black mb-4 transition-colors duration-500 tracking-tighter uppercase leading-[0.9] ${textColor}`}>
+        <h2 className={`text-[clamp(2.2rem,5vw,4.5rem)] font-black mb-2 transition-colors duration-500 tracking-tighter uppercase leading-[0.9] text-white`}>
           Choose your <br className="md:hidden" />
-          <span className={`font-serif italic normal-case tracking-tight transition-colors duration-500 ${isDarkSection ? 'text-white/80' : 'text-[#10b981]'}`}>Subscription.</span>
+          <span className={`font-serif italic normal-case tracking-tight text-[#afff00]`}>Subscription.</span>
         </h2>
 
         {/* Minimalist Billing Toggle */}
-        <div className="mt-10 flex flex-wrap justify-center items-center gap-4 md:gap-8">
+        <div className="mt-6 flex flex-wrap justify-center items-center gap-4 md:gap-8">
            <button 
              onClick={(e) => { e.stopPropagation(); setBilling('monthly'); }}
-             className={`text-[10px] font-black uppercase tracking-widest transition-all ${textColor} ${billing === 'monthly' ? 'underline underline-offset-8 text-[#10b981]' : 'opacity-60 hover:opacity-100'}`}
+             className={`text-[10px] font-black uppercase tracking-widest transition-all ${textColor} ${billing === 'monthly' ? 'underline underline-offset-8 text-[#afff00]' : 'opacity-60 hover:opacity-100'}`}
            >
              Monthly
            </button>
            
-           <div className={`hidden md:block w-1 h-1 rounded-full ${isDarkSection ? 'bg-white/20' : 'bg-black/20'}`} />
+           <div className={`hidden md:block w-1 h-1 rounded-full bg-white/20`} />
            
            <button 
              onClick={(e) => { e.stopPropagation(); setBilling('6month'); }}
-             className={`text-[10px] font-black uppercase tracking-widest transition-all ${textColor} ${billing === '6month' ? 'underline underline-offset-8 text-[#10b981]' : 'opacity-60 hover:opacity-100'}`}
+             className={`text-[10px] font-black uppercase tracking-widest transition-all ${textColor} ${billing === '6month' ? 'underline underline-offset-8 text-[#afff00]' : 'opacity-60 hover:opacity-100'}`}
            >
              6 Months
            </button>
            
-           <div className={`hidden md:block w-1 h-1 rounded-full ${isDarkSection ? 'bg-white/20' : 'bg-black/20'}`} />
+           <div className={`hidden md:block w-1 h-1 rounded-full bg-white/20`} />
            
            <button 
              onClick={(e) => { e.stopPropagation(); setBilling('yearly'); }}
-             className={`text-[10px] font-black uppercase tracking-widest transition-all ${textColor} ${billing === 'yearly' ? 'underline underline-offset-8 text-[#10b981]' : 'opacity-60 hover:opacity-100'}`}
+             className={`text-[10px] font-black uppercase tracking-widest transition-all ${textColor} ${billing === 'yearly' ? 'underline underline-offset-8 text-[#afff00]' : 'opacity-60 hover:opacity-100'}`}
            >
              Yearly
            </button>
@@ -255,10 +247,10 @@ export const SimplePricingBento = () => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-100px" }}
         transition={{ duration: 1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-        className={`relative max-w-full mx-auto z-10 mt-4 outline-none ${
+        className={`relative max-w-full mx-auto z-10 mt-2 outline-none ${
           isMobile 
-            ? `w-[360px] ${selectedIdx !== null ? 'h-[460px]' : 'h-[380px]'} scale-[0.90] origin-top transition-all duration-300` 
-            : 'w-[840px] h-[640px] scale-[0.60] sm:scale-[0.80] md:scale-[0.90] lg:scale-100 origin-top lg:origin-center md:mt-2'
+            ? `w-[360px] ${selectedIdx !== null ? 'h-[420px]' : 'h-[340px]'} scale-[0.90] origin-top transition-all duration-300` 
+            : 'w-[750px] h-[580px] scale-[0.65] sm:scale-[0.85] md:scale-[0.95] lg:scale-100 origin-top xl:origin-center md:mt-0'
         }`}
       >
         {TIERS.map((tier, idx) => {
@@ -272,19 +264,19 @@ export const SimplePricingBento = () => {
 
           // Mobile Overrides for responsive interlocking grid shape
           if (isMobile) {
-            unselectedHeight = 160;
+            unselectedHeight = 140;
             if (idx === 0) { // Starter (Left)
-              currentWidth = 160; leftPos = 10; currentTop = 100;
+              currentWidth = 150; leftPos = 10; currentTop = 80;
             } else if (idx === 1) { // Pro (Top Right)
-              currentWidth = 160; leftPos = 180; currentTop = 0;
+              currentWidth = 150; leftPos = 170; currentTop = 0;
             } else if (idx === 2) { // Legend (Bottom Right)
-              currentWidth = 160; leftPos = 180; currentTop = 170;
+              currentWidth = 150; leftPos = 170; currentTop = 150;
             }
 
             if (isSelected) {
-              currentWidth = 340;
-              leftPos = 10; // Centered securely in mobile 360 container
-              currentTop = -20; // Float above
+              currentWidth = 320;
+              leftPos = 20; 
+              currentTop = -10; 
             }
           } else {
              // Desktop Expansion Logic
@@ -305,9 +297,9 @@ export const SimplePricingBento = () => {
                 left: leftPos,
                 top: currentTop,
                 zIndex: isSelected ? 50 : 10,
-                height: isSelected ? (isMobile ? 460 : 420) : unselectedHeight,
-                backgroundColor: isSelected ? config.activeBg : 'var(--arc-cream-alt)',
-                borderColor: isSelected ? (config.tier === 'Pro' ? '#fff' : '#000') : config.activeBg
+                height: isSelected ? (isMobile ? 420 : 380) : unselectedHeight,
+                backgroundColor: isSelected ? config.activeBg : '#111111',
+                borderColor: isSelected ? (config.tier === 'Pro' ? '#fff' : '#000') : '#222'
               }}
               transition={{ type: "spring", stiffness: 300, damping: isMobile ? 25 : 30 }}
               onClick={(e) => handleCardClick(e, idx)}
@@ -323,7 +315,7 @@ export const SimplePricingBento = () => {
                     key={lIdx}
                     animate={{ 
                       [line.prop]: isSelected ? line.grow : line.base,
-                      backgroundColor: (isSelected && config.tier === 'Pro') ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.2)'
+                      backgroundColor: (isSelected && config.tier === 'Pro') ? 'rgba(255,255,255,0.4)' : 'rgba(175,255,0,0.2)'
                     }}
                     className={`absolute ${line.side}-0 ${line.type === 'h' ? 'h-px' : 'w-px'}`}
                     style={{
@@ -392,7 +384,7 @@ export const SimplePricingBento = () => {
                       7-Day
                     </span>
                   </div>
-                  <p className="text-[9px] font-black uppercase tracking-[0.1em] opacity-40 leading-relaxed max-w-[170px] mb-auto" style={comicFont}>
+                  <p className="text-[9px] font-black uppercase tracking-[0.1em] opacity-40 leading-relaxed max-w-[170px] mb-auto text-white" style={comicFont}>
                     {tier.tagline}
                   </p>
                 </div>
@@ -416,9 +408,9 @@ export const SimplePricingBento = () => {
                     {tier.tier}.
                   </motion.h3>
                   
-                  <div className="flex items-baseline gap-2">
+                   <div className="flex items-baseline gap-2">
                     <span 
-                      className={`${isSelected ? 'text-4xl md:text-5xl' : 'text-xl'} font-bold tracking-tight ${isSelected ? config.activeText : 'text-black'} italic transition-all`} 
+                      className={`${isSelected ? 'text-4xl md:text-5xl' : 'text-xl'} font-bold tracking-tight ${isSelected ? config.activeText : 'text-white'} italic transition-all`} 
                       style={comicFont}
                     >
                       ₹{isSelected 
@@ -426,7 +418,7 @@ export const SimplePricingBento = () => {
                         : config.priceMonthly}
                     </span>
                     <span 
-                      className={`text-[10px] font-black uppercase tracking-widest ${isSelected && config.tier === 'Pro' ? 'text-white/40' : 'text-black/30'}`} 
+                      className={`text-[10px] font-black uppercase tracking-widest ${isSelected && config.tier === 'Pro' ? 'text-white/40' : 'text-white/30'}`} 
                       style={comicFont}
                     >
                       {isSelected && billing !== 'monthly' ? 'total' : '/mo'}

@@ -6,8 +6,9 @@ import {
   Activity, 
   Lock, CreditCard
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import axios from '../../api/axios';
+import { Logo } from '../../components/ui/Logo';
 
 // --- DATA: SUBSCRIPTION LAYERS (Mirrored from UpgradeModal) ---
 const ALL_PLANS = [
@@ -64,22 +65,23 @@ const ALL_PLANS = [
 
 const accentMap = {
   emerald: {
-    bg: 'bg-emerald-500/10',
-    border: 'border-emerald-500/30',
-    text: 'text-emerald-400',
-    btn: 'bg-emerald-500 hover:bg-emerald-400 text-black shadow-emerald-500/20',
+    bg: 'bg-[#afff00]/10',
+    border: 'border-[#afff00]/30',
+    text: 'text-[#afff00]',
+    btn: 'bg-[#afff00] hover:bg-[#c6ff00] text-black shadow-[#afff00]/20',
   },
   amber: {
-    bg: 'bg-amber-500/10',
-    border: 'border-amber-400/30',
-    text: 'text-amber-400',
-    btn: 'bg-amber-500 hover:bg-amber-400 text-black shadow-amber-500/20',
+    bg: 'bg-white/5',
+    border: 'border-[#afff00]/40',
+    text: 'text-[#afff00]',
+    pulse: true,
+    btn: 'bg-[#afff00] hover:bg-[#c6ff00] text-black shadow-[#afff00]/30',
   },
   slate: {
-    bg: 'bg-slate-500/10',
-    border: 'border-slate-500/30',
-    text: 'text-slate-400',
-    btn: 'bg-slate-500 hover:bg-slate-400 text-white shadow-slate-500/20',
+    bg: 'bg-white/5',
+    border: 'border-white/10',
+    text: 'text-white/60',
+    btn: 'bg-white/10 hover:bg-white/20 text-white shadow-white/10',
   },
 };
 
@@ -89,6 +91,7 @@ const Subscription = () => {
   const [loading, setLoading] = useState(true);
   const [billingCycle, setBillingCycle] = useState(1);
   const [selectedPlan, setSelectedPlan] = useState('pro');
+  const [expandedPlanId, setExpandedPlanId] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState('');
 
@@ -208,31 +211,34 @@ const Subscription = () => {
   );
 
   return (
-    <div className="min-h-screen bg-[#060606] text-white selection:bg-emerald-500 selection:text-black font-sans relative overflow-hidden pb-20">
+    <div className="min-h-screen bg-[#0A0A0A] text-white selection:bg-[#afff00] selection:text-black font-sans relative overflow-hidden pb-20">
       
       {/* Background Ambience */}
-      <div className="absolute inset-0 pointer-events-none opacity-[0.05]">
-          <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:40px_40px]" />
-          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-transparent via-emerald-500/5 to-transparent" />
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <motion.div 
+            animate={{ opacity: [0.03, 0.08, 0.03] }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute inset-0 bg-[radial-gradient(#afff00_1px,transparent_1px)] [background-size:24px_24px] opacity-10" 
+          />
+          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-transparent via-[#afff00]/5 to-transparent opacity-20" />
       </div>
 
       {/* --- HEADER: MINIMALIST LOGO --- */}
       <header className="px-8 py-8 md:px-16 flex justify-between items-center relative z-20">
-        <div className="flex items-center gap-2">
-            <span className="text-3xl font-black tracking-tighter italic" style={{ fontFamily: 'Georgia, serif' }}>drope.</span>
-            <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_15px_rgba(16,185,129,0.5)]" />
-        </div>
+        <Link to="/" className="group">
+            <Logo size="2.2rem" accentColor="#afff00" className="hover:opacity-80 transition-opacity" />
+        </Link>
         
         <div className="flex items-center gap-6">
-            <div className="hidden md:flex flex-col items-end">
-                <span className="text-[10px] font-black uppercase tracking-widest text-white/30">Authenticated User</span>
-                <span className="text-xs font-bold text-emerald-400/80">{user?.username}</span>
+            <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md">
+                <div className="w-1.5 h-1.5 bg-[#afff00] rounded-full animate-pulse shadow-[0_0_10px_#afff00]" />
+                <span className="text-[10px] font-bold text-white tracking-widest">{user?.username}</span>
             </div>
             <button 
                 onClick={() => { localStorage.removeItem('token'); navigate('/login'); }}
-                className="px-4 py-2 border border-white/5 bg-white/5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-colors"
+                className="px-5 py-2.5 border border-white/5 bg-white/5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all hover:text-[#afff00] active:scale-95"
             >
-                Logout
+                Disconnect
             </button>
         </div>
       </header>
@@ -245,13 +251,37 @@ const Subscription = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             >
-                <h1 className="text-5xl md:text-7xl lg:text-8xl font-black italic tracking-tighter uppercase mb-6 leading-none">
-                   {user?.subscription?.status === 'inactive' ? 'Protocol Suspended.' : 'Activate Your Node.'}
-                </h1>
-                <p className="text-base md:text-xl font-bold uppercase tracking-[0.3em] text-white/30 max-w-2xl mx-auto">
+                <motion.h1 
+                  className="text-6xl md:text-8xl lg:text-[10vw] font-black italic tracking-tighter uppercase mb-6 leading-[0.8] text-white flex flex-wrap justify-center gap-x-[0.5em]"
+                >
+                  {(user?.subscription?.status === 'inactive' ? 'ACTIVATE YOUR ENGINE' : 'ACTIVATE YOUR NODE').split(" ").map((word, wIdx) => (
+                    <span key={wIdx} className="flex whitespace-nowrap">
+                      {word.split("").map((char, cIdx) => (
+                        <motion.span
+                          key={cIdx}
+                          whileHover={{ 
+                            scale: 1.2, 
+                            y: -15, 
+                            color: '#afff00',
+                            textShadow: '0 0 30px rgba(175,255,0,0.5)' 
+                          }}
+                          transition={{ 
+                            type: "spring", 
+                            stiffness: 400, 
+                            damping: 10 
+                          }}
+                          className="inline-block cursor-default select-none"
+                        >
+                          {char}
+                        </motion.span>
+                      ))}
+                    </span>
+                  ))}
+                </motion.h1>
+                <p className="text-xs md:text-sm font-black uppercase tracking-[0.4em] text-white/30 max-w-2xl mx-auto leading-loose">
                     {user?.subscription?.status === 'inactive' 
-                      ? 'Your node authentication has expired. Resynchronize with a settlement layer to restore access.' 
-                      : 'Select your settlement layer to begin scaling with precision.'}
+                      ? 'Select a settlement tier to unlock real-time alerts and instant liquidity for your stream.' 
+                      : 'Sync with a settlement layer to begin scaling with tactical precision.'}
                 </p>
 
                 {/* --- TRIAL COUNTDOWN WIDGET --- */}
@@ -283,10 +313,10 @@ const Subscription = () => {
                         <button
                             key={item.m}
                             onClick={() => setBillingCycle(item.m)}
-                            className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${billingCycle === item.m ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20' : 'text-white/40 hover:text-white/60'}`}
+                            className={`px-8 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${billingCycle === item.m ? 'bg-[#afff00] text-black shadow-[0_0_30px_rgba(175,255,0,0.2)]' : 'text-white/40 hover:text-white/60'}`}
                         >
                             {item.label}
-                            {item.save && <span className="ml-2 opacity-50 italic">(-{item.save})</span>}
+                            {item.save && <span className="ml-2 font-black italic opacity-60">(-{item.save})</span>}
                         </button>
                     ))}
                 </div>
@@ -294,7 +324,7 @@ const Subscription = () => {
         </div>
 
         {/* --- THE TIERS: THE ENGINE --- */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
             {ALL_PLANS.map((plan, idx) => {
                 const isSelected = selectedPlan === plan.id;
                 const ac = accentMap[plan.accentColor];
@@ -302,10 +332,11 @@ const Subscription = () => {
                 return (
                     <motion.div
                         key={plan.id}
+                        layoutId={`card-${plan.id}`}
                         initial={{ opacity: 0, y: 40 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: idx * 0.1 }}
-                        onClick={() => setSelectedPlan(plan.id)}
+                        onClick={() => { setSelectedPlan(plan.id); setExpandedPlanId(plan.id); }}
                         className={`relative group cursor-pointer p-8 rounded-[2.5rem] flex flex-col transition-all duration-700 overflow-hidden border-2
                             ${isSelected 
                                 ? `bg-[#0c0c0c] ${ac.border} shadow-2xl scale-[1.02]` 
@@ -320,12 +351,12 @@ const Subscription = () => {
 
                         <div className="relative z-10 flex flex-col h-full">
                             <div className="flex items-start justify-between mb-8">
-                                <div className={`p-4 rounded-2xl border transition-all duration-500 ${isSelected ? `${ac.bg} ${ac.border}` : 'bg-white/5 border-white/10'}`}>
-                                    <plan.icon className={`w-8 h-8 ${isSelected ? ac.text : 'text-white/20'}`} />
+                                <div className={`p-4 rounded-xl border transition-all duration-700 ${isSelected ? `${ac.bg} ${ac.border} shadow-[0_0_20px_rgba(175,255,0,0.1)]` : 'bg-white/5 border-white/10'}`}>
+                                    <plan.icon className={`w-10 h-10 transition-all duration-700 ${isSelected ? ac.text : 'text-white/20'}`} />
                                 </div>
                                 <div className="text-right">
-                                    <div className={`text-4xl font-black italic tracking-tighter ${isSelected ? 'text-white' : 'text-white/40'}`}>
-                                        ₹{(plan.price * billingCycle * (billingCycle === 12 ? 0.7 : billingCycle === 6 ? 0.85 : 1)).toLocaleString('en-IN')}
+                                    <div className={`text-4xl font-black italic tracking-tighter transition-colors ${isSelected ? 'text-white' : 'text-white/40'}`}>
+                                        ₹{Math.round(plan.price * billingCycle * (billingCycle === 12 ? 0.7 : billingCycle === 6 ? 0.85 : 1)).toLocaleString('en-IN')}
                                     </div>
                                     <div className="text-[10px] font-black uppercase tracking-widest opacity-20">Cycle Total</div>
                                 </div>
@@ -340,9 +371,9 @@ const Subscription = () => {
 
                             <div className="space-y-4 mb-10 flex-1">
                                 {plan.features.map((feature, fIdx) => (
-                                    <div key={fIdx} className={`flex items-center gap-3 transition-all duration-500 ${isSelected ? 'opacity-100' : 'opacity-30'}`}>
-                                        <CheckCircle className={`w-4 h-4 ${isSelected ? 'text-emerald-500' : 'text-white/20'}`} />
-                                        <span className="text-xs font-bold uppercase tracking-widest text-white/80">{feature}</span>
+                                    <div key={fIdx} className={`flex items-center gap-3 transition-opacity duration-700 ${isSelected ? 'opacity-100' : 'opacity-20'}`}>
+                                        <CheckCircle className={`w-4 h-4 ${isSelected ? 'text-[#afff00]' : 'text-white/20'}`} />
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-white/80">{feature}</span>
                                     </div>
                                 ))}
                             </div>
@@ -351,21 +382,30 @@ const Subscription = () => {
                             <button
                                 onClick={(e) => { e.stopPropagation(); handleSubscribe(plan.id); }}
                                 disabled={isProcessing}
-                                className={`w-full py-5 rounded-2xl font-black uppercase italic text-[11px] tracking-[0.3em] transition-all duration-500 flex justify-center items-center gap-2 group/btn
+                                className={`w-full py-4.5 rounded-xl font-black uppercase italic text-[10px] tracking-[0.3em] transition-all duration-700 flex justify-center items-center gap-2 group/btn
                                     ${isSelected 
                                         ? `${ac.btn} scale-100` 
-                                        : 'bg-white/5 text-white/40 hover:bg-white/10 hover:text-white'}`}
+                                        : 'bg-white/10 text-white/60 hover:bg-white/20 hover:text-white border border-white/10'}`}
                             >
                                 {isProcessing && selectedPlan === plan.id ? (
                                     <Loader2 className="w-5 h-5 animate-spin" />
                                 ) : (
                                     <>
-                                        {isSelected ? 'Initialize Node' : 'Select Tier'}
+                                        {plan.id === 'legend' ? 'INITIALIZE NODE' : 'SELECT TIER'}
                                         <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
                                     </>
                                 )}
                             </button>
                         </div>
+                        
+                        {/* LEGEND BREATHING PULSE FX */}
+                        {ac.pulse && isSelected && (
+                            <motion.div 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: [0.1, 0.4, 0.1] }}
+                            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                            className="absolute inset-0 pointer-events-none rounded-[2.5rem] border-2 border-[#afff00]" />
+                        )}
                     </motion.div>
                 );
             })}
@@ -385,19 +425,19 @@ const Subscription = () => {
         </AnimatePresence>
 
         {/* --- TRUST LAYER: SECURITY --- */}
-        <div className="mt-20 flex flex-col md:flex-row items-center justify-between gap-12 opacity-20 border-t border-white/5 pt-12">
+        <div className="mt-20 flex flex-col md:flex-row items-center justify-between gap-12 opacity-40 border-t border-white/10 pt-12">
             <div className="flex items-center gap-6">
                 <div className="flex items-center gap-2">
-                    <ShieldCheck className="w-4 h-4" />
-                    <span className="text-[10px] font-black uppercase tracking-widest">AES-256 Encryption</span>
+                    <ShieldCheck className="w-4 h-4 text-[#afff00]" />
+                    <span className="text-[9px] font-black uppercase tracking-widest text-white/60">AES-256 Encryption</span>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Activity className="w-4 h-4" />
-                    <span className="text-[10px] font-black uppercase tracking-widest">99.9% Uptime Verified</span>
+                    <Activity className="w-4 h-4 text-[#afff00]" />
+                    <span className="text-[9px] font-black uppercase tracking-widest text-white/60">High-Speed Uptime</span>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Lock className="w-4 h-4" />
-                    <span className="text-[10px] font-black uppercase tracking-widest">PCI-DSS Compliant</span>
+                    <Lock className="w-4 h-4 text-[#afff00]" />
+                    <span className="text-[9px] font-black uppercase tracking-widest text-white/60">PCI-DSS Secure</span>
                 </div>
             </div>
             
@@ -407,6 +447,95 @@ const Subscription = () => {
             </div>
         </div>
       </main>
+
+      {/* --- EXPANSION HUB: ACTIVATION TERMINAL --- */}
+      <AnimatePresence>
+        {expandedPlanId && (() => {
+            const plan = ALL_PLANS.find(p => p.id === expandedPlanId);
+            const ac = accentMap[plan.accentColor];
+            return (
+                <>
+                    <motion.div 
+                        initial={{ opacity: 0 }} 
+                        animate={{ opacity: 1 }} 
+                        exit={{ opacity: 0 }}
+                        onClick={() => setExpandedPlanId(null)}
+                        className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-2xl cursor-zoom-out"
+                    />
+                    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 pointer-events-none">
+                        <motion.div 
+                            layoutId={`card-${expandedPlanId}`}
+                            className={`relative z-[120] w-full max-w-2xl bg-[#0c0c0c] border-2 ${ac.border} rounded-[3rem] p-8 sm:p-12 shadow-[0_0_100px_rgba(0,0,0,0.5)] overflow-hidden pointer-events-auto`}
+                        >
+                        <button 
+                            onClick={() => setExpandedPlanId(null)}
+                            className="absolute top-8 right-8 text-white/20 hover:text-white transition-colors p-2"
+                        >
+                            <ArrowRight className="w-6 h-6 rotate-180" />
+                        </button>
+
+                        <div className="flex flex-col md:flex-row gap-12 items-start h-full">
+                            <div className="flex-1 space-y-8">
+                                <div className="flex items-center gap-6">
+                                    <div className={`p-6 rounded-2xl border ${ac.bg} ${ac.border} shadow-[0_0_40px_rgba(175,255,0,0.1)]`}>
+                                        <plan.icon className={`w-12 h-12 ${ac.text}`} />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-4xl sm:text-5xl font-black italic uppercase tracking-tighter text-white leading-none mb-2">{plan.name}</h2>
+                                        <span className={`text-[10px] font-black uppercase tracking-[0.4em] ${ac.text}`}>Secure Settlement Mode</span>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-4">
+                                    {plan.features.map((feature, fIdx) => (
+                                        <motion.div 
+                                            initial={{ opacity: 0, x: -20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            transition={{ delay: 0.2 + (fIdx * 0.05) }}
+                                            key={fIdx} 
+                                            className="flex items-center gap-4"
+                                        >
+                                            <CheckCircle className="w-5 h-5 text-[#afff00]" />
+                                            <span className="text-sm font-bold uppercase tracking-widest text-white/80">{feature}</span>
+                                        </motion.div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="w-full md:w-[300px] flex flex-col justify-between self-stretch bg-white/5 rounded-[2.5rem] border border-white/5 p-8 relative overflow-hidden">
+                                <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+                                    <CreditCard className="w-24 h-24" />
+                                </div>
+                                
+                                <div className="mb-12">
+                                    <span className="text-[9px] font-black uppercase tracking-[0.4em] text-white/30 block mb-4">Total Amount Due</span>
+                                    <div className="text-5xl font-black italic tracking-tighter text-white">
+                                        ₹{Math.round(plan.price * billingCycle * (billingCycle === 12 ? 0.7 : billingCycle === 6 ? 0.85 : 1)).toLocaleString('en-IN')}
+                                    </div>
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500/80 mt-2 block">All protocols secure</span>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <button
+                                        onClick={() => handleSubscribe(plan.id)}
+                                        disabled={isProcessing}
+                                        className="w-full py-6 rounded-2xl bg-[#afff00] text-black font-black uppercase italic text-[12px] tracking-[0.4em] shadow-[0_20px_60px_rgba(175,255,0,0.2)] hover:bg-[#c6ff00] transition-all hover:translate-y-[-4px] active:translate-y-0"
+                                    >
+                                        {isProcessing ? <Loader2 className="w-6 h-6 animate-spin mx-auto" /> : 'PROCEED TO UPLINK'}
+                                    </button>
+                                    <p className="text-[9px] font-black uppercase tracking-widest text-center text-white/20">Secure handshake with Razorpay</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Background Detail */}
+                        <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-[#afff00]/5 blur-[100px] pointer-events-none" />
+                    </motion.div>
+                </div>
+                </>
+            );
+        })()}
+      </AnimatePresence>
     </div>
   );
 };
