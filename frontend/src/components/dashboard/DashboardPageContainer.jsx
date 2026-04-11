@@ -20,9 +20,6 @@ export function DashboardPageContainer({ children, className = '', noPadding = f
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
             className={`w-full flex-1 min-h-full nexus-card border overflow-hidden mt-6 ${noPadding ? '' : 'p-4 md:p-6'} ${className}`}
             style={{
-                background: 'var(--nexus-panel)',
-                borderColor: 'var(--nexus-border)',
-                borderWidth: '1px',
                 opacity: 1,
             }}
         >

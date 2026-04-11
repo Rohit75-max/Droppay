@@ -7,6 +7,9 @@ const DeploymentAnimation = ({ onComplete, theme }) => {
     const [progress, setProgress] = useState(0);
 
     useEffect(() => {
+        // Lock body scroll on mount
+        document.body.style.overflow = 'hidden';
+
         const stages = [
             { text: 'DECRYPTING ASSET...', time: 1000 },
             { text: 'SYNCING TO NETWORK...', time: 2000 },
@@ -37,6 +40,8 @@ const DeploymentAnimation = ({ onComplete, theme }) => {
         }, 4000);
 
         return () => {
+            // Restore body scroll on unmount
+            document.body.style.overflow = 'unset';
             clearInterval(interval);
             clearInterval(progressInterval);
             clearTimeout(timeout);

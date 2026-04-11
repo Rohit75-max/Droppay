@@ -3,6 +3,17 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Wallet, CreditCard, IndianRupee, Zap, ArrowUpRight } from 'lucide-react';
 
 const PaymentChoiceModal = ({ isOpen, onClose, onSelect, balance, price, itemName, theme }) => {
+    React.useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, [isOpen]);
+
     if (!isOpen) return null;
 
     const isLight = theme === 'light' || (typeof document !== 'undefined' && document.documentElement.classList.contains('light'));

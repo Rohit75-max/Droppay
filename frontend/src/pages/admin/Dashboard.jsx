@@ -16,17 +16,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
-
-const PremiumSmallLoader = ({ text, className = "" }) => (
-    <div className={`flex items-center gap-3 ${className}`}>
-        <div className="relative">
-            <div className="w-4 h-4 border border-black/5 rounded-full" />
-            <div className="absolute inset-0 w-4 h-4 border-t-emerald-500 border-r-transparent border-b-transparent border-l-transparent border rounded-full animate-spin" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1 h-1 bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)] animate-pulse" />
-        </div>
-        {text && <span className="text-[10px] font-black uppercase tracking-[0.6em] text-[#111111]">{text}</span>}
-    </div>
-);
+import { InlineLoader } from '../../components/common/Loader';
 
 
 // API_BASE is now handled by the centralized axios configuration in src/api/axios.js
@@ -188,7 +178,7 @@ const UserDetailDrawer = ({ userId, isOpen, onClose, context = 'directory' }) =>
 
                         {loading ? (
                             <div className="flex-1 flex flex-col items-center justify-center">
-                                <PremiumSmallLoader text="RETRIEVING_USER_DATA" />
+                                <InlineLoader text="RETRIEVING_USER_DATA" />
                             </div>
 
                         ) : user ? (
@@ -1162,7 +1152,7 @@ const AdminSecurePortal = () => {
                         {/* Refresh */}
                         <button onClick={refreshAll}
                             className="p-3 bg-black/5 border border-black/10 text-slate-400 hover:bg-emerald-500 hover:text-black transition-all">
-                            {refreshing ? <PremiumSmallLoader /> : <RefreshCw className="w-4 h-4" />}
+                            {refreshing ? <InlineLoader /> : <RefreshCw className="w-4 h-4" />}
                         </button>
 
                         {/* Admin badge */}
@@ -1270,7 +1260,7 @@ const AdminSecurePortal = () => {
                                         {/* Body */}
                                         {loading ? (
                                             <div className="p-8 text-center text-slate-400 flex items-center justify-center gap-2">
-                                                <PremiumSmallLoader text="SCANNING_ACTIVE_NODES" />
+                                                <InlineLoader text="SCANNING_ACTIVE_NODES" />
 
                                             </div>
                                         ) : nodes.length === 0 ? (
@@ -1644,7 +1634,7 @@ const AdminSecurePortal = () => {
                                         </thead>
                                         <tbody className="divide-y divide-black/5">
                                             {loading ? (
-                                                <tr><td colSpan="5" className="py-24 text-center"><PremiumSmallLoader className="justify-center" text="FETCHING_ACTIVE_DISPUTES" /></td></tr>
+                                                <tr><td colSpan="5" className="py-24 text-center"><InlineLoader className="justify-center" text="FETCHING_ACTIVE_DISPUTES" /></td></tr>
 
                                             ) : transactions.length === 0 ? (
                                                 <tr><td colSpan="5" className="py-24 text-center text-slate-500 font-black uppercase text-[10px] tracking-widest">No matching logs found on ledger</td></tr>
@@ -1707,7 +1697,7 @@ const AdminSecurePortal = () => {
                                         </p>
                                     </div>
                                     <button onClick={fetchDisputes} className="px-6 py-3 bg-black/5 hover:bg-black/10 text-emerald-500 text-[10px] font-black uppercase tracking-[0.3em] border border-black/5 transition-all flex items-center gap-3">
-                                        {refreshing ? <PremiumSmallLoader /> : <RefreshCw className="w-3.5 h-3.5" />} SYNC_CASES
+                                        {refreshing ? <InlineLoader /> : <RefreshCw className="w-3.5 h-3.5" />} SYNC_CASES
 
                                     </button>
                                 </div>
@@ -1725,7 +1715,7 @@ const AdminSecurePortal = () => {
                                         </thead>
                                         <tbody className="divide-y divide-black/5">
                                             {loading || refreshing ? (
-                                                <tr><td colSpan="5" className="py-24 text-center"><PremiumSmallLoader className="justify-center" text="RETRIEVING_TRANSMISSION_HISTORY" /></td></tr>
+                                                <tr><td colSpan="5" className="py-24 text-center"><InlineLoader className="justify-center" text="RETRIEVING_TRANSMISSION_HISTORY" /></td></tr>
 
                                             ) : disputes.length === 0 ? (
                                                 <tr>
@@ -1854,7 +1844,7 @@ const AdminSecurePortal = () => {
                                             </p>
                                         </div>
                                         <button onClick={() => fetchAuditLogs(logsPage)} className="p-4 bg-black/5 hover:bg-black/10 transition-all border border-black/5 hover:border-black/20">
-                                            {refreshing ? <PremiumSmallLoader /> : <RefreshCw className="w-4 h-4 text-emerald-500" />}
+                                            {refreshing ? <InlineLoader /> : <RefreshCw className="w-4 h-4 text-emerald-500" />}
 
                                         </button>
                                     </div>
@@ -2033,7 +2023,7 @@ const AdminSecurePortal = () => {
                                 className="max-w-4xl mx-auto">
                                 {!adminProfile ? (
                                     <div className="py-24 text-center">
-                                        <PremiumSmallLoader text="LOADING_SYSTEM_CONFIG" className="justify-center py-12" />
+                                        <InlineLoader text="LOADING_SYSTEM_CONFIG" className="justify-center py-12" />
 
                                         <p className="text-slate-400 text-[11px] font-black uppercase tracking-[0.2em]">Synchronizing Identity Matrix...</p>
                                     </div>
@@ -2191,7 +2181,7 @@ const AdminSecurePortal = () => {
                                                     whileTap={{ scale: 0.98 }}
                                                     disabled={isSavingProfile}
                                                     className="w-full sm:w-auto px-16 py-5 bg-emerald-500 text-black disabled:opacity-50 font-black uppercase tracking-[0.4em] text-[11px] transition-all shadow-[0_0_40px_rgba(16,185,129,0.25)] hover:bg-emerald-400 flex items-center justify-center gap-4">
-                                                    {isSavingProfile ? <PremiumSmallLoader /> : <CheckCircle2 className="w-5 h-5" />}
+                                                    {isSavingProfile ? <InlineLoader /> : <CheckCircle2 className="w-5 h-5" />}
 
                                                     SYNCHRONIZE_IDENTITY
                                                 </motion.button>

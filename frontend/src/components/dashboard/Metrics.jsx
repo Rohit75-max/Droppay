@@ -32,7 +32,7 @@ return (
         {alertMetrics.map((metric) => (
         <div key={metric.label}
             className="nexus-card p-6 md:p-8 shadow-sm group transition-all h-full flex flex-col justify-between"
-            style={{ background: 'var(--nexus-panel)', border: '1px solid var(--nexus-border)', borderRadius: 'var(--nexus-radius)' }}>
+        >
             <div>
                 <p className="font-mono text-[8px] uppercase tracking-widest mb-1.5 md:mb-2 transition-colors"
                     style={{ color: 'var(--nexus-text-muted)' }}>
@@ -56,8 +56,7 @@ return (
 
         {/* ── RECENT ACTIVITY LOG ── */}
         <section>
-            <div className="nexus-card shadow-sm overflow-hidden h-full flex flex-col"
-                style={{ background: 'var(--nexus-panel)', border: '1px solid var(--nexus-border)', borderRadius: 'var(--nexus-radius)' }}>
+            <div className="nexus-card shadow-sm overflow-hidden h-full flex flex-col">
                 <div className="px-6 md:px-10 py-5 flex items-center"
                     style={{ borderBottom: '1px solid var(--nexus-accent)', background: 'rgba(var(--nexus-text-rgb, 255,255,255), 0.03)' }}>
                     <p className="font-mono text-[10px] uppercase tracking-[0.2em] font-medium"
@@ -107,8 +106,7 @@ return (
 
         {/* ── TRAFFIC SOURCE TELEMETRY ── */}
         <section>
-            <div className="nexus-card shadow-sm overflow-hidden h-full flex flex-col"
-                style={{ background: 'var(--nexus-panel)', border: '1px solid var(--nexus-border)', borderRadius: 'var(--nexus-radius)' }}>
+            <div className="nexus-card shadow-sm overflow-hidden h-full flex flex-col">
                 <div className="px-6 md:px-10 py-5 flex items-center"
                     style={{ borderBottom: '1px solid var(--nexus-accent)', background: 'rgba(var(--nexus-text-rgb, 255,255,255), 0.03)' }}>
                     <p className="font-mono text-[10px] uppercase tracking-[0.2em] font-medium"

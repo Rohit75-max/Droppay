@@ -1,19 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Logo } from '../ui/Logo';
-
-const METADATA_STRINGS = [
-    "INITIALIZING_PROTOCOL",
-    "OPTIMIZING_SHADERS",
-    "FETCHING_ASSETS...",
-    "SECURE_LAYER_BOOT",
-    "SYNCING_NODES",
-    "DROPE_CORE_V1.0.4"
-];
 
 export const Preloader = ({ onComplete }) => {
     const [percent, setPercent] = useState(0);
-    const [metaIndex, setMetaIndex] = useState(0);
 
     useEffect(() => {
         // 1. Percentage counter (0 to 100 over ~1.8s)
@@ -31,14 +21,8 @@ export const Preloader = ({ onComplete }) => {
             });
         }, 45);
 
-        // 2. Metadata string cycling
-        const metaInterval = setInterval(() => {
-            setMetaIndex((prev) => (prev + 1) % METADATA_STRINGS.length);
-        }, 400);
-
         return () => {
             clearInterval(interval);
-            clearInterval(metaInterval);
         };
     }, [onComplete]);
 
@@ -80,47 +64,8 @@ export const Preloader = ({ onComplete }) => {
                     className="absolute bottom-10 right-10 w-12 h-12 border-b-2 border-r-2 border-white/30"
                 />
 
-                {/* PROGRESS BLOCK - Centered below logo position */}
-                <div className="relative flex flex-col items-center gap-6 mt-[120px]">
-                    <div className="flex items-end gap-10 w-full max-w-[300px]">
-                        <div className="flex-1 flex flex-col gap-2">
-                            <div className="flex justify-between items-center font-mono text-[10px] text-white/40 tracking-widest">
-                                <span>SYSTEM.UPLOAD</span>
-                                <span>{percent}%</span>
-                            </div>
-                            <div className="h-[2px] w-full bg-white/10 relative overflow-hidden">
-                                <motion.div
-                                    className="absolute top-0 left-0 h-full bg-[#FF2D00]"
-                                    initial={{ width: 0 }}
-                                    animate={{ width: `${percent}%` }}
-                                />
-                                <motion.div
-                                    className="absolute top-0 left-0 h-full bg-white/40"
-                                    animate={{
-                                        left: ["-100%", "100%"],
-                                        transition: { repeat: Infinity, duration: 1.5, ease: "linear" }
-                                    }}
-                                    style={{ width: '20%' }}
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* METADATA STREAM */}
-                    <div className="absolute top-[120%] right-0 text-right overflow-hidden h-[15px]">
-                        <AnimatePresence mode="wait">
-                            <motion.p
-                                key={metaIndex}
-                                initial={{ y: 20, opacity: 0 }}
-                                animate={{ y: 0, opacity: [0, 1, 0.8, 1] }}
-                                exit={{ y: -20, opacity: 0 }}
-                                transition={{ duration: 0.2 }}
-                                className="font-mono text-[9px] uppercase tracking-[0.3em] text-[#FF2D00]"
-                            >
-                                / {METADATA_STRINGS[metaIndex]}
-                            </motion.p>
-                        </AnimatePresence>
-                    </div>
+                {/* SEARCHING_NODES (Internal logic still runs, but UI is clean) */}
+                <div className="relative flex flex-col items-center gap-6 mt-[40px]">
                 </div>
 
                 {/* SCANLINES OVERLAY */}

@@ -5,6 +5,8 @@ import { HypeChatFooter } from '../../components/features/HypeChatFooter';
 import { StreamEngineDemo } from '../../components/features/StreamEngineDemo';
 import { FeaturePillars } from '../../components/features/FeaturePillars';
 import { CreatorStack } from '../../components/features/CreatorStack';
+import { EcosystemMap } from '../../components/features/EcosystemMap';
+import { InteractiveFeatures } from '../../components/features/InteractiveFeatures';
 
 
 const Features = () => {
@@ -96,6 +98,13 @@ const Features = () => {
 
                 {/* --- SECTION 03: THE CREATOR STACK (SPLIT-SCREEN) --- */}
                 <CreatorStack scrollContainerRef={scrollContainerRef} />
+
+                {/* --- SECTION 04: ECOSYSTEM MAP --- */}
+                <EcosystemMap />
+
+                {/* --- SECTION 05: INTERACTIVE FEATURES TERMINAL --- */}
+                <InteractiveFeatures />
+
                 <HypeChatFooter scrollContainerRef={scrollContainerRef} />
             </motion.main>
         </div>

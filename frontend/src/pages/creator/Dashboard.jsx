@@ -537,7 +537,7 @@ const Dashboard = () => {
             handleLogoClick={handleLogoClick} 
           />
 
-          <div className="flex-1 overflow-y-auto custom-scrollbar pt-[70px] pb-32 md:pb-12 transition-all duration-300">
+          <div className="flex-1 overflow-y-auto custom-scrollbar pt-[70px] pb-24 md:pb-12 transition-all duration-300">
             <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 w-full min-h-full flex flex-col">
               
               <DashboardPageContainer noPadding className="mt-4">

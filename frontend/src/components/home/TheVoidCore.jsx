@@ -159,21 +159,45 @@ export const TheVoidCore = ({ containerRef }) => {
                 {/* ── Final Text Climax (Entering Next Section) ── */}
                 <motion.div 
                     style={{ opacity: climaxOpacity }}
-                    className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none"
+                    className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none px-4"
                 >
-                    <div className="w-full overflow-hidden flex flex-col items-center gap-2">
-                        <motion.h2 
+                    <div className="w-full flex flex-col md:flex-row items-center justify-center gap-6 md:gap-16">
+                        {/* Left Side: Plan Name */}
+                        <motion.div 
                             style={{ x: climaxLeftX }}
-                            className="font-heading text-[clamp(3.5rem,15vw,18vw)] leading-[0.8] uppercase tracking-tighter text-white"
+                            className="flex flex-col items-center md:items-end text-center md:text-right"
                         >
-                            ENTER
-                        </motion.h2>
-                        <motion.h2 
+                            <h2 className="font-heading text-[clamp(3rem,8vw,10vw)] leading-[0.8] uppercase tracking-tighter text-white">
+                                ELITE
+                            </h2>
+                            <span className="font-mono text-[10px] md:text-[12px] uppercase tracking-[0.4em] text-zinc-500 mt-2 md:mt-4">
+                                Full System Unlocked.
+                            </span>
+                        </motion.div>
+                        
+                        {/* Right Side: Subscription Pricing & Details */}
+                        <motion.div 
                             style={{ x: climaxRightX }}
-                            className="font-heading text-[clamp(3.5rem,15vw,18vw)] leading-[0.8] uppercase tracking-tighter text-[#afff00]"
+                            className="flex flex-col items-center md:items-start text-center md:text-left bg-black/40 backdrop-blur-xl border border-[#afff00]/30 rounded-2xl p-6 md:p-8 shadow-[0_0_30px_rgba(175,255,0,0.05)]"
                         >
-                            THE DROP
-                        </motion.h2>
+                            <h2 className="font-heading text-[clamp(2.5rem,6vw,8vw)] leading-[0.8] uppercase tracking-tighter text-[#afff00]">
+                                $19<span className="text-[clamp(1rem,2vw,3vw)] text-white">/MO</span>
+                            </h2>
+                            <ul className="font-mono text-[9px] md:text-[11px] text-white space-y-3 uppercase tracking-widest mt-6">
+                                <li className="flex items-center justify-center md:justify-start gap-3">
+                                    <span className="w-2 h-2 bg-[#afff00] rounded-sm transform rotate-45" /> 
+                                    0% Platform Fees
+                                </li>
+                                <li className="flex items-center justify-center md:justify-start gap-3">
+                                    <span className="w-2 h-2 bg-[#afff00] rounded-sm transform rotate-45" /> 
+                                    Custom Visual Engine
+                                </li>
+                                <li className="flex items-center justify-center md:justify-start gap-3">
+                                    <span className="w-2 h-2 bg-[#afff00] rounded-sm transform rotate-45" /> 
+                                    Priority Sub-10ms Routing
+                                </li>
+                            </ul>
+                        </motion.div>
                     </div>
                 </motion.div>
 

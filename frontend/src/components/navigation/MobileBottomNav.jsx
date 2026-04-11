@@ -25,17 +25,11 @@ export function MobileBottomNav() {
             initial={{ y: 100 }}
             animate={{ y: 0 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="md:hidden fixed bottom-0 left-0 right-0 z-50 pointer-events-none"
+            className="md:hidden fixed bottom-0 left-0 right-0 z-50"
         >
-            {/* Pure Frost Blur Gradient - No Solid Colors */}
-            <div 
-                className="absolute inset-0 top-[-80px] pointer-events-none backdrop-blur-[24px]" 
-                style={{ maskImage: "linear-gradient(to bottom, transparent 0%, black 70%)", WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 70%)" }}
-            />
-            
-            <div className="px-4 pb-2 relative z-10" style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}>
-                <div className="backdrop-blur-[40px] border flex items-center justify-between px-6 py-4 rounded-[2rem] shadow-[0_15px_35px_rgba(0,0,0,0.2)] relative overflow-hidden pointer-events-auto"
-                      style={{ background: 'var(--nexus-panel)', borderColor: 'var(--nexus-border)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)' }}>
+            <div className="relative z-10 overflow-hidden">
+                <div className="backdrop-blur-[40px] border-t flex items-center justify-between px-6 py-4 rounded-t-[1.5rem] shadow-[0_-10px_25px_rgba(0,0,0,0.1)] relative overflow-hidden"
+                      style={{ background: 'var(--nexus-panel)', borderColor: 'var(--nexus-border)' }}>
 
                 {/* Animated Glow effect behind nav */}   {mobileNavItems.map((item, idx) => {
                     const active = pathname === item.href;

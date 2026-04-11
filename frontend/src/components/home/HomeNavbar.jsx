@@ -41,7 +41,7 @@ const HomeNavbar = ({ scaleX }) => {
                 className="nav-link-arc cursor-pointer border-none bg-transparent"
               >
                 {item}
-            </button>
+              </button>
             ))}
             <button onClick={() => navigate('/login')}
               className="text-[9px] font-black uppercase tracking-[0.25em] px-5 py-2 rounded-full border border-white/30 text-white/90 hover:bg-white/10 transition-all">
@@ -67,26 +67,26 @@ const HomeNavbar = ({ scaleX }) => {
         {isMobileMenuOpen && (
           <>
             <motion.div
-              initial={{ height: 0 }}
-              animate={{ height: '100vh' }}
-              exit={{ height: 0 }}
-              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-              className="fixed top-[52px] left-0 right-0 z-[102] bg-[var(--arc-blue)]"
+              initial={{ y: '-100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '-100%' }}
+              transition={{ duration: 0.1, ease: 'linear' }}
+              className="fixed top-[52px] bottom-0 left-0 right-0 z-[102] bg-[var(--arc-blue)]"
             />
             <motion.div
-              initial={{ height: 0 }}
-              animate={{ height: '100vh' }}
-              exit={{ height: 0 }}
-              transition={{ delay: 0.1, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              className="fixed top-[52px] left-0 right-0 z-[103]"
+              initial={{ y: '-100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '-100%' }}
+              transition={{ duration: 0.12, ease: 'easeOut' }}
+              className="fixed top-[52px] bottom-0 left-0 right-0 z-[103]"
               style={{ background: 'linear-gradient(180deg, var(--arc-blue) 0%, #00D166 100%)' }}
             />
             <motion.div
-              initial={{ height: 0 }}
-              animate={{ height: 'calc(100vh - 52px)' }}
-              exit={{ height: 0 }}
-              transition={{ delay: 0.2, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-              className="fixed top-[52px] left-0 right-0 z-[105] overflow-hidden bg-[var(--arc-blue)] shadow-2xl"
+              initial={{ y: '-100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '-100%' }}
+              transition={{ duration: 0.15, ease: 'easeOut' }}
+              className="fixed top-[52px] bottom-0 left-0 right-0 z-[105] overflow-y-auto bg-[var(--arc-blue)] shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
             >
               <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
               <div className="h-full px-10 py-16 flex flex-col justify-between items-start relative z-10">
@@ -98,9 +98,9 @@ const HomeNavbar = ({ scaleX }) => {
                   ].map((item, idx) => (
                     <motion.button
                       key={item.label}
-                      initial={{ opacity: 0, x: -15 }}
+                      initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.35 + idx * 0.08, duration: 0.4, ease: "easeOut" }}
+                      transition={{ duration: 0.15, ease: "easeOut" }}
                       onClick={() => {
                         navigate(item.path);
                         setIsMobileMenuOpen(false);
@@ -116,9 +116,9 @@ const HomeNavbar = ({ scaleX }) => {
                 </div>
                 <div className="w-full flex flex-col items-start gap-10">
                   <motion.div
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 1.1, duration: 0.6 }}
+                    transition={{ duration: 0.15, ease: "easeOut" }}
                     className="flex flex-row w-full gap-3"
                   >
                     <button onClick={() => { navigate('/login'); setIsMobileMenuOpen(false); }}

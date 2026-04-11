@@ -9,7 +9,7 @@ import { Preloader } from '../../components/layout/Preloader';
 import Hero from '../../components/home/Hero';
 import { TheVoidCore } from '../../components/home/TheVoidCore';
 import { TheDrop } from '../../components/home/TheDrop';
-import { HorizontalGallery } from '../../components/home/HorizontalGallery';
+import { InteractiveFeatures } from '../../components/features/InteractiveFeatures';
 import { Footer } from '../../components/home/Footer';
 
 const Home = () => {
@@ -68,7 +68,7 @@ const Home = () => {
             <Hero />
             <TheVoidCore containerRef={scrollRef} />
             <TheDrop />
-            <HorizontalGallery containerRef={scrollRef} />
+            <InteractiveFeatures />
             <Footer containerRef={scrollRef} />
           </div>
         </main>

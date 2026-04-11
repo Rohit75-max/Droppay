@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Swords, Timer, Save, Rocket, Zap, ShieldAlert, Flame } from 'lucide-react';
 import { io } from 'socket.io-client';
 import axios from '../../api/axios';
+import TugOfWarWidget from '../widgets/TugOfWarWidget';
 
 const TugOfWarControl = ({ user, nexusTheme, streamerId, theme }) => {
     const [event, setEvent] = useState(null);
@@ -90,6 +91,7 @@ const TugOfWarControl = ({ user, nexusTheme, streamerId, theme }) => {
     }
 
     return (
+        <>
         <div className="w-full bg-[var(--nexus-panel)] border border-[var(--nexus-border)] rounded-[2.5rem] p-8 nexus-card overflow-hidden">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
                 <div className="flex items-center gap-4">
@@ -211,6 +213,44 @@ const TugOfWarControl = ({ user, nexusTheme, streamerId, theme }) => {
                 </div>
             )}
         </div>
+
+        {/* ── LIVE WIDGET PREVIEW ── */}
+        <div className="w-full mt-6 bg-[var(--nexus-panel)] border border-[var(--nexus-border)] rounded-[2.5rem] p-8 nexus-card overflow-hidden">
+            <div className="flex items-center gap-3 mb-6">
+                <div className="w-2 h-2 rounded-full bg-[var(--nexus-accent)] animate-pulse shadow-[0_0_10px_var(--nexus-accent-glow)]" />
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--nexus-text-muted)]">
+                    {event ? 'Live Stream Preview' : 'Widget Preview (Mock Data)'}
+                </span>
+            </div>
+
+            {/* Dark OBS-like preview container */}
+            <div className="bg-black rounded-2xl overflow-hidden border border-white/5 p-4">
+                <TugOfWarWidget
+                    title={event ? event.title : formData.title}
+                    timeRemaining={event ? "LIVE" : `${formData.durationMinutes}:00`}
+                    teamA={{
+                        name: event ? event.teamAName : formData.teamAName,
+                        amount: event ? event.teamAAmount : 12500,
+                        color: "from-red-600 to-red-400",
+                        shadow: "shadow-[0_0_20px_rgba(220,38,38,0.6)]"
+                    }}
+                    teamB={{
+                        name: event ? event.teamBName : formData.teamBName,
+                        amount: event ? event.teamBAmount : 8400,
+                        color: "from-blue-600 to-blue-400",
+                        shadow: "shadow-[0_0_20px_rgba(37,99,235,0.6)]"
+                    }}
+                    lastStrike={event?.lastStrike || null}
+                />
+            </div>
+
+            {!event && (
+                <p className="text-center text-[9px] font-black uppercase tracking-[0.3em] text-[var(--nexus-text-muted)]/40 mt-4">
+                    Preview updates as you type · Amounts shown are illustrative
+                </p>
+            )}
+        </div>
+        </>
     );
 };
 

@@ -4,7 +4,7 @@ import { Circle, Triangle, Square, Pentagon, Hexagon, Shield, Zap, RefreshCw } f
 import { toast } from 'react-toastify';
 import axios from '../../api/axios';
 
-const FeedbackStation = ({ user }) => {
+const FeedbackStation = ({ user, theme }) => {
   const [rating, setRating] = useState(0);
   const [feedback, setFeedback] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -48,7 +48,7 @@ const FeedbackStation = ({ user }) => {
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full h-[600px] flex flex-col items-center justify-center p-6 space-y-6"
+        className="w-full min-h-[500px] flex flex-col items-center justify-center p-6 space-y-6"
       >
         <div className="w-24 h-24 bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center relative">
           <motion.div 
@@ -59,8 +59,8 @@ const FeedbackStation = ({ user }) => {
           <Shield className="w-10 h-10 text-emerald-500" />
         </div>
         <div className="text-center space-y-2">
-          <h2 className="text-3xl font-black italic tracking-tighter text-[#111111] uppercase">Signal Received</h2>
-          <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.4em]">Uplink_Sync_Complete // Data_Stored</p>
+          <h2 className="text-3xl font-black italic tracking-tighter uppercase" style={{ color: 'var(--nexus-text)' }}>Signal Received</h2>
+          <p className="text-[10px] uppercase tracking-[0.4em] font-black" style={{ color: 'var(--nexus-text-muted)' }}>Uplink_Sync_Complete // Data_Stored</p>
         </div>
         <button 
           onClick={() => { setIsSubmitted(false); setRating(0); setFeedback(''); }}
@@ -74,18 +74,18 @@ const FeedbackStation = ({ user }) => {
   }
 
   return (
-    <div className="w-full min-h-[700px] relative font-sans text-[#111111] overflow-hidden">
+    <div className="w-full min-h-screen relative font-sans" style={{ color: 'var(--nexus-text)' }}>
       {/* Blueprint Grid Background */}
       <div className="absolute inset-0 opacity-[0.03] pointer-events-none" 
-           style={{ backgroundImage: 'radial-gradient(#111111 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
+           style={{ backgroundImage: `radial-gradient(var(--nexus-text) 1px, transparent 1px)`, backgroundSize: '30px 30px' }} />
       
       <div className="max-w-5xl mx-auto py-8 px-8 relative z-10">
         <header className="mb-8 space-y-2">
           <div className="flex items-center gap-3">
-            <span className="w-8 h-[2px] bg-[#111111]" />
+            <span className="w-8 h-[2px] bg-emerald-500" />
             <span className="text-[9px] font-black uppercase tracking-[0.4em] text-emerald-600">Protocol: feedback_uplink_v4.0.2</span>
           </div>
-          <h1 className="text-5xl font-black italic tracking-tighter text-[#111111] uppercase leading-[0.9]">
+          <h1 className="text-5xl font-black italic tracking-tighter uppercase leading-[0.9]" style={{ color: 'var(--nexus-text)' }}>
             Share Your Light.
           </h1>
         </header>
@@ -105,7 +105,7 @@ const FeedbackStation = ({ user }) => {
                       whileHover={{ x: 6 }}
                       onClick={() => setRating(stratum.level)}
                       className={`flex items-center gap-4 p-3 border transition-all relative group overflow-hidden
-                        ${isActive ? 'bg-[#111111] border-[#111111] shadow-xl shadow-emerald-500/10' : 'bg-white/50 border-black/10 hover:border-[#111111]'}`}
+                        ${isActive ? 'bg-[var(--nexus-text)] border-[var(--nexus-text)] shadow-xl shadow-emerald-500/10' : 'bg-[var(--nexus-panel)] border-[var(--nexus-border)] hover:border-[var(--nexus-text)]'}`}
                     >
                       {isActive && (
                         <motion.div 
@@ -113,14 +113,14 @@ const FeedbackStation = ({ user }) => {
                           className="absolute inset-0 bg-emerald-500/5 animate-pulse" 
                         />
                       )}
-              <div className={`w-8 h-8 flex items-center justify-center border ${isActive ? 'border-emerald-500/30' : 'border-black/5'}`}>
-                        <Icon className={`w-4 h-4 ${isActive ? 'text-emerald-500 scale-110' : 'text-[#111111] opacity-40'} transition-all`} />
+                      <div className={`w-8 h-8 flex items-center justify-center border ${isActive ? 'border-emerald-500/30' : 'border-[var(--nexus-border)]'}`}>
+                        <Icon className={`w-4 h-4 ${isActive ? 'text-emerald-500 scale-110' : 'text-[var(--nexus-text)] opacity-40'} transition-all`} />
                       </div>
                       <div className="text-left">
-                        <p className={`text-[10px] font-black uppercase tracking-[0.3em] ${isActive ? 'text-white' : 'text-[#111111]'}`}>
+                        <p className={`text-[10px] font-black uppercase tracking-[0.3em] ${isActive ? (theme === 'light' ? 'text-white' : 'text-black') : 'text-[var(--nexus-text)]'}`}>
                           {stratum.label}
                         </p>
-                        <p className={`text-[8px] font-bold uppercase opacity-40 ${isActive ? 'text-emerald-500' : 'text-slate-500'}`}>
+                        <p className={`text-[8px] font-bold uppercase opacity-40 ${isActive ? 'text-emerald-500' : 'text-[var(--nexus-text-muted)]'}`}>
                           0{stratum.level}_Level_Access
                         </p>
                       </div>
@@ -130,12 +130,12 @@ const FeedbackStation = ({ user }) => {
               </div>
             </div>
             
-            <div className="p-6 bg-[#111111]/5 border border-black/5 space-y-3">
+            <div className="p-6 bg-[var(--nexus-panel)] border border-[var(--nexus-border)] space-y-3">
               <div className="flex items-center gap-2">
                 <Shield className="w-3 h-3 text-emerald-600" />
-                <span className="text-[9px] font-black uppercase tracking-widest">End_to_End_Encryption</span>
+                <span className="text-[9px] font-black uppercase tracking-widest text-[var(--nexus-text)]">End_to_End_Encryption</span>
               </div>
-              <p className="text-[10px] text-slate-500 font-bold leading-relaxed italic uppercase opacity-60">
+              <p className="text-[10px] font-bold leading-relaxed italic uppercase opacity-60" style={{ color: 'var(--nexus-text-muted)' }}>
                 Your data is synchronized with the Nexus Core via a secure tunnel. Identity masked by default.
               </p>
             </div>
@@ -144,10 +144,10 @@ const FeedbackStation = ({ user }) => {
           {/* Feedback Capture */}
           <div className="lg:col-span-7 space-y-8">
             <div className="relative group">
-              <label className="absolute -top-3 left-6 px-3 bg-[#f5f4e2] text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 z-20">
+              <label className="absolute -top-3 left-6 px-3 text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 z-20" style={{ background: 'var(--nexus-panel)' }}>
                 Input_Intel_Stream
               </label>
-              <div className="relative overflow-hidden border-2 border-[#111111] h-[320px]">
+              <div className="relative overflow-hidden border-2 h-[320px]" style={{ borderColor: 'var(--nexus-text)' }}>
                 {/* Scanning Line */}
                 <motion.div 
                   animate={{ top: ['0%', '100%', '0%'] }}
@@ -159,19 +159,21 @@ const FeedbackStation = ({ user }) => {
                   value={feedback}
                   onChange={(e) => setFeedback(e.target.value)}
                   placeholder="Initiate transmission..."
-                  className="w-full h-full bg-transparent p-8 text-sm font-black uppercase tracking-widest focus:outline-none resize-none relative z-10 placeholder:text-black/10 leading-relaxed custom-scrollbar"
+                  className="w-full h-full bg-transparent p-8 text-sm font-black uppercase tracking-widest focus:outline-none resize-none relative z-10 leading-relaxed custom-scrollbar"
+                  style={{ color: 'var(--nexus-text)', '--tw-placeholder-opacity': '0.1' }}
                 />
 
                 {/* Technical Corner Ornaments */}
-                <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-[#111111]" />
-                <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-[#111111]" />
+                <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2" style={{ borderColor: 'var(--nexus-text)' }} />
+                <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2" style={{ borderColor: 'var(--nexus-text)' }} />
               </div>
             </div>
 
             <button
               onClick={handleSubmit}
               disabled={isSubmitting}
-              className="w-full bg-[#111111] text-white py-6 px-8 font-black uppercase tracking-[0.6em] text-xs italic relative group overflow-hidden transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+              className="w-full bg-[var(--nexus-text)] py-6 px-8 font-black uppercase tracking-[0.6em] text-xs italic relative group overflow-hidden transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+              style={{ color: (theme === 'light' ? 'white' : 'black') }}
             >
               <motion.div 
                 className="absolute inset-0 bg-emerald-500/10 -translate-x-full group-hover:translate-x-0 transition-transform duration-500"
@@ -192,8 +194,8 @@ const FeedbackStation = ({ user }) => {
             </button>
 
             <div className="flex justify-between items-center opacity-30">
-              <div className="text-[8px] font-black uppercase tracking-[0.4em]">LINK_STRENGTH: 99.8%</div>
-              <div className="text-[8px] font-black uppercase tracking-[0.4em]">UPLINK_ENCRYPTION_V4</div>
+              <div className="text-[8px] font-black uppercase tracking-[0.4em]" style={{ color: 'var(--nexus-text-muted)' }}>LINK_STRENGTH: 99.8%</div>
+              <div className="text-[8px] font-black uppercase tracking-[0.4em]" style={{ color: 'var(--nexus-text-muted)' }}>UPLINK_ENCRYPTION_V4</div>
             </div>
           </div>
         </div>

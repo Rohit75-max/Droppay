@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, useMotionValue, useSpring, useTransform, AnimatePresence, useMotionTemplate } from 'framer-motion';
 
 const Hero = () => {
-    // Engine Modes: 'LENS', 'KINETIC', 'BREACH'
-    const [activeMode, setActiveMode] = useState('LENS');
+    // Engine Modes: 'LENS', 'KINETIC', 'BREACH', null (Normal)
+    const [activeMode, setActiveMode] = useState(null);
     const [isHoveringText, setIsHoveringText] = useState(false);
     const [hoveredLetterIndex, setHoveredLetterIndex] = useState(null);
     const containerRef = useRef(null);
@@ -231,7 +231,7 @@ const Hero = () => {
                     ].map((mode) => (
                         <button
                             key={mode.id}
-                            onClick={() => setActiveMode(mode.id)}
+                            onClick={() => setActiveMode(activeMode === mode.id ? null : mode.id)}
                             className="group relative flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.2em] transition-colors duration-300 w-[100px] justify-end"
                             style={{ color: activeMode === mode.id ? mode.color : 'rgba(255,255,255,0.4)' }}
                         >

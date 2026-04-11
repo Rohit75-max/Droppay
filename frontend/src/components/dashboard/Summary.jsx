@@ -186,7 +186,6 @@ const Summary = ({
             <EliteCard
               whileHover={{ scale: 1.01, z: 10 }}
               className={`md:col-span-4 flex flex-col items-stretch border relative overflow-hidden h-[240px] transition-all duration-700 ${nexusTheme === 'neon_relic' ? 'rounded-none relic-surface' : 'rounded-[var(--nexus-radius)]'} nexus-card`}
-              style={{ background: 'var(--nexus-panel)', borderColor: 'var(--nexus-border)', boxShadow: 'var(--nexus-glow)' }}
             >
               {/* Profile Image Section (Top 72%) */}
               <div className="w-full h-[72%] relative overflow-hidden group/avatar flex-shrink-0">
@@ -222,7 +221,7 @@ const Summary = ({
               </div>
 
               {/* Identity Details Section (Bottom 28%) */}
-              <div className={`w-full h-[28%] p-3 flex flex-col justify-center items-center relative z-20 flex-shrink-0 border-t`} style={{ background: 'var(--nexus-panel)', borderColor: 'var(--nexus-border)' }}>
+              <div className={`w-full h-[28%] p-3 flex flex-col justify-center items-center relative z-20 flex-shrink-0 border-t`}>
                 <div className="space-y-1 w-full text-center">
                   <div className="space-y-0.5">
                     <div className="flex items-center justify-center gap-2">
@@ -292,7 +291,7 @@ const Summary = ({
             </div>
           ) : (
             <EliteCard disableHover={true} className={`md:col-span-8 flex flex-col justify-center p-6 sm:p-8 rounded-[var(--nexus-radius)] border relative overflow-hidden h-[240px] transition-all duration-500 nexus-card`}
-              style={{ background: 'var(--nexus-panel)', borderColor: 'var(--nexus-border)', boxShadow: 'var(--nexus-glow)' }}>
+            >
               {nexusTheme === 'neon_relic' && (
                 <>
                   <div className="plasma-leak-cyan top-0 right-0 -mt-2 -mr-2"></div>
@@ -337,7 +336,6 @@ const Summary = ({
         {/* ANALYTICS DATA STREAM (Revenue Chart) */}
         <EliteCard
           className={`group border p-0 relative transition-all duration-500 overflow-hidden ${nexusTheme === 'neon_relic' ? 'rounded-none relic-surface flex flex-col' : 'rounded-[var(--nexus-radius)] flex flex-col'} nexus-card`}
-          style={{ background: 'var(--nexus-panel)', borderColor: 'var(--nexus-border)', boxShadow: 'var(--nexus-glow)' }}
         >
           {nexusTheme === 'neon_relic' && (
             <>

@@ -14,7 +14,7 @@ import MaintenanceMode from './pages/system/Maintenance';
 
 // ─── EAGER IMPORTS (critical path — must load instantly) ──────────────────────
 import LiveThemeEngine from './components/dashboard/ThemeEngine';
-import { DashboardPreloader } from './components/ui/DashboardPreloader';
+import { TopBar } from './components/common/Loader';
 import { Navbar } from './components/layout/Navbar';
 import Home from './pages/public/Home';
 
@@ -109,14 +109,6 @@ class ErrorBoundary extends React.Component {
 }
 
 
-// ─── SIMPLE LOADER — Minimal fallback for admin gate & lazy route loads ───────
-const SimpleLoader = () => (
-  <div className="fixed inset-0 bg-[#050505] flex items-center justify-center z-[9999]">
-    <div className="flex items-baseline gap-[2px]" style={{ fontFamily: 'Georgia, serif', fontSize: '2rem', fontWeight: 900, letterSpacing: '-0.04em', color: '#ffffff', opacity: 0.15 }}>
-      drope
-    </div>
-  </div>
-);
 
 // --- PROFESSIONAL GATE: SECURE UPLINK ---
 
@@ -169,7 +161,7 @@ const MissionGate = ({ children }) => {
     checkAccess();
   }, [token, navigate]); // pathnameRef is a ref — not reactive, no ESLint warning
 
-  if (status === 'loading') return <DashboardPreloader />;
+  if (status === 'loading') return <TopBar />;
   if (status === 'unauthorized') return <Navigate to="/login" state={{ from: location }} replace />;
   return children;
 };
@@ -204,7 +196,7 @@ const MasterGate = ({ children }) => {
     checkAdminAccess();
   }, [token]);
 
-  if (status === 'loading') return <SimpleLoader />;
+  if (status === 'loading') return <TopBar />;
   if (status === 'unauthorized') return <Navigate to="/admin/login" state={{ from: location }} replace />;
   return children;
 };
@@ -216,7 +208,7 @@ const AnimatedRoutes = () => {
   return (
     // Use a minimal fallback — BootSequence as route fallback caused full loading screen
     // on every lazy page navigation (Dashboard, Admin, etc.)
-    <Suspense fallback={<SimpleLoader />}>
+    <Suspense fallback={<TopBar />}>
 
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname.split('/')[1] || 'root'}>

@@ -70,8 +70,8 @@ export default function DashboardNavbar({ user, isProfileOpen, setIsProfileOpen,
     <header
       className="flex fixed top-0 right-0 left-0 h-[70px] z-[60] items-center justify-between px-4 md:px-8 transition-all duration-500"
       style={{
-        background: 'var(--nexus-panel)',
-        borderBottom: '1px solid var(--nexus-border)'
+        background: 'transparent',
+        borderBottom: 'none'
       }}
     >
 
@@ -79,7 +79,7 @@ export default function DashboardNavbar({ user, isProfileOpen, setIsProfileOpen,
       <Link to="/dashboard" className="flex items-center gap-2 group pointer-events-auto shrink-0">
         <Logo 
           size="1.2rem" 
-          accentColor="#FF2D00" 
+          accentColor="var(--nexus-accent, #afff00)" 
           className={theme === 'light' ? 'text-black' : 'text-white'} 
           isLight={theme === 'light'}
         />
@@ -119,16 +119,15 @@ export default function DashboardNavbar({ user, isProfileOpen, setIsProfileOpen,
         {/* MODE TOGGLE (Neural Switch) */}
         <button
           onClick={toggleTheme}
-          className="w-10 h-10 rounded-full border flex items-center justify-center transition-all hover:scale-105"
-          style={{ borderColor: 'var(--nexus-border)', color: 'var(--nexus-text-muted)', background: 'var(--nexus-panel)' }}
+          className="w-10 h-10 flex items-center justify-center transition-all hover:scale-110 hover:text-[var(--nexus-accent)]"
+          style={{ color: 'var(--nexus-text-muted)' }}
         >
-          {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
+          {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
         </button>
 
 
         {/* ACTIONS & USER IDENTITY */}
-        <div className="flex items-center gap-1 md:gap-2">
-
+        <div className={`flex items-center gap-1 md:gap-2 relative ${isProfileOpen ? 'z-[110]' : 'z-10'}`}>
           {/* PROFILE TOGGLE */}
           <button
             onClick={() => setIsProfileOpen(!isProfileOpen)}
@@ -158,20 +157,30 @@ export default function DashboardNavbar({ user, isProfileOpen, setIsProfileOpen,
         {/* HIGH-FIDELITY PROFILE DROPDOWN */}
         <AnimatePresence>
           {isProfileOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-              className="absolute top-[72px] right-2 w-[280px] shadow-2xl rounded-2xl z-[100] overflow-hidden border"
-              style={{ 
-                background: 'var(--nexus-panel)', 
-                borderColor: 'var(--nexus-border)',
-                opacity: 1, /* Ensure 100% solidness */
-                boxShadow: '0 20px 50px rgba(0, 0, 0, 0.8)'
-              }}
-            >
-              {/* HEADER: Identity Reveal */}
-              <div className="p-8 pb-6 flex flex-col items-center border-b" style={{ borderColor: 'var(--nexus-border)' }}>
+            <>
+              {/* BACKDROP BLUR LAYER (Neural Focus Protocol) */}
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setIsProfileOpen(false)}
+                className="fixed inset-0 z-[50] bg-black/10 backdrop-blur-[10px]"
+              />
+
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                className="absolute top-[72px] right-2 w-[280px] shadow-2xl rounded-2xl z-[100] overflow-hidden border"
+                style={{ 
+                  background: 'var(--nexus-panel)', 
+                  borderColor: 'var(--nexus-border)',
+                  opacity: 1,
+                  boxShadow: '0 20px 50px rgba(0, 0, 0, 0.8)'
+                }}
+              >
+                {/* HEADER: Identity Reveal */}
+                <div className="p-8 pb-6 flex flex-col items-center border-b" style={{ borderColor: 'var(--nexus-border)' }}>
                 <div className="w-16 h-16 rounded-full flex items-center justify-center font-black text-xl mb-4 shadow-xl border-4"
                      style={{ background: 'var(--nexus-panel)', color: 'var(--nexus-text)', borderColor: 'var(--nexus-border)' }}>
                    {user?.fullName?.split(' ').map(n => n[0]).join('').toUpperCase() || 'RK'}
@@ -226,16 +235,16 @@ export default function DashboardNavbar({ user, isProfileOpen, setIsProfileOpen,
                       >
                         <div className="pt-4 space-y-2">
                           {quickLinks.map((link, idx) => (
-                            <div key={idx} className="p-2 border border-white/5 bg-white/[0.02] flex items-center justify-between group">
+                            <div key={idx} className="p-2 border border-[var(--nexus-border)] bg-[var(--nexus-panel)] flex items-center justify-between group">
                               <div className="flex flex-col min-w-0">
-                                <span className="text-[8px] font-black uppercase tracking-widest text-white/30 mb-0.5">{link.label}</span>
-                                <span className="text-[9px] font-mono font-bold text-white/60 truncate pr-2">
+                                <span className="text-[8px] font-black uppercase tracking-widest text-[var(--nexus-text-muted)] opacity-60 mb-0.5">{link.label}</span>
+                                <span className="text-[9px] font-mono font-bold text-[var(--nexus-text)] opacity-80 truncate pr-2">
                                   {link.value.replace(/^https?:\/\//, '')}
                                 </span>
                               </div>
                               <button
                                 onClick={() => handleCopy(link.label, link.value)}
-                                className="p-1.5 hover:bg-white hover:text-black transition-all border border-transparent hover:border-white active:scale-95 text-white/40"
+                                className="p-1.5 hover:bg-[var(--nexus-text)] hover:text-[var(--nexus-bg)] transition-all border border-transparent hover:border-[var(--nexus-border)] active:scale-95 text-[var(--nexus-text-muted)]"
                                 title="Copy Link"
                               >
                                 <Copy className="w-3 h-3" />
@@ -286,7 +295,8 @@ export default function DashboardNavbar({ user, isProfileOpen, setIsProfileOpen,
                   </button>
                 </div>
               </div>
-            </motion.div>
+              </motion.div>
+            </>
           )}
         </AnimatePresence>
 

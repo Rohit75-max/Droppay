@@ -90,12 +90,12 @@ const TopSupporterWidget = ({ topSupporters = [], stylePreference = 'royal_thron
     // ==========================================
     if (stylePreference === 'classic_chart') {
         return (
-            <div className="w-full bg-slate-900/50 backdrop-blur-xl rounded-2xl border border-white/10 p-6 flex flex-col shadow-lg">
-                <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-4">
-                    <h3 className="text-white font-bold tracking-wide flex items-center gap-2">
-                        <Trophy className="w-5 h-5 text-indigo-400" /> Top Supporters <Award className="w-4 h-4 text-indigo-400/50" />
+            <div className="w-full rounded-[var(--nexus-radius)] border p-6 flex flex-col shadow-[var(--nexus-glow)] nexus-card transition-all duration-500" style={{ background: 'var(--nexus-panel)', borderColor: 'var(--nexus-border)' }}>
+                <div className="flex items-center justify-between border-b pb-4 mb-4" style={{ borderColor: 'var(--nexus-border)' }}>
+                    <h3 className="font-bold tracking-wide flex items-center gap-2" style={{ color: 'var(--nexus-text)' }}>
+                        <Trophy className="w-5 h-5" style={{ color: 'var(--nexus-accent)' }} /> Top Supporters <Award className="w-4 h-4 opacity-50" style={{ color: 'var(--nexus-accent)' }} />
                     </h3>
-                    <span className="text-slate-400 text-xs font-mono">All-Time</span>
+                    <span className="text-xs font-mono" style={{ color: 'var(--nexus-text-muted)' }}>All-Time</span>
                 </div>
 
                 <div className="flex flex-col gap-3">
@@ -105,32 +105,33 @@ const TopSupporterWidget = ({ topSupporters = [], stylePreference = 'royal_thron
                             initial={{ x: -20, opacity: 0 }}
                             animate={{ x: 0, opacity: 1 }}
                             transition={{ delay: index * 0.1 }}
-                            className={`flex items-center justify-between p-3 rounded-xl border ${index === 0 ? 'bg-indigo-500/20 border-indigo-500/50' : 'bg-black/40 border-white/5'}`}
+                            className={`flex items-center justify-between p-3 rounded-xl border transition-colors ${index === 0 ? 'bg-[var(--nexus-accent-glow)]' : 'bg-transparent'}`}
+                            style={{ borderColor: index === 0 ? 'var(--nexus-accent)' : 'var(--nexus-border)' }}
                         >
                             <div className="flex items-center gap-4 min-w-0">
-                                <div className="font-black text-xl w-6 text-center shrink-0" style={{ color: index === 0 ? '#fbbf24' : index === 1 ? '#cbd5e1' : index === 2 ? '#d97706' : '#475569' }}>
+                                <div className="font-black text-xl w-6 text-center shrink-0" style={{ color: index === 0 ? 'var(--nexus-accent)' : 'var(--nexus-text-muted)' }}>
                                     #{index + 1}
                                 </div>
-                                <div className="w-10 h-10 rounded-full bg-slate-800/80 overflow-hidden border-2 border-white/10 shrink-0 flex items-center justify-center">
+                                <div className="w-10 h-10 rounded-full overflow-hidden border-2 shrink-0 flex items-center justify-center" style={{ borderColor: 'var(--nexus-border)', background: 'var(--nexus-bg)' }}>
                                     {index === 0 ? (
                                         <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 1.5 }}>
-                                            <Flame className="w-5 h-5 text-yellow-400 drop-shadow-md" fill="currentColor" />
+                                            <Flame className="w-5 h-5 drop-shadow-md" style={{ color: 'var(--nexus-accent)' }} fill="currentColor" />
                                         </motion.div>
                                     ) : index === 1 ? (
                                         <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ repeat: Infinity, duration: 2 }}>
-                                            <Star className="w-5 h-5 text-slate-300 drop-shadow-md" />
+                                            <Star className="w-5 h-5 drop-shadow-md text-amber-500" />
                                         </motion.div>
                                     ) : index === 2 ? (
                                         <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ repeat: Infinity, duration: 2.5 }}>
-                                            <Zap className="w-5 h-5 text-amber-500 drop-shadow-md" />
+                                            <Zap className="w-5 h-5 drop-shadow-md text-sky-500" />
                                         </motion.div>
                                     ) : (
-                                        <Zap className="w-4 h-4 text-slate-500" />
+                                        <Zap className="w-4 h-4 opacity-50" style={{ color: 'var(--nexus-text-muted)' }} />
                                     )}
                                 </div>
-                                <span className={`font-bold truncate ${index === 0 ? 'text-white' : 'text-slate-300'}`}>{supporter.name}</span>
+                                <span className={`font-bold truncate`} style={{ color: index === 0 ? 'var(--nexus-text)' : 'var(--nexus-text-muted)' }}>{supporter.name}</span>
                             </div>
-                            <span className={`font-mono font-black shrink-0 ml-4 ${index === 0 ? 'text-indigo-300' : 'text-slate-400'}`}>
+                            <span className={`font-mono font-black shrink-0 ml-4`} style={{ color: index === 0 ? 'var(--nexus-accent)' : 'var(--nexus-text-muted)' }}>
                                 ₹{supporter.amount.toLocaleString()}
                             </span>
                         </motion.div>

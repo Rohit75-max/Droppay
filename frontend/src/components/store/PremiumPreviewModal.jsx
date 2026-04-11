@@ -12,6 +12,17 @@ const PREMIUM_GOAL_STYLES = [
 ];
 
 const PremiumPreviewModal = ({ isOpen, onClose, item, onUnlock, theme, user }) => {
+    React.useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, [isOpen]);
+
     if (!isOpen || !item) return null;
 
     const isLight = theme === 'light' || document.documentElement.classList.contains('light');

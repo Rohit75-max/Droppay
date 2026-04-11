@@ -251,7 +251,6 @@ const PremiumStoreCard = ({ item, theme, activeTab, onClick, onPurchase, isProce
             </motion.div>
 
                 {/* Cyber Scanner Overlay on Hover */}
-                <div className="absolute inset-x-0 top-0 h-0.5 bg-[var(--nexus-accent)] opacity-0 group-hover:opacity-100 group-hover:animate-[scan_2s_linear_infinite] shadow-[0_0_15px_var(--nexus-accent)]" />
             </div>
 
             {/* Info Section */}

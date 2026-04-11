@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Lock, Loader2, Shield, Sparkles, Globe } from 'lucide-react';
 import axios from '../../api/axios';
@@ -11,7 +11,6 @@ const ResetPassword = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
 
   const handleReset = async (e) => {
@@ -24,8 +23,7 @@ const ResetPassword = () => {
     setError('');
     try {
       await axios.post('/api/auth/reset-password', { token, newPassword });
-      setSuccess(true);
-      setTimeout(() => navigate('/login'), 4000);
+      navigate('/login');
     } catch (err) {
       setError(err.response?.data?.msg || "Link expired or invalid protocol.");
     } finally {
@@ -91,10 +89,6 @@ const ResetPassword = () => {
           animate={{ y: 0, opacity: 1 }}
           className="w-full max-w-sm relative"
         >
-          <AnimatePresence mode="wait">
-            {!success ? (
-              <motion.div key="form" initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -20, opacity: 0 }}>
-
                 <div className="flex flex-col mb-8">
                   <h2 className="text-5xl font-black tracking-tighter text-[#111111] leading-tight mb-2" style={{ fontFamily: 'Georgia, serif' }}>
                     Reset.
@@ -113,7 +107,7 @@ const ResetPassword = () => {
                     <label className="text-[9px] font-black uppercase tracking-[0.3em] text-black/40 ml-1">New Password</label>
                     <div className="relative group">
                       <Lock className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-black/20 group-focus-within:text-black transition-colors" />
-                      <input 
+                      <input
                         type="password"
                         required
                         value={newPassword}
@@ -128,7 +122,7 @@ const ResetPassword = () => {
                     <label className="text-[9px] font-black uppercase tracking-[0.3em] text-black/40 ml-1">Confirm Identity</label>
                     <div className="relative group">
                       <Lock className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-black/20 group-focus-within:text-black transition-colors" />
-                      <input 
+                      <input
                         type="password"
                         required
                         value={confirmPassword}
@@ -139,7 +133,7 @@ const ResetPassword = () => {
                     </div>
                   </div>
 
-                  <button 
+                  <button
                     type="submit"
                     disabled={loading}
                     className="w-full bg-[#111111] text-white py-6 font-black uppercase tracking-[0.4em] text-[13px] italic flex items-center justify-center gap-4 transition-all hover:bg-emerald-600 hover:shadow-[8px_8px_0px_#000] disabled:opacity-50 group mt-4"
@@ -151,31 +145,7 @@ const ResetPassword = () => {
                     )}
                   </button>
                 </form>
-              </motion.div>
-            ) : (
-              <motion.div key="success" initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex flex-col items-center text-center">
-                 <div className="w-24 h-24 bg-emerald-500/10 border-4 border-black rounded-[2rem] flex items-center justify-center mb-10 shadow-[8px_8px_0px_#000]">
-                   <Shield className="w-10 h-10 text-emerald-600" />
-                 </div>
-                 <h2 className="text-4xl font-black tracking-tighter text-[#111111] mb-4" style={{ fontFamily: 'Georgia, serif' }}>
-                    Updated.
-                 </h2>
-                 <p className="text-sm font-bold text-black/60 mb-10 max-w-xs italic leading-relaxed">
-                    Security nexus synchronized. Redirecting to login portal...
-                 </p>
-                 <div className="w-48 h-1 bg-black/5 rounded-full overflow-hidden">
-                    <motion.div 
-                      initial={{ width: 0 }}
-                      animate={{ width: "100%" }}
-                      transition={{ duration: 4 }}
-                      className="h-full bg-emerald-500"
-                    />
-                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
 
-          {/* Technical Metadata Footer */}
           <div className="mt-20 pt-10 border-t border-black/5 flex justify-between items-center text-[8px] font-black uppercase tracking-[0.3em] text-black/20">
             <div className="flex gap-4">
               <span className="flex items-center gap-1.5"><Shield size={10} /> ENC_RSA</span>
