@@ -55,7 +55,7 @@ export const Navbar = ({ showLogo = true }) => {
 
   const navLinks = [
     { title: "Feature", path: "/features", hud: "EXPLORE PROTOCOLS" },
-    { title: "Split", path: "/pricing", hud: "ACCESS PLANS" },
+    { title: "Pricing", path: "/pricing", hud: "ROUTING & PRICING" },
     { title: "Core", path: "/blog", hud: "CORE ACCESS" }
   ];
 

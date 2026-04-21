@@ -1,4 +1,5 @@
 import React, { useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useLocation, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -6,7 +7,6 @@ import {
   Gamepad2,
   BarChart3,
   ShoppingBag,
-  DollarSign,
   ChevronRight,
   ChevronUp,
   ChevronDown,
@@ -19,7 +19,8 @@ import {
   Settings,
   Activity,
   HelpCircle,
-  MessageSquare
+  MessageSquare,
+  Monitor
 } from 'lucide-react';
 import { Logo } from '../ui/Logo';
 import { useTheme } from '../../context/ThemeContext';
@@ -28,25 +29,26 @@ import { toast } from 'react-toastify';
 
 const navItems = [
   { label: 'DASHBOARD', href: '/dashboard', icon: LayoutDashboard },
+  { label: 'STUDIO', href: '/dashboard/studio', icon: Monitor },
   { label: 'CONTROL', href: '/dashboard/control', icon: Gamepad2 },
-  { label: 'METRICS', href: '/dashboard/metrics', icon: BarChart3 },
+  { label: 'ANALYTICS', href: '/dashboard/analytics', icon: BarChart3 },
   { label: 'STORE', href: '/dashboard/store', icon: ShoppingBag },
-  { label: 'EARNINGS', href: '/dashboard/earnings', icon: DollarSign },
-  { label: 'GROWTH', href: '/dashboard/growth', icon: Activity },
-  { label: 'HELP', href: '/dashboard/help', icon: HelpCircle },
-  { label: 'FEEDBACK', href: '/dashboard/feedback', icon: MessageSquare },
 ];
 
 export default function DashboardNavbar({ user, isProfileOpen, setIsProfileOpen, setActiveSection, handleLogoClick }) {
   const { pathname } = useLocation();
   const { theme, toggleTheme } = useTheme();
   const dropdownRef = useRef(null);
+  const innerDropdownRef = useRef(null);
   const [isQuickLinksExpanded, setIsQuickLinksExpanded] = React.useState(false);
 
   // Close dropdown on click outside
   useEffect(() => {
     function handleClickOutside(event) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      if (
+        dropdownRef.current && !dropdownRef.current.contains(event.target) &&
+        (!innerDropdownRef.current || !innerDropdownRef.current.contains(event.target))
+      ) {
         setIsProfileOpen(false);
       }
     }
@@ -68,7 +70,7 @@ export default function DashboardNavbar({ user, isProfileOpen, setIsProfileOpen,
 
   return (
     <header
-      className="flex fixed top-0 right-0 left-0 h-[70px] z-[60] items-center justify-between px-4 md:px-8 transition-all duration-500"
+      className={`flex fixed top-0 right-0 left-0 h-[70px] ${isProfileOpen ? 'z-[210]' : 'z-[60]'} items-center justify-between px-4 md:px-8 transition-all duration-500`}
       style={{
         background: 'transparent',
         borderBottom: 'none'
@@ -127,7 +129,7 @@ export default function DashboardNavbar({ user, isProfileOpen, setIsProfileOpen,
 
 
         {/* ACTIONS & USER IDENTITY */}
-        <div className={`flex items-center gap-1 md:gap-2 relative ${isProfileOpen ? 'z-[110]' : 'z-10'}`}>
+        <div className={`flex items-center gap-1 md:gap-2 relative ${isProfileOpen ? 'z-[210]' : 'z-10'}`}>
           {/* PROFILE TOGGLE */}
           <button
             onClick={() => setIsProfileOpen(!isProfileOpen)}
@@ -155,150 +157,192 @@ export default function DashboardNavbar({ user, isProfileOpen, setIsProfileOpen,
         </div>
 
         {/* HIGH-FIDELITY PROFILE DROPDOWN */}
-        <AnimatePresence>
-          {isProfileOpen && (
-            <>
-              {/* BACKDROP BLUR LAYER (Neural Focus Protocol) */}
-              <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={() => setIsProfileOpen(false)}
-                className="fixed inset-0 z-[50] bg-black/10 backdrop-blur-[10px]"
-              />
+        {createPortal(
+          <AnimatePresence>
+            {isProfileOpen && (
+              <>
+                {/* BACKDROP BLUR LAYER (Neural Focus Protocol) */}
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={() => setIsProfileOpen(false)}
+                  className="fixed inset-0 z-[150] bg-black/40 backdrop-blur-[10px]"
+                />
 
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                className="absolute top-[72px] right-2 w-[280px] shadow-2xl rounded-2xl z-[100] overflow-hidden border"
-                style={{ 
-                  background: 'var(--nexus-panel)', 
-                  borderColor: 'var(--nexus-border)',
-                  opacity: 1,
-                  boxShadow: '0 20px 50px rgba(0, 0, 0, 0.8)'
-                }}
-              >
-                {/* HEADER: Identity Reveal */}
-                <div className="p-8 pb-6 flex flex-col items-center border-b" style={{ borderColor: 'var(--nexus-border)' }}>
-                <div className="w-16 h-16 rounded-full flex items-center justify-center font-black text-xl mb-4 shadow-xl border-4"
-                     style={{ background: 'var(--nexus-panel)', color: 'var(--nexus-text)', borderColor: 'var(--nexus-border)' }}>
-                   {user?.fullName?.split(' ').map(n => n[0]).join('').toUpperCase() || 'RK'}
-                </div>
-                <h3 className="font-sans font-black text-sm uppercase tracking-tight" style={{ color: 'var(--nexus-text)' }}>
-                  {user?.fullName || 'CREATOR NODE'}
-                </h3>
-                <p className="font-mono text-[9px] uppercase tracking-widest mt-1" style={{ color: 'var(--nexus-text-muted)' }}>
-                  {user?.streamerId ? `@${user.streamerId}` : 'ID: @SECURE_NODE'}
-                </p>
-              </div>
-
-              {/* TELEMETRY: Node Stats Grid */}
-              <div className="grid grid-cols-2 border-b" style={{ borderColor: 'var(--nexus-border)' }}>
-                <div className="p-4 border-r text-center" style={{ borderColor: 'var(--nexus-border)' }}>
-                  <p className="font-mono text-[7px] uppercase tracking-widest mb-1" style={{ color: 'var(--nexus-text-muted)' }}>Balance</p>
-                  <p className="font-sans font-black text-xs uppercase" style={{ color: 'var(--nexus-text)' }}>
-                    ₹{(Number(user?.walletBalance) || 0).toLocaleString('en-IN')}
-                  </p>
-                </div>
-                <div className="p-4 text-center">
-                  <p className="font-mono text-[7px] uppercase tracking-widest mb-1" style={{ color: 'var(--nexus-text-muted)' }}>Node_Tier</p>
-                  <div className="flex items-center justify-center gap-1">
-                    <Zap size={8} style={{ color: 'var(--nexus-accent)' }} fill="currentColor" />
-                    <p className="font-sans font-black text-xs uppercase italic" style={{ color: 'var(--nexus-text)' }}>
-                      {user?.subscription?.plan || 'STARTER'}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                  ref={innerDropdownRef}
+                  className="fixed top-[80px] right-4 w-[300px] shadow-2xl rounded-3xl z-[200] overflow-hidden border"
+                  style={{ 
+                    background: 'var(--nexus-panel)', 
+                    borderColor: 'var(--nexus-border)',
+                    opacity: 1,
+                    boxShadow: '0 30px 60px -12px rgba(0, 0, 0, 0.45), 0 18px 36px -18px rgba(0, 0, 0, 0.5)'
+                  }}
+                >
+                  {/* HEADER: Identity Reveal */}
+                  <div className="p-8 pb-6 flex flex-col items-center border-b" style={{ borderColor: 'var(--nexus-border)' }}>
+                    <div className="w-16 h-16 rounded-full flex items-center justify-center font-black text-xl mb-4 shadow-xl border-4"
+                         style={{ background: 'var(--nexus-panel)', color: 'var(--nexus-text)', borderColor: 'var(--nexus-border)' }}>
+                      {user?.fullName?.split(' ').map(n => n[0]).join('').toUpperCase() || 'RK'}
+                    </div>
+                    <h3 className="font-sans font-black text-sm uppercase tracking-tight" style={{ color: 'var(--nexus-text)' }}>
+                      {user?.fullName || 'CREATOR NODE'}
+                    </h3>
+                    <p className="font-mono text-[9px] uppercase tracking-widest mt-1" style={{ color: 'var(--nexus-text-muted)' }}>
+                      {user?.streamerId ? `@${user.streamerId}` : 'ID: @SECURE_NODE'}
                     </p>
                   </div>
-                </div>
-              </div>
 
-              {/* ACTIONS: Tactical Menu */}
-              <div className="p-1 space-y-1">
-                {/* Tactical Action Button (Expandable Toggle) */}
-                <div className="p-3 border-b border-[var(--nexus-border)]/50">
-                  <button
-                    onClick={() => setIsQuickLinksExpanded(!isQuickLinksExpanded)}
-                    className="mx-auto block w-full py-2.5 rounded-none bg-[#111111] text-white text-[10px] font-black uppercase italic tracking-[0.3em] flex flex-row items-center justify-center gap-2 hover:bg-black transition-all active:scale-[0.98] shadow-lg"
-                  >
-                    <Zap className={`w-3 h-3 ${isQuickLinksExpanded ? 'text-amber-500' : 'text-[var(--nexus-accent)]'}`} />
-                    {isQuickLinksExpanded ? 'Hide Links' : 'Quick Links'}
-                    {isQuickLinksExpanded ? <ChevronUp className="w-3 h-3 ml-auto" /> : <ChevronDown className="w-3 h-3 ml-auto" />}
-                  </button>
+                  {/* TELEMETRY: Node Stats Grid */}
+                  <div className="grid grid-cols-2 border-b" style={{ borderColor: 'var(--nexus-border)' }}>
+                    <div className="p-4 border-r text-center" style={{ borderColor: 'var(--nexus-border)' }}>
+                      <p className="font-mono text-[7px] uppercase tracking-widest mb-1" style={{ color: 'var(--nexus-text-muted)' }}>Balance</p>
+                      <p className="font-sans font-black text-xs uppercase" style={{ color: 'var(--nexus-text)' }}>
+                        ₹{(Number(user?.walletBalance) || 0).toLocaleString('en-IN')}
+                      </p>
+                    </div>
+                    <div className="p-4 text-center">
+                      <p className="font-mono text-[7px] uppercase tracking-widest mb-1" style={{ color: 'var(--nexus-text-muted)' }}>Node_Tier</p>
+                      <div className="flex items-center justify-center gap-1">
+                        <Zap size={8} style={{ color: 'var(--nexus-accent)' }} fill="currentColor" />
+                        <p className="font-sans font-black text-xs uppercase italic" style={{ color: 'var(--nexus-text)' }}>
+                          {user?.subscription?.plan || 'STARTER'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
 
-                  <AnimatePresence>
-                    {isQuickLinksExpanded && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        className="overflow-hidden"
+                  {/* ACTIONS: Tactical Menu */}
+                  <div className="p-2 space-y-1 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                    {/* Tactical Action Button (Expandable Toggle) */}
+                    <div className="p-2">
+                      <button
+                        onClick={() => setIsQuickLinksExpanded(!isQuickLinksExpanded)}
+                        className="mx-auto block w-full py-3 rounded-xl bg-[#111111] text-white text-[10px] font-black uppercase italic tracking-[0.3em] flex flex-row items-center justify-center gap-2 hover:bg-black transition-all active:scale-[0.98] shadow-lg"
                       >
-                        <div className="pt-4 space-y-2">
-                          {quickLinks.map((link, idx) => (
-                            <div key={idx} className="p-2 border border-[var(--nexus-border)] bg-[var(--nexus-panel)] flex items-center justify-between group">
-                              <div className="flex flex-col min-w-0">
-                                <span className="text-[8px] font-black uppercase tracking-widest text-[var(--nexus-text-muted)] opacity-60 mb-0.5">{link.label}</span>
-                                <span className="text-[9px] font-mono font-bold text-[var(--nexus-text)] opacity-80 truncate pr-2">
-                                  {link.value.replace(/^https?:\/\//, '')}
-                                </span>
-                              </div>
-                              <button
-                                onClick={() => handleCopy(link.label, link.value)}
-                                className="p-1.5 hover:bg-[var(--nexus-text)] hover:text-[var(--nexus-bg)] transition-all border border-transparent hover:border-[var(--nexus-border)] active:scale-95 text-[var(--nexus-text-muted)]"
-                                title="Copy Link"
-                              >
-                                <Copy className="w-3 h-3" />
-                              </button>
+                        <Zap className={`w-3 h-3 ${isQuickLinksExpanded ? 'text-amber-500' : 'text-[var(--nexus-accent)]'}`} />
+                        {isQuickLinksExpanded ? 'Hide Links' : 'Quick Links'}
+                        {isQuickLinksExpanded ? <ChevronUp className="w-3 h-3 ml-auto" /> : <ChevronDown className="w-3 h-3 ml-auto" />}
+                      </button>
+
+                      <AnimatePresence>
+                        {isQuickLinksExpanded && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            className="overflow-hidden"
+                          >
+                            <div className="pt-3 space-y-2">
+                              {quickLinks.map((link, idx) => (
+                                <div key={idx} className="p-2.5 rounded-xl border border-[var(--nexus-border)] bg-[var(--nexus-bg)]/50 flex items-center justify-between group">
+                                  <div className="flex flex-col min-w-0">
+                                    <span className="text-[7px] font-black uppercase tracking-widest text-[var(--nexus-text-muted)] opacity-60 mb-0.5">{link.label}</span>
+                                    <span className="text-[9px] font-mono font-bold text-[var(--nexus-text)] opacity-80 truncate pr-2">
+                                      {link.value.replace(/^https?:\/\//, '')}
+                                    </span>
+                                  </div>
+                                  <button
+                                    onClick={() => handleCopy(link.label, link.value)}
+                                    className="p-1.5 rounded-lg hover:bg-[var(--nexus-text)] hover:text-[var(--nexus-bg)] transition-all border border-transparent hover:border-[var(--nexus-border)] active:scale-95 text-[var(--nexus-text-muted)]"
+                                    title="Copy Link"
+                                  >
+                                    <Copy className="w-3 h-3" />
+                                  </button>
+                                </div>
+                              ))}
                             </div>
-                          ))}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
 
-                <Link
-                   to="/dashboard/profile"
-                   onClick={() => { setIsProfileOpen(false); setActiveSection('profile'); }}
-                   className="flex items-center justify-between p-3 px-4 rounded-xl transition-colors group border border-transparent hover:border-[var(--nexus-border)]"
-                   style={{ color: 'var(--nexus-text)' }}
-                 >
-                   <div className="flex items-center gap-3">
-                     <User size={14} className="opacity-50 group-hover:opacity-100 transition-opacity" />
-                     <span className="font-mono text-[10px] uppercase font-bold tracking-wide">Profile</span>
-                   </div>
-                   <ChevronRight size={12} className="opacity-30 group-hover:translate-x-0.5 transition-all" />
-                 </Link>
+                    <Link
+                       to="/dashboard/profile"
+                       onClick={() => { setIsProfileOpen(false); setActiveSection('profile'); }}
+                       className="flex items-center justify-between p-3 px-4 rounded-xl transition-all group border border-transparent hover:border-[var(--nexus-border)] hover:bg-[var(--nexus-border)]/10"
+                       style={{ color: 'var(--nexus-text)' }}
+                     >
+                       <div className="flex items-center gap-3">
+                         <User size={14} className="opacity-50 group-hover:opacity-100 transition-opacity" />
+                         <span className="font-mono text-[10px] uppercase font-bold tracking-wide">Profile</span>
+                       </div>
+                       <ChevronRight size={12} className="opacity-30 group-hover:translate-x-0.5 transition-all" />
+                     </Link>
 
-                 <button
-                   onClick={() => { setIsProfileOpen(false); setActiveSection('settings'); }}
-                   className="flex items-center justify-between p-3 px-4 rounded-xl transition-colors group border border-transparent hover:border-[var(--nexus-border)]"
-                   style={{ color: 'var(--nexus-text)' }}
-                 >
-                   <div className="flex items-center gap-3">
-                     <Settings size={14} className="opacity-50 group-hover:opacity-100 transition-opacity" />
-                     <span className="font-mono text-[10px] uppercase font-bold tracking-wide">Settings</span>
-                   </div>
-                   <ChevronRight size={12} className="opacity-30 group-hover:translate-x-0.5 transition-all" />
-                 </button>
+                     <button
+                       onClick={() => { setIsProfileOpen(false); setActiveSection('settings'); }}
+                       className="w-full flex items-center justify-between p-3 px-4 rounded-xl transition-all group border border-transparent hover:border-[var(--nexus-border)] hover:bg-[var(--nexus-border)]/10"
+                       style={{ color: 'var(--nexus-text)' }}
+                     >
+                       <div className="flex items-center gap-3">
+                         <Settings size={14} className="opacity-50 group-hover:opacity-100 transition-opacity" />
+                         <span className="font-mono text-[10px] uppercase font-bold tracking-wide">Settings</span>
+                       </div>
+                       <ChevronRight size={12} className="opacity-30 group-hover:translate-x-0.5 transition-all" />
+                     </button>
 
-                <div className="pt-2 mt-2 border-t" style={{ borderColor: 'var(--nexus-border)' }}>
-                  <button 
-                    onClick={() => {
-                      localStorage.removeItem('token');
-                      window.location.href = '/login';
-                    }}
-                    className="w-full flex items-center gap-3 p-3 px-4 rounded-xl text-rose-500 hover:bg-rose-500/5 transition-colors group"
-                  >
-                    <LogOut size={14} className="transition-colors" />
-                    <span className="font-mono text-[10px] uppercase font-bold tracking-wide">De-authenticate</span>
-                  </button>
-                </div>
-              </div>
-              </motion.div>
-            </>
-          )}
-        </AnimatePresence>
+                     <div className="mx-4 my-1 border-t opacity-30" style={{ borderColor: 'var(--nexus-border)' }} />
+
+                     <Link to="/dashboard/growth" onClick={() => setIsProfileOpen(false)}
+                       className="flex items-center justify-between p-3 px-4 rounded-xl transition-all group border border-transparent hover:border-[var(--nexus-border)] hover:bg-[var(--nexus-border)]/10"
+                       style={{ color: 'var(--nexus-text)' }}
+                     >
+                       <div className="flex items-center gap-3">
+                         <Activity size={14} className="opacity-50 group-hover:opacity-100 transition-opacity" />
+                         <span className="font-mono text-[10px] uppercase font-bold tracking-wide">Growth</span>
+                       </div>
+                       <ChevronRight size={12} className="opacity-30 group-hover:translate-x-0.5 transition-all" />
+                     </Link>
+
+                     <Link to="/dashboard/help" onClick={() => setIsProfileOpen(false)}
+                       className="flex items-center justify-between p-3 px-4 rounded-xl transition-all group border border-transparent hover:border-[var(--nexus-border)] hover:bg-[var(--nexus-border)]/10"
+                       style={{ color: 'var(--nexus-text)' }}
+                     >
+                       <div className="flex items-center gap-3">
+                         <HelpCircle size={14} className="opacity-50 group-hover:opacity-100 transition-opacity" />
+                         <span className="font-mono text-[10px] uppercase font-bold tracking-wide">Help</span>
+                       </div>
+                       <ChevronRight size={12} className="opacity-30 group-hover:translate-x-0.5 transition-all" />
+                     </Link>
+
+                     <Link to="/dashboard/feedback" onClick={() => setIsProfileOpen(false)}
+                       className="flex items-center justify-between p-3 px-4 rounded-xl transition-all group border border-transparent hover:border-[var(--nexus-border)] hover:bg-[var(--nexus-border)]/10"
+                       style={{ color: 'var(--nexus-text)' }}
+                     >
+                       <div className="flex items-center gap-3">
+                         <MessageSquare size={14} className="opacity-50 group-hover:opacity-100 transition-opacity" />
+                         <span className="font-mono text-[10px] uppercase font-bold tracking-wide">Feedback</span>
+                       </div>
+                       <ChevronRight size={12} className="opacity-30 group-hover:translate-x-0.5 transition-all" />
+                     </Link>
+
+                    <div className="pt-2 mt-1 border-t" style={{ borderColor: 'var(--nexus-border)' }}>
+                      <button
+                        onClick={() => {
+                          localStorage.removeItem('token');
+                          localStorage.removeItem('nexusTheme');
+                          localStorage.removeItem('dropeTheme');
+                          localStorage.removeItem('dropeThemeSet');
+                          window.location.href = '/login';
+                        }}
+                        className="w-full flex items-center gap-3 p-3 px-4 rounded-xl text-rose-500 hover:bg-rose-500/5 transition-all group border border-transparent hover:border-rose-500/20"
+                      >
+                        <LogOut size={14} />
+                        <span className="font-mono text-[10px] uppercase font-bold tracking-wide">Log Out</span>
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>,
+          document.body
+        )}
 
       </div>
     </header>

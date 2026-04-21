@@ -1,251 +1,260 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { motion, useMotionValue, useSpring, useTransform, AnimatePresence, useMotionTemplate } from 'framer-motion';
+import React, { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Link } from 'react-router-dom';
+import { ArrowRight, Play, Heart, Zap } from 'lucide-react';
 
-const Hero = () => {
-    // Engine Modes: 'LENS', 'KINETIC', 'BREACH', null (Normal)
-    const [activeMode, setActiveMode] = useState(null);
-    const [isHoveringText, setIsHoveringText] = useState(false);
-    const [hoveredLetterIndex, setHoveredLetterIndex] = useState(null);
-    const containerRef = useRef(null);
+// --- Simulated live donation alerts for the OBS-style badge ---
+const LIVE_ALERTS = [
+    { user: 'NightOwl_Dev', amount: '$25.00', msg: 'Keep grinding! 🔥', platform: 'twitch', color: '#9146FF' },
+    { user: 'xSakura99', amount: '$50.00', msg: 'First drop! Let\'s go!', platform: 'youtube', color: '#FF0000' },
+    { user: 'CodeWithKai', amount: '$10.00', msg: 'Love the stream ❤️', platform: 'kick', color: '#53FC18' },
+    { user: 'StreamFan42', amount: '$100.00', msg: 'HYPE HYPE HYPE 🚀', platform: 'twitch', color: '#9146FF' },
+];
 
-    const brandName = "DROPE".split("");
+const PlatformDot = ({ color }) => (
+    <span className="w-2 h-2 rounded-full shrink-0" style={{ background: color }} />
+);
 
-    // Responsive Lens Calibration
-    const [lensSize, setLensSize] = useState(220);
+const AlertBadge = () => {
+    const [idx, setIdx] = useState(0);
+
     useEffect(() => {
-        const handleResize = () => setLensSize(typeof window !== 'undefined' && window.innerWidth > 768 ? 320 : 220);
-        handleResize(); // Initial measurement
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
+        const t = setInterval(() => setIdx(p => (p + 1) % LIVE_ALERTS.length), 3200);
+        return () => clearInterval(t);
     }, []);
 
-    // --- SPATIAL MOUSE TRACKING ---
-    const mouseX = useMotionValue(0);
-    const mouseY = useMotionValue(0);
-    const maskX = useMotionValue(0);
-    const maskY = useMotionValue(0);
-    const textWrapperRef = useRef(null);
-
-    const handleMouseMove = (e) => {
-        if (!containerRef.current) return;
-        const rect = containerRef.current.getBoundingClientRect();
-        mouseX.set(e.clientX - rect.left);
-        mouseY.set(e.clientY - rect.top);
-
-        // Separate coordinate tracking specifically for the tight bounding box of the Mask Overlay
-        if (textWrapperRef.current) {
-            const textRect = textWrapperRef.current.getBoundingClientRect();
-            maskX.set(e.clientX - textRect.left);
-            maskY.set(e.clientY - textRect.top);
-        }
-    };
-
-
-    // Dynamic Lens Blooming Physics
-    const maskRadius = useSpring(0, { damping: 30, stiffness: 300 });
-    useEffect(() => {
-        if (activeMode === 'LENS') {
-            maskRadius.set(isHoveringText ? (lensSize / 2) : 12);
-        } else {
-            maskRadius.set(0);
-        }
-    }, [isHoveringText, activeMode, maskRadius, lensSize]);
-    
-    const displayMouseX = useTransform(mouseX, Math.round);
-    const displayMouseY = useTransform(mouseY, Math.round);
-
-    // CSS Mask Templates for True X-Ray Engine (1:1 instant tracking)
-    const layerBMask = useMotionTemplate`radial-gradient(circle ${maskRadius}px at ${maskX}px ${maskY}px, black ${maskRadius}px, transparent ${maskRadius}px)`;
-    const layerAMask = useMotionTemplate`radial-gradient(circle ${maskRadius}px at ${maskX}px ${maskY}px, transparent ${maskRadius}px, black ${maskRadius}px)`;
+    const alert = LIVE_ALERTS[idx];
 
     return (
-        <section 
-            ref={containerRef}
-            onMouseMove={handleMouseMove}
-            data-navbar-theme="dark" 
-            className={`home-section-panel relative flex flex-col justify-end p-[clamp(1.5rem,5vw,4rem)] pb-0 md:pb-[3vh] transition-all duration-300 ${
-                activeMode === 'BREACH' ? 'border-[4px] border-red-500/30' : ''
-            } ${activeMode === 'LENS' ? 'cursor-none' : ''}`}
+        <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 1 }}
+            className="absolute -bottom-6 -left-6 md:-left-12 z-20 hidden md:block"
         >
-            {/* --- THE COMMAND CANVAS BACKGROUND --- */}
-            <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 1.5 }}
-                className="absolute inset-0 pointer-events-none z-0"
-            >
-                {/* 1px Grey Grid */}
-                <div className="absolute inset-0 blueprint-grid opacity-10" />
-            </motion.div>
-
-            {/* --- BREACH MODE SHARDS --- */}
-            <AnimatePresence>
-                {activeMode === 'BREACH' && (
-                    <motion.div 
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="absolute inset-0 z-0 pointer-events-none"
-                    >
-                        {[...Array(12)].map((_, i) => (
-                            <motion.div
-                                key={`shard-${i}`}
-                                initial={{ x: "-10vw", y: Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 800), opacity: 0 }}
-                                animate={{ x: "110vw", opacity: [0, 1, 1, 0] }}
-                                transition={{ duration: 0.5 + Math.random() * 1.5, repeat: Infinity, ease: "linear", delay: Math.random() * 2 }}
-                                className="absolute h-[2px] w-24 bg-red-500/80 blur-[1px]"
-                                style={{ transform: 'skewX(-45deg)' }}
-                            />
-                        ))}
-                        <div className="absolute inset-0 bg-red-900/5 mix-blend-color-burn" />
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
-            {/* --- LENS CURSOR --- */}
-            {activeMode === 'LENS' && (
-                <motion.div
-                    style={{ x: mouseX, y: mouseY, translateX: "-50%", translateY: "-50%" }}
-                    animate={{ 
-                        width: isHoveringText ? lensSize : 24, 
-                        height: isHoveringText ? lensSize : 24,
-                        opacity: isHoveringText ? 1 : 0.6
-                    }}
-                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                    className="absolute top-0 left-0 rounded-full border border-[#afff00]/40 z-50 pointer-events-none flex flex-col items-center justify-center bg-[#afff00]/5"
-                >
-                    {/* The Inner Target reticle - Only visible when expanded */}
-                    <div className={`absolute inset-0 transition-opacity duration-300 flex items-center justify-center ${isHoveringText ? 'opacity-100' : 'opacity-0'}`}>
-                        {/* Targeting Brackets */}
-                        <div className="absolute top-4 left-4 w-3 h-3 border-t-[1.5px] border-l-[1.5px] border-[#afff00]" />
-                        <div className="absolute top-4 right-4 w-3 h-3 border-t-[1.5px] border-r-[1.5px] border-[#afff00]" />
-                        <div className="absolute bottom-4 left-4 w-3 h-3 border-b-[1.5px] border-l-[1.5px] border-[#afff00]" />
-                        <div className="absolute bottom-4 right-4 w-3 h-3 border-b-[1.5px] border-r-[1.5px] border-[#afff00]" />
-
-                        {/* Crosshairs */}
-                        <div className="w-[1px] h-full absolute bg-[#afff00]/20" />
-                        <div className="w-full h-[1px] absolute bg-[#afff00]/20" />
-                        
-                        {/* Live Coordinate Feed */}
-                        <div className="absolute -right-24 top-1/2 -translate-y-1/2 font-mono text-[9px] text-[#afff00] tracking-widest flex flex-col gap-1.5 opacity-80">
-                            <div className="flex items-center gap-1"><span>X:</span> <motion.span>{displayMouseX}</motion.span></div>
-                            <div className="flex items-center gap-1"><span>Y:</span> <motion.span>{displayMouseY}</motion.span></div>
-                            <span className="text-white/50 mt-1">LENS_ACTV</span>
-                        </div>
+            {/* OBS-style alert card */}
+            <div className="bg-zinc-900/95 border border-white/10 rounded-2xl p-4 shadow-[0_20px_60px_rgba(0,0,0,0.5)] backdrop-blur-xl w-72">
+                {/* Header bar */}
+                <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+                        <span className="font-mono text-[8px] uppercase tracking-[0.2em] text-zinc-400">live alert</span>
                     </div>
-                    
-                    {/* Always visible solid dot core */}
-                    <div className="absolute w-1 h-1 bg-[#afff00] rounded-full shadow-[0_0_10px_#afff00]" />
-                </motion.div>
-            )}
+                    <div className="flex items-center gap-1.5 bg-[#afff00]/10 border border-[#afff00]/20 px-2 py-0.5 rounded-full">
+                        <Zap className="w-2.5 h-2.5 text-[#afff00]" />
+                        <span className="font-mono text-[7px] text-[#afff00] uppercase tracking-widest">instant</span>
+                    </div>
+                </div>
 
-            {/* --- MULTI-LAYER MASSIVE BACKGROUND TEXT --- */}
-            <div className="w-full relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-0 md:gap-6" style={{ perspective: 1500 }}>
-                
-                {/* The Dual-Layer Canvas Wrapper */}
-                <div 
-                    ref={textWrapperRef} 
-                    className="relative inline-block w-full"
-                    onMouseEnter={() => setIsHoveringText(true)}
-                    onMouseLeave={() => setIsHoveringText(false)}
-                >
-                    {/* LAYER A: The Surface */}
+                {/* Alert content — cycles through donors */}
+                <AnimatePresence mode="wait">
                     <motion.div
-                        className="relative z-10 block"
-                        style={{
-                            WebkitMaskImage: layerAMask,
-                            maskImage: layerAMask,
-                        }}
+                        key={idx}
+                        initial={{ opacity: 0, x: 10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -10 }}
+                        transition={{ duration: 0.35 }}
+                        className="flex items-center gap-3"
                     >
-                        <motion.h1
-                            initial={{ scale: 0.8, opacity: 0, filter: "blur(20px)" }}
-                            animate={{ scale: 1, opacity: 1, filter: "blur(0px)" }}
-                            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-                            className="flex font-sans font-black text-[clamp(4rem,13vw,11rem)] leading-none uppercase tracking-tighter py-12"
-                        >
-                            {brandName.map((letter, i) => (
-                                <motion.span 
-                                    key={i} 
-                                    className="relative inline-block px-[1vw] -mx-[1vw] text-white drop-shadow-2xl"
-                                    animate={{ 
-                                        y: hoveredLetterIndex === i ? (i % 2 === 0 ? -24 : 24) : 0,
-                                        rotateZ: hoveredLetterIndex === i ? (i % 2 === 0 ? -4 : 4) : 0
-                                    }}
-                                    style={{
-                                        WebkitTextStroke: activeMode === 'BREACH' ? "1.5px #FF2D00" : "0px transparent",
-                                        filter: activeMode === 'BREACH' ? "drop-shadow(0 0 10px rgba(255, 45, 0, 0.3))" : "none"
-                                    }}
-                                    transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                                    onMouseEnter={() => setHoveredLetterIndex(i)}
-                                    onMouseLeave={() => setHoveredLetterIndex(null)}
-                                >
-                                    {letter}
-                                </motion.span>
-                            ))}
-                        </motion.h1>
+                        <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
+                            <Heart className="w-4 h-4 text-rose-400" />
+                        </div>
+                        <div className="flex flex-col min-w-0">
+                            <div className="flex items-center gap-1.5 mb-0.5">
+                                <PlatformDot color={alert.color} />
+                                <span className="font-sans font-black text-xs text-white truncate">{alert.user}</span>
+                                <span className="font-mono text-[10px] text-[#afff00] font-bold ml-auto shrink-0">{alert.amount}</span>
+                            </div>
+                            <span className="font-mono text-[9px] text-zinc-400 truncate">{alert.msg}</span>
+                        </div>
+                    </motion.div>
+                </AnimatePresence>
+
+                {/* Progress bar */}
+                <div className="mt-3 h-0.5 w-full bg-white/5 rounded-full overflow-hidden">
+                    <motion.div
+                        key={idx}
+                        initial={{ width: '100%' }}
+                        animate={{ width: '0%' }}
+                        transition={{ duration: 3.2, ease: 'linear' }}
+                        className="h-full bg-[#afff00]/60 rounded-full"
+                    />
+                </div>
+            </div>
+        </motion.div>
+    );
+};
+
+const Hero = () => {
+    return (
+        <section className="relative min-h-[95vh] flex flex-col items-center justify-center pt-32 pb-20 px-[clamp(1.5rem,5vw,4rem)] overflow-hidden bg-black text-white">
+            {/* Background Blueprint Grid */}
+            <div className="absolute inset-0 blueprint-grid opacity-[0.05] pointer-events-none z-0" />
+
+            {/* Soft Top Glow */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80vw] h-[30vh] bg-[#afff00]/10 blur-[120px] pointer-events-none z-0" />
+
+            <div className="relative z-10 w-full max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
+
+                {/* --- LEFT: COPY & CTAS --- */}
+                <div className="flex-1 flex flex-col items-start text-left z-20">
+
+                    {/* Live status pill */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8, ease: "easeOut" }}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-md mb-6 shadow-sm"
+                    >
+                        <span className="w-2 h-2 rounded-full bg-[#afff00] relative">
+                            <span className="animate-ping absolute inset-0 rounded-full bg-[#afff00] opacity-50"></span>
+                        </span>
+                        <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-white/80">For Streamers & Developers</span>
                     </motion.div>
 
-                    {/* LAYER B: The Hidden Blueprint Overlay */}
-                    <motion.div 
-                        className="absolute inset-0 pointer-events-none z-20 flex"
-                        style={{
-                            WebkitMaskImage: layerBMask,
-                            maskImage: layerBMask,
-                            opacity: activeMode === 'LENS' ? 1 : 0
-                        }}
+                    {/* Main headline — creator-first messaging */}
+                    <motion.h1
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 1, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+                        className="font-sans font-black text-[clamp(2.8rem,6vw,5.5rem)] leading-[0.95] uppercase tracking-tighter mb-6 relative"
                     >
-                        <h1 className="flex font-sans font-black text-[clamp(4rem,13vw,11rem)] leading-none uppercase tracking-tighter py-12">
-                            {brandName.map((letter, i) => (
-                                <motion.span 
-                                    key={`wire-${i}`} 
-                                    className="relative inline-block px-[1vw] -mx-[1vw] text-transparent"
-                                    style={{ WebkitTextStroke: "1px #afff00" }}
-                                    animate={{ 
-                                        y: hoveredLetterIndex === i ? (i % 2 === 0 ? -24 : 24) : 0,
-                                        rotateZ: hoveredLetterIndex === i ? (i % 2 === 0 ? -4 : 4) : 0
-                                    }}
-                                    transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                                >
-                                    {letter}
+                        They Donate.<br />
+                        <span className="text-[#afff00] drop-shadow-[0_0_15px_rgba(175,255,0,0.3)]">
+                            You Know.
+                        </span>
+                        <br />
+                        Instantly.
+                    </motion.h1>
 
-                                    {/* Secret Data Tags scattered within the letters */}
-                                    {i === 1 && <span className="absolute -top-8 left-10 font-mono text-[9px] text-[#afff00] tracking-widest" style={{ WebkitTextStroke: '0px' }}>LATENCY_0.01ms</span>}
-                                    {i === 2 && <span className="absolute bottom-8 right-10 font-mono text-[9px] text-[#afff00] tracking-widest" style={{ WebkitTextStroke: '0px' }}>SECURE_TUNNEL</span>}
-                                    {i === 4 && <span className="absolute -top-4 -right-12 font-mono text-[9px] text-[#afff00] tracking-widest" style={{ WebkitTextStroke: '0px' }}>SETTLEMENT_v2</span>}
-                                </motion.span>
-                            ))}
-                        </h1>
+                    {/* Sub copy — hits all 3 differentiators */}
+                    <motion.p
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+                        className="font-mono text-[clamp(10px,1.2vw,14px)] leading-[1.8] tracking-[0.1em] text-zinc-400 max-w-lg mb-10"
+                    >
+                        Real-time stream alerts the moment your audience pays.
+                        The lowest commission on the market — and setup takes under 5 minutes.
+                    </motion.p>
+
+                    {/* Key proof stats */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8, delay: 0.25, ease: "easeOut" }}
+                        className="flex items-center gap-8 mb-10"
+                    >
+                        {[
+                            { label: 'Commission', value: '2.5%', note: 'market low' },
+                            { label: 'Alert Speed', value: '<1s', note: 'on stream' },
+                            { label: 'Setup Time', value: '5 min', note: 'go live fast' },
+                        ].map((stat, i) => (
+                            <div key={i} className="flex flex-col">
+                                <span className="font-sans font-black text-[clamp(1.3rem,2.5vw,2rem)] text-white tracking-tighter">{stat.value}</span>
+                                <span className="font-mono text-[8px] uppercase tracking-widest text-zinc-500">{stat.label}</span>
+                                <span className="font-mono text-[7px] text-[#afff00]/70 tracking-wider">{stat.note}</span>
+                            </div>
+                        ))}
+                    </motion.div>
+
+                    {/* CTAs */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
+                        className="flex flex-col sm:flex-row items-center gap-5 w-full sm:w-auto"
+                    >
+                        <Link
+                            to="/signup"
+                            id="hero-cta-primary"
+                            className="w-full sm:w-auto group relative px-10 py-5 bg-[#afff00] text-black font-black uppercase text-[12px] tracking-[0.2em] overflow-hidden rounded-xl flex items-center justify-center gap-3 hover:scale-[1.02] shadow-[0_0_20px_rgba(175,255,0,0.2)] active:scale-95 transition-all"
+                        >
+                            <span className="relative z-10">Start Earning Free</span>
+                            <ArrowRight className="w-4 h-4 relative z-10 group-hover:translate-x-1 transition-transform" />
+                        </Link>
+
+                        <button
+                            id="hero-cta-secondary"
+                            onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
+                            className="w-full sm:w-auto group px-10 py-5 bg-transparent border border-white/10 hover:border-white/30 hover:bg-white/[0.03] text-white font-bold uppercase text-[12px] tracking-[0.2em] rounded-xl flex items-center justify-center gap-3 transition-colors active:scale-95"
+                        >
+                            <Play className="w-4 h-4 opacity-50 group-hover:opacity-100 transition-opacity" />
+                            See How It Works
+                        </button>
                     </motion.div>
                 </div>
 
-                {/* --- ENGINE MODE SELECTORS --- */}
+                {/* --- RIGHT: ANIMATED PAYMENT TERMINAL MOCKUP --- */}
                 <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 1, delay: 1.5 }}
-                    className="absolute bottom-6 md:bottom-8 right-0 flex flex-row md:flex-col gap-4 justify-end items-end z-50"
+                    initial={{ opacity: 0, x: 50, rotateY: 15 }}
+                    animate={{ opacity: 1, x: 0, rotateY: 0 }}
+                    transition={{ duration: 1.2, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                    style={{ perspective: 1200 }}
+                    className="flex-1 w-full relative mt-16 lg:mt-0 z-10"
                 >
-                    {[
-                        { id: 'LENS', color: '#afff00' },
-                        { id: 'BREACH', color: '#FF2D00' }
-                    ].map((mode) => (
-                        <button
-                            key={mode.id}
-                            onClick={() => setActiveMode(activeMode === mode.id ? null : mode.id)}
-                            className="group relative flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.2em] transition-colors duration-300 w-[100px] justify-end"
-                            style={{ color: activeMode === mode.id ? mode.color : 'rgba(255,255,255,0.4)' }}
-                        >
-                            <span className="group-hover:tracking-[0.3em] transition-all duration-300">
-                                {mode.id}
-                            </span>
-                            <span className="relative flex h-2 w-2 shrink-0">
-                                {activeMode === mode.id && (
-                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60" style={{ backgroundColor: mode.color }} />
-                                )}
-                                <span className="relative inline-flex rounded-full h-2 w-2" style={{ backgroundColor: activeMode === mode.id ? mode.color : 'rgba(255,255,255,0.2)' }} />
-                            </span>
-                        </button>
-                    ))}
+                    <div className="relative w-full aspect-[4/3] rounded-2xl bg-[#0A0A0A]/80 border border-white/10 shadow-[0_0_80px_rgba(175,255,0,0.06)] backdrop-blur-2xl overflow-hidden flex flex-col group">
+
+                        {/* Mockup Header */}
+                        <div className="h-12 border-b border-white/10 flex items-center px-5 gap-2.5 bg-gradient-to-b from-white/[0.04] to-transparent">
+                            <div className="w-3 h-3 rounded-full border border-white/20 bg-white/5 group-hover:bg-rose-500/20 transition-colors" />
+                            <div className="w-3 h-3 rounded-full border border-white/20 bg-white/5 group-hover:bg-amber-500/20 transition-colors" />
+                            <div className="w-3 h-3 rounded-full border border-white/20 bg-white/5 group-hover:bg-emerald-500/20 transition-colors" />
+                            <div className="ml-4 font-mono text-[9px] text-zinc-500 uppercase tracking-[0.2em]">Droppay_Terminal.live</div>
+                            <div className="ml-auto flex items-center gap-1.5">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                                <span className="font-mono text-[7px] text-emerald-400 uppercase tracking-widest">live</span>
+                            </div>
+                        </div>
+
+                        {/* Mockup Content Grid */}
+                        <div className="flex-1 p-6 grid grid-cols-2 gap-5 pointer-events-none">
+
+                            {/* Revenue card */}
+                            <div className="col-span-2 rounded-xl border border-[#afff00]/30 bg-[#afff00]/5 p-5 flex flex-col justify-between relative overflow-hidden">
+                                <div className="absolute -right-10 -top-10 w-32 h-32 bg-[#afff00]/10 blur-3xl rounded-full" />
+                                <div className="relative z-10">
+                                    <span className="font-mono text-[9px] text-[#afff00] uppercase tracking-widest block mb-1">Tonight's Earnings</span>
+                                    <span className="font-sans font-black text-4xl lg:text-5xl text-white tracking-tighter block">$1,842.50</span>
+                                    <span className="font-mono text-[8px] text-zinc-500 mt-1 block">+$124.00 last 5 min</span>
+                                </div>
+                                <div className="mt-4 flex items-end gap-1.5 h-12 opacity-80 relative z-10">
+                                    {[0.3, 0.5, 0.4, 0.7, 0.6, 0.9, 1].map((val, i) => (
+                                        <div key={i} className="flex-1 bg-gradient-to-t from-[#afff00] to-[#afff00]/70 rounded-t-sm" style={{ height: `${val * 100}%` }} />
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Alert queue */}
+                            <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4 flex flex-col gap-2">
+                                <span className="font-mono text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Alert Queue</span>
+                                {[
+                                    { user: 'NightOwl', amt: '$25', color: '#9146FF' },
+                                    { user: 'CodeKai', amt: '$10', color: '#53FC18' },
+                                    { user: 'xSakura', amt: '$50', color: '#FF0000' },
+                                ].map((a, i) => (
+                                    <div key={i} className="flex items-center gap-2">
+                                        <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: a.color }} />
+                                        <span className="font-mono text-[8px] text-zinc-400 flex-1 truncate">{a.user}</span>
+                                        <span className="font-mono text-[8px] text-[#afff00]">{a.amt}</span>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Commission card */}
+                            <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4 flex flex-col justify-between">
+                                <span className="font-mono text-[9px] text-zinc-500 uppercase tracking-widest">Commission</span>
+                                <div className="flex flex-col mt-auto">
+                                    <span className="font-sans font-black text-2xl text-white tracking-tighter">2.5%</span>
+                                    <span className="font-mono text-[7px] text-[#afff00] tracking-wider mt-0.5">Market Low ✓</span>
+                                    <span className="font-mono text-[7px] text-zinc-600 mt-1">vs 2.9% industry avg</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* OBS-style live alert badge */}
+                    <AlertBadge />
                 </motion.div>
             </div>
         </section>

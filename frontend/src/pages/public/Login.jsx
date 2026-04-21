@@ -8,25 +8,7 @@ import {
   Eye, EyeOff, Key
 } from 'lucide-react';
 
-// ─── Telemetry Mini Graph ─────────────────────────────────────
-const SyncGraph = () => (
-  <div className="w-12 h-4 overflow-hidden relative opacity-40">
-    <motion.svg viewBox="0 0 100 40" className="w-full h-full" preserveAspectRatio="none">
-      <motion.path
-        d="M0 20 Q 10 5, 20 20 T 40 20 T 60 20 T 80 20 T 100 20"
-        fill="none" stroke="#afff00" strokeWidth="2"
-        animate={{
-          d: [
-            "M0 20 Q 10 5, 20 20 T 40 20 T 60 20 T 80 20 T 100 20",
-            "M0 20 Q 10 35, 20 20 T 40 20 T 60 20 T 80 20 T 100 20",
-            "M0 20 Q 10 5, 20 20 T 40 20 T 60 20 T 80 20 T 100 20"
-          ]
-        }}
-        transition={{ duration: 0.5, repeat: Infinity, ease: "linear" }}
-      />
-    </motion.svg>
-  </div>
-);
+
 
 // ─── Architectural Input ──────────────────────────────────────
 const ArchitecturalInput = ({ icon: Icon, label, type, name, value, onChange, onFocusChange, placeholder, rightEl }) => {
@@ -47,7 +29,10 @@ const ArchitecturalInput = ({ icon: Icon, label, type, name, value, onChange, on
           type={type} name={name} value={value} onChange={onChange}
           onFocus={handleFocus} onBlur={handleBlur}
           placeholder={placeholder} required
-          className="w-full bg-white/5 border border-white/5 py-4 px-5 text-sm focus:outline-none text-white placeholder:text-white/5 uppercase font-medium tracking-tight"
+          className="w-full bg-white/5 border border-white/5 py-4 px-5 text-sm focus:outline-none text-white placeholder:text-white/20 font-medium tracking-tight"
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck="false"
         />
         <motion.div
           initial={{ scaleX: 0 }}

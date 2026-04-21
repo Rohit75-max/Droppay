@@ -4,16 +4,16 @@ import { motion } from 'framer-motion';
 import {
     Gamepad2,
     ShoppingBag,
-    DollarSign,
+    User,
     Activity
 } from 'lucide-react';
 
 const mobileNavItems = [
-    { label: 'Overview', href: '/dashboard/metrics', icon: Activity },
-    { label: 'Control', href: '/dashboard/controlcenter', icon: Gamepad2 },
+    { label: 'Analytics', href: '/dashboard/analytics', icon: Activity },
+    { label: 'Control', href: '/dashboard/control', icon: Gamepad2 },
     { label: 'DASHBOARD', href: '/dashboard', icon: null }, // Special Central Branding
     { label: 'Store', href: '/dashboard/store', icon: ShoppingBag },
-    { label: 'Earnings', href: '/dashboard/earnings', icon: DollarSign },
+    { label: 'Profile', href: '/dashboard/profile', icon: User },
 ];
 
 export function MobileBottomNav() {

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'framer-motion';
 import {
     Paintbrush, Target, BellRing, LayoutTemplate, Loader2,
@@ -371,6 +371,19 @@ const PremiumStorefront = ({
     const [selectedItemForPayment, setSelectedItemForPayment] = useState(null);
     const [isDeploying, setIsDeploying] = useState(false);
 
+    // --- PROFESSIONAL SCROLL LOCK ---
+    useEffect(() => {
+        const isAnyModalOpen = !!previewItem || showPaymentModal || isDeploying;
+        if (isAnyModalOpen) {
+            document.body.classList.add('modal-lock');
+        } else {
+            document.body.classList.remove('modal-lock');
+        }
+        return () => {
+            document.body.classList.remove('modal-lock');
+        };
+    }, [previewItem, showPaymentModal, isDeploying]);
+
     const handleDirectBuy = (e, item) => {
         if (e) e.stopPropagation();
         if (item.isOwned) {
@@ -570,16 +583,12 @@ const PremiumStorefront = ({
             />
 
             {/* Deployment Animation Overlay */}
-            <AnimatePresence>
-                {isDeploying && (
-                    <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/95">
-                        <DeploymentAnimation
-                            onComplete={() => setIsDeploying(false)}
-                            theme={theme}
-                        />
-                    </div>
-                )}
-            </AnimatePresence>
+            {isDeploying && (
+                <DeploymentAnimation
+                    onComplete={() => setIsDeploying(false)}
+                    theme={theme}
+                />
+            )}
         </div>
     );
 };

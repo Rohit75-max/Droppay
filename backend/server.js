@@ -45,10 +45,10 @@ const setupSockets = async () => {
         io = new Server(server, ioOptions);
     }
     app.set('io', io);
-    io.on('connection', (socket) => {
-        socket.on('join-overlay', (obsKey) => socket.join(obsKey));
-        socket.on('join-room', (roomId) => socket.join(roomId));
-    });
+    
+    // Antigravity: Modular Socket Protocol
+    const socketHandler = require('./socket/socketHandler');
+    socketHandler(io);
 };
 
 // 2. CONNECT DATABASE

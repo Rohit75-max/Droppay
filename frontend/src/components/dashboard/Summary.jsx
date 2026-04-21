@@ -16,8 +16,8 @@ import TopSupporterWidget from '../widgets/TopSupporterWidget';
 import EliteCard from '../common/EliteCard';
 
 import {
-  Wallet, BarChart3, Target, TrendingUp, Loader2, Zap, Activity, Send, ShieldCheck, IndianRupee, Sparkles,
-  CheckCircle, Trophy, User, Crown, Smile, Volume2, Lock, UserCircle, Gift, AlertCircle
+  Wallet, BarChart3, Target, TrendingUp, Loader2, Zap, Send, ShieldCheck, IndianRupee, Sparkles,
+  CheckCircle, Trophy, User, Crown, UserCircle, AlertCircle
 } from 'lucide-react';
 
 const PREMIUM_GOAL_STYLES = [
@@ -201,9 +201,7 @@ const Summary = ({
                   </div>
                 )}
                 
-                {/* Visual Overlays */}
-                <div className={`absolute inset-0 bg-gradient-to-t ${theme === 'light' ? 'from-white' : 'from-[#070707]'} via-transparent to-transparent pointer-events-none z-10`} />
-                
+                {/* Visual Overlays (Removed profile shadow for cleaner layout) */}                
                 {nexusTheme === 'neon_relic' && (
                   <>
                     <div className="plasma-leak-cyan top-0 left-0 -mt-2 -ml-2 opacity-40"></div>
@@ -311,7 +309,7 @@ const Summary = ({
                 <button
                   onClick={() => setShowWithdrawModal(true)}
                   disabled={isProcessingWithdraw || (Number(user.walletBalance) || 0) < 1000}
-                  className={`px-3 sm:px-6 py-2.5 rounded-xl text-[8px] sm:text-[10px] font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2 border shrink-0 ${(Number(user.walletBalance) || 0) >= 1000 ? 'bg-[var(--nexus-accent)] text-[var(--nexus-panel)] border-[var(--nexus-accent)] hover:brightness-110 shadow-[0_0_20px_var(--nexus-accent-glow)] scale-105' : 'bg-[var(--nexus-panel)] border-[var(--nexus-border)] text-[var(--nexus-text-muted)] cursor-not-allowed opacity-50'}`}
+                  className={`px-3 sm:px-6 py-2.5 rounded-xl text-[8px] sm:text-[10px] font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2 border shrink-0 ${(Number(user.walletBalance) || 0) >= 1000 ? 'bg-[var(--nexus-accent)] text-slate-900 border-[var(--nexus-accent)] hover:brightness-110 shadow-[0_0_20px_var(--nexus-accent-glow)] scale-105' : 'bg-[var(--nexus-panel)] border-[var(--nexus-border)] text-[var(--nexus-text-muted)] cursor-not-allowed opacity-50'}`}
                 >
                   {isProcessingWithdraw ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Withdraw <span className="hidden sm:inline">Funds</span> <Send className="w-3 h-3 opacity-80" /></>}
                 </button>
@@ -555,8 +553,9 @@ const Summary = ({
         )}
 
         {/* ACTIVITY SIGNAL FEED */}
+        {/* ACTIVITY SIGNAL FEED */}
         <EliteCard
-          className={`group border p-7 transition-all duration-500 h-[330px] flex flex-col ${nexusTheme === 'neon_relic' ? 'rounded-none relic-surface' : 'rounded-[var(--nexus-radius)]'} ${getCardStyle()}`}
+          className={`group border p-0 transition-all duration-500 h-[380px] flex flex-col relative overflow-hidden ${nexusTheme === 'neon_relic' ? 'rounded-none relic-surface' : 'rounded-[var(--nexus-radius)]'} ${getCardStyle()}`}
         >
           {nexusTheme === 'neon_relic' && (
             <>
@@ -570,29 +569,32 @@ const Summary = ({
             <div className="absolute top-0 left-0 w-1/3 h-1 bg-[var(--nexus-accent)] z-30" />
           )}
 
-          <h3 className={`text-[11px] font-black italic mb-8 uppercase flex items-center gap-3 transition-colors relative z-20 ${nexusTheme === 'neon_relic' ? 'text-white' : 'text-[var(--nexus-text-muted)] group-hover:text-[var(--nexus-accent)]'}`}>
-            <Activity className="w-4 h-4" /> Recent Tips <Volume2 className="w-3 h-3 opacity-30 group-hover:opacity-100 transition-opacity" />
-          </h3>
-          <div className="space-y-4 overflow-y-auto pr-3 custom-scrollbar flex-1 relative">
+          {/* HEADER STRIP */}
+          <div className="flex items-center justify-between p-5 border-b border-[var(--nexus-border)] bg-[var(--nexus-panel)]/50 backdrop-blur-md relative z-20">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 px-3 py-1 rounded-full border border-emerald-500/20 bg-emerald-500/10 backdrop-blur-md shadow-sm">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Live Feed</span>
+              </div>
+              <h3 className={`text-[11px] font-black italic uppercase tracking-tighter transition-colors ${nexusTheme === 'neon_relic' ? 'text-white' : 'text-[var(--nexus-text)]'}`}>
+                Recent Tips
+              </h3>
+            </div>
+            {recentDrops.length > 0 && (
+              <span className="text-[10px] font-mono font-bold text-[var(--nexus-text-muted)] bg-[var(--nexus-bg)] px-2 py-0.5 rounded border border-[var(--nexus-border)]">
+                x{recentDrops.length}
+              </span>
+            )}
+          </div>
+
+          <div className="space-y-3 overflow-y-auto p-4 custom-scrollbar flex-1 relative z-10 w-full">
             {recentDrops.length === 0 ? (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-center">
-
                 {nexusTheme === 'neon_relic' ? (
                   <div className="relative w-32 h-32 border-2 border-slate-700 bg-[#1a1a1a] overflow-hidden flex items-center justify-center" style={{ imageRendering: 'pixelated' }}>
-                    {/* Dithered Grid Background */}
                     <div className="absolute inset-0 opacity-50" style={{ backgroundImage: 'radial-gradient(#555 1px, transparent 1px)', backgroundSize: '4px 4px' }} />
-
-                    {/* Pink Jagged Sweep Line */}
-                    <motion.div
-                      animate={{ top: ['-20%', '120%'] }}
-                      transition={{ duration: 2, ease: "linear", repeat: Infinity }}
-                      className="absolute left-0 right-0 h-1 bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.5)] z-10"
-                      style={{ clipPath: 'polygon(0 0, 10% 100%, 20% 0, 30% 100%, 40% 0, 50% 100%, 60% 0, 70% 100%, 80% 0, 90% 100%, 100% 0)' }}
-                    />
-
-                    <div className="relative z-20 px-2 py-1 bg-black border border-pink-500 text-pink-500 text-[10px] font-mono font-bold animate-pulse shadow-[0_0_10px_rgba(255,0,255,0.5)]">
-                      SCANNING
-                    </div>
+                    <motion.div animate={{ top: ['-20%', '120%'] }} transition={{ duration: 2, ease: "linear", repeat: Infinity }} className="absolute left-0 right-0 h-1 bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.5)] z-10" style={{ clipPath: 'polygon(0 0, 10% 100%, 20% 0, 30% 100%, 40% 0, 50% 100%, 60% 0, 70% 100%, 80% 0, 90% 100%, 100% 0)' }} />
+                    <div className="relative z-20 px-2 py-1 bg-black border border-pink-500 text-pink-500 text-[10px] font-mono font-bold animate-pulse shadow-[0_0_10px_rgba(255,0,255,0.5)]">SCANNING</div>
                   </div>
                 ) : (
                   <div className="relative">
@@ -602,81 +604,128 @@ const Summary = ({
                     </div>
                   </div>
                 )}
-
                 <div className="space-y-1 mt-2">
-                  <p className={`text-xs font-black uppercase tracking-widest ${nexusTheme === 'neon_relic' ? 'text-pink-500 font-mono' : 'text-[var(--nexus-text-muted)]'}`}>Feed Offline</p>
-                  <p className={`text-[9px] font-bold italic tracking-tighter animate-pulse ${nexusTheme === 'neon_relic' ? 'text-emerald-500 font-mono drop-shadow-[0_0_5px_rgba(16,185,129,0.8)]' : 'text-emerald-600/70'}`}>Waiting for contributions...</p>
+                  <p className={`text-xs font-black uppercase tracking-widest ${nexusTheme === 'neon_relic' ? 'text-pink-500 font-mono' : 'text-[var(--nexus-text-muted)]'}`}>Awaiting Signals</p>
+                  <p className={`text-[9px] font-bold italic tracking-tighter animate-pulse ${nexusTheme === 'neon_relic' ? 'text-emerald-500 font-mono drop-shadow-[0_0_5px_rgba(16,185,129,0.8)]' : 'text-[var(--nexus-accent)] opacity-70'}`}>No contributions yet...</p>
                 </div>
               </div>
             ) : (
               <List
-                height={300} // Capped height for virtualization viewport
+                height={260}
                 rowCount={recentDrops.length}
-                rowHeight={68} // Explicit average size per row item
+                rowHeight={88}
                 rowProps={{ recentDrops, LOTTIE_STICKER_MAP, stickerFallback, nexusTheme }}
                 rowComponent={({ index, style, recentDrops, LOTTIE_STICKER_MAP, stickerFallback, nexusTheme }) => {
                   const drop = recentDrops[index];
                   if (!drop) return null;
+                  
+                  const amount = Number(drop.amount) || 0;
+                  let tierColor = 'bg-emerald-500';
+                  let textTierColor = 'text-emerald-600 dark:text-emerald-400';
+                  let bgTierColor = 'bg-emerald-500/5';
+                  if (amount >= 1000) {
+                    tierColor = 'bg-rose-500';
+                    textTierColor = 'text-rose-600 dark:text-rose-400';
+                    bgTierColor = 'bg-rose-500/5';
+                  } else if (amount >= 500) {
+                    tierColor = 'bg-amber-500';
+                    textTierColor = 'text-amber-600 dark:text-amber-400';
+                    bgTierColor = 'bg-amber-500/5';
+                  }
+
+                  const timeAgo = (() => {
+                    if (!drop.createdAt) return 'Just now';
+                    const diffMins = Math.round((new Date() - new Date(drop.createdAt)) / 60000);
+                    if (diffMins < 1) return 'Just now';
+                    if (diffMins < 60) return `${diffMins}m ago`;
+                    const diffHours = Math.floor(diffMins / 60);
+                    if (diffHours < 24) return `${diffHours}h ago`;
+                    return `${Math.floor(diffHours / 24)}d ago`;
+                  })();
 
                   return (
-                    <div style={style} className="pr-2 pb-1.5">
+                    <div style={style} className="pr-2 pb-3">
                       <motion.div
-                        initial={{ opacity: 0, x: -20, scale: 0.95 }}
-                        animate={{ opacity: 1, x: 0, scale: 1 }}
-                        transition={{ duration: 0.4 }}
-                        whileHover={{ x: 4, scale: 1.02 }}
-                        className={`group/card relative overflow-hidden flex items-center justify-between px-6 py-3 rounded-[var(--nexus-radius)] border transition-all duration-300 bg-[var(--nexus-panel)] border-[var(--nexus-border)] hover:border-[var(--nexus-accent)]/60 nexus-card h-full`}
+                        initial={{ opacity: 0, x: -16 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.4, delay: Math.min(index * 0.05, 0.5) }}
+                        whileHover={{ x: 6, scale: 1.01 }}
+                        className={`group/card relative overflow-hidden flex items-center justify-between p-4 rounded-2xl border transition-all duration-300 ${bgTierColor} border-[var(--nexus-border)] hover:border-[var(--nexus-text-muted)] dark:hover:border-white/20 shadow-sm hover:shadow-md h-full`}
                       >
-                        <div className={`absolute inset-0 opacity-0 group-hover/card:opacity-100 transition-opacity duration-500 bg-gradient-to-r from-[var(--nexus-accent)]/0 via-[var(--nexus-accent)]/10 to-[var(--nexus-accent)]/0 -translate-x-full group-hover/card:animate-[shimmer_2s_infinite]`} />
-                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-[var(--nexus-accent)] opacity-0 group-hover/card:opacity-100 transition-opacity" />
+                        {/* Status Accent Line */}
+                        <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${tierColor} opacity-70 group-hover/card:opacity-100 transition-opacity`} />
+                        <div className={`absolute inset-0 opacity-0 group-hover/card:opacity-100 transition-opacity duration-700 bg-gradient-to-r from-transparent via-${tierColor.split('-')[1]}-500/5 to-transparent -translate-x-full group-hover/card:animate-[shimmer_2s_infinite]`} />
 
-                          <div className="flex-shrink-0 w-9 h-9 group-hover/card:scale-110 transition-transform flex items-center justify-center drop-shadow-md overflow-hidden">
-                            {(LOTTIE_STICKER_MAP[drop.sticker] || (typeof drop.sticker === 'string' && drop.sticker.startsWith('http')) || drop.stickerUrl) ? (
+                        {/* Left: Sticker & User Info */}
+                        <div className="flex items-center gap-4 relative z-10 w-full overflow-hidden ml-1">
+                          <div className={`flex-shrink-0 w-11 h-11 rounded-full ${nexusTheme === 'neon_relic' ? 'bg-[#111111] border border-slate-700' : 'bg-white dark:bg-black/40 border border-[var(--nexus-border)]'} flex items-center justify-center shadow-sm relative group-hover/card:scale-110 transition-transform duration-300`}>
+                            <div className={`absolute inset-0 rounded-full ${tierColor} opacity-20 blur-md group-hover/card:opacity-40 transition-opacity`} />
+                            {((drop.sticker && LOTTIE_STICKER_MAP[drop.sticker]) || (typeof drop.sticker === 'string' && drop.sticker.startsWith('http')) || drop.stickerUrl) ? (
                               <InView triggerOnce>
                                 {({ inView, ref }) => (
-                                  <div ref={ref} style={{ width: '40px', height: '40px' }}>
+                                  <div ref={ref} className="w-8 h-8 flex items-center justify-center relative z-10">
                                     {inView ? (
                                       <Player
                                         autoplay
                                         loop
                                         src={LOTTIE_STICKER_MAP[drop.sticker] || drop.sticker || drop.stickerUrl}
-                                        style={{ width: '36px', height: '36px' }}
+                                        style={{ width: '100%', height: '100%' }}
                                       />
                                     ) : (
-                                      <span className="text-2xl">{stickerFallback[drop.sticker] || '💎'}</span>
+                                      <span className="text-xl">{stickerFallback[drop.sticker] || '💎'}</span>
                                     )}
                                   </div>
                                 )}
                               </InView>
                             ) : (
-                              <span className="text-2xl">{stickerFallback[drop.sticker] || '💎'}</span>
+                              <span className="text-xl relative z-10">{stickerFallback[drop.sticker] || '💎'}</span>
                             )}
                           </div>
-                          <div className="flex-1 min-w-0 text-center flex flex-col items-center justify-center transform translate-x-3">
-                            <p className="font-black italic text-[11px] uppercase truncate group-hover/card:text-[var(--nexus-accent)] transition-colors flex items-center gap-1 justify-center">
-                              <UserCircle className="w-2.5 h-2.5 opacity-50" /> {drop.donorName}
-                              {drop.isTest && <span className="ml-2 px-1 py-0.5 bg-rose-500 text-white text-[6px] rounded uppercase font-bold">Test</span>}
+                          
+                          <div className="flex-1 min-w-0 pr-4">
+                            <div className="flex items-center gap-2 mb-0.5">
+                              <p className={`font-black italic text-xs uppercase truncate ${nexusTheme === 'neon_relic' ? 'text-white' : 'text-[var(--nexus-text)]'} flex items-center gap-1.5`}>
+                                <UserCircle className={`w-3.5 h-3.5 ${textTierColor}`} />
+                                {drop.donorName}
+                              </p>
+                              {drop.isTest && (
+                                <span className="px-1.5 py-0.5 bg-rose-500/10 border border-rose-500/20 text-rose-500 text-[7px] rounded-sm uppercase font-black tracking-widest leading-none">Test</span>
+                              )}
+                            </div>
+                            <p className="text-[10px] text-[var(--nexus-text-muted)] truncate italic font-bold max-w-[180px]">
+                              "{drop.message}"
                             </p>
                           </div>
-                        <div className="flex flex-col items-end gap-0.5 shrink-0 ml-4 text-right">
-                          <p className="font-black text-[var(--nexus-accent)] italic text-sm md:text-base shrink-0 tracking-tighter relative z-10 flex items-center gap-1">
-                            <Gift className="w-2.5 h-2.5" /> ₹{drop.amount}
-                          </p>
-                          <p className="text-[9px] text-slate-500 truncate italic font-bold opacity-60 flex items-center gap-1 max-w-[120px]">
-                             "{drop.message}"
-                          </p>
                         </div>
-                          <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-0 group-hover/card:opacity-100 transition-opacity z-20">
-                            <button
-                              onClick={(e) => { e.stopPropagation(); handleReportIssue(drop); }}
-                              title="Report Issue"
-                              className="p-1.5 rounded-full hover:bg-rose-500/20 text-slate-500 hover:text-rose-400 transition-colors hidden sm:block delay-75 duration-300"
-                            >
-                                <AlertCircle className="w-3 h-3" />
-                            </button>
-                            <Smile className="w-2.5 h-2.5 text-[var(--nexus-accent)] hidden sm:block" />
-                            <Lock className="w-2.5 h-2.5 text-slate-600 hidden sm:block" />
+
+                        {/* Right: Amount & Controls */}
+                        <div className="flex flex-col items-end gap-1 shrink-0 relative z-10">
+                          <div className="flex items-center gap-3">
+                            <AnimatePresence mode="popLayout">
+                              <motion.p
+                                key={drop.amount}
+                                initial={{ y: -10, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                className={`font-black italic text-base md:text-lg tracking-tighter ${textTierColor} drop-shadow-sm flex items-center`}
+                              >
+                                ₹{drop.amount}
+                              </motion.p>
+                            </AnimatePresence>
                           </div>
+                          
+                          <div className="flex items-center gap-2">
+                             <span className="text-[9px] font-mono text-[var(--nexus-text-muted)] opacity-80">
+                                {timeAgo}
+                             </span>
+                             <button
+                               onClick={(e) => { e.stopPropagation(); handleReportIssue(drop); }}
+                               title="Report Issue"
+                               className="opacity-0 group-hover/card:opacity-100 p-1 rounded-md hover:bg-rose-500/10 text-[var(--nexus-text-muted)] hover:text-rose-500 transition-all duration-300 -mr-1"
+                             >
+                                <AlertCircle className="w-3.5 h-3.5" />
+                             </button>
+                          </div>
+                        </div>
                       </motion.div>
                     </div>
                   );
@@ -686,9 +735,12 @@ const Summary = ({
             )}
           </div>
 
+          {/* BACKGROUND TEXTURE */}
+          <div className="absolute inset-0 pointer-events-none opacity-[0.02] mix-blend-overlay z-0" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.65\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E")' }}></div>
+
           {/* BGMI Bottom tech-HUD details */}
           {nexusTheme === 'bgmi' && (
-            <div className="mt-auto pt-3 border-t border-[var(--nexus-border)] flex justify-between items-center relative z-20">
+            <div className="mt-auto p-3 border-t border-[var(--nexus-border)] flex justify-between items-center relative z-20 bg-[var(--nexus-panel)]/50 backdrop-blur-md">
               <span className="bg-[var(--nexus-accent)] text-[var(--nexus-panel)] px-2 py-0.5 text-[8px] font-black uppercase tracking-widest">
                 Signal Listeners
               </span>

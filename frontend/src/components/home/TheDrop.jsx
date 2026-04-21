@@ -1,89 +1,180 @@
-import React, { useState, useRef } from 'react';
-import { motion } from 'framer-motion';
-import { LootCard } from './LootCard';
+import React, { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Bell, Zap, GitMerge } from 'lucide-react';
 
-// ── Hardcoded Scatter Positions (Ensures physics stability across re-renders) ──
-const LOOT_CLUSTER = [
-    // --- Premium Alerts (Cinematic Showcase) ---
-    { id: 'p2', type: 'premium_alert', stylePreference: 'orbital_strike', name: 'PHANTOM_UNIT', amount: '5,500', message: 'Orbital drop incoming. Stay tactical.', initialPos: { x: 120, y: -140, rotate: 6 }, zIndex: 4 },
-    { id: 'p3', type: 'premium_alert', stylePreference: 'mainframe_breach', name: 'WHALE_PROTOCOL', amount: '25,000', message: 'Full system breach. Accessing sovereign funds.', initialPos: { x: 0, y: -10, rotate: 1 }, zIndex: 20 },
-    { id: 'p4', type: 'premium_alert', stylePreference: 'neon_billboard', name: 'CITY_LIGHTS', amount: '2,000', message: 'Ad revenue spike detected.', initialPos: { x: -240, y: 40, rotate: -10 }, zIndex: 3 },
-
-    // --- Goal Bars (Mission Trackers) ---
-    { id: 'g2', type: 'goal_bar', goalStyle: 'arc_reactor_horizontal', name: 'CORE_SYNC', currentProgress: 420, targetAmount: 1000, initialPos: { x: -180, y: 140, rotate: -5 }, zIndex: 7 },
-    { id: 'g3', type: 'goal_bar', goalStyle: 'boss_fight', name: 'RAID_BOSS_AXEL', currentProgress: 12000, targetAmount: 20000, initialPos: { x: 40, y: 180, rotate: 2 }, zIndex: 8 },
-
-    // --- Free Alerts replaced with Gaming Icons ---
-    { id: 'f1', type: 'premium_alert', stylePreference: 'respect_plus', name: 'GROVE_STREET', amount: '5,000', message: 'Mission Passed!', initialPos: { x: -60, y: -160, rotate: 12 }, zIndex: 10 },
-    { id: 'f2', type: 'premium_alert', stylePreference: 'bgmi_tactical', name: 'BGMI_PRO', amount: '1,500', message: 'Winner Winner!', initialPos: { x: 260, y: -180, rotate: -8 }, zIndex: 2 },
+// Stream-style donation feed — real product language
+const STREAM_FEED = [
+    { user: 'NightOwl_Dev', platform: 'Twitch', amount: '$25.00', msg: '🔥 Keep grinding!', time: '0s ago', platformColor: '#9146FF' },
+    { user: 'xSakura99', platform: 'YouTube', amount: '$50.00', msg: 'First drop lets go!', time: '12s ago', platformColor: '#FF0000' },
+    { user: 'CodeWithKai', platform: 'Kick', amount: '$10.00', msg: '❤️ Love the stream', time: '31s ago', platformColor: '#53FC18' },
+    { user: 'StreamFan42', platform: 'Twitch', amount: '$100.00', msg: '🚀 HYPE HYPE HYPE', time: '58s ago', platformColor: '#9146FF' },
+    { user: 'PixelRaider', platform: 'YouTube', amount: '$15.00', msg: 'Best stream ever!', time: '1m ago', platformColor: '#FF0000' },
 ];
 
+const FeedRow = ({ donor, isNew }) => (
+    <motion.div
+        initial={isNew ? { opacity: 0, x: 16, backgroundColor: 'rgba(175,255,0,0.07)' } : { opacity: 1 }}
+        animate={{ opacity: 1, x: 0, backgroundColor: 'rgba(0,0,0,0)' }}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        className="px-6 py-4 flex items-center justify-between hover:bg-white/[0.02] transition-colors"
+    >
+        <div className="flex items-center gap-3">
+            {/* Platform indicator dot */}
+            <div className="w-2 h-2 rounded-full shrink-0" style={{ background: donor.platformColor }} />
+            <div className="flex flex-col">
+                <span className="font-sans font-black text-sm text-white tracking-tight">{donor.user}</span>
+                <span className="font-mono text-[8px] text-zinc-500 uppercase tracking-widest">{donor.platform}</span>
+            </div>
+        </div>
+
+        <div className="flex items-center gap-5">
+            <span className="hidden md:block font-mono text-[9px] text-zinc-600 italic truncate max-w-[140px]">"{donor.msg}"</span>
+            <span className="font-mono text-[10px] font-black text-[#afff00]">{donor.amount}</span>
+            <span className="font-mono text-[8px] text-zinc-600">{donor.time}</span>
+        </div>
+    </motion.div>
+);
+
 export const TheDrop = () => {
-    const sandboxRef = useRef(null);
-    const [activeCardId, setActiveCardId] = useState(null);
+    const [feed, setFeed] = useState(STREAM_FEED);
+    const [newIdx, setNewIdx] = useState(null);
+
+    // Simulate live donations coming in
+    useEffect(() => {
+        const simulateDonations = [
+            { user: 'DragonSlayer_X', platform: 'Twitch', amount: '$75.00', msg: '💜 PogChamp!', time: 'just now', platformColor: '#9146FF' },
+            { user: 'MidnightCoder', platform: 'Kick', amount: '$20.00', msg: 'W stream fr fr', time: 'just now', platformColor: '#53FC18' },
+        ];
+
+        let i = 0;
+        const t = setInterval(() => {
+            const newDonor = simulateDonations[i % simulateDonations.length];
+            i++;
+            setFeed(prev => {
+                const updated = [newDonor, ...prev.slice(0, 4)];
+                setNewIdx(0);
+                return updated;
+            });
+        }, 4000);
+
+        return () => clearInterval(t);
+    }, []);
 
     return (
-        <section data-navbar-theme="dark" className="home-section-panel bg-black text-white px-[clamp(1.5rem,5vw,4rem)] pt-0 pb-0 relative z-30 overflow-hidden flex flex-col">
-            {/* 70px Navbar Protection & Spacer */}
-            <div className="h-[70px] w-full shrink-0 relative z-20" />
-
+        <section
+            id="how-it-works"
+            className="bg-black text-white px-[clamp(1.5rem,5vw,4rem)] py-24 md:py-32 relative z-30 overflow-hidden flex flex-col"
+        >
             {/* Standard Boundary Line */}
-            <div className="w-full border-t border-white/10 relative z-20" />
+            <div className="w-full border-t border-white/10 absolute top-0 left-0 right-0 z-20" />
 
-            {/* Header Layer */}
-            <div className="relative z-10 md:pt-10 pt-14 w-full max-w-[1400px] mx-auto pointer-events-none flex flex-col items-center text-center">
-                <div className="max-w-4xl flex flex-col items-center">
-                    <motion.h2
-                        initial={{ clipPath: "inset(0 100% 0 0)" }}
-                        whileInView={{ clipPath: "inset(0 0% 0 0)" }}
-                        transition={{ duration: 1, ease: [0.76, 0, 0.24, 1] }}
-                        viewport={{ once: true }}
-                        className="font-heading text-[clamp(2.2rem,11vw,14vw)] leading-[0.85] uppercase tracking-tighter"
-                    >
-                        Loot <span className="text-[#afff00] italic font-light">&</span> Lore<span className="text-[#afff00]">.</span>
-                    </motion.h2>
-                    <motion.p
-                        initial={{ opacity: 0, y: 10 }}
+            <div className="relative z-10 w-full max-w-7xl mx-auto flex flex-col lg:flex-row gap-16 lg:gap-24 items-center">
+
+                {/* --- LEFT: COPY --- */}
+                <div className="flex-1 max-w-xl">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
                         viewport={{ once: true }}
-                        className="font-mono text-[clamp(9px,1.1vw,12px)] uppercase tracking-[0.2em] text-zinc-500 mt-4 leading-relaxed max-w-md pointer-events-auto"
+                        transition={{ duration: 0.8 }}
                     >
-                        Interact with your revenue. A digital sandbox where your alerts live as high-fidelity physical objects. Drag, drop, and conquer.
-                    </motion.p>
+                        <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-[#afff00] mb-6 block">Zero Delay</span>
+                        <h2 className="font-sans font-black text-[clamp(2.5rem,4vw,3.5rem)] leading-[1.05] uppercase tracking-tighter mb-6">
+                            Alert fires<br />
+                            <span className="text-zinc-500">before they refresh.</span>
+                        </h2>
+                        <p className="font-mono text-[clamp(11px,1.2vw,14px)] leading-relaxed tracking-wider text-zinc-400 mb-10">
+                            The moment a payment clears, Droppay fires an instant alert to your OBS overlay.
+                            No refresh, no delay, no middle-man. Your stream keeps rolling — your audience stays engaged.
+                        </p>
+
+                        <div className="grid grid-cols-2 gap-8">
+                            <div className="flex items-start gap-4">
+                                <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
+                                    <Bell className="w-4 h-4 text-[#afff00]" />
+                                </div>
+                                <div>
+                                    <h4 className="font-sans font-black text-sm uppercase tracking-tight text-white mb-1">Instant OBS Alert</h4>
+                                    <p className="font-mono text-[9px] text-zinc-500">Fires to your overlay in under one second.</p>
+                                </div>
+                            </div>
+                            <div className="flex items-start gap-4">
+                                <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
+                                    <GitMerge className="w-4 h-4 text-[#afff00]" />
+                                </div>
+                                <div>
+                                    <h4 className="font-sans font-black text-sm uppercase tracking-tight text-white mb-1">Any Platform</h4>
+                                    <p className="font-mono text-[9px] text-zinc-500">Twitch, YouTube, Kick — one dashboard.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Instant payout callout */}
+                        <div className="mt-10 flex items-center gap-3 p-4 rounded-xl border border-[#afff00]/20 bg-[#afff00]/5">
+                            <Zap className="w-4 h-4 text-[#afff00] shrink-0" />
+                            <p className="font-mono text-[10px] text-zinc-300 leading-relaxed">
+                                <span className="text-[#afff00] font-bold">Instant payouts</span> — no more T+3 holds.
+                                Money lands in your account the same session.
+                            </p>
+                        </div>
+                    </motion.div>
                 </div>
 
-                <div className="flex flex-col items-center gap-2 mt-8 pointer-events-auto">
-                    <span className="font-mono text-[9px] text-[#afff00] tracking-[0.3em] uppercase">PHYSICS_ENGINE_ACTIVE</span>
-                    <div className="w-16 h-[1px] bg-[#afff00]/30 shadow-[0_0_10px_#afff00]" />
-                </div>
-            </div>
+                {/* --- RIGHT: LIVE STREAM DONATION FEED --- */}
+                <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 1 }}
+                    className="flex-1 w-full relative"
+                >
+                    <div className="absolute inset-0 bg-[#afff00]/5 blur-3xl rounded-full" />
 
-            {/* ── THE KINETIC SANDBOX ── */}
-            <div
-                ref={sandboxRef}
-                className="flex-1 w-full relative z-10 -mt-[10vh]" // Negative margin pulls sandbox up into header space gracefully
-            >
-                {/* Background Grid */}
-                <div className="absolute inset-0 blueprint-grid opacity-[0.03] pointer-events-none" />
+                    <div className="relative w-full rounded-2xl border border-white/10 bg-[#111] overflow-hidden flex flex-col shadow-2xl">
 
-                {LOOT_CLUSTER.map((item) => {
-                    const isDimmed = activeCardId !== null && activeCardId !== item.id;
-                    return (
-                        <LootCard
-                            key={item.id}
-                            item={item}
-                            containerRef={sandboxRef}
-                            isDimmed={isDimmed}
-                            onHover={(id) => setActiveCardId(id)}
-                            onHoverEnd={() => setActiveCardId(null)}
-                        />
-                    );
-                })}
+                        {/* Terminal header */}
+                        <div className="h-12 border-b border-white/10 bg-white/[0.02] flex items-center justify-between px-6">
+                            <div className="flex items-center gap-3">
+                                <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+                                <span className="font-mono text-[9px] text-zinc-400 uppercase tracking-widest">Live Donation Feed</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 bg-[#afff00]/10 border border-[#afff00]/20 px-2 py-1 rounded-full">
+                                <Bell className="w-2.5 h-2.5 text-[#afff00]" />
+                                <span className="font-mono text-[7px] text-[#afff00] uppercase tracking-widest">alerts on</span>
+                            </div>
+                        </div>
+
+                        {/* Column headers */}
+                        <div className="px-6 py-2 flex items-center justify-between border-b border-white/5">
+                            <span className="font-mono text-[7px] uppercase tracking-widest text-zinc-600">donor / platform</span>
+                            <div className="flex items-center gap-5">
+                                <span className="hidden md:block font-mono text-[7px] uppercase tracking-widest text-zinc-600">message</span>
+                                <span className="font-mono text-[7px] uppercase tracking-widest text-zinc-600">amount</span>
+                                <span className="font-mono text-[7px] uppercase tracking-widest text-zinc-600">time</span>
+                            </div>
+                        </div>
+
+                        {/* Feed rows */}
+                        <div className="flex-1 flex flex-col divide-y divide-white/5">
+                            <AnimatePresence initial={false}>
+                                {feed.map((donor, idx) => (
+                                    <FeedRow key={`${donor.user}-${idx}`} donor={donor} isNew={idx === newIdx} />
+                                ))}
+                            </AnimatePresence>
+                        </div>
+
+                        {/* Footer */}
+                        <div className="h-10 border-t border-white/5 bg-white/[0.01] flex items-center justify-between px-6">
+                            <span className="font-mono text-[7px] text-zinc-600 uppercase tracking-widest">Processing via Droppay</span>
+                            <span className="font-mono text-[7px] text-[#afff00] uppercase tracking-widest">2.5% commission only</span>
+                        </div>
+                    </div>
+                </motion.div>
+
             </div>
 
             {/* Tactical Glow (Bottom) */}
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[80vw] h-[20vh] bg-[#afff00]/5 blur-[100px] pointer-events-none" />
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[60vw] h-[20vh] bg-[#afff00]/5 blur-[120px] pointer-events-none" />
         </section>
     );
 };

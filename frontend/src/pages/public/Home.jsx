@@ -7,8 +7,9 @@ import { Preloader } from '../../components/layout/Preloader';
 
 // Home sections
 import Hero from '../../components/home/Hero';
-import { TheVoidCore } from '../../components/home/TheVoidCore';
 import { TheDrop } from '../../components/home/TheDrop';
+import { TrustStrip } from '../../components/home/TrustStrip';
+import { CommissionStrip } from '../../components/home/CommissionStrip';
 import { InteractiveFeatures } from '../../components/features/InteractiveFeatures';
 import { Footer } from '../../components/home/Footer';
 
@@ -19,11 +20,6 @@ const Home = () => {
 
   useEffect(() => {
     setMounted(true);
-    // Apply body lock class when marketing page is mounted
-    document.body.classList.add('marketing-root-body-lock');
-    return () => {
-      document.body.classList.remove('marketing-root-body-lock');
-    };
   }, []);
 
   useEffect(() => {
@@ -57,18 +53,30 @@ const Home = () => {
           )}
         </AnimatePresence>
 
-
-
         {/* MAIN SCROLL CONTAINER */}
+        {/* Section order: Hero → Trust → How It Works → Commission → Features → Footer */}
         <main
           ref={scrollRef}
-          className="home-scroll-container bg-[#0A0A0A] relative z-10"
+          className="bg-[#0A0A0A] relative z-10"
         >
           <div className="main-content-sheet relative z-10 w-full">
+
+            {/* 1. HERO — First impression. Creator-first headline + OBS alert demo */}
             <Hero />
-            <TheVoidCore containerRef={scrollRef} />
+
+            {/* 2. TRUST STRIP — Platform logos + social proof stats */}
+            <TrustStrip />
+
+            {/* 3. HOW IT WORKS — Live stream donation feed, instant alert story */}
             <TheDrop />
+
+            {/* 4. COMMISSION COMPARISON — "We cost less. We move faster." */}
+            <CommissionStrip />
+
+            {/* 5. PLATFORM FEATURES — Interactive bento grid */}
             <InteractiveFeatures />
+
+            {/* 6. FOOTER */}
             <Footer containerRef={scrollRef} />
           </div>
         </main>
@@ -79,4 +87,3 @@ const Home = () => {
 };
 
 export default Home;
-

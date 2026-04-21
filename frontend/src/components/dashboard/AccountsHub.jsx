@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { toast } from 'react-toastify';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from '../../api/axios';
@@ -99,6 +100,19 @@ const AccountsHub = React.memo(({
       setIsVerifyingOtp(false);
     }
   };
+
+  // --- PROFESSIONAL SCROLL LOCK ---
+  React.useEffect(() => {
+    const isAnyModalOpen = showUpgradeModal || showVerifyModal || showBankModal;
+    if (isAnyModalOpen) {
+      document.body.classList.add('modal-lock');
+    } else {
+      document.body.classList.remove('modal-lock');
+    }
+    return () => {
+      document.body.classList.remove('modal-lock');
+    };
+  }, [showUpgradeModal, showVerifyModal, showBankModal]);
 
   const status = calculateTierStatus(user?.tier || 'starter', user?.referralCount || 0);
 
@@ -415,14 +429,14 @@ const AccountsHub = React.memo(({
                   <Globe className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-[11px] font-black uppercase italic tracking-widest text-[var(--nexus-text)]">Active Streams</h3>
-                  <p className="text-[8px] font-bold text-[var(--nexus-text-muted)] uppercase tracking-wider">Operational Source Nodes</p>
+                  <h3 className="text-[11px] font-black uppercase italic tracking-widest text-[var(--nexus-text)]">Integration Protocols</h3>
+                  <p className="text-[8px] font-bold text-[var(--nexus-text-muted)] uppercase tracking-wider">Strategic Overlay Connectivity</p>
                 </div>
               </div>
               
               <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full ${theme === 'light' ? 'bg-emerald-50 border border-emerald-200' : 'bg-white/5 border border-white/10'}`}>
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[8px] font-black uppercase tracking-widest text-[var(--nexus-text-muted)]">Live Signal Ready</span>
+                <span className="text-[8px] font-black uppercase tracking-widest text-[var(--nexus-text-muted)]">Active Node Stable</span>
               </div>
             </div>
 
@@ -588,142 +602,148 @@ const AccountsHub = React.memo(({
       </div>
 
       {/* OTP VERIFICATION MODAL */}
-      <AnimatePresence>
-        {showVerifyModal && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-            <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} className={`w-full max-w-md p-8 rounded-[2.5rem] border shadow-2xl relative overflow-hidden bg-[var(--nexus-panel)] border-[var(--nexus-border)]`}>
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-emerald-500 to-transparent" />
-              <div className="flex flex-col items-center text-center space-y-6">
-                <div className="w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center border-2 border-emerald-500/20 shadow-inner">
-                  <ShieldAlert className="w-8 h-8 text-emerald-500" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-black uppercase italic tracking-tighter text-white">Identity Verification</h3>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-emerald-500 mt-1">{verifyType === 'email' ? 'Email Verification' : 'Phone Verification'}</p>
-                </div>
-                <p className={`text-sm italic text-[var(--nexus-text-muted)]`}>
-                  Enter the 6-digit code sent to your {verifyType}.
-                </p>
-                <div className="w-full space-y-4 pt-4">
-                  <input
-                    type="text"
-                    maxLength={6}
-                    value={otpInput}
-                    onChange={(e) => setOtpInput(e.target.value.replace(/\D/g, ''))}
-                    placeholder="000000"
-                    className={`w-full text-center text-3xl tracking-[0.5em] font-black p-4 rounded-2xl outline-none border transition-all bg-[var(--nexus-bg)]/40 border-[var(--nexus-border)] text-[var(--nexus-text)] focus:border-emerald-500 shadow-inner`}
-                  />
-                  <div className="flex gap-3">
-                    <button onClick={() => setShowVerifyModal(false)} className={`flex-1 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest transition-colors border bg-[var(--nexus-accent)]/5 text-[var(--nexus-text-muted)] border-[var(--nexus-border)] hover:bg-[var(--nexus-accent)]/10`}>Cancel</button>
-                    <button onClick={submitVerification} disabled={isVerifyingOtp || otpInput.length !== 6} className="flex-[2] py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest bg-emerald-500 text-black hover:bg-emerald-400 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20">
-                      {isVerifyingOtp ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Verify'}
-                    </button>
+      {createPortal(
+        <AnimatePresence>
+          {showVerifyModal && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+              <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} className={`w-full max-w-md p-8 rounded-[2.5rem] border shadow-2xl relative overflow-hidden bg-[var(--nexus-panel)] border-[var(--nexus-border)]`}>
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-emerald-500 to-transparent" />
+                <div className="flex flex-col items-center text-center space-y-6">
+                  <div className="w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center border-2 border-emerald-500/20 shadow-inner">
+                    <ShieldAlert className="w-8 h-8 text-emerald-500" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-black uppercase italic tracking-tighter text-white">Identity Verification</h3>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-emerald-500 mt-1">{verifyType === 'email' ? 'Email Verification' : 'Phone Verification'}</p>
+                  </div>
+                  <p className={`text-sm italic text-[var(--nexus-text-muted)]`}>
+                    Enter the 6-digit code sent to your {verifyType}.
+                  </p>
+                  <div className="w-full space-y-4 pt-4">
+                    <input
+                      type="text"
+                      maxLength={6}
+                      value={otpInput}
+                      onChange={(e) => setOtpInput(e.target.value.replace(/\D/g, ''))}
+                      placeholder="000000"
+                      className={`w-full text-center text-3xl tracking-[0.5em] font-black p-4 rounded-2xl outline-none border transition-all bg-[var(--nexus-bg)]/40 border-[var(--nexus-border)] text-[var(--nexus-text)] focus:border-emerald-500 shadow-inner`}
+                    />
+                    <div className="flex gap-3">
+                      <button onClick={() => setShowVerifyModal(false)} className={`flex-1 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest transition-colors border bg-[var(--nexus-accent)]/5 text-[var(--nexus-text-muted)] border-[var(--nexus-border)] hover:bg-[var(--nexus-accent)]/10`}>Cancel</button>
+                      <button onClick={submitVerification} disabled={isVerifyingOtp || otpInput.length !== 6} className="flex-[2] py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest bg-emerald-500 text-black hover:bg-emerald-400 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20">
+                        {isVerifyingOtp ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Verify'}
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
 
       {/* BANKING MODAL */}
-      <AnimatePresence>
-        {showBankModal && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-            <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} style={{ willChange: 'transform' }} className={`w-full max-w-md p-8 rounded-[2.5rem] border shadow-2xl relative overflow-hidden bg-[var(--nexus-panel)] border-[var(--nexus-border)]`}>
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-amber-500 to-transparent" />
-              <div className="flex flex-col items-center text-center space-y-6">
-                <div className="w-16 h-16 rounded-full bg-amber-500/10 flex items-center justify-center border-2 border-amber-500/20 shadow-inner">
-                  <Landmark className="w-8 h-8 text-amber-500" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-black uppercase italic tracking-tighter text-white">Secure Payouts</h3>
-                  <p className="text-amber-500 text-[10px] font-black uppercase tracking-widest mt-1">Link Bank Account</p>
-                </div>
+      {createPortal(
+        <AnimatePresence>
+          {showBankModal && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+              <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} style={{ willChange: 'transform' }} className={`w-full max-w-md p-8 rounded-[2.5rem] border shadow-2xl relative overflow-hidden bg-[var(--nexus-panel)] border-[var(--nexus-border)]`}>
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-amber-500 to-transparent" />
+                <div className="flex flex-col items-center text-center space-y-6">
+                  <div className="w-16 h-16 rounded-full bg-amber-500/10 flex items-center justify-center border-2 border-amber-500/20 shadow-inner">
+                    <Landmark className="w-8 h-8 text-amber-500" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-black uppercase italic tracking-tighter text-white">Secure Payouts</h3>
+                    <p className="text-amber-500 text-[10px] font-black uppercase tracking-widest mt-1">Link Bank Account</p>
+                  </div>
 
-                {!bankOtpMode ? (
-                  <div className="w-full space-y-4">
-                    <div className="flex p-1 rounded-xl bg-[var(--nexus-bg)]/40 border border-[var(--nexus-border)] mb-4 shadow-inner">
-                      <button onClick={() => setBankLinkType('bank_account')} className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${bankLinkType === 'bank_account' ? 'bg-amber-500 text-black' : 'text-[var(--nexus-text-muted)] hover:text-[var(--nexus-text)]'}`}>Bank Account</button>
-                      <button onClick={() => setBankLinkType('vpa')} className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${bankLinkType === 'vpa' ? 'bg-amber-500 text-black' : 'text-[var(--nexus-text-muted)] hover:text-[var(--nexus-text)]'}`}>UPI ID</button>
-                    </div>
-
-                    <div className="space-y-3 text-left">
-                      <div>
-                        <label className="text-[9px] font-black uppercase text-amber-500 tracking-widest mb-1 block">Account Holder Name</label>
-                        <input value={bankForm.name} onChange={(e) => setBankForm({ ...bankForm, name: e.target.value })} placeholder="Full Legal Name" className={`w-full rounded-2xl p-4 text-sm font-bold border-2 transition-all ${getInputStyle()}`} />
+                  {!bankOtpMode ? (
+                    <div className="w-full space-y-4">
+                      <div className="flex p-1 rounded-xl bg-[var(--nexus-bg)]/40 border border-[var(--nexus-border)] mb-4 shadow-inner">
+                        <button onClick={() => setBankLinkType('bank_account')} className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${bankLinkType === 'bank_account' ? 'bg-amber-500 text-black' : 'text-[var(--nexus-text-muted)] hover:text-[var(--nexus-text)]'}`}>Bank Account</button>
+                        <button onClick={() => setBankLinkType('vpa')} className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${bankLinkType === 'vpa' ? 'bg-amber-500 text-black' : 'text-[var(--nexus-text-muted)] hover:text-[var(--nexus-text)]'}`}>UPI ID</button>
                       </div>
-                      {bankLinkType === 'bank_account' ? (
-                        <>
-                          <div>
-                            <label className="text-[9px] font-black uppercase text-amber-500 tracking-widest mb-1 block">Account Number</label>
-                            <input value={bankForm.account_number} onChange={(e) => setBankForm({ ...bankForm, account_number: e.target.value.replace(/\D/g, '') })} placeholder="0000000000" className={`w-full rounded-2xl p-4 text-sm font-bold font-mono border-2 transition-all ${getInputStyle()}`} />
-                          </div>
-                          <div>
-                            <label className="text-[9px] font-black uppercase text-amber-500 tracking-widest mb-1 block">Confirm Account Number</label>
-                            <input value={bankForm.confirm_account_number} onChange={(e) => setBankForm({ ...bankForm, confirm_account_number: e.target.value.replace(/\D/g, '') })} placeholder="Re-enter Account Number" className={`w-full rounded-2xl p-4 text-sm font-bold font-mono border-2 transition-all ${getInputStyle()} ${bankForm.confirm_account_number && bankForm.account_number !== bankForm.confirm_account_number ? 'border-red-500 focus:border-red-500' : ''}`} />
-                            {bankForm.confirm_account_number && bankForm.account_number !== bankForm.confirm_account_number && (
-                              <p className="text-[8px] font-bold text-red-500 mt-1 uppercase tracking-wider">Account numbers do not match</p>
-                            )}
-                          </div>
-                          <div>
-                            <label className="text-[9px] font-black uppercase text-amber-500 tracking-widest mb-1 block">IFSC Code</label>
-                            <div className="relative">
-                              <input value={bankForm.ifsc} onChange={(e) => setBankForm({ ...bankForm, ifsc: e.target.value.toUpperCase().slice(0, 11) })} placeholder="IFSC0001234" className={`w-full rounded-2xl p-4 text-sm font-bold font-mono border-2 transition-all ${getInputStyle()} ${ifscDetails?.isValid === false ? 'border-red-500' : ifscDetails?.isValid ? 'border-emerald-500' : ''}`} />
-                              {isIfscVerifying && <Loader2 className="absolute right-4 top-4 w-5 h-5 animate-spin text-amber-500" />}
-                            </div>
-                            {ifscDetails?.isValid && (
-                              <p className="text-[9px] font-bold text-emerald-500 mt-1 uppercase tracking-wide">✅ {ifscDetails.bank} - {ifscDetails.branch}</p>
-                            )}
-                            {ifscDetails?.isValid === false && (
-                              <p className="text-[8px] font-bold text-red-500 mt-1 uppercase tracking-wide">❌ Invalid IFSC Code</p>
-                            )}
-                          </div>
-                        </>
-                      ) : (
+
+                      <div className="space-y-3 text-left">
                         <div>
-                          <label className="text-[9px] font-black uppercase text-amber-500 tracking-widest mb-1 block">UPI ID</label>
-                          <input value={bankForm.vpa} onChange={(e) => setBankForm({ ...bankForm, vpa: e.target.value.toLowerCase() })} placeholder="username@bank" className={`w-full rounded-2xl p-4 text-sm font-bold font-mono border-2 transition-all ${getInputStyle()}`} />
+                          <label className="text-[9px] font-black uppercase text-amber-500 tracking-widest mb-1 block">Account Holder Name</label>
+                          <input value={bankForm.name} onChange={(e) => setBankForm({ ...bankForm, name: e.target.value })} placeholder="Full Legal Name" className={`w-full rounded-2xl p-4 text-sm font-bold border-2 transition-all ${getInputStyle()}`} />
                         </div>
-                      )}
+                        {bankLinkType === 'bank_account' ? (
+                          <>
+                            <div>
+                              <label className="text-[9px] font-black uppercase text-amber-500 tracking-widest mb-1 block">Account Number</label>
+                              <input value={bankForm.account_number} onChange={(e) => setBankForm({ ...bankForm, account_number: e.target.value.replace(/\D/g, '') })} placeholder="0000000000" className={`w-full rounded-2xl p-4 text-sm font-bold font-mono border-2 transition-all ${getInputStyle()}`} />
+                            </div>
+                            <div>
+                              <label className="text-[9px] font-black uppercase text-amber-500 tracking-widest mb-1 block">Confirm Account Number</label>
+                              <input value={bankForm.confirm_account_number} onChange={(e) => setBankForm({ ...bankForm, confirm_account_number: e.target.value.replace(/\D/g, '') })} placeholder="Re-enter Account Number" className={`w-full rounded-2xl p-4 text-sm font-bold font-mono border-2 transition-all ${getInputStyle()} ${bankForm.confirm_account_number && bankForm.account_number !== bankForm.confirm_account_number ? 'border-red-500 focus:border-red-500' : ''}`} />
+                              {bankForm.confirm_account_number && bankForm.account_number !== bankForm.confirm_account_number && (
+                                <p className="text-[8px] font-bold text-red-500 mt-1 uppercase tracking-wider">Account numbers do not match</p>
+                              )}
+                            </div>
+                            <div>
+                              <label className="text-[9px] font-black uppercase text-amber-500 tracking-widest mb-1 block">IFSC Code</label>
+                              <div className="relative">
+                                <input value={bankForm.ifsc} onChange={(e) => setBankForm({ ...bankForm, ifsc: e.target.value.toUpperCase().slice(0, 11) })} placeholder="IFSC0001234" className={`w-full rounded-2xl p-4 text-sm font-bold font-mono border-2 transition-all ${getInputStyle()} ${ifscDetails?.isValid === false ? 'border-red-500' : ifscDetails?.isValid ? 'border-emerald-500' : ''}`} />
+                                {isIfscVerifying && <Loader2 className="absolute right-4 top-4 w-5 h-5 animate-spin text-amber-500" />}
+                              </div>
+                              {ifscDetails?.isValid && (
+                                <p className="text-[9px] font-bold text-emerald-500 mt-1 uppercase tracking-wide">✅ {ifscDetails.bank} - {ifscDetails.branch}</p>
+                              )}
+                              {ifscDetails?.isValid === false && (
+                                <p className="text-[8px] font-bold text-red-500 mt-1 uppercase tracking-wide">❌ Invalid IFSC Code</p>
+                              )}
+                            </div>
+                          </>
+                        ) : (
+                          <div>
+                            <label className="text-[9px] font-black uppercase text-amber-500 tracking-widest mb-1 block">UPI ID</label>
+                            <input value={bankForm.vpa} onChange={(e) => setBankForm({ ...bankForm, vpa: e.target.value.toLowerCase() })} placeholder="username@bank" className={`w-full rounded-2xl p-4 text-sm font-bold font-mono border-2 transition-all ${getInputStyle()}`} />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex gap-3 pt-4">
+                        <button onClick={() => setShowBankModal(false)} className={`flex-1 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest transition-colors border bg-[var(--nexus-accent)]/5 text-[var(--nexus-text-muted)] border-[var(--nexus-border)] hover:bg-[var(--nexus-accent)]/10`}>Back</button>
+                        <button 
+                          onClick={initiateBankLink} 
+                          disabled={
+                            isProcessingBank || 
+                            !bankForm.name || 
+                            (bankLinkType === 'bank_account' && (
+                              !bankForm.account_number || 
+                              bankForm.account_number !== bankForm.confirm_account_number || 
+                              !ifscDetails?.isValid
+                            )) ||
+                            (bankLinkType === 'vpa' && !bankForm.vpa)
+                          } 
+                          className="flex-[2] py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest bg-amber-500 text-black hover:bg-amber-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg shadow-amber-500/20"
+                        >
+                          {isProcessingBank ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Verify'}
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex gap-3 pt-4">
-                      <button onClick={() => setShowBankModal(false)} className={`flex-1 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest transition-colors border bg-[var(--nexus-accent)]/5 text-[var(--nexus-text-muted)] border-[var(--nexus-border)] hover:bg-[var(--nexus-accent)]/10`}>Back</button>
-                      <button 
-                        onClick={initiateBankLink} 
-                        disabled={
-                          isProcessingBank || 
-                          !bankForm.name || 
-                          (bankLinkType === 'bank_account' && (
-                            !bankForm.account_number || 
-                            bankForm.account_number !== bankForm.confirm_account_number || 
-                            !ifscDetails?.isValid
-                          )) ||
-                          (bankLinkType === 'vpa' && !bankForm.vpa)
-                        } 
-                        className="flex-[2] py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest bg-amber-500 text-black hover:bg-amber-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg shadow-amber-500/20"
-                      >
-                        {isProcessingBank ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Verify'}
-                      </button>
+                  ) : (
+                    <div className="w-full space-y-4">
+                      <p className={`text-sm italic text-[var(--nexus-text-muted)]`}>Enter the code sent to your phone.</p>
+                      <input type="text" maxLength={6} value={bankOtpInput} onChange={(e) => setBankOtpInput(e.target.value.replace(/\D/g, ''))} placeholder="000000" className={`w-full text-center text-3xl tracking-[0.5em] font-black p-4 rounded-2xl outline-none border transition-all bg-[var(--nexus-bg)]/40 border-[var(--nexus-border)] text-[var(--nexus-text)] focus:border-emerald-500 shadow-inner mt-4`} />
+                      <div className="flex gap-3 pt-4">
+                        <button onClick={() => setBankOtpMode(false)} className={`flex-1 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest transition-colors border bg-[var(--nexus-accent)]/5 text-[var(--nexus-text-muted)] border-[var(--nexus-border)] hover:bg-[var(--nexus-accent)]/10`}>Back</button>
+                        <button onClick={confirmBankLink} disabled={isProcessingBank || bankOtpInput.length !== 6} className="flex-[2] py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest bg-emerald-500 text-black hover:bg-emerald-400 transition-colors shadow-lg shadow-emerald-500/20">
+                          {isProcessingBank ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirm'}
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ) : (
-                  <div className="w-full space-y-4">
-                    <p className={`text-sm italic text-[var(--nexus-text-muted)]`}>Enter the code sent to your phone.</p>
-                    <input type="text" maxLength={6} value={bankOtpInput} onChange={(e) => setBankOtpInput(e.target.value.replace(/\D/g, ''))} placeholder="000000" className={`w-full text-center text-3xl tracking-[0.5em] font-black p-4 rounded-2xl outline-none border transition-all bg-[var(--nexus-bg)]/40 border-[var(--nexus-border)] text-[var(--nexus-text)] focus:border-emerald-500 shadow-inner mt-4`} />
-                    <div className="flex gap-3 pt-4">
-                      <button onClick={() => setBankOtpMode(false)} className={`flex-1 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest transition-colors border bg-[var(--nexus-accent)]/5 text-[var(--nexus-text-muted)] border-[var(--nexus-border)] hover:bg-[var(--nexus-accent)]/10`}>Back</button>
-                      <button onClick={confirmBankLink} disabled={isProcessingBank || bankOtpInput.length !== 6} className="flex-[2] py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest bg-emerald-500 text-black hover:bg-emerald-400 transition-colors shadow-lg shadow-emerald-500/20">
-                        {isProcessingBank ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirm'}
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
 
       {/* UPGRADE MODAL */}
       <UpgradeModal

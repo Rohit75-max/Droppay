@@ -583,51 +583,82 @@ const ControlCenter = ({
               className="w-full"
             >
               <div className="w-full">
-                <div className="flex flex-col items-center text-center space-y-3 mb-10">
-                  <div className="px-4 py-1.5 rounded-full bg-[var(--nexus-accent)]/10 border border-[var(--nexus-accent)]/20">
-                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[var(--nexus-accent)]">UI Theme</span>
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6 border-b border-white/5 pb-8">
+                  <div className="flex items-center gap-4">
+                    <div className="p-4 bg-[var(--nexus-accent)]/10 rounded-[1.5rem] border border-[var(--nexus-accent)]/20 shadow-inner">
+                      <Layout className="w-8 h-8 text-[var(--nexus-accent)]" />
+                    </div>
+                    <div className="flex flex-col">
+                      <h2 className="text-3xl font-black italic tracking-tighter text-[var(--nexus-text)] uppercase">Appearance</h2>
+                      <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-[var(--nexus-text-muted)] opacity-60 mt-1">Select a theme to apply globally</p>
+                    </div>
                   </div>
-                  <p className="max-w-xl text-xs italic text-[var(--nexus-text-muted)]">Transform your control center into a thematic dashboard. Choose an interface style that matches your stream identity.</p>
+
+                  {/* Dark / Light Compact Toggle Chip */}
+                  <div className="inline-flex items-center bg-[var(--nexus-panel)] border border-[var(--nexus-border)] rounded-full p-0.5 gap-0 shrink-0">
+                     <button
+                        onClick={() => {
+                          const event = new CustomEvent('nexus-theme-change', { detail: { mode: 'dark' } });
+                          window.dispatchEvent(event);
+                          localStorage.setItem('dropeThemeSet', 'true');
+                          localStorage.setItem('dropeTheme', 'dark');
+                        }}
+                        title="Dark Mode"
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full font-black tracking-widest text-[9px] uppercase transition-all duration-200 ${theme === 'dark' ? 'bg-[var(--nexus-accent)] text-white shadow-md' : 'text-[var(--nexus-text-muted)] hover:text-[var(--nexus-text)]'}`}
+                     >
+                       <Monitor className="w-3 h-3" /> Dark
+                     </button>
+                     <button
+                        onClick={() => {
+                          const event = new CustomEvent('nexus-theme-change', { detail: { mode: 'light' } });
+                          window.dispatchEvent(event);
+                          localStorage.setItem('dropeThemeSet', 'true');
+                          localStorage.setItem('dropeTheme', 'light');
+                        }}
+                        title="Light Mode"
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full font-black tracking-widest text-[9px] uppercase transition-all duration-200 ${theme === 'light' ? 'bg-[var(--nexus-accent)] text-white shadow-md' : 'text-[var(--nexus-text-muted)] hover:text-[var(--nexus-text)]'}`}
+                     >
+                       <Zap className="w-3 h-3" /> Light
+                     </button>
+                  </div>
                 </div>
 
-                <div className="relative group/scroll">
-                  {/* Directional Controllers */}
-                  <button 
-                    onClick={() => handleScroll(nexusScrollRef, -300)}
-                    className="absolute left-[-20px] top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full bg-black/80 border border-white/10 flex items-center justify-center text-[var(--nexus-accent)] opacity-0 group-hover/scroll:opacity-100 transition-all hover:bg-black hover:scale-110 shadow-[0_0_20px_rgba(16,185,129,0.3)] hidden md:flex"
-                  >
-                    <ChevronLeft className="w-6 h-6" />
-                  </button>
-                  <button 
-                    onClick={() => handleScroll(nexusScrollRef, 300)}
-                    className="absolute right-[-20px] top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full bg-black/80 border border-white/10 flex items-center justify-center text-[var(--nexus-accent)] opacity-0 group-hover/scroll:opacity-100 transition-all hover:bg-black hover:scale-110 shadow-[0_0_20px_rgba(16,185,129,0.3)] hidden md:flex"
-                  >
-                    <ChevronRight className="w-6 h-6" />
-                  </button>
-
+                <div>
                   <div 
                     ref={nexusScrollRef}
-                    className="flex overflow-x-auto snap-x snap-mandatory gap-5 p-4 -m-4 pb-8 laser-scroll items-stretch"
+                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3"
                   >
                   {[
-                    { id: 'void', label: 'VOID (DEFAULT)', desc: 'Pitch black, neon accents.', icon: <Layout className="w-6 h-6" />, color: '#10B981', premium: false },
-                    { id: 'aero', label: 'AERO (GLASS)', desc: 'Frosted glass, macOS vibe.', icon: <Sparkles className="w-6 h-6" />, color: '#38bdf8', premium: false },
-                    { id: 'aero-light', label: 'AERO LIGHT', desc: 'Bright frosted glass, macOS vibe.', icon: <Sparkles className="w-6 h-6" />, color: '#ec4899', premium: false },
-                    { id: 'nebula-void', label: 'NEBULA VOID', desc: 'Deep obsidian, violet highlights.', icon: <Layout className="w-6 h-6" />, color: '#8B5CF6', premium: false },
-                    { id: 'alabaster-pulse', label: 'ALABASTER PULSE', desc: 'Professional, bright tech-style.', icon: <Zap className="w-6 h-6" />, color: '#3B82F6', premium: false },
-                    { id: 'kawaii', label: 'KAWAII DESK', desc: 'Pastel pink, cute bounce.', icon: <Heart className="w-6 h-6" />, color: '#fb7185', premium: false },
-                    { id: 'arcade', label: 'ARCADE', desc: 'Retro 8-bit, purple neon.', icon: <Gamepad2 className="w-6 h-6" />, color: '#facc15', premium: false },
-                    { id: 'bgmi', label: 'BGMI / TACTICAL', desc: 'Desert camo, angled armor.', icon: <Target className="w-6 h-6" />, color: '#F97316', premium: false },
-                    { id: 'live_space', label: 'ZERO-GRAVITY', desc: 'Cinematic Orbit (4K Video).', icon: <Globe className="w-6 h-6" />, color: '#6366f1', premium: true },
-                    { id: 'live_erangel', label: 'RED-ZONE', desc: 'Tactical Warzone (4K Video).', icon: <Skull className="w-6 h-6" />, color: '#ef4444', premium: true },
-                    { id: 'live_cyber', label: 'HACKER OS', desc: 'Digital Rain (4K Video).', icon: <Activity className="w-6 h-6" />, color: '#39ff14', premium: true },
-                    { id: 'live_synthwave', label: 'NEON OVERDRIVE', desc: '80s Retro (3D Grid).', icon: <Music className="w-6 h-6" />, color: '#ff00aa', premium: true },
-                    { id: 'live_kawaii', label: 'SKY SANCTUARY', desc: 'Day/Night (Parallax).', icon: <Cloud className="w-6 h-6" />, color: '#a1c4fd', premium: true },
-                    { id: 'live_dragon', label: 'DRAGON HOARD', desc: 'Mystic Runes (Ember).', icon: <Gem className="w-6 h-6" />, color: '#fbbf24', premium: true },
+                    // SYSTEM ENVIRONMENTS
+                    { id: 'void',           label: 'Default',       desc: 'Dark base · Emerald',    icon: <Layout className="w-6 h-6" />,   color: '#10B981', premium: false },
+                    { id: 'aero',           label: 'Aero',          desc: 'Glass · Dark',           icon: <Sparkles className="w-6 h-6" />, color: '#38bdf8', premium: false },
+                    { id: 'aero-light',     label: 'Aero Light',    desc: 'Glass · Light',          icon: <Sparkles className="w-6 h-6" />, color: '#ec4899', premium: false },
+                    { id: 'nebula-void',    label: 'Nebula',        desc: 'Deep space · Violet',    icon: <Globe className="w-6 h-6" />,    color: '#8B5CF6', premium: false },
+                    { id: 'alabaster-pulse',label: 'Alabaster',     desc: 'Clean light · Blue',     icon: <Zap className="w-6 h-6" />,      color: '#3B82F6', premium: false },
+                    { id: 'kawaii',         label: 'Kawaii',        desc: 'Soft pink · Rounded',    icon: <Heart className="w-6 h-6" />,    color: '#fb7185', premium: false },
+                    { id: 'arcade',         label: 'Arcade',        desc: 'Retro · Neon yellow',    icon: <Gamepad2 className="w-6 h-6" />, color: '#facc15', premium: false },
+                    { id: 'bgmi',           label: 'Tactical',      desc: 'Military · Sharp edges', icon: <Target className="w-6 h-6" />,   color: '#F97316', premium: false },
+                    { id: 'live_space',     label: 'Zero Gravity',  desc: 'Cinematic orbit · 4K',   icon: <Globe className="w-6 h-6" />,    color: '#6366f1', premium: true },
+                    { id: 'live_erangel',   label: 'Warzone',       desc: 'Battlefield · 4K',       icon: <Skull className="w-6 h-6" />,    color: '#ef4444', premium: true },
+                    { id: 'live_cyber',     label: 'Hacker',        desc: 'Digital rain · Matrix',  icon: <Activity className="w-6 h-6" />, color: '#39ff14', premium: true },
+                    { id: 'live_synthwave', label: 'Synthwave',     desc: 'Retro 80s · Neon grid',  icon: <Music className="w-6 h-6" />,    color: '#ff00aa', premium: true },
+                    { id: 'live_kawaii',    label: 'Sky Parallax',  desc: 'Day to night · Live',    icon: <Cloud className="w-6 h-6" />,    color: '#a1c4fd', premium: true },
+                    { id: 'live_dragon',    label: 'Dragon',        desc: 'Mystic ember · Fantasy', icon: <Gem className="w-6 h-6" />,      color: '#fbbf24', premium: true },
+                    { id: 'uplink',         label: 'Uplink',        desc: 'Layered glass · Dark',   icon: <Zap className="w-6 h-6" />,      color: '#10B981', premium: false },
+                    { id: 'monolith',       label: 'Monolith',      desc: 'Solid opaque · Minimal', icon: <Layout className="w-6 h-6" />,   color: '#10B981', premium: false },
+                    { id: 'neon_relic',     label: 'Neon Relic',    desc: 'Brutalist · Cyan',       icon: <Flame className="w-6 h-6" />,    color: '#00ffff', premium: true },
 
-                    { id: 'uplink', label: 'ELITE INTERFACE', desc: 'Modern Design. Multi-layer glass.', icon: <Zap className="w-6 h-6" />, color: '#10B981', premium: false },
-                    { id: 'monolith', label: 'SOLID MONOLITH', desc: 'Solid Block Design. Opaque & Curved.', icon: <Layout className="w-6 h-6" />, color: '#10B981', premium: false },
-                    { id: 'neon_relic', label: 'NEON RELIC', desc: 'Retro Vapor Brutalism.', icon: <Layout className="w-6 h-6" />, color: '#00ffff', premium: true },
+                    // COLOR VARIANTS
+                    { id: 'emerald', label: 'Emerald', desc: '#10b981', icon: <Leaf className="w-6 h-6" />,     color: '#10b981', premium: false },
+                    { id: 'sky',     label: 'Sky',     desc: '#38bdf8', icon: <Cloud className="w-6 h-6" />,    color: '#38bdf8', premium: false },
+                    { id: 'violet',  label: 'Violet',  desc: '#8b5cf6', icon: <Sparkles className="w-6 h-6" />, color: '#8b5cf6', premium: false },
+                    { id: 'rose',    label: 'Rose',    desc: '#f43f5e', icon: <Heart className="w-6 h-6" />,    color: '#f43f5e', premium: false },
+                    { id: 'orange',  label: 'Orange',  desc: '#f97316', icon: <Flame className="w-6 h-6" />,    color: '#f97316', premium: false },
+                    { id: 'amber',   label: 'Amber',   desc: '#f59e0b', icon: <Star className="w-6 h-6" />,     color: '#f59e0b', premium: false },
+                    { id: 'cyan',    label: 'Cyan',    desc: '#06b6d4', icon: <Activity className="w-6 h-6" />, color: '#06b6d4', premium: false },
+                    { id: 'fuchsia', label: 'Fuchsia', desc: '#d946ef', icon: <Zap className="w-6 h-6" />,      color: '#d946ef', premium: false },
+                    { id: 'zinc',    label: 'Zinc',    desc: '#a1a1aa', icon: <Layout className="w-6 h-6" />,   color: '#a1a1aa', premium: false },
+
                   ].filter(t => !t.premium || (user?.unlockedNexusThemes || []).includes(t.id)).map((t) => {
                     const isSelected = nexusTheme === t.id;
                     const isHovered = hoveredTheme === t.id;
@@ -635,54 +666,109 @@ const ControlCenter = ({
                     return (
                       <motion.button
                         key={t.id}
-                        whileHover={{ scale: 1.05, y: -5 }}
-                        whileTap={{ scale: 0.95 }}
+                        whileHover={{ x: 4 }}
+                        whileTap={{ scale: 0.98 }}
                         onClick={() => saveNexusTheme(t.id)}
                         onMouseEnter={() => setHoveredTheme(t.id)}
                         onMouseLeave={() => setHoveredTheme(null)}
-                        className={`group shrink-0 snap-center relative flex flex-col p-5 md:p-6 rounded-[1.5rem] border-2 transition-all duration-500 z-10 w-[200px] md:w-[240px] text-left
-                    ${isSelected
-                            ? 'scale-[1.02]'
-                            : 'opacity-80 hover:opacity-100'
+                        className={`group relative flex items-center gap-4 w-full px-5 py-4 rounded-2xl border transition-all duration-150 text-left overflow-hidden cursor-pointer
+                          ${isSelected
+                            ? 'border-[var(--nexus-accent)]'
+                            : 'border-[var(--nexus-border)]'
                           }`}
                         style={{
-                          borderColor: isSelected || isHovered ? t.color : `${t.color}40`, // 40 is hex for 25% opacity
-                          backgroundColor: `${t.color}0a`, // 0a is very faint background
-                          boxShadow: isSelected || isHovered ? `0 0 30px ${t.color}60` : 'none',
-                          transform: isHovered && !isSelected ? 'scale(1.02)' : ''
+                          backgroundColor: isSelected
+                            ? `${t.color}12`
+                            : isHovered
+                            ? `${t.color}16`
+                            : 'var(--nexus-panel)',
+                          borderColor: isSelected || isHovered ? t.color : undefined,
+                          boxShadow: isSelected
+                            ? `0 0 0 1px ${t.color}40, inset 0 0 30px ${t.color}08`
+                            : isHovered
+                            ? `0 4px 20px ${t.color}30`
+                            : 'none',
                         }}
                       >
-                        {/* OWNED premium badge */}
-                        {t.premium && (
-                          <div className="absolute top-4 left-4 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-yellow-400/10 border border-yellow-400/20">
-                            <Crown className="w-3 h-3 text-yellow-500" />
-                            <span className="text-[8px] font-black uppercase tracking-widest text-yellow-600">Owned</span>
-                          </div>
-                        )}
-
-                        <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center mb-4 transition-all duration-500 relative z-10"
+                        {/* Left accent bar — grows on hover */}
+                        <div
+                          className="absolute left-0 top-0 bottom-0 transition-all duration-150 rounded-l-2xl"
                           style={{
-                            backgroundColor: isSelected || isHovered ? t.color : `${t.color}20`,
+                            width: isSelected ? '4px' : isHovered ? '3px' : '0px',
+                            backgroundColor: t.color,
+                            boxShadow: isHovered || isSelected ? `0 0 8px ${t.color}` : 'none',
+                          }}
+                        />
+
+                        {/* Background color wash sweeping in from the right */}
+                        <div
+                          className="absolute inset-0 pointer-events-none transition-all duration-200"
+                          style={{
+                            background: isHovered && !isSelected
+                              ? `linear-gradient(to left, ${t.color}20, transparent 60%)`
+                              : 'transparent',
+                          }}
+                        />
+
+                        {/* Icon — fills with color on hover */}
+                        <div
+                          className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center border transition-all duration-150 z-10"
+                          style={{
+                            backgroundColor: isSelected || isHovered ? t.color : 'var(--nexus-bg)',
+                            borderColor: isSelected || isHovered ? t.color : 'var(--nexus-border)',
                             color: isSelected || isHovered ? '#fff' : t.color,
-                            boxShadow: isSelected || isHovered ? `0 0 15px ${t.color}80` : 'none'
+                            boxShadow: isSelected || isHovered ? `0 0 12px ${t.color}80` : 'none',
                           }}
                         >
                           {t.icon}
                         </div>
 
-                        <div className="flex flex-col text-left gap-1 relative z-10 mt-auto">
-                          <span className="text-[10px] md:text-[11px] font-black uppercase tracking-widest" style={{ color: t.color }}>{t.label}</span>
-                          <p className="text-[8px] md:text-[9px] font-bold italic leading-relaxed opacity-80" style={{ color: t.color }}>{t.desc}</p>
+                        {/* Text — glows in theme color on hover */}
+                        <div className="flex flex-col flex-1 min-w-0 z-10">
+                          <span
+                            className="text-[12px] font-black uppercase tracking-[0.1em] truncate transition-colors duration-150"
+                            style={{ color: isSelected || isHovered ? t.color : 'var(--nexus-text)' }}
+                          >{t.label}</span>
+                          <span
+                            className="text-[9px] font-mono tracking-widest uppercase mt-0.5 truncate transition-colors duration-150"
+                            style={{ color: isHovered ? `${t.color}cc` : 'var(--nexus-text-muted)', opacity: isHovered ? 1 : 0.7 }}
+                          >{t.desc}</span>
                         </div>
 
-                        {isSelected && (
-                          <div className="absolute top-6 right-6 z-20">
-                            <Check className="w-5 h-5 animate-pulse" style={{ color: t.color }} />
-                          </div>
-                        )}
+                        {/* Right badges */}
+                        <div className="shrink-0 flex items-center gap-2 z-10">
+                          {t.premium && (
+                            <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-yellow-400/10 border border-yellow-400/20">
+                              <Crown className="w-3 h-3 text-yellow-500" />
+                              <span className="text-[7px] font-black uppercase tracking-widest text-yellow-600">Pro</span>
+                            </div>
+                          )}
+                          {isSelected ? (
+                            <div
+                              className="w-6 h-6 rounded-full flex items-center justify-center"
+                              style={{ backgroundColor: t.color }}
+                            >
+                              <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />
+                            </div>
+                          ) : isHovered ? (
+                            <div
+                              className="w-6 h-6 rounded-full flex items-center justify-center border-2 transition-all duration-150"
+                              style={{ borderColor: t.color, color: t.color }}
+                            >
+                              <Check className="w-3 h-3" strokeWidth={3} />
+                            </div>
+                          ) : null}
+                        </div>
 
-                        {/* Owned premium glow shimmer */}
-                        {t.premium && <div className="absolute inset-0 rounded-[1.5rem] pointer-events-none ring-1 ring-yellow-400/10 shadow-[inset_0_0_20px_rgba(234,179,8,0.05)]" />}
+                        {/* Decorative corner shard — theme color accent */}
+                        <div
+                          className="absolute bottom-0 right-0 w-12 h-12 pointer-events-none transition-all duration-200"
+                          style={{
+                            background: isHovered || isSelected
+                              ? `linear-gradient(135deg, transparent 50%, ${t.color}25 100%)`
+                              : 'transparent',
+                          }}
+                        />
                       </motion.button>
                   );
                 })}
@@ -698,73 +784,7 @@ const ControlCenter = ({
                   </div>
                 )}
 
-                {/* ─── BASE COLOR SPECTRUM ─────────────────────────────── */}
-                <div className="mt-10">
-                  <div className="flex flex-col items-center text-center space-y-2 mb-8">
-                    <div className="px-4 py-1.5 rounded-full bg-[var(--nexus-accent)]/10 border border-[var(--nexus-accent)]/20">
-                      <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[var(--nexus-accent)]">Base Color Spectrum</span>
-                    </div>
-                    <p className="max-w-xl text-xs italic text-[var(--nexus-text-muted)]">Pure accent-color overrides. Cascades through every card, border, and interaction across the entire dashboard.</p>
-                  </div>
-
-                  <div className="flex flex-wrap gap-3 justify-center px-4 max-w-4xl mx-auto">
-                    {[
-                      { id: 'zinc',    label: 'Zinc',    color: '#a1a1aa' },
-                      { id: 'rose',    label: 'Rose',    color: '#f43f5e' },
-                      { id: 'sky',     label: 'Sky',     color: '#38bdf8' },
-                      { id: 'emerald', label: 'Emerald', color: '#10b981' },
-                      { id: 'orange',  label: 'Orange',  color: '#f97316' },
-                      { id: 'violet',  label: 'Violet',  color: '#8b5cf6' },
-                      { id: 'amber',   label: 'Amber',   color: '#f59e0b' },
-                      { id: 'cyan',    label: 'Cyan',    color: '#06b6d4' },
-                      { id: 'fuchsia', label: 'Fuchsia', color: '#d946ef' },
-                    ].map((c) => {
-                      const isSelected = nexusTheme === c.id;
-                      return (
-                        <motion.button
-                          key={c.id}
-                          whileHover={{ scale: 1.02, y: -2 }}
-                          whileTap={{ scale: 0.98 }}
-                          onClick={() => saveNexusTheme(c.id)}
-                          className={`relative flex items-center gap-3 px-5 py-3 rounded-2xl border-2 transition-all duration-300 min-w-[120px] shadow-sm ${isSelected ? 'opacity-100' : 'opacity-60 bg-[var(--nexus-panel)] border-[var(--nexus-border)] hover:opacity-100'}`}
-                          style={{
-                            borderColor: isSelected ? c.color : 'var(--nexus-border)',
-                            backgroundColor: isSelected ? `${c.color}15` : 'var(--nexus-panel)',
-                            boxShadow: isSelected ? `0 0 20px ${c.color}30` : 'none',
-                          }}
-                        >
-                          {/* Color Identity Node */}
-                          <div
-                            className="w-2.5 h-2.5 rounded-full"
-                            style={{ 
-                              backgroundColor: c.color,
-                              boxShadow: `0 0 10px ${c.color}80`
-                            }}
-                          />
-                          
-                          {/* Label */}
-                          <span
-                            className="text-[10px] font-black uppercase tracking-[0.1em] transition-colors"
-                            style={{ color: isSelected ? c.color : 'var(--nexus-text-muted)' }}
-                          >
-                            {c.label}
-                          </span>
-
-                          {isSelected && (
-                            <motion.div 
-                              layoutId="activeThemeCheck"
-                              className="absolute -top-1.5 -right-1.5 bg-white rounded-full p-0.5 shadow-lg border border-black/5"
-                            >
-                              <Check className="w-2.5 h-2.5" style={{ color: c.color }} strokeWidth={4} />
-                            </motion.div>
-                          )}
-                        </motion.button>
-                      );
-                    })}
-                  </div>
-                </div>
-                {/* ─── END BASE COLOR SPECTRUM ─────────────────────────── */}
-
+                {/* End of Unified Matrix. The Color Spectrum grid is officially retired and merged heavily into the main deck. */}
               </div>
             </motion.div>
           )}

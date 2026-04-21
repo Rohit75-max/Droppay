@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Wallet, CreditCard, IndianRupee, Zap, ArrowUpRight } from 'lucide-react';
 
@@ -21,7 +22,7 @@ const PaymentChoiceModal = ({ isOpen, onClose, onSelect, balance, price, itemNam
     const priceNum = parseInt(price.replace(/[^0-9]/g, '')) || 0;
     const canAfford = balance >= priceNum;
 
-    return (
+    return createPortal(
         <AnimatePresence>
             <div className="fixed inset-0 z-[250] flex items-center justify-center p-4">
                 <motion.div
@@ -151,7 +152,8 @@ const PaymentChoiceModal = ({ isOpen, onClose, onSelect, balance, price, itemNam
                     </div>
                 </motion.div>
             </div>
-        </AnimatePresence>
+        </AnimatePresence>,
+        document.body
     );
 };
 

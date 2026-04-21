@@ -11,6 +11,7 @@ import { TechnicalHUD } from './components/ui/TechnicalHUD';
 import { syncTheme } from './api/themeSync';
 import { io } from 'socket.io-client';
 import MaintenanceMode from './pages/system/Maintenance';
+import { Logo } from './components/ui/Logo';
 
 // ─── EAGER IMPORTS (critical path — must load instantly) ──────────────────────
 import LiveThemeEngine from './components/dashboard/ThemeEngine';
@@ -52,53 +53,52 @@ class ErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen bg-[#f5f4e2] flex flex-col items-center justify-center relative overflow-hidden font-sans">
+        <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center relative overflow-hidden font-sans">
           {/* Background Elements */}
-          <div className="absolute inset-0 blueprint-grid opacity-[0.03]" />
-          <div className="scanning-line opacity-20" />
+          <div className="absolute inset-0 blueprint-grid opacity-10 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-b from-rose-500/5 via-transparent to-transparent pointer-events-none" />
           
           <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             className="relative z-10 flex flex-col items-center max-w-lg px-8 text-center"
           >
-            <div className="mb-12 flex flex-col items-center">
-              <span className="text-7xl font-black tracking-tighter text-[#111111] mb-2" style={{ fontFamily: 'Georgia, serif' }}>drope.</span>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-rose-500 animate-pulse shadow-[0_0_10px_rgba(244,63,94,0.5)]" />
-                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-rose-500">CRITICAL_SYSTEM_FAILURE</span>
+            <div className="mb-14 flex flex-col items-center">
+              <Logo size="2rem" accentColor="#ff3b30" isLight={false} />
+              <div className="flex items-center gap-2 mt-6">
+                <div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
+                <span className="text-[9px] font-black uppercase tracking-[0.5em] text-rose-500/80">System Interface Interrupt</span>
               </div>
             </div>
 
-            <h2 className="text-xl font-black text-[#111111] uppercase tracking-tighter mb-6 glitch-text" data-text="RECALIBRATING_MESH_NETWORK">
-              RECALIBRATING_MESH_NETWORK
+            <h2 className="text-3xl font-black text-white uppercase italic tracking-tighter mb-4 leading-none">
+              Interface Sync Failed
             </h2>
             
-            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest leading-loose mb-10">
-              Our high-availability infrastructure has encountered a synchronization anomaly. Automated recovery protocols have been initiated to restore stability.
+            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest leading-loose mb-12 max-w-sm">
+              We encountered a non-recoverable render conflict. A clean handshake is required to restore terminal stability.
             </p>
 
             <motion.button 
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => window.location.reload()} 
-              className="px-12 py-5 bg-[#111111] text-white font-black uppercase tracking-[0.4em] text-[10px] shadow-[0_20px_40px_rgba(0,0,0,0.2)] hover:bg-[#222222] transition-all"
+              className="px-16 py-5 bg-white text-black font-black uppercase italic tracking-[0.3em] text-[10px] shadow-[0_20px_50px_rgba(255,255,255,0.1)] hover:bg-[#afff00] transition-all"
             >
-              Force Reboot System
+              Reload Interface
             </motion.button>
           </motion.div>
 
-          {/* Technical Metadata */}
-          <div className="absolute top-12 left-12 text-[9px] font-black uppercase tracking-[0.5em] text-black/20 vertical-rl">
-            RECOVERY_NODE_INIT_V2
-          </div>
-          <div className="absolute bottom-12 right-12 flex flex-col items-end gap-2">
-            <div className="flex gap-4 text-[8px] font-black uppercase tracking-[0.3em] text-black/10">
-              <span>CLOUD_STABLE</span>
-              <span>UPLINK_SECURE</span>
-              <span className="text-rose-500/40">DROPE_CORE_ERR_402</span>
+          {/* Technical Telemetry */}
+          <div className="absolute bottom-12 left-0 right-0 flex justify-center opacity-30">
+            <div className="flex flex-col items-center gap-2">
+              <div className="flex gap-6 text-[8px] font-black uppercase tracking-[0.3em] text-slate-400">
+                <span className="flex items-center gap-2"><div className="w-1 h-1 bg-rose-500 rounded-full" /> CODE: CORE-402</span>
+                <span>{'//'}</span>
+                <span className="font-mono">NODE_ID: {Math.random().toString(36).substring(7).toUpperCase()}</span>
+              </div>
+              <div className="w-48 h-0.5 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
             </div>
-            <span className="text-[8px] font-mono text-black/10">SESSION_ID: {Math.random().toString(36).substring(7).toUpperCase()}</span>
           </div>
         </div>
       );
@@ -317,7 +317,7 @@ function AppContent() {
   }, [nexusTheme]);
 
   // Logic to hide Navbar on specific flows (Auth, Dashboard, Admin, Subscription & Overlays)
-  const hideNavbarPaths = ['/login', '/signup', '/forgot-password', '/reset-password', '/dashboard', '/admin', '/subscription'];
+  const hideNavbarPaths = ['/login', '/signup', '/forgot-password', '/reset-password', '/dashboard', '/admin', '/subscription', '/pay'];
   const shouldHideNavbar = hideNavbarPaths.some(path => location.pathname.startsWith(path));
 
   // --- GLOBAL PRELOADER SYNCHRONIZATION ---

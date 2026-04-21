@@ -122,7 +122,7 @@ const UserSchema = new mongoose.Schema({
     trialEndsAt: { type: Date }
   },
 
-  nexusTheme: { type: String, enum: ['void', 'cyber', 'aero', 'kawaii', 'arcade', 'bgmi', 'live_space', 'live_erangel', 'live_cyber', 'live_synthwave', 'live_kawaii', 'live_dragon', 'aero-light', 'nebula-void', 'alabaster-pulse', 'midnight-obsidian', 'kawaii-desk', 'bgmi-tactical', 'uplink'], default: 'void', index: true }, // ADDED: Fast bulk theme lookups at 50k+ scale
+  nexusTheme: { type: String, enum: ['void', 'cyber', 'aero', 'kawaii', 'arcade', 'bgmi', 'live_space', 'live_erangel', 'live_cyber', 'live_synthwave', 'live_kawaii', 'live_dragon', 'aero-light', 'nebula-void', 'alabaster-pulse', 'midnight-obsidian', 'kawaii-desk', 'bgmi-tactical', 'uplink', 'monolith', 'neon_relic', 'emerald', 'sky', 'violet', 'rose', 'orange', 'amber', 'cyan', 'fuchsia', 'zinc'], default: 'void', index: true }, // ADDED: Fast bulk theme lookups at 50k+ scale
   nexusThemeMode: { type: String, enum: ['dark', 'light'], default: 'dark' },
   unlockedNexusThemes: [{ type: String }], // ADDED: Tracks Elite workspace themes purchased from Store
   ownedWidgets: [{ type: String }], // ADDED: Tracks premium dashboard widgets purchased from Store
@@ -218,7 +218,38 @@ const UserSchema = new mongoose.Schema({
     lastActive: { type: Date, default: Date.now }
   },
 
+  // --- STREAMING SUITE: Professional Broadcasting Hub ---
+  streamingSuite: {
+    activeScene: { type: String, default: 'primary' },
+    scenes: [
+      {
+        id: { type: String, required: true, default: 'primary' },
+        name: { type: String, required: true, default: 'Main Gameplay' },
+        activeWidgets: [{ type: String }], // 'alert', 'goal', 'event_list', 'the_drop'
+        layout: { type: mongoose.Schema.Types.Mixed } 
+      }
+    ],
+    eventLog: [
+      {
+        id: { type: String, default: () => uuidv4() },
+        type: { type: String, enum: ['donation', 'follow', 'sub', 'test'], default: 'donation' },
+        donorName: String,
+        amount: Number,
+        message: String,
+        sticker: String,
+        isRead: { type: Boolean, default: false },
+        createdAt: { type: Date, default: Date.now }
+      }
+    ],
+    studioSettings: {
+      isLive: { type: Boolean, default: false },
+      lastStreamAt: { type: Date },
+      autoReplayAlerts: { type: Boolean, default: true }
+    }
+  },
+
   googleId: { type: String, unique: true, sparse: true }
+
 
 }, { timestamps: true });
 

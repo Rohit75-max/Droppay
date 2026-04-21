@@ -261,6 +261,7 @@ router.post('/update-profile', auth, async (req, res) => {
             if (nexusThemeMode) user.nexusThemeMode = nexusThemeMode;
 
             await user.save();
+            await invalidateProfileCache(req.user.id);
 
             // Fire warning to CURRENT secure email
             const transporter = createTransporter();
@@ -313,6 +314,7 @@ router.post('/update-profile', auth, async (req, res) => {
         }
 
         await user.save();
+        await invalidateProfileCache(req.user.id);
 
         // FIRING WEBSOCKETS TO FORCE OBS COMPONENT RERENDERS
         const io = req.app.get('io');

@@ -44,6 +44,19 @@ html {
   min-height: calc(100vh - var(--nav-height));
 }
 
+/* --- MODAL SCROLL LOCK & BLUR (Professional SaaS Protocol) --- */
+body.modal-lock {
+  overflow: hidden !important;
+}
+
+body.modal-lock #dashboard-main-scroll {
+  overflow-y: hidden !important;
+  filter: blur(8px) saturate(1.2);
+  pointer-events: none;
+  transition: filter 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: scale(0.985);
+}
+
 .h-screen-fit {
   height: calc(100vh - var(--nav-height));
 }
@@ -357,85 +370,111 @@ html.light {
 }
 
 /* ================================================ */
-/* VOID (DEFAULT) */
-.theme-void {
-    --nexus-radius: 1.5rem;
-}
-
-/* AERO (GLASS) */
-.theme-aero, .theme-aero-light {
-    --nexus-radius: 2.5rem;
-}
-
-/* NEBULA VOID */
-.theme-nebula-void {
-    --nexus-radius: 1.75rem;
-}
-
-/* ALABASTER PULSE */
-.theme-alabaster-pulse {
+/* VOID (DEFAULT) — Pitch black, pure emerald neon  */
+body.theme-void {
+    --nexus-bg: #050505;
+    --nexus-panel: #0a0a0b;
+    --nexus-accent: #10B981;
+    --nexus-text: #ffffff;
+    --nexus-text-muted: #94a3b8;
+    --nexus-border: rgba(255, 255, 255, 0.08);
     --nexus-radius: 1.25rem;
+    --nexus-glow: 0 12px 40px rgba(16, 185, 129, 0.1);
+    --nexus-accent-glow: rgba(16, 185, 129, 0.12);
+    --nexus-sidebar-bg: #070707;
+    --nexus-sidebar-border: rgba(255, 255, 255, 0.06);
+}
+.light body.theme-void {
+    --nexus-bg: #f8fafc;
+    --nexus-panel: #ffffff;
+    --nexus-accent: #10B981;
+    --nexus-text: #0f172a;
+    --nexus-text-muted: #64748b;
+    --nexus-border: #e2e8f0;
 }
 
-/* KAWAII DESK */
-.theme-kawaii, .theme-live_kawaii {
-    --nexus-radius: 3rem;
+/* AERO LIGHT — Bright frosted glass, macOS vibe     */
+body.theme-aero-light {
+    --nexus-bg: #f0f4ff;
+    --nexus-panel: rgba(255, 255, 255, 0.75);
+    --nexus-accent: #ec4899;
+    --nexus-text: #0f172a;
+    --nexus-text-muted: #6b7280;
+    --nexus-border: rgba(236, 72, 153, 0.2);
+    --nexus-radius: 2.5rem;
+    --nexus-glow: 0 8px 32px rgba(236, 72, 153, 0.12);
+    --nexus-accent-glow: rgba(236, 72, 153, 0.15);
+    --nexus-sidebar-bg: rgba(255, 255, 255, 0.6);
+    --nexus-sidebar-border: rgba(236, 72, 153, 0.15);
+    background: linear-gradient(135deg, #fdf2f8 0%, #f0f4ff 50%, #f5f3ff 100%);
 }
 
-/* ARCADE */
-.theme-arcade {
-    --nexus-radius: 0.5rem;
+/* NEBULA VOID — Deep obsidian, violet highlights    */
+body.theme-nebula-void {
+    --nexus-bg: #06040f;
+    --nexus-panel: #110c1e;
+    --nexus-accent: #8B5CF6;
+    --nexus-text: #ede9fe;
+    --nexus-text-muted: #a78bfa;
+    --nexus-border: rgba(139, 92, 246, 0.18);
+    --nexus-radius: 1.75rem;
+    --nexus-glow: 0 12px 40px rgba(139, 92, 246, 0.2);
+    --nexus-accent-glow: rgba(139, 92, 246, 0.15);
+    --nexus-sidebar-bg: #090617;
+    --nexus-sidebar-border: rgba(139, 92, 246, 0.12);
+    background: radial-gradient(ellipse at top, #1e1040 0%, #06040f 60%);
+}
+.light body.theme-nebula-void {
+    --nexus-bg: #f5f3ff; --nexus-panel: #ffffff;
+    --nexus-text: #06040f; --nexus-text-muted: #5b21b6;
+    --nexus-border: rgba(139,92,246,0.2);
 }
 
-/* BGMI / TACTICAL — Armored Identity */
-.theme-bgmi .nexus-card, 
-.theme-bgmi .theme-card,
-.theme-live_erangel .nexus-card,
-.theme-live_erangel .theme-card {
-    --nexus-radius: 4px;
-    border-top-left-radius: 20px !important;
-    border-bottom-right-radius: 20px !important;
-    clip-path: polygon(0 0, 100% 0, 100% 85%, 85% 100%, 0 100%); /* Tactical clip */
+/* ALABASTER PULSE — Professional bright, clean tech */
+body.theme-alabaster-pulse {
+    --nexus-bg: #f1f5f9;
+    --nexus-panel: #ffffff;
+    --nexus-accent: #3B82F6;
+    --nexus-text: #0f172a;
+    --nexus-text-muted: #475569;
+    --nexus-border: #e2e8f0;
+    --nexus-radius: 1rem;
+    --nexus-glow: 0 4px 20px rgba(59, 130, 246, 0.1);
+    --nexus-accent-glow: rgba(59, 130, 246, 0.12);
+    --nexus-sidebar-bg: #ffffff;
+    --nexus-sidebar-border: #e2e8f0;
+    background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+}
+.light body.theme-alabaster-pulse {
+    --nexus-bg: #f1f5f9; --nexus-panel: #ffffff;
+    --nexus-text: #0f172a; --nexus-text-muted: #1d4ed8;
+    --nexus-border: #bfdbfe;
 }
 
-/* KAWAII DESK — Super Soft / Organic */
-.theme-kawaii .nexus-card,
-.theme-kawaii .theme-card,
-.theme-live_kawaii .nexus-card,
-.theme-live_kawaii .theme-card {
-    --nexus-radius: 3rem;
-    border-bottom-left-radius: 4rem !important;
-    border-top-right-radius: 4rem !important;
-}
-
-/* CYBER / HACKER */
-.theme-live_cyber {
-    --nexus-radius: 0;
-}
-
-/* SYNTHWAVE */
-.theme-live_synthwave {
-    --nexus-radius: 10px;
-}
-
-/* DRAGON HOARD */
-.theme-live_dragon {
-    --nexus-radius: 1.5rem;
-}
-
-/* UPLINK */
-.theme-uplink {
+/* UPLINK (ELITE INTERFACE) — Multi-layer glass, pro */
+body.theme-uplink {
+    --nexus-bg: #0a0f1e;
+    --nexus-panel: rgba(255, 255, 255, 0.04);
+    --nexus-accent: #10B981;
+    --nexus-text: #e2e8f0;
+    --nexus-text-muted: #94a3b8;
+    --nexus-border: rgba(255, 255, 255, 0.1);
     --nexus-radius: 2rem;
+    --nexus-glow: 0 8px 32px rgba(16, 185, 129, 0.08);
+    --nexus-accent-glow: rgba(16, 185, 129, 0.1);
+    --nexus-sidebar-bg: rgba(10, 15, 30, 0.8);
+    --nexus-sidebar-border: rgba(255, 255, 255, 0.06);
+    background: radial-gradient(ellipse at top left, #111827 0%, #0a0f1e 100%);
 }
-
-/* ZERO-GRAVITY */
-.theme-live_space {
-    --nexus-radius: 2.2rem;
+.theme-uplink .nexus-card {
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    background: rgba(255, 255, 255, 0.04) !important;
 }
-
-/* NEON RELIC */
-.theme-neon_relic {
-    --nexus-radius: 0.75rem;
+.light body.theme-uplink {
+    --nexus-bg: #f8fafc; --nexus-panel: rgba(255,255,255,0.8);
+    --nexus-text: #0f172a; --nexus-text-muted: #475569;
+    --nexus-border: rgba(16,185,129,0.15);
 }
 
 /* BASE NEXUS CARD RULE — Theme Cascade Foundation  */
@@ -452,6 +491,15 @@ html.light {
     box-shadow: none !important;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
+}
+
+/* Light mode: kill glass blur, use solid white + shadow for depth */
+.light .nexus-card {
+    background: #ffffff !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-color: #e2e8f0 !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04) !important;
 }
 
 /* GLOBAL CURSOR & ATMOSPHERIC GLOW DISABLE (2026 Solid Identity) */
@@ -603,15 +651,14 @@ body.theme-arcade {
 
 /* Light Mode Overrides (Default - 2026 Premium Upgrade) */
 .light {
-    --nexus-bg: #f8fafc;
-    /* Premium Slate-50 Base */
-    --nexus-panel: rgba(255, 255, 255, 0.45);
+    --nexus-bg: #f1f5f9;
+    --nexus-panel: #ffffff;
     --nexus-accent: #10B981;
     --nexus-text: #0F172A;
     --nexus-text-muted: #64748B;
     --nexus-border: #e2e8f0;
     --nexus-accent-glow: rgba(16, 185, 129, 0.15);
-    --nexus-glow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
+    --nexus-glow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
     --nexus-sidebar-bg: #ffffff;
     --nexus-sidebar-border: #e2e8f0;
     --simulator-bg: #ffffff;
@@ -619,12 +666,7 @@ body.theme-arcade {
 }
 
 body.light {
-    background:
-        radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.05) 0px, transparent 50%),
-        radial-gradient(at 100% 0%, rgba(59, 130, 246, 0.03) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.05) 0px, transparent 50%),
-        radial-gradient(at 0% 100%, rgba(245, 158, 11, 0.03) 0px, transparent 50%),
-        #f8fafc;
+    background: #e8edf2;
     background-attachment: fixed;
 }
 

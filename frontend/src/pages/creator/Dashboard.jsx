@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from '../../api/axios';
 import { useLiveSocket } from '../../hooks/useLiveSocket';
@@ -22,9 +23,9 @@ import GrowthMissions from '../../components/dashboard/GrowthMissions';
 import HelpCenter from '../../components/dashboard/HelpCenter';
 import FeedbackStation from '../../components/dashboard/FeedbackStation';
 import DashboardStore from './Store';
+import StudioHub from '../../components/dashboard/StudioHub';
 import { MobileBottomNav } from '../../components/navigation/MobileBottomNav';
 import { MetricsPulse } from '../../components/dashboard/Metrics';
-import { EarningsIntel } from '../../components/dashboard/Earnings';
 import { DashboardPageContainer } from '../../components/dashboard/DashboardPageContainer';
 import { SettingsProtocol } from '../../components/dashboard/Setting';
 
@@ -33,74 +34,79 @@ import { SettingsProtocol } from '../../components/dashboard/Setting';
 // API_BASE is now handled by the centralized axios configuration in src/api/axios.js
 
 // ─── SUBSCRIPTION HARD-LOCK OVERLAY ─────────────────────────
-const SubscriptionLockOverlay = () => (
-  <motion.div 
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    className="fixed inset-0 z-[1000] flex items-center justify-center p-6"
-  >
-    {/* Blurry Backdrop Filter */}
-    <div className="absolute inset-0 bg-[#0a0a0b]/80 backdrop-blur-3xl" />
-    <div className="absolute inset-0 blueprint-grid opacity-10 pointer-events-none" />
-    <div className="absolute top-0 w-full h-px bg-gradient-to-r from-transparent via-rose-500/50 to-transparent" />
-    
+const SubscriptionLockOverlay = () => {
+  return createPortal(
     <motion.div 
-      initial={{ scale: 0.9, opacity: 0, y: 20 }}
-      animate={{ scale: 1, opacity: 1, y: 0 }}
-      className="relative z-50 max-w-lg w-full bg-[#111111]/80 border border-white/10 p-10 text-center rounded-[3rem] shadow-[0_40px_100px_rgba(0,0,0,0.6)] backdrop-blur_md"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="fixed inset-0 z-[5000] flex items-center justify-center p-6"
     >
-      <div className="w-20 h-20 bg-rose-500/10 rounded-3xl flex items-center justify-center mx-auto mb-8 border border-rose-500/20">
-        <ShieldAlert className="w-10 h-10 text-rose-500 animate-pulse" />
-      </div>
-
-      <h2 className="text-4xl font-black text-white italic tracking-tighter mb-4 uppercase" style={{ fontFamily: 'Georgia, serif' }}>
-        Access Suspended
-      </h2>
+      {/* Blurry Backdrop Filter */}
+      <div className="absolute inset-0 bg-[#0a0a0b]/90 backdrop-blur-3xl" />
+      <div className="absolute inset-0 blueprint-grid opacity-10 pointer-events-none" />
+      <div className="absolute top-0 w-full h-px bg-gradient-to-r from-transparent via-rose-500/50 to-transparent" />
       
-      <p className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.3em] leading-loose mb-10 max-w-sm mx-auto">
-        Your creator node has been de-authenticated from the high-throughput network. Trial access has expired or the subscription handshake failed.
-      </p>
-
-      <div className="flex flex-col gap-4">
-        <button 
-           onClick={() => window.location.href = '/subscription'}
-           className="w-full py-6 bg-white text-black font-black uppercase tracking-[0.4em] text-[11px] hover:bg-emerald-500 transition-all hover:shadow-[0_0_30px_rgba(16,185,129,0.3)] shadow-[10px_10px_0px_rgba(255,255,255,0.1)]"
-        >
-          Secure Access Key
-        </button>
-        <button 
-           onClick={() => window.location.href = '/login'}
-           className="text-[9px] font-black uppercase tracking-widest text-slate-600 hover:text-white transition-colors py-4"
-        >
-          Disconnect Session
-        </button>
-      </div>
-
-      {/* Security Telemetry */}
-      <div className="absolute bottom-6 left-0 w-full flex justify-center gap-6 opacity-20">
-        <div className="flex items-center gap-2">
-            <div className="w-1 h-1 bg-rose-500 rounded-full" />
-            <span className="text-[8px] font-mono tracking-widest text-white">LOCKED</span>
+      <motion.div 
+        initial={{ scale: 0.9, opacity: 0, y: 20 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        className="relative z-50 max-w-lg w-full bg-[#111111]/80 border border-white/10 p-10 text-center rounded-[3rem] shadow-[0_40px_100px_rgba(0,0,0,0.6)] backdrop-blur_md"
+      >
+        <div className="w-20 h-20 bg-rose-500/10 rounded-3xl flex items-center justify-center mx-auto mb-8 border border-rose-500/20">
+          <ShieldAlert className="w-10 h-10 text-rose-500 animate-pulse" />
         </div>
-        <div className="flex items-center gap-2">
-            <div className="w-1 h-1 bg-slate-500 rounded-full" />
-            <span className="text-[8px] font-mono tracking-widest text-white">OFFLINE</span>
+
+        <h2 className="text-4xl font-black text-white italic tracking-tighter mb-4 uppercase" style={{ fontFamily: 'Georgia, serif' }}>
+          Access Suspended
+        </h2>
+        
+        <p className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.3em] leading-loose mb-10 max-w-sm mx-auto">
+          Your creator node has been de-authenticated from the high-throughput network. Trial access has expired or the subscription handshake failed.
+        </p>
+
+        <div className="flex flex-col gap-4">
+          <button 
+             onClick={() => window.location.href = '/subscription'}
+             className="w-full py-6 bg-white text-black font-black uppercase tracking-[0.4em] text-[11px] hover:bg-emerald-500 transition-all hover:shadow-[0_0_30px_rgba(16,185,129,0.3)] shadow-[10px_10px_0px_rgba(255,255,255,0.1)]"
+          >
+            Secure Access Key
+          </button>
+          <button 
+             onClick={() => window.location.href = '/login'}
+             className="text-[9px] font-black uppercase tracking-widest text-slate-600 hover:text-white transition-colors py-4"
+          >
+            Disconnect Session
+          </button>
         </div>
-      </div>
-    </motion.div>
-  </motion.div>
-);
+
+        {/* Security Telemetry */}
+        <div className="absolute bottom-6 left-0 w-full flex justify-center gap-6 opacity-20">
+          <div className="flex items-center gap-2">
+              <div className="w-1 h-1 bg-rose-500 rounded-full" />
+              <span className="text-[8px] font-mono tracking-widest text-white">LOCKED</span>
+          </div>
+          <div className="flex items-center gap-2">
+              <div className="w-1 h-1 bg-slate-500 rounded-full" />
+              <span className="text-[8px] font-mono tracking-widest text-white">OFFLINE</span>
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>,
+    document.body
+  );
+};
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const pathMap = {
     '/dashboard': 'summary',
-    '/dashboard/metrics': 'metrics',
+    '/dashboard/studio': 'studio',
+    '/dashboard/analytics': 'analytics',
+    '/dashboard/metrics': 'analytics', // Redirect legacy
     '/dashboard/controlcenter': 'control',
     '/dashboard/control': 'control',
     '/dashboard/store': 'store',
-    '/dashboard/earnings': 'earnings',
+    '/dashboard/earnings': 'analytics', // Redirect legacy
     '/dashboard/growth': 'growth',
     '/dashboard/help': 'help',
     '/dashboard/feedback': 'feedback',
@@ -157,6 +163,19 @@ const Dashboard = () => {
 
   const [withdrawals, setWithdrawals] = useState([]);
   const [isFetchingWithdrawals, setIsFetchingWithdrawals] = useState(false);
+
+  // --- PROFESSIONAL SCROLL LOCK ---
+  useEffect(() => {
+    const isAnyModalOpen = showWithdrawModal || showOtpModal || isProfileOpen;
+    if (isAnyModalOpen) {
+      document.body.classList.add('modal-lock');
+    } else {
+      document.body.classList.remove('modal-lock');
+    }
+    return () => {
+      document.body.classList.remove('modal-lock');
+    };
+  }, [showWithdrawModal, showOtpModal, isProfileOpen]);
 
   const fetchWithdrawals = useCallback(async () => {
     try {
@@ -286,7 +305,7 @@ const Dashboard = () => {
     }
   }, [timeRange, fetchAnalyticsData, user?.streamerId]);
 
-  useLiveSocket({
+  const socket = useLiveSocket({
     user,
     setUser,
     setRecentDrops,
@@ -537,13 +556,13 @@ const Dashboard = () => {
             handleLogoClick={handleLogoClick} 
           />
 
-          <div className="flex-1 overflow-y-auto custom-scrollbar pt-[70px] pb-24 md:pb-12 transition-all duration-300">
+          <div id="dashboard-main-scroll" className="flex-1 overflow-y-auto custom-scrollbar pt-[70px] pb-24 md:pb-12 transition-all duration-300">
             <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 w-full min-h-full flex flex-col">
               
               <DashboardPageContainer noPadding className="mt-4">
                 <div className="p-4 space-y-4">
                   {/* --- NEURAL TRIAL / EXPIRY HUD --- */}
-                  {user?.subscription?.status === 'active' && ['earnings', 'profile'].includes(activeSection) && (
+                  {user?.subscription?.status === 'active' && ['analytics', 'profile', 'summary'].includes(activeSection) && (
                     <div className="mb-2">
                       {user.subscription.isTrial ? (
                         <div className="bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-2xl flex items-center justify-between group overflow-hidden relative shadow-sm">
@@ -614,8 +633,8 @@ const Dashboard = () => {
                             Play
                           }} />
                         )}
-                        {activeSection === 'metrics' && <MetricsPulse />}
-                        {activeSection === 'earnings' && <EarningsIntel />}
+                        {activeSection === 'studio' && <StudioHub user={user} recentDrops={recentDrops} socket={socket} />}
+                        {activeSection === 'analytics' && <MetricsPulse user={user} topDonors={topDonors} recentDrops={recentDrops} nexusTheme={nexusTheme} theme={theme} />}
                         {activeSection === 'control' && (
                           <ControlCenter
                             theme={theme} user={user}
@@ -665,187 +684,193 @@ const Dashboard = () => {
         </main>
 
         {/* WITHDRAWAL MODAL */}
-        <AnimatePresence>
-          {showWithdrawModal && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[200] flex items-center justify-center pt-20 pb-24 px-4 md:p-8 bg-black/40"
-            >
+        {createPortal(
+          <AnimatePresence>
+            {showWithdrawModal && (
               <motion.div
-                initial={{ scale: 0.95, opacity: 0, y: 20 }}
-                animate={{ scale: 1, opacity: 1, y: 0 }}
-                exit={{ scale: 0.95, opacity: 0, y: 20 }}
-                className={`w-full max-w-4xl max-h-full md:max-h-[85vh] rounded-3xl overflow-hidden shadow-2xl relative flex flex-col ${theme === 'light' ? 'bg-white' : 'bg-[#121212] border border-white/5'}`}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-[200] flex items-center justify-center pt-20 pb-24 px-4 md:p-8 bg-black/40"
               >
-                <div className={`p-4 md:p-6 pb-0 ${theme === 'light' ? 'bg-slate-50/50' : 'bg-white/[0.02]'}`}>
-                  <div className="flex items-start md:items-center justify-between mb-4 md:mb-6">
-                    <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-3">
-                      <span className={`text-[10px] md:text-sm font-bold uppercase tracking-widest md:normal-case md:tracking-normal ${theme === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>Current Balance:</span>
-                      <span className={`text-lg md:text-xl font-black ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>
-                        ₹{(Number(user.walletBalance) || 0).toLocaleString('en-IN')} <span className="text-[10px] font-bold opacity-60">INR</span>
-                      </span>
+                <motion.div
+                  initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                  animate={{ scale: 1, opacity: 1, y: 0 }}
+                  exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                  className={`w-full max-w-4xl max-h-full md:max-h-[85vh] rounded-3xl overflow-hidden shadow-2xl relative flex flex-col ${theme === 'light' ? 'bg-white' : 'bg-[#121212] border border-white/5'}`}
+                >
+                  <div className={`p-4 md:p-6 pb-0 ${theme === 'light' ? 'bg-slate-50/50' : 'bg-white/[0.02]'}`}>
+                    <div className="flex items-start md:items-center justify-between mb-4 md:mb-6">
+                      <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-3">
+                        <span className={`text-[10px] md:text-sm font-bold uppercase tracking-widest md:normal-case md:tracking-normal ${theme === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>Current Balance:</span>
+                        <span className={`text-lg md:text-xl font-black ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>
+                          ₹{(Number(user.walletBalance) || 0).toLocaleString('en-IN')} <span className="text-[10px] font-bold opacity-60">INR</span>
+                        </span>
+                      </div>
+                      <button onClick={() => setShowWithdrawModal(false)} className={`p-2 rounded-full transition-colors ${theme === 'light' ? 'hover:bg-slate-200 text-slate-400' : 'hover:bg-white/10 text-slate-500'}`}>
+                        <X className="w-5 h-5" />
+                      </button>
                     </div>
-                    <button onClick={() => setShowWithdrawModal(false)} className={`p-2 rounded-full transition-colors ${theme === 'light' ? 'hover:bg-slate-200 text-slate-400' : 'hover:bg-white/10 text-slate-500'}`}>
-                      <X className="w-5 h-5" />
-                    </button>
+                    <div className="flex items-center gap-4 md:gap-8 border-b border-slate-200 dark:border-white/5">
+                      {['Withdraw', 'History'].map((tab) => {
+                        const isActive = activeModalTab === tab;
+                        return (
+                          <button key={tab} onClick={() => setActiveModalTab(tab)} className={`pb-4 text-[10px] md:text-xs font-black uppercase tracking-widest relative transition-all flex items-center gap-2 ${isActive ? (theme === 'light' ? 'text-slate-900' : 'text-white') : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}>
+                            {tab === 'History' && <History className="w-3.5 h-3.5" />}
+                            {tab}
+                            {isActive && <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--nexus-accent)]" />}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
-                  <div className="flex items-center gap-4 md:gap-8 border-b border-slate-200 dark:border-white/5">
-                    {['Withdraw', 'History'].map((tab) => {
-                      const isActive = activeModalTab === tab;
-                      return (
-                        <button key={tab} onClick={() => setActiveModalTab(tab)} className={`pb-4 text-[10px] md:text-xs font-black uppercase tracking-widest relative transition-all flex items-center gap-2 ${isActive ? (theme === 'light' ? 'text-slate-900' : 'text-white') : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}>
-                          {tab === 'History' && <History className="w-3.5 h-3.5" />}
-                          {tab}
-                          {isActive && <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--nexus-accent)]" />}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
 
-                <div className="flex-1 overflow-y-auto custom-scrollbar p-5 md:p-8">
-                  <AnimatePresence mode="wait">
-                    {activeModalTab === 'History' ? (
-                      <motion.div key="history" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} className="space-y-6">
-                        <div className="flex items-center justify-between">
-                          <h4 className={`text-sm font-black uppercase tracking-widest ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>Recent Node Disbursals</h4>
-                          <span className="text-[10px] font-mono text-slate-500 font-bold">NODE LOGS: 50</span>
-                        </div>
-                        {isFetchingWithdrawals ? (
-                          <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-[var(--nexus-accent)]" /></div>
-                        ) : withdrawals.length === 0 ? (
-                          <div className={`py-20 text-center rounded-2xl border border-dashed ${theme === 'light' ? 'bg-slate-50 border-slate-200' : 'bg-white/[0.02] border-white/10'}`}>
-                            <History className="w-8 h-8 mx-auto mb-4 opacity-20" />
-                            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">No Recent Activity Found</p>
+                  <div className="flex-1 overflow-y-auto custom-scrollbar p-5 md:p-8">
+                    <AnimatePresence mode="wait">
+                      {activeModalTab === 'History' ? (
+                        <motion.div key="history" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} className="space-y-6">
+                          <div className="flex items-center justify-between">
+                            <h4 className={`text-sm font-black uppercase tracking-widest ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>Recent Node Disbursals</h4>
+                            <span className="text-[10px] font-mono text-slate-500 font-bold">NODE LOGS: 50</span>
                           </div>
-                        ) : (
-                          <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-                            {withdrawals.map((wd) => {
-                              const amt = Math.abs(wd.amount);
-                              const statusColors = { pending: 'amber', processing: 'blue', completed: 'emerald', cancelled: 'red' };
-                              const color = statusColors[wd.status] || 'slate';
-                              return (
-                                <div key={wd._id} className={`flex items-center justify-between p-4 rounded-xl border transition-all ${theme === 'light' ? 'bg-slate-50 border-slate-100 hover:border-slate-200' : 'bg-white/[0.03] border-white/5 hover:border-white/10'}`}>
-                                  <div className="flex items-center gap-4">
-                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${theme === 'light' ? 'bg-white shadow-sm' : 'bg-white/5'}`}><IndianRupee className="w-4 h-4 text-[var(--nexus-accent)]" /></div>
-                                    <div>
-                                      <h5 className={`text-xs font-black ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>Bank Withdrawal</h5>
-                                      <span className="text-[9px] font-mono font-bold text-slate-500 uppercase">{new Date(wd.createdAt).toLocaleString()}</span>
-                                    </div>
-                                  </div>
-                                  <div className="flex items-center gap-4">
-                                    <div className="text-right">
-                                      <h5 className={`text-xs font-black ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>₹{amt.toLocaleString()}</h5>
-                                      <span className={`px-2 py-0.5 rounded-lg border text-[8px] font-black uppercase tracking-widest border-${color}-500/30 text-${color}-500 bg-${color}-500/5`}>{wd.status}</span>
-                                    </div>
-                                    {wd.status === 'pending' && (
-                                      <button onClick={() => handleCancelWithdrawal(wd._id)} className="p-2 rounded-lg border border-red-500/20 text-red-500 hover:bg-red-500/10 transition-all">
-                                        <Trash2 className="w-3.5 h-3.5" />
-                                      </button>
-                                    )}
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        )}
-                      </motion.div>
-                    ) : withdrawalStep === 0 ? (
-                      <motion.div key="step0" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
-                        <div className="space-y-8">
-                          <h4 className={`text-sm font-black uppercase tracking-widest ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>Bank Transfer</h4>
-                          <div className="space-y-6">
-                            <div className="space-y-2">
-                              <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Withdrawal Amount</label>
-                              <div className="relative group">
-                                <input type="number" value={withdrawalAmount} onChange={(e) => setWithdrawalAmount(Number(e.target.value))} className={`w-full p-4 md:p-6 pr-24 rounded-2xl border text-xl md:text-2xl font-black transition-all outline-none ${theme === 'light' ? 'bg-slate-50 border-slate-200 focus:border-slate-400 text-slate-900' : 'bg-white/5 border-white/10 focus:border-white/20 text-white'}`} placeholder="1000" />
-                                <div className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center gap-3">
-                                  <button onClick={() => setWithdrawalAmount(Number(user.walletBalance) || 0)} className="text-[10px] font-black uppercase tracking-widest text-[var(--nexus-accent)]">MAX</button>
-                                  <span className="text-xs font-bold text-slate-500">INR</span>
-                                </div>
-                              </div>
-                            </div>
-                            <div className="space-y-3">
-                              <div className="flex justify-between items-center text-xs font-bold"><span className="text-slate-500">Fee (2%)</span><span className={theme === 'light' ? 'text-slate-900' : 'text-white'}>₹{(withdrawalAmount * 0.02).toFixed(2)}</span></div>
-                              <div className="flex justify-between items-center text-xs font-bold"><span className="text-slate-500">You Get</span><span className="text-[var(--nexus-accent)] font-black text-sm">₹{(withdrawalAmount * 0.98).toFixed(2)}</span></div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="space-y-8">
-                          <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Payment Details</span>
-                          {user.payoutSettings?.bankDetailsLinked ? (
-                            <div className={`p-5 rounded-2xl border transition-all flex items-center justify-between ${theme === 'light' ? 'bg-slate-50 border-pink-100' : 'bg-white/[0.03] border-pink-500/30'}`}>
-                              <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-pink-500 to-rose-500 p-[1px]"><div className={`w-full h-full rounded-2xl flex items-center justify-center ${theme === 'light' ? 'bg-white' : 'bg-[#1a1a1a]'}`}><div className="w-4 h-4 rounded-full bg-[var(--nexus-accent)] shadow-[0_0_10px_var(--nexus-accent)]" /></div></div>
-                                <div><h5 className={`text-sm font-black ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>Primary Account</h5><div className="flex gap-4 text-[10px] font-mono font-bold text-slate-500"><span>IFSC: {user.bankDetails?.ifsc}</span><span>ACC: {user.bankDetails?.masked_account}</span></div></div>
-                              </div>
-                              <Trash2 className="w-4 h-4 text-slate-400 hover:text-red-500 cursor-pointer" />
+                          {isFetchingWithdrawals ? (
+                            <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-[var(--nexus-accent)]" /></div>
+                          ) : withdrawals.length === 0 ? (
+                            <div className={`py-20 text-center rounded-2xl border border-dashed ${theme === 'light' ? 'bg-slate-50 border-slate-200' : 'bg-white/[0.02] border-white/10'}`}>
+                              <History className="w-8 h-8 mx-auto mb-4 opacity-20" />
+                              <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">No Recent Activity Found</p>
                             </div>
                           ) : (
-                            <div className="p-6 rounded-2xl border border-dashed text-center space-y-3"><AlertCircle className="w-8 h-8 mx-auto opacity-50" /><p className="text-[9px] font-bold text-slate-500">No Bank Linked</p><button onClick={() => { setShowWithdrawModal(false); setActiveSection('profile'); }} className="px-4 py-2 bg-amber-500 text-white rounded-lg text-[9px] font-black uppercase tracking-widest">Link Now</button></div>
+                            <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                              {withdrawals.map((wd) => {
+                                const amt = Math.abs(wd.amount);
+                                const statusColors = { pending: 'amber', processing: 'blue', completed: 'emerald', cancelled: 'red' };
+                                const color = statusColors[wd.status] || 'slate';
+                                return (
+                                  <div key={wd._id} className={`flex items-center justify-between p-4 rounded-xl border transition-all ${theme === 'light' ? 'bg-slate-50 border-slate-100 hover:border-slate-200' : 'bg-white/[0.03] border-white/5 hover:border-white/10'}`}>
+                                    <div className="flex items-center gap-4">
+                                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${theme === 'light' ? 'bg-white shadow-sm' : 'bg-white/5'}`}><IndianRupee className="w-4 h-4 text-[var(--nexus-accent)]" /></div>
+                                      <div>
+                                        <h5 className={`text-xs font-black ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>Bank Withdrawal</h5>
+                                        <span className="text-[9px] font-mono font-bold text-slate-500 uppercase">{new Date(wd.createdAt).toLocaleString()}</span>
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center gap-4">
+                                      <div className="text-right">
+                                        <h5 className={`text-xs font-black ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>₹{amt.toLocaleString()}</h5>
+                                        <span className={`px-2 py-0.5 rounded-lg border text-[8px] font-black uppercase tracking-widest border-${color}-500/30 text-${color}-500 bg-${color}-500/5`}>{wd.status}</span>
+                                      </div>
+                                      {wd.status === 'pending' && (
+                                        <button onClick={() => handleCancelWithdrawal(wd._id)} className="p-2 rounded-lg border border-red-500/20 text-red-500 hover:bg-red-500/10 transition-all">
+                                          <Trash2 className="w-3.5 h-3.5" />
+                                        </button>
+                                      )}
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
                           )}
-                          <button disabled={!user.payoutSettings?.bankDetailsLinked || withdrawalAmount < 1000 || withdrawalAmount > (Number(user.walletBalance) || 0)} onClick={() => setWithdrawalStep(1)} className={`w-full py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-all flex items-center justify-center gap-2 ${theme === 'light' ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'bg-[var(--nexus-accent)] text-black shadow-lg shadow-[var(--nexus-accent)]/20'}`}>Withdraw <ArrowRight className="w-4 h-4" /></button>
-                        </div>
-                      </motion.div>
-                    ) : withdrawalStep === 1 ? (
-                      <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
-                         <div className="space-y-8">
-                          <button onClick={() => setWithdrawalStep(0)} className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-400 hover:text-slate-900"><ArrowLeft className="w-3.5 h-3.5" /> Back</button>
-                          <h4 className={`text-sm font-black uppercase tracking-widest ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>Summary</h4>
-                          <div className={`p-6 rounded-2xl border ${theme === 'light' ? 'bg-slate-50 border-slate-100' : 'bg-white/[0.02] border-white/5'}`}>
-                            {[{ l: 'You Receive', v: `₹${(withdrawalAmount * 0.98).toFixed(2)}`, h: true }, { l: 'Fee', v: `₹${(withdrawalAmount * 0.02).toFixed(2)}` }, { l: 'Name', v: user.bankDetails?.account_holder_name }, { l: 'IFSC', v: user.bankDetails?.ifsc }, { l: 'Acc', v: user.bankDetails?.masked_account }].map((item, i) => (
-                              <div key={i} className="flex justify-between items-center py-1"><span className="text-[10px] font-bold text-slate-500">{item.l}</span><span className={`text-[11px] font-black ${item.h ? 'text-[var(--nexus-accent)]' : (theme === 'light' ? 'text-slate-900' : 'text-white')}`}>{item.v}</span></div>
-                            ))}
+                        </motion.div>
+                      ) : withdrawalStep === 0 ? (
+                        <motion.div key="step0" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+                          <div className="space-y-8">
+                            <h4 className={`text-sm font-black uppercase tracking-widest ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>Bank Transfer</h4>
+                            <div className="space-y-6">
+                              <div className="space-y-2">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Withdrawal Amount</label>
+                                <div className="relative group">
+                                  <input type="number" value={withdrawalAmount} onChange={(e) => setWithdrawalAmount(Number(e.target.value))} className={`w-full p-4 md:p-6 pr-24 rounded-2xl border text-xl md:text-2xl font-black transition-all outline-none ${theme === 'light' ? 'bg-slate-50 border-slate-200 focus:border-slate-400 text-slate-900' : 'bg-white/5 border-white/10 focus:border-white/20 text-white'}`} placeholder="1000" />
+                                  <div className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center gap-3">
+                                    <button onClick={() => setWithdrawalAmount(Number(user.walletBalance) || 0)} className="text-[10px] font-black uppercase tracking-widest text-[var(--nexus-accent)]">MAX</button>
+                                    <span className="text-xs font-bold text-slate-500">INR</span>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="space-y-3">
+                                <div className="flex justify-between items-center text-xs font-bold"><span className="text-slate-500">Fee (2%)</span><span className={theme === 'light' ? 'text-slate-900' : 'text-white'}>₹{(withdrawalAmount * 0.02).toFixed(2)}</span></div>
+                                <div className="flex justify-between items-center text-xs font-bold"><span className="text-slate-500">You Get</span><span className="text-[var(--nexus-accent)] font-black text-sm">₹{(withdrawalAmount * 0.98).toFixed(2)}</span></div>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                        <div className="space-y-8">
-                          <h4 className={`text-sm font-black uppercase tracking-widest ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>MFA Verification</h4>
-                          <div className="space-y-6">
-                            <p className="text-[10px] font-medium text-slate-500">Sent code to {user.phone ? `${user.phone.slice(0, 4)} XXX ${user.phone.slice(-2)}` : 'XXXX'}.</p>
-                            <input type="text" value={mfaCode} onChange={(e) => setMfaCode(e.target.value)} className={`w-full p-4 rounded-xl border text-xl font-black tracking-[1em] text-center ${theme === 'light' ? 'bg-slate-50 border-slate-200' : 'bg-white/5 border-white/10 text-white'}`} placeholder="000000" maxLength={6} />
+                          <div className="space-y-8">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Payment Details</span>
+                            {user.payoutSettings?.bankDetailsLinked ? (
+                              <div className={`p-5 rounded-2xl border transition-all flex items-center justify-between ${theme === 'light' ? 'bg-slate-50 border-pink-100' : 'bg-white/[0.03] border-pink-500/30'}`}>
+                                <div className="flex items-center gap-4">
+                                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-pink-500 to-rose-500 p-[1px]"><div className={`w-full h-full rounded-2xl flex items-center justify-center ${theme === 'light' ? 'bg-white' : 'bg-[#1a1a1a]'}`}><div className="w-4 h-4 rounded-full bg-[var(--nexus-accent)] shadow-[0_0_10px_var(--nexus-accent)]" /></div></div>
+                                  <div><h5 className={`text-sm font-black ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>Primary Account</h5><div className="flex gap-4 text-[10px] font-mono font-bold text-slate-500"><span>IFSC: {user.bankDetails?.ifsc}</span><span>ACC: {user.bankDetails?.masked_account}</span></div></div>
+                                </div>
+                                <Trash2 className="w-4 h-4 text-slate-400 hover:text-red-500 cursor-pointer" />
+                              </div>
+                            ) : (
+                              <div className="p-6 rounded-2xl border border-dashed text-center space-y-3"><AlertCircle className="w-8 h-8 mx-auto opacity-50" /><p className="text-[9px] font-bold text-slate-500">No Bank Linked</p><button onClick={() => { setShowWithdrawModal(false); setActiveSection('profile'); }} className="px-4 py-2 bg-amber-500 text-white rounded-lg text-[9px] font-black uppercase tracking-widest">Link Now</button></div>
+                            )}
+                            <button disabled={!user.payoutSettings?.bankDetailsLinked || withdrawalAmount < 1000 || withdrawalAmount > (Number(user.walletBalance) || 0)} onClick={() => setWithdrawalStep(1)} className={`w-full py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-all flex items-center justify-center gap-2 ${theme === 'light' ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'bg-[var(--nexus-accent)] text-black shadow-lg shadow-[var(--nexus-accent)]/20'}`}>Withdraw <ArrowRight className="w-4 h-4" /></button>
                           </div>
-                          <div className="flex gap-4">
-                            <button onClick={() => setShowWithdrawModal(false)} className={`flex-1 py-4 rounded-xl font-black uppercase text-[10px] ${theme === 'light' ? 'bg-slate-100 text-slate-500' : 'bg-white/5 text-slate-400'}`}>Cancel</button>
-                            <button onClick={() => handleWithdrawRequest(withdrawalAmount)} disabled={isProcessingWithdraw || mfaCode.length < 6} className={`flex-[2] py-4 rounded-xl font-black uppercase text-[10px] ${theme === 'light' ? 'bg-slate-900 text-white shadow-slate-200' : 'bg-[var(--nexus-accent)] text-black shadow-[var(--nexus-accent)]/20'}`}>{isProcessingWithdraw ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirm'}</button>
+                        </motion.div>
+                      ) : withdrawalStep === 1 ? (
+                        <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+                           <div className="space-y-8">
+                            <button onClick={() => setWithdrawalStep(0)} className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-400 hover:text-slate-900"><ArrowLeft className="w-3.5 h-3.5" /> Back</button>
+                            <h4 className={`text-sm font-black uppercase tracking-widest ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>Summary</h4>
+                            <div className={`p-6 rounded-2xl border ${theme === 'light' ? 'bg-slate-50 border-slate-100' : 'bg-white/[0.02] border-white/5'}`}>
+                              {[{ l: 'You Receive', v: `₹${(withdrawalAmount * 0.98).toFixed(2)}`, h: true }, { l: 'Fee', v: `₹${(withdrawalAmount * 0.02).toFixed(2)}` }, { l: 'Name', v: user.bankDetails?.account_holder_name }, { l: 'IFSC', v: user.bankDetails?.ifsc }, { l: 'Acc', v: user.bankDetails?.masked_account }].map((item, i) => (
+                                <div key={i} className="flex justify-between items-center py-1"><span className="text-[10px] font-bold text-slate-500">{item.l}</span><span className={`text-[11px] font-black ${item.h ? 'text-[var(--nexus-accent)]' : (theme === 'light' ? 'text-slate-900' : 'text-white')}`}>{item.v}</span></div>
+                              ))}
+                            </div>
                           </div>
-                        </div>
-                      </motion.div>
-                    ) : (
-                      <motion.div key="step2" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center justify-center py-12 text-center">
-                        <div className="w-20 h-20 rounded-full bg-emerald-500/20 flex items-center justify-center mb-6 relative"><div className="w-12 h-12 rounded-full bg-emerald-500 flex items-center justify-center shadow-lg"><Zap className="w-6 h-6 text-white" /></div></div>
-                        <h3 className={`text-xl font-black uppercase tracking-widest mb-2 ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>Success</h3>
-                        <p className="text-xs font-bold text-slate-500 uppercase mb-8">₹{(withdrawalAmount * 0.98).toFixed(2)} INR Transmitted.</p>
-                        <button onClick={() => setShowWithdrawModal(false)} className={`px-12 py-4 rounded-2xl font-black uppercase text-xs ${theme === 'light' ? 'bg-slate-900 text-white' : 'bg-white text-black'}`}>Back to Dashboard</button>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
+                          <div className="space-y-8">
+                            <h4 className={`text-sm font-black uppercase tracking-widest ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>MFA Verification</h4>
+                            <div className="space-y-6">
+                              <p className="text-[10px] font-medium text-slate-500">Sent code to {user.phone ? `${user.phone.slice(0, 4)} XXX ${user.phone.slice(-2)}` : 'XXXX'}.</p>
+                              <input type="text" value={mfaCode} onChange={(e) => setMfaCode(e.target.value)} className={`w-full p-4 rounded-xl border text-xl font-black tracking-[1em] text-center ${theme === 'light' ? 'bg-slate-50 border-slate-200' : 'bg-white/5 border-white/10 text-white'}`} placeholder="000000" maxLength={6} />
+                            </div>
+                            <div className="flex gap-4">
+                              <button onClick={() => setShowWithdrawModal(false)} className={`flex-1 py-4 rounded-xl font-black uppercase text-[10px] ${theme === 'light' ? 'bg-slate-100 text-slate-500' : 'bg-white/5 text-slate-400'}`}>Cancel</button>
+                              <button onClick={() => handleWithdrawRequest(withdrawalAmount)} disabled={isProcessingWithdraw || mfaCode.length < 6} className={`flex-[2] py-4 rounded-xl font-black uppercase text-[10px] ${theme === 'light' ? 'bg-slate-900 text-white shadow-slate-200' : 'bg-[var(--nexus-accent)] text-black shadow-[var(--nexus-accent)]/20'}`}>{isProcessingWithdraw ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirm'}</button>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ) : (
+                        <motion.div key="step2" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center justify-center py-12 text-center">
+                          <div className="w-20 h-20 rounded-full bg-emerald-500/20 flex items-center justify-center mb-6 relative"><div className="w-12 h-12 rounded-full bg-emerald-500 flex items-center justify-center shadow-lg"><Zap className="w-6 h-6 text-white" /></div></div>
+                          <h3 className={`text-xl font-black uppercase tracking-widest mb-2 ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>Success</h3>
+                          <p className="text-xs font-bold text-slate-500 uppercase mb-8">₹{(withdrawalAmount * 0.98).toFixed(2)} INR Transmitted.</p>
+                          <button onClick={() => setShowWithdrawModal(false)} className={`px-12 py-4 rounded-2xl font-black uppercase text-xs ${theme === 'light' ? 'bg-slate-900 text-white' : 'bg-white text-black'}`}>Back to Dashboard</button>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </motion.div>
               </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            )}
+          </AnimatePresence>,
+          document.body
+        )}
 
         {/* OTP SECURITY MODAL */}
-        <AnimatePresence>
-          {showOtpModal && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/40">
-              <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} className={`w-full max-w-md p-8 rounded-[2.5rem] border shadow-2xl relative overflow-hidden ${theme === 'dark' ? 'bg-[#0a0a0a] border-white/10' : 'bg-white border-slate-200'}`}>
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#10B981] to-transparent" />
-                <div className="flex flex-col items-center text-center space-y-6">
-                  <div className="w-16 h-16 rounded-full bg-[#10B981]/10 flex items-center justify-center border-2 border-[#10B981]/20"><ShieldAlert className="w-8 h-8 text-[#10B981]" /></div>
-                  <div><h3 className={`text-2xl font-black uppercase italic tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Verification</h3><p className="text-[10px] font-black uppercase tracking-widest text-[#10B981] mt-1">Code Required</p></div>
-                  <input type="text" maxLength={6} value={otpInput} onChange={(e) => setOtpInput(e.target.value.replace(/\D/g, ''))} placeholder="000000" className={`w-full text-center text-3xl tracking-[0.5em] font-black p-4 rounded-2xl outline-none border transition-all ${theme === 'dark' ? 'bg-black/40 border-white/5 text-white focus:border-[#10B981]' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-[#10B981]'}`} />
-                  <div className="flex gap-3 w-full">
-                    <button onClick={() => setShowOtpModal(false)} className={`flex-1 py-4 rounded-2xl font-black uppercase text-[10px] border ${theme === 'dark' ? 'bg-white/5 text-slate-300 border-white/5' : 'bg-slate-50 text-slate-600 border-slate-200'}`}>Cancel</button>
-                    <button onClick={verifyProfileOtp} disabled={isVerifyingOtp || otpInput.length !== 6} className="flex-[2] py-4 rounded-2xl font-black uppercase text-[10px] bg-[#10B981] text-black hover:bg-[#0fa672] shadow-lg shadow-[#10B981]/20">{isVerifyingOtp ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirm'}</button>
+        {createPortal(
+          <AnimatePresence>
+            {showOtpModal && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/40">
+                <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} className={`w-full max-w-md p-8 rounded-[2.5rem] border shadow-2xl relative overflow-hidden ${theme === 'dark' ? 'bg-[#0a0a0a] border-white/10' : 'bg-white border-slate-200'}`}>
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#10B981] to-transparent" />
+                  <div className="flex flex-col items-center text-center space-y-6">
+                    <div className="w-16 h-16 rounded-full bg-[#10B981]/10 flex items-center justify-center border-2 border-[#10B981]/20"><ShieldAlert className="w-8 h-8 text-[#10B981]" /></div>
+                    <div><h3 className={`text-2xl font-black uppercase italic tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Verification</h3><p className="text-[10px] font-black uppercase tracking-widest text-[#10B981] mt-1">Code Required</p></div>
+                    <input type="text" maxLength={6} value={otpInput} onChange={(e) => setOtpInput(e.target.value.replace(/\D/g, ''))} placeholder="000000" className={`w-full text-center text-3xl tracking-[0.5em] font-black p-4 rounded-2xl outline-none border transition-all ${theme === 'dark' ? 'bg-black/40 border-white/5 text-white focus:border-[#10B981]' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-[#10B981]'}`} />
+                    <div className="flex gap-3 w-full">
+                      <button onClick={() => setShowOtpModal(false)} className={`flex-1 py-4 rounded-2xl font-black uppercase text-[10px] border ${theme === 'dark' ? 'bg-white/5 text-slate-300 border-white/5' : 'bg-slate-50 text-slate-600 border-slate-200'}`}>Cancel</button>
+                      <button onClick={verifyProfileOtp} disabled={isVerifyingOtp || otpInput.length !== 6} className="flex-[2] py-4 rounded-2xl font-black uppercase text-[10px] bg-[#10B981] text-black hover:bg-[#0fa672] shadow-lg shadow-[#10B981]/20">{isVerifyingOtp ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirm'}</button>
+                    </div>
                   </div>
-                </div>
+                </motion.div>
               </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            )}
+          </AnimatePresence>,
+          document.body
+        )}
 
         {/* STYLE ENFORCEMENT */}
         <style dangerouslySetInnerHTML={{ __html: `.custom-scrollbar::-webkit-scrollbar { display: none; } .custom-scrollbar { -ms-overflow-style: none; scrollbar-width: none; overscroll-behavior: none; }` }} />

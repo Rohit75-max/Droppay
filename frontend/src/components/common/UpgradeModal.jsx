@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence, useMotionValue, useMotionTemplate } from 'framer-motion';
 import {
   X, ArrowRight, Loader2, CheckCircle, Clock,
@@ -7,6 +8,7 @@ import {
   Infinity as InfinityIcon, Star, Trophy
 } from 'lucide-react';
 import axios from '../../api/axios';
+import { Logo } from '../ui/Logo';
 
 // ─── Tier Hierarchy ───────────────────────────────────────────
 const TIER_RANK = { starter: 0, pro: 1, legend: 2 };
@@ -20,21 +22,12 @@ const ALL_PLANS = [
     fee: '15%',
     icon: Zap,
     accentColor: 'slate',
-    glow: 'shadow-slate-500/20',
-    border: 'border-slate-500/30',
-    badge: 'Standard Entry',
-    bIcon: Star,
+    glow: 'rgba(100,116,139,0.15)',
     tagline: 'Get started with the basics',
     features: [
-      { icon: CheckCircle, text: '15% Revenue Split' },
-      { icon: Clock, text: 'Weekly Payout Cycle' },
-      { icon: Shield, text: 'Standard Encryption' },
-    ],
-    specs: [
-      { icon: Activity, label: 'Latency', value: '45ms' },
-      { icon: BarChart3, label: 'Analytics', value: 'Basic' },
-      { icon: HardDrive, label: 'Storage', value: '5GB' },
-      { icon: Shield, label: 'Security', value: 'Standard' },
+      { text: '15% Revenue Split' },
+      { text: 'Weekly Payout Cycle' },
+      { text: 'Standard Encryption' },
     ],
     upgradePerks: [],
   },
@@ -45,22 +38,14 @@ const ALL_PLANS = [
     fee: '10%',
     icon: Cpu,
     accentColor: 'emerald',
-    glow: 'shadow-emerald-500/30',
-    border: 'border-emerald-500/30',
-    badge: 'Most Popular',
-    bIcon: Rocket,
+    glow: 'rgba(16,185,129,0.25)',
+    badge: 'High Throughput',
     tagline: 'Supercharge your creator income',
     features: [
-      { icon: CheckCircle, text: '10% Revenue Split' },
-      { icon: Clock, text: '48hr Payout Terminal' },
-      { icon: ShieldCheck, text: 'Advanced Encryption' },
-      { icon: Zap, text: 'Priority Connection' },
-    ],
-    specs: [
-      { icon: Activity, label: 'Latency', value: '18ms' },
-      { icon: BarChart3, label: 'Analytics', value: 'Advanced' },
-      { icon: HardDrive, label: 'Storage', value: '25GB' },
-      { icon: Shield, label: 'Security', value: 'Advanced' },
+      { text: '10% Revenue Split' },
+      { text: '48hr Payout Terminal' },
+      { text: 'Advanced Encryption' },
+      { text: 'Priority Connection' },
     ],
     upgradePerks: {
       starter: ['Save 5% on every payout', 'Payouts in 48hrs instead of weekly', 'Advanced analytics dashboard', '5× more storage (25GB)'],
@@ -73,22 +58,14 @@ const ALL_PLANS = [
     fee: '5%',
     icon: Award,
     accentColor: 'amber',
-    glow: 'shadow-amber-500/30',
-    border: 'border-amber-400/30',
-    badge: 'VIP Priority',
-    bIcon: Crown,
+    glow: 'rgba(251,191,36,0.3)',
+    badge: 'Ultra Low Latency',
     tagline: 'The absolute pinnacle of creator monetization',
     features: [
-      { icon: CheckCircle, text: '5% Revenue Split' },
-      { icon: Clock, text: 'Instant Settlement' },
-      { icon: ShieldCheck, text: 'Military Grade Security' },
-      { icon: Rocket, text: 'Dedicated Infrastructure' },
-    ],
-    specs: [
-      { icon: Activity, label: 'Latency', value: 'Sub-ms' },
-      { icon: InfinityIcon, label: 'Capacity', value: 'Unlimited' },
-      { icon: HardDrive, label: 'Storage', value: 'Unlimited' },
-      { icon: Shield, label: 'Security', value: 'Military' },
+      { text: '5% Revenue Split' },
+      { text: 'Instant Settlement' },
+      { text: 'Military Grade Security' },
+      { text: 'Dedicated Infrastructure' },
     ],
     upgradePerks: {
       starter: ['Save 10% on every payout', 'Instant settlements — no waiting', 'Unlimited storage & bandwidth', 'Military-grade security layer', 'Dedicated infrastructure'],
@@ -97,50 +74,33 @@ const ALL_PLANS = [
   },
 ];
 
-// ─── Accent Color Utility ─────────────────────────────────────
 const accentMap = {
   emerald: {
     bg: 'bg-emerald-500/10',
     border: 'border-emerald-500/30',
-    text: 'text-emerald-400',
-    fill: 'fill-emerald-500',
-    btn: 'bg-emerald-500 hover:bg-emerald-400 shadow-emerald-500/20',
+    text: 'text-[#10B981]',
+    btn: 'bg-[#10B981] text-black hover:bg-[#12d192] shadow-[0_0_30px_rgba(16,185,129,0.3)]',
     ring: 'ring-emerald-500/30',
-    glow: 'rgba(16,185,129,0.15)',
-    bar: 'via-emerald-500',
-    perkBg: 'bg-emerald-500/10',
-    perkBorder: 'border-emerald-500/20',
-    perkText: 'text-emerald-400',
+    bar: 'via-[#10B981]',
   },
   amber: {
     bg: 'bg-amber-500/10',
     border: 'border-amber-400/30',
     text: 'text-amber-400',
-    fill: 'fill-amber-500',
-    btn: 'bg-amber-500 hover:bg-amber-400 shadow-amber-500/20',
+    btn: 'bg-amber-500 text-black hover:bg-amber-400 shadow-[0_0_30px_rgba(251,191,36,0.3)]',
     ring: 'ring-amber-500/30',
-    glow: 'rgba(251,191,36,0.15)',
     bar: 'via-amber-500',
-    perkBg: 'bg-amber-500/10',
-    perkBorder: 'border-amber-400/20',
-    perkText: 'text-amber-400',
   },
   slate: {
     bg: 'bg-slate-500/10',
     border: 'border-slate-500/30',
     text: 'text-slate-400',
-    fill: 'fill-slate-500',
-    btn: 'bg-slate-500 hover:bg-slate-400 shadow-slate-500/20',
+    btn: 'bg-slate-800 text-white hover:bg-slate-700 shadow-[0_0_30px_rgba(100,116,139,0.1)]',
     ring: 'ring-slate-500/30',
-    glow: 'rgba(100,116,139,0.15)',
     bar: 'via-slate-500',
-    perkBg: 'bg-slate-500/10',
-    perkBorder: 'border-slate-500/20',
-    perkText: 'text-slate-400',
   },
 };
 
-// ─── Upgrade Plan Card ────────────────────────────────────────
 const UpgradePlanCard = ({ plan, currentTier, isSelected, isLoading, billingCycle, onSelect, onSubscribe }) => {
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -157,7 +117,7 @@ const UpgradePlanCard = ({ plan, currentTier, isSelected, isLoading, billingCycl
     let discounted = original;
     if (billingCycle === 6) discounted = Math.round(original * 0.85);
     if (billingCycle === 12) discounted = Math.round(original * 0.70);
-    return { original, discounted };
+    return { discounted };
   };
 
   const { discounted } = getPriceData();
@@ -167,91 +127,82 @@ const UpgradePlanCard = ({ plan, currentTier, isSelected, isLoading, billingCycl
     <motion.div
       onMouseMove={handleMouseMove}
       onClick={onSelect}
-      initial={{ opacity: 0, y: 24 }}
+      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`relative group cursor-pointer rounded-2xl p-5 flex flex-col transition-all duration-500 overflow-hidden border
+      className={`relative group cursor-pointer rounded-[2.5rem] p-8 flex flex-col transition-all duration-500 overflow-hidden border-2
         ${isSelected
-          ? `bg-[#080808] ${ac.border} ring-2 ${ac.ring} shadow-2xl scale-[1.02]`
-          : 'bg-white/[0.02] border-white/5 hover:border-white/10 hover:scale-[1.01]'
+          ? `bg-[#0a0a0a] ${ac.border} shadow-[0_40px_80px_rgba(0,0,0,0.6)] scale-[1.03] z-10`
+          : 'bg-[#060606] border-white/5 hover:border-white/10 hover:bg-[#080808]'
         }`}
     >
       {/* Popular badge */}
       {plan.id === 'pro' && (
-        <div className="absolute top-0 right-0 px-3 py-1 rounded-bl-xl rounded-tr-2xl bg-emerald-500 text-white text-[8px] font-black uppercase tracking-widest">
+        <div className="absolute top-6 right-0 px-4 py-1.5 rounded-l-full bg-[#10B981] text-black text-[9px] font-black uppercase tracking-[0.2em] shadow-lg">
           Most Popular
         </div>
       )}
 
       {/* Hover glow */}
       <motion.div
-        className="pointer-events-none absolute -inset-px rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+        className="pointer-events-none absolute -inset-px rounded-[2.5rem] opacity-0 group-hover:opacity-100 transition-opacity duration-500"
         style={{
-          background: useMotionTemplate`radial-gradient(500px circle at ${mouseX}px ${mouseY}px, ${ac.glow}, transparent 80%)`,
+          background: useMotionTemplate`radial-gradient(400px circle at ${mouseX}px ${mouseY}px, ${plan.glow}, transparent 80%)`,
         }}
       />
 
-      {/* Glossy top bar */}
-      {isSelected && (
-        <div className={`absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent ${ac.bar} to-transparent`} />
-      )}
-
       <div className="relative z-10 flex flex-col h-full">
         {/* Header */}
-        <div className="flex items-start justify-between mb-4">
-          <div className={`p-2.5 rounded-xl border transition-all duration-500 ${isSelected ? `${ac.bg} ${ac.border}` : 'bg-white/5 border-white/10'}`}>
-            <plan.icon className={`w-5 h-5 ${isSelected ? ac.text : 'text-white/30'}`} />
+        <div className="flex items-center gap-4 mb-8">
+          <div className={`w-14 h-14 rounded-2xl border flex items-center justify-center transition-all duration-700 ${isSelected ? `${ac.bg} ${ac.border} rotate-6 shadow-xl` : 'bg-white/5 border-white/10'}`}>
+            <plan.icon className={`w-7 h-7 ${isSelected ? ac.text : 'text-white/20'}`} />
           </div>
-          <div className="text-right">
-            <div className={`text-2xl font-black italic tracking-tighter ${isSelected ? 'text-white' : 'text-white/60'}`}>
-              ₹{discounted.toLocaleString('en-IN')}
-            </div>
-            <div className="text-[8px] font-black uppercase tracking-widest text-white/20">/ lifecycle</div>
+          <div>
+            <h3 className={`text-xl font-black italic uppercase tracking-tighter leading-none ${isSelected ? 'text-white' : 'text-white/40'}`}>
+              {plan.name}
+            </h3>
+            <p className={`text-[9px] font-black uppercase tracking-widest mt-1 ${isSelected ? ac.text : 'text-white/20'}`}>
+              {plan.tagline}
+            </p>
           </div>
         </div>
 
-        <h3 className={`text-base font-black italic uppercase tracking-tighter mb-1 ${isSelected ? 'text-white' : 'text-white/40'}`}>
-          {plan.name}
-        </h3>
-        <p className={`text-[9px] font-bold uppercase tracking-wider mb-4 ${isSelected ? ac.text : 'text-white/20'}`}>
-          {plan.tagline}
-        </p>
+        {/* Price Section */}
+        <div className="mb-8">
+            <div className="flex items-baseline gap-1">
+                <span className="text-4xl font-black italic tracking-tighter text-white">₹{discounted.toLocaleString('en-IN')}</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-white/20">/ Lifecycle</span>
+            </div>
+            <div className={`mt-2 inline-flex items-center gap-2 px-3 py-1 rounded-full border text-[8px] font-black uppercase tracking-widest ${isSelected ? `${ac.bg} ${ac.border} ${ac.text}` : 'bg-white/5 border-white/5 text-white/20'}`}>
+                <Zap className="w-3 h-3" />
+                {plan.fee} Node Revenue Split
+            </div>
+        </div>
 
-        {/* What you gain */}
-        <div className={`space-y-2 mb-4 p-3 rounded-xl border transition-all duration-500 ${isSelected ? `${ac.perkBg} ${ac.perkBorder}` : 'bg-transparent border-transparent'}`}>
-          {isSelected && (
-            <p className={`text-[8px] font-black uppercase tracking-widest mb-2 ${ac.text} opacity-70`}>
-              ✦ What you gain
-            </p>
-          )}
+        {/* Feature List */}
+        <div className={`space-y-3 mb-10 p-5 rounded-3xl border transition-all duration-700 ${isSelected ? 'bg-black/40 border-white/10' : 'border-transparent'}`}>
           {perks.map((perk, i) => (
-            <div key={i} className={`flex items-center gap-2 transition-all duration-300 ${isSelected ? 'opacity-100' : 'opacity-25'}`}>
-              <div className={`w-1 h-1 rounded-full shrink-0 ${isSelected ? ac.text.replace('text-', 'bg-') : 'bg-white/20'}`} />
-              <span className={`text-[9px] font-bold uppercase tracking-wide ${isSelected ? 'text-white/90' : 'text-white/50'}`}>
+            <div key={i} className={`flex items-start gap-3 transition-all duration-300 ${isSelected ? 'opacity-100' : 'opacity-30'}`}>
+              <div className={`mt-1.5 w-1.5 h-1.5 rounded-full shrink-0 ${isSelected ? ac.text.replace('text-', 'bg-') : 'bg-white/20'}`} />
+              <span className={`text-[10px] font-bold uppercase tracking-wide leading-relaxed ${isSelected ? 'text-slate-200' : 'text-slate-500'}`}>
                 {typeof perk === 'string' ? perk : perk.text}
               </span>
             </div>
           ))}
         </div>
 
-        {/* Fee badge */}
-        <div className={`flex items-center gap-2 mb-5 px-3 py-2 rounded-xl border text-[9px] font-black uppercase tracking-widest w-fit transition-all duration-500 ${isSelected ? `${ac.bg} ${ac.border} ${ac.text}` : 'bg-white/5 border-white/5 text-white/20'}`}>
-          <Zap className="w-3 h-3" />
-          {plan.fee} Revenue Split
-        </div>
-
         {/* CTA */}
         <button
           onClick={(e) => { e.stopPropagation(); onSubscribe(plan.id); }}
           disabled={isLoading}
-          className={`w-full py-3.5 rounded-xl font-black uppercase italic text-[10px] tracking-[0.25em] transition-all duration-300 flex justify-center items-center gap-2 border-2 border-transparent mt-auto
+          className={`w-full py-5 rounded-2xl font-black uppercase italic text-[11px] tracking-[0.3em] transition-all duration-300 flex justify-center items-center gap-3 mt-auto
             ${isSelected
-              ? `${ac.btn} text-black shadow-lg`
-              : 'bg-white/5 text-white/30 hover:bg-white/10 hover:text-white/60'
+              ? ac.btn
+              : 'bg-white/5 text-white/20 hover:bg-white/10 hover:text-white/40 border border-white/5'
             }`}
         >
           {isLoading
             ? <Loader2 className="animate-spin w-5 h-5" />
-            : <>Upgrade Now <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" /></>
+            : <>Deploy {plan.id} Tier <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" /></>
           }
         </button>
       </div>
@@ -259,7 +210,6 @@ const UpgradePlanCard = ({ plan, currentTier, isSelected, isLoading, billingCycl
   );
 };
 
-// ─── Main Modal Component ─────────────────────────────────────
 const UpgradeModal = ({ isOpen, onClose, user }) => {
   const [billingCycle, setBillingCycle] = useState(1);
   const [selectedPlan, setSelectedPlan] = useState(null);
@@ -268,11 +218,8 @@ const UpgradeModal = ({ isOpen, onClose, user }) => {
 
   const currentTier = user?.tier || 'starter';
   const currentRank = TIER_RANK[currentTier] ?? 0;
-
-  // Plans strictly higher than current tier
   const upgradablePlans = ALL_PLANS.filter(p => TIER_RANK[p.id] > currentRank);
 
-  // Auto-select the first (lowest) upgradable plan on open
   useEffect(() => {
     if (isOpen && upgradablePlans.length > 0) {
       setSelectedPlan(upgradablePlans[0].id);
@@ -280,215 +227,164 @@ const UpgradeModal = ({ isOpen, onClose, user }) => {
     }
   }, [isOpen, currentTier]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Block body scroll when modal is open
-  useEffect(() => {
-    if (isOpen) document.body.style.overflow = 'hidden';
-    else document.body.style.overflow = '';
-    return () => { document.body.style.overflow = ''; };
-  }, [isOpen]);
-
   const handleSubscribe = async (planId) => {
     setLoadingPlan(planId);
     setError('');
     const token = localStorage.getItem('token');
     try {
-      const subRes = await axios.post(
-        '/api/payment/create-subscription',
-        { planId, billingCycle },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
+      const subRes = await axios.post('/api/payment/create-subscription', { planId, billingCycle }, { headers: { Authorization: `Bearer ${token}` } });
       const options = {
         key: 'rzp_test_SHrX3upgmJ6sGL',
         subscription_id: subRes.data.id,
         name: 'Drope Terminal',
-        description: `Upgrading to ${planId.toUpperCase()} Tier`,
+        description: `AUTHENTICATING ${planId.toUpperCase()} HANDSHAKE`,
         handler: async (response) => {
           try {
-            const verifyRes = await axios.post(
-              '/api/payment/verify-subscription',
-              {
+            const verifyRes = await axios.post('/api/payment/verify-subscription', {
                 plan: planId,
                 billingCycle: billingCycle,
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_subscription_id: response.razorpay_subscription_id,
                 razorpay_signature: response.razorpay_signature,
-              },
-              { headers: { Authorization: `Bearer ${token}` } }
-            );
-            if (verifyRes.data.status === 'success') {
-              window.location.href = '/dashboard';
-            } else {
-              setLoadingPlan(null);
-            }
+            }, { headers: { Authorization: `Bearer ${token}` } });
+            if (verifyRes.data.status === 'success') window.location.href = '/dashboard';
+            else setLoadingPlan(null);
           } catch (err) {
             setLoadingPlan(null);
-            setError(err.response?.data?.msg || 'Verification Failed. Please try again.');
+            setError(err.response?.data?.msg || 'Neural verification failed.');
           }
         },
         prefill: { name: user?.username, email: user?.email },
-        theme: { color: planId === 'legend' ? '#fbbf24' : '#10B981' },
+        theme: { color: '#111111' },
         modal: { ondismiss: () => setLoadingPlan(null) },
       };
-
       const rzp = new window.Razorpay(options);
       rzp.open();
     } catch (err) {
-      setError(err.response?.data?.msg || 'Payment gateway unreachable. Please try again.');
+      setError(err.response?.data?.msg || 'Security uplink disconnected. Try again.');
       setLoadingPlan(null);
     }
   };
 
-  const tierLabel = { starter: 'Starter', pro: 'Pro', legend: 'Legend' };
-  const tierAccent = { starter: 'text-slate-400', pro: 'text-emerald-400', legend: 'text-amber-400' };
-
-  return (
+  return createPortal(
     <AnimatePresence>
       {isOpen && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.25 }}
-          className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md"
+          className="fixed inset-0 z-[1000] flex items-center justify-center p-6 bg-black/95 backdrop-blur-2xl"
           onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
         >
-          <motion.div
-            initial={{ scale: 0.93, y: 30, opacity: 0 }}
-            animate={{ scale: 1, y: 0, opacity: 1 }}
-            exit={{ scale: 0.93, y: 30, opacity: 0 }}
-            transition={{ type: 'spring', bounce: 0.2, duration: 0.5 }}
-            className="relative w-full max-w-3xl max-h-[92vh] overflow-y-auto bg-[#060606] border border-white/10 rounded-3xl shadow-2xl flex flex-col no-scrollbar"
-          >
-            {/* Top accent bar */}
-            <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-indigo-500 to-transparent rounded-t-3xl" />
+          {/* Grainy Texture */}
+          <div className="absolute inset-0 blueprint-grid opacity-10 pointer-events-none" />
 
-            {/* Header */}
-            <div className="sticky top-0 z-10 flex items-center justify-between p-6 pb-4 bg-[#060606]/95 backdrop-blur-xl border-b border-white/5">
-              <div className="flex items-center gap-4">
-                <div className="p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20">
-                  <Trophy className="w-5 h-5 text-indigo-400" />
+          <motion.div
+            initial={{ scale: 0.95, y: 40, opacity: 0 }}
+            animate={{ scale: 1, y: 0, opacity: 1 }}
+            exit={{ scale: 0.95, y: 40, opacity: 0 }}
+            transition={{ type: 'spring', bounce: 0.1, duration: 0.6 }}
+            className="relative w-full max-w-4xl max-h-[95vh] overflow-hidden bg-[#0a0a0b] border border-white/10 rounded-[3rem] shadow-[0_0_100px_rgba(0,0,0,0.8)] flex flex-col"
+          >
+            {/* Glossy Header */}
+            <div className="flex items-center justify-between p-10 pb-6">
+                <div className="flex flex-col gap-6">
+                    <Logo size="1.2rem" accentColor="#10B981" />
+                    <div>
+                        <h2 className="text-4xl font-black italic uppercase tracking-tighter text-white leading-none mb-2">Terminal Expansion</h2>
+                        <div className="flex items-center gap-3">
+                            <span className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-500">Current Node:</span>
+                            <span className={`text-[9px] font-black uppercase tracking-[0.3em] px-3 py-1 rounded-full bg-white/5 border border-white/10 ${currentTier === 'legend' ? 'text-amber-500' : currentTier === 'pro' ? 'text-emerald-500' : 'text-slate-400'}`}>
+                                {currentTier} tier
+                            </span>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                  <h2 className="text-base font-black italic uppercase tracking-tighter text-white">
-                    Upgrade Your Plan
-                  </h2>
-                  <p className="text-[9px] font-bold uppercase tracking-widest text-white/30 mt-0.5">
-                    Current:{' '}
-                    <span className={`${tierAccent[currentTier]} font-black`}>
-                      {tierLabel[currentTier]} Tier
-                    </span>
-                    {' '}— Select a higher tier below
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={onClose}
-                className="p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-white/50 hover:text-white"
-              >
-                <X className="w-4 h-4" />
-              </button>
+                <button onClick={onClose} className="w-14 h-14 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-all flex items-center justify-center group relative overflow-hidden">
+                    <div className="absolute inset-0 bg-rose-500/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <X className="w-6 h-6 text-white/50 group-hover:text-white transition-colors relative z-10" />
+                </button>
             </div>
 
-            {/* Body */}
-            <div className="p-6 flex flex-col gap-6">
-
-              {/* Legend is max */}
-              {upgradablePlans.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-20 gap-6 text-center">
-                  <div className="w-20 h-20 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
-                    <Crown className="w-10 h-10 text-amber-400" />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-black italic uppercase tracking-tighter text-white mb-2">
-                      You've Reached the Top
-                    </h3>
-                    <p className="text-sm text-white/40 font-bold max-w-xs mx-auto">
-                      You're already on the <span className="text-amber-400">Legend Tier</span> — the highest plan we offer. Enjoy every benefit!
-                    </p>
-                  </div>
-                  <button
-                    onClick={onClose}
-                    className="px-8 py-3.5 rounded-xl font-black uppercase italic text-[11px] tracking-widest bg-amber-500 text-black hover:bg-amber-400 transition-all shadow-lg shadow-amber-500/20"
-                  >
-                    Close
-                  </button>
-                </div>
-              ) : (
-                <>
-                  {/* Billing Cycle Switcher */}
-                  <div className="flex items-center justify-center">
-                    <div className="flex p-1 rounded-2xl bg-black/60 border border-white/10 shadow-inner gap-1">
-                      {[
-                        { m: 1, label: 'Monthly' },
-                        { m: 6, label: '6 Months', disc: 'Save 15%' },
-                        { m: 12, label: 'Yearly', disc: 'Save 30%' },
-                      ].map((item) => (
-                        <button
-                          key={item.m}
-                          onClick={() => setBillingCycle(item.m)}
-                          className={`relative flex flex-col items-center px-4 py-2 rounded-xl text-[8.5px] font-black uppercase tracking-[0.15em] transition-all duration-300
-                            ${billingCycle === item.m
-                              ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20'
-                              : 'text-white/30 hover:text-white/60'
-                            }`}
-                        >
-                          <span>{item.label}</span>
-                          {item.disc && (
-                            <span className={`text-[7px] mt-0.5 italic ${billingCycle === item.m ? 'text-white/80' : 'text-indigo-400/50'}`}>
-                              {item.disc}
-                            </span>
-                          )}
-                        </button>
-                      ))}
+            {/* Content Body */}
+            <div className="flex-1 overflow-y-auto custom-scrollbar px-10 pb-10">
+                {upgradablePlans.length === 0 ? (
+                    <div className="py-20 flex flex-col items-center text-center">
+                        <div className="w-24 h-24 rounded-[2rem] bg-amber-500/10 border-2 border-amber-500/20 flex items-center justify-center mb-8 shadow-[0_0_50px_rgba(251,191,36,0.15)]">
+                            <Crown className="w-12 h-12 text-amber-500 animate-pulse" />
+                        </div>
+                        <h3 className="text-3xl font-black italic uppercase tracking-tighter text-white mb-3">Peak Performance Reached</h3>
+                        <p className="text-[11px] font-black uppercase tracking-[0.3em] text-slate-500 max-w-sm mb-10">You are currently operating on the highest throughput tier available.</p>
+                        <button onClick={onClose} className="px-12 py-5 bg-white text-black rounded-2xl font-black uppercase italic text-[11px] tracking-widest hover:bg-emerald-500 transition-all shadow-xl">Close Terminal</button>
                     </div>
-                  </div>
+                ) : (
+                    <div className="space-y-12">
+                        {/* Billing Switcher */}
+                        <div className="flex justify-center">
+                            <div className="p-1 rounded-2xl bg-black border border-white/5 shadow-inner flex gap-1">
+                                {[
+                                    { m: 1, label: 'Monthly' },
+                                    { m: 6, label: '6 Months', prk: '-15%' },
+                                    { m: 12, label: 'Yearly', prk: '-30%' }
+                                ].map((tab) => (
+                                    <button 
+                                        key={tab.m}
+                                        onClick={() => setBillingCycle(tab.m)}
+                                        className={`relative px-6 py-3 rounded-xl transition-all duration-500 group ${billingCycle === tab.m ? 'bg-white text-black' : 'text-slate-500 hover:text-white'}`}
+                                    >
+                                        <div className="flex flex-col items-center">
+                                            <span className="text-[10px] font-black uppercase tracking-[0.2em]">{tab.label}</span>
+                                            {tab.prk && <span className={`text-[7px] font-black tracking-widest mt-0.5 ${billingCycle === tab.m ? 'text-emerald-600' : 'text-emerald-500 opacity-60'}`}>{tab.prk} OFF</span>}
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
 
-                  {/* Error */}
-                  <AnimatePresence>
-                    {error && (
-                      <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0 }}
-                        className="flex items-center gap-3 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-[10px] font-black uppercase tracking-widest"
-                      >
-                        <div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse shrink-0" />
-                        {error}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                        {/* Error Handling */}
+                        <AnimatePresence>
+                            {error && (
+                                <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-[9px] font-black uppercase tracking-[0.3em] text-center italic animate-pulse">
+                                    {error}
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
 
-                  {/* Plan Cards */}
-                  <div className={`grid gap-4 ${upgradablePlans.length === 1 ? 'grid-cols-1 max-w-sm mx-auto w-full' : 'grid-cols-1 sm:grid-cols-2'}`}>
-                    {upgradablePlans.map((plan) => (
-                      <UpgradePlanCard
-                        key={plan.id}
-                        plan={plan}
-                        currentTier={currentTier}
-                        isSelected={selectedPlan === plan.id}
-                        isLoading={loadingPlan === plan.id}
-                        billingCycle={billingCycle}
-                        onSelect={() => setSelectedPlan(plan.id)}
-                        onSubscribe={handleSubscribe}
-                      />
-                    ))}
-                  </div>
+                        {/* Plan Grid */}
+                        <div className={`grid gap-8 ${upgradablePlans.length === 1 ? 'max-w-md mx-auto grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}>
+                            {upgradablePlans.map((plan) => (
+                                <UpgradePlanCard
+                                    key={plan.id}
+                                    plan={plan}
+                                    currentTier={currentTier}
+                                    isSelected={selectedPlan === plan.id}
+                                    isLoading={loadingPlan === plan.id}
+                                    billingCycle={billingCycle}
+                                    onSelect={() => setSelectedPlan(plan.id)}
+                                    onSubscribe={handleSubscribe}
+                                />
+                            ))}
+                        </div>
 
-                  {/* Footer note */}
-                  <div className="flex items-center justify-center gap-2 opacity-30 pt-2">
-                    <Sparkles className="w-3 h-3 text-white" />
-                    <p className="text-[8px] font-black uppercase tracking-widest text-white">
-                      Secure checkout powered by Razorpay — cancel anytime
-                    </p>
-                  </div>
-                </>
-              )}
+                        <div className="flex flex-col items-center gap-4 py-8 opacity-30 group cursor-default">
+                            <div className="flex items-center gap-6">
+                                <div className="h-px w-20 bg-gradient-to-r from-transparent to-white/50" />
+                                <div className="flex items-center gap-3">
+                                    <ShieldCheck className="w-4 h-4 text-white group-hover:text-emerald-500 transition-colors" />
+                                    <span className="text-[8px] font-black uppercase tracking-[0.4em] text-white">Neural Secure Handshake Active</span>
+                                </div>
+                                <div className="h-px w-20 bg-gradient-to-l from-transparent to-white/50" />
+                            </div>
+                            <p className="text-[7px] font-black uppercase tracking-[0.2em] text-white/50">SECURE CHECKOUT BY RAZORPAY • CANCEL ANYTIME</p>
+                        </div>
+                    </div>
+                )}
             </div>
           </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 };
 

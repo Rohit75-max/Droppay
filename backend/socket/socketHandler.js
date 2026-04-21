@@ -22,6 +22,28 @@ module.exports = (io) => {
             console.log(`🎨 Theme update broadcasted to overlay: ${obsKey}`);
         });
 
+        // 4. STREAMING SUITE: Professional Broadcasting Controls
+        
+        // Trigger a specific alert (Replay feature)
+        socket.on('trigger-alert', (data) => {
+            const { obsKey, eventData } = data;
+            io.to(obsKey).emit('new-drop', eventData);
+            console.log(`📡 Alert Replay triggered for: ${obsKey}`);
+        });
+
+        // Switch Scenes (Dynamic OBS Source)
+        socket.on('switch-scene', (data) => {
+            const { obsKey, sceneId } = data;
+            io.to(obsKey).emit('scene-change', sceneId);
+            console.log(`🎬 Scene changed to ${sceneId} for: ${obsKey}`);
+        });
+
+        // Studio Hub Real-time Sync (Live feed updates)
+        socket.on('studio-ping', (data) => {
+            const { streamerId, event } = data;
+            io.to(streamerId).emit('studio-event', event);
+        });
+
         socket.on('disconnect', () => {
             console.log('❌ User Disconnected');
         });
